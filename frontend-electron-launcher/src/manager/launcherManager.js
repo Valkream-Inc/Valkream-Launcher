@@ -8,19 +8,21 @@ const yaml = require("yaml");
 const { cleanGameFolder, config } = require("@valkream/shared");
 const { baseUrl } = config;
 
-const appDir = path.join(process.cwd(), ".valkream-launcher");
+const appdataDir = path.join(process.cwd(), ".valkream-launcher");
 const serverGameRoot = path.join(baseUrl, "game/latest");
 
 const gameVersionFileName = "latest.yml";
 const gameVersionFileLink = path.join(serverGameRoot, gameVersionFileName);
-const gameVersionFilePath = path.join(appDir, gameVersionFileName);
+const gameVersionFilePath = path.join(appdataDir, gameVersionFileName);
 
 const gameZipName = "game.zip";
 const gameZipLink = path.join(serverGameRoot, gameZipName);
-const gameZipPath = path.join(appDir, gameZipName);
+const gameZipPath = path.join(appdataDir, gameZipName);
 
-const gameDir = path.join(appDir, "Valheim Valkream Data");
+const gameDir = path.join(appdataDir, "Valheim Valkream Data");
 const gameExePath = path.join(gameDir, "ValheimValkream.exe");
+
+const dev = process.env.DEV_TOOL === "open";
 
 function getLocalVersion() {
   if (fs.existsSync(gameVersionFilePath)) {
@@ -131,15 +133,27 @@ function playGame() {
 const clearCache = async () => cleanGameFolder(gameDir);
 
 async function uninstallGame() {
-  if (fs.existsSync(appDir)) {
-    fs.rmSync(appDir, { recursive: true });
+  if (fs.existsSync(appdataDir)) {
+    fs.rmSync(appdataDir, { recursive: true });
     return true;
   } else return false;
 }
 
+async function uninstallLauncherGame() {
+  this.uninstallGame();
+  const installPath = await ipcRenderer.invoke("get-app-path");
+  if (!dev) {
+    const uninstallerPath = path.join(
+      path.dirname(path.dirname(installPath)),
+      "Uninstall Valkream-Launcher.exe"
+    );
+    execFile(uninstallerPath, (err) => {});
+  }
+}
+
 async function openGameFolder() {
-  if (fs.existsSync(appDir)) {
-    shell.openPath(appDir);
+  if (fs.existsSync(appdataDir)) {
+    shell.openPath(appdataDir); // => parent directory of gameDir
     return true;
   } else return false;
 }
@@ -148,11 +162,9 @@ async function openLauncherFolder() {
   try {
     const installPath = await ipcRenderer.invoke("get-app-path");
     if (fs.existsSync(installPath)) {
-      shell.openPath(path.dirname(installPath));
+      shell.openPath(path.dirname(path.dirname(installPath)));
       return true;
-    } else {
-      throw new Error("Dossier de l'application est introuvable !");
-    }
+    } else return false;
   } catch {
     return false;
   }
