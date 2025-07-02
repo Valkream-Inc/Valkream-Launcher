@@ -73,6 +73,8 @@ jobs:
         with:
           tag_name: ${{ needs.build-launcher.outputs.version }}
           name: release ${{ needs.build-launcher.outputs.version }}
-          draft: false
-          prerelease: false
-          files: ./dist/**/*
+         draft: false
+         prerelease: false
+         files: ./dist/**/*
+         fail_on_unmatched_files: true
+         overwrite: true
