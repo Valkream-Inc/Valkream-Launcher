@@ -1,0 +1,10 @@
+{
+  "name": "Updater-Saver-Game-Launcher-Valkream",
+  "private": true,
+  "workspaces": [
+    "./backend-update-server",
+    "./frontend-electron-launcher",
+    "./game-updater",
+    "./shared function"
+  ]
+}

@@ -1,0 +1,335 @@
+/*
+.home .container {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+*/
+
+/*******************************************************************************
+ *                                                                             *
+ * Header Logo                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.header-logo {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 10;
+}
+
+.logo-image {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.logo-text {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * social server                                                               *
+ *                                                                             *
+ ******************************************************************************/
+
+.social-tab {
+  position: absolute;
+  display: flex;
+  top: 50vh;
+  transform: translateY(-50%);
+  right: 32px;
+  max-height: 10cm;
+  margin-bottom: 1rem;
+}
+
+.social-block {
+  display: flex;
+  background: var(--background-transparent);
+  width: 90px;
+  height: 90px;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  font-size: 2rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-block:hover .icon-social {
+  transform: scale(1.1);
+}
+.social-block:hover {
+  background: var(--background);
+}
+
+.social-block:active {
+  background-color: var(--color);
+}
+
+.social-block .icon-social {
+  pointer-events: none;
+  background-repeat: no-repeat;
+  height: 55%;
+  width: 55%;
+  filter: var(--svg-color);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * sidebar                                                                     *
+ *                                                                             *
+ ******************************************************************************/
+/* 
+.sidebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 90px;
+  background: var(--background-transparent);
+}
+
+.player-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 15px;
+  height: 3rem;
+  margin: 0 1.5rem;
+}
+
+.player-head {
+  background: url("../../images/default/setve.png"), no-repeat;
+  background-size: cover;
+  image-rendering: pixelated;
+  transition: var(--transition);
+  height: 3rem;
+  width: 3rem;
+  pointer-events: none;
+  border-radius: 15px;
+}
+
+.player-menu {
+  color: var(--element-color);
+  transform: rotate(270deg);
+  pointer-events: none;
+}
+
+.play-elements {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.play-instance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  border: solid 3px var(--element-color);
+  border-radius: 15px;
+  height: 3.2rem;
+  padding-right: 1.9rem;
+}
+
+.play-btn {
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: var(--color);
+  font-size: 2rem;
+  font-weight: bolder;
+  padding: 0 1.5rem;
+  pointer-events: none;
+}
+
+.instance-select {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  right: -3;
+  top: -2;
+  color: var(--element-color);
+  font-size: 1rem;
+  height: calc(100% - 1px);
+  border: solid 3px var(--element-color);
+  text-align: center;
+  border-radius: 15px;
+  padding: 0 0.5rem;
+  cursor: pointer;
+}
+
+.instance-select:before {
+  transform: rotate(270deg);
+  pointer-events: none;
+}
+
+.info-starting-game {
+  display: none;
+  text-align: center;
+}
+
+.progress-bar {
+  appearance: none;
+  height: 10px;
+  margin: 0.5rem 0;
+}
+
+.progress-bar::-webkit-progress-bar {
+  background-color: var(--background);
+  border: solid 1px var(--element-color);
+  border-radius: 10px;
+}
+
+.progress-bar::-webkit-progress-value {
+  background-color: var(--element-color);
+  border-radius: 10px;
+}
+
+.settings-btn {
+  width: 3rem;
+  height: 3rem;
+  font-size: 3rem;
+  color: var(--element-color);
+  margin: 0 1.5rem;
+}
+
+.instance-popup {
+  position: absolute;
+  display: none;
+  width: 100%;
+  height: 100%;
+  background: #000000b3;
+  z-index: 10;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.instances-tab {
+  position: relative;
+  background: var(--background);
+  border-radius: 10px;
+  padding: 1rem 3rem;
+}
+
+.close-popup {
+  position: absolute;
+  display: flex;
+  top: 10px;
+  right: 10px;
+  background: var(--shadow);
+  height: 30px;
+  width: 30px;
+  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.instances-tab p {
+  margin-top: 1.5rem;
+  font-size: 2rem;
+}
+
+.instance-elements {
+  background: var(--background-element);
+  text-align: center;
+  border-radius: 10px;
+  margin: 0.5rem 0;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.instance-elements:hover {
+  background: var(--element-color);
+}
+
+.active-instance {
+  background: var(--element-color);
+} */
+
+.bottom-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  z-index: 20;
+}
+
+.play-btn {
+  background: var(--secondary-color);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0.8rem 3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.play-btn:hover {
+  background: #1565c0;
+  transform: scale(1.05);
+}
+
+.bottom-actions .settings-btn {
+  width: 3.2rem;
+  height: 3.2rem;
+  font-size: 2.2rem;
+  color: var(--element-color);
+  background: var(--background-transparent);
+  border: none;
+  border-radius: 10px;
+  margin-left: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.bottom-actions .settings-btn:hover {
+  background: var(--background);
+}
+
+/* Bouton tips positionné en bas à gauche */
+.tips-bottom-left {
+  position: fixed;
+  left: 32px;
+  bottom: 32px;
+  z-index: 30;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tips-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
+  transition: filter 0.2s;
+}
+
+.tips-bottom-left:hover .tips-icon {
+  filter: brightness(1.2) drop-shadow(0 0 6px #ffd60088);
+}

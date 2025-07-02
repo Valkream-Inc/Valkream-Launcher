@@ -1,0 +1,96 @@
+<div class="container">
+  <div class="nav-settings">
+    <img
+      src="./assets/images/icon-with-name.png"
+      alt="Valkream Logo"
+      class="menu-header"
+    />
+    <div class="nav-box">
+      <div id="launcher" class="nav-settings-btn">LAUNCHER</div>
+      <div id="game" class="nav-settings-btn">JEU</div>
+      <div id="dev" class="nav-settings-btn" style="display: none">DEV</div>
+      <div id="save" class="nav-settings-btn">ACCUEIL</div>
+    </div>
+  </div>
+
+  <!-- launcher tab -->
+  <div
+    id="launcher-tab"
+    class="container-settings content-scroll active-container-settings"
+  >
+    <div class="titre-tab">Paramètres du launcher</div>
+
+    <div class="settings-elements-box">
+      <div class="setting-text">La musique vous géne ? Désactivez la ici .</div>
+      <div class="settings-elements content-center">
+        <label class="toggle-switch">
+          <input type="checkbox" class="video-music-toggle" />
+          <span class="toggle-slider"></span>
+        </label>
+        <p>Activer la musique de la vidéo</p>
+      </div>
+    </div>
+
+    <div class="settings-elements-box">
+      <div class="setting-text">
+        Besoin d'activer les outils de développement ? Faites-le ici.
+      </div>
+      <div class="settings-elements content-center">
+        <label class="toggle-switch">
+          <input type="checkbox" class="enabled-dev" />
+          <span class="toggle-slider"></span>
+        </label>
+        <p>Activer les outils de développement</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- game tab -->
+  <div id="game-tab" class="container-settings content-scroll">
+    <div class="titre-tab">Deinstaller le jeu</div>
+    <div class="settings-elements-box">
+      <div class="setting-text">
+        Vous pouvez supprimer les fichiers de jeux valkream
+      </div>
+      <div class="settings-elements content-evenly close-box">
+        <div id="uninstall-game" class="close-btn" style="background: red">
+          Deinstaller
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- dev tab -->
+  <div id="dev-tab" class="container-settings content-scroll">
+    <div class="titre-tab">Vider le cache</div>
+    <div class="settings-elements-box">
+      <div class="setting-text">
+        Vous pouvez vider le cache BepInEx et les mods de Valheim.
+      </div>
+      <div class="settings-elements content-evenly close-box">
+        <div id="close-cache" class="close-btn" style="background: red">
+          Vider le cache
+        </div>
+      </div>
+    </div>
+    <div class="titre-tab">Ouvrir les dossiers d'installation</div>
+    <div class="settings-elements-box">
+      <div class="setting-text">
+        Vous pouvez ouvrir les dossiers d'installation de Valkream et du
+        launcher
+      </div>
+      <div class="settings-elements content-evenly close-box">
+        <div
+          id="open-launcher-folder"
+          class="close-btn"
+          style="background: orange"
+        >
+          Ouvrir le dossier du launcher
+        </div>
+        <div id="open-game-folder" class="close-btn" style="background: orange">
+          Ouvrir le dossier du jeu
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

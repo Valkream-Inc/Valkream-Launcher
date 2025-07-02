@@ -1,0 +1,78 @@
+name: Launcher Build
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-launcher:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-14, ubuntu-latest, windows-latest]
+
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.x
+
+      - name: Install yarn
+        run: npm install -g yarn
+        working-directory: ./
+
+      - name: Install dependencies
+        run: yarn install
+        working-directory: ./
+
+      - name: Build Electron app
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: yarn run build
+        working-directory: ./frontend-electron-launcher
+
+      - name: Get version from package.json
+        shell: bash
+        id: get_version
+        run: |
+          version=$(jq -r .version ./frontend-electron-launcher/package.json)
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-build-${{ matrix.os }}
+          path: ./frontend-electron-launcher/dist/
+
+  create-release:
+    needs: build-launcher
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./dist
+
+      - name: List downloaded files (debug)
+        run: ls -R ./dist
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.build-launcher.outputs.version }}
+          release_name: release ${{ needs.build-launcher.outputs.version }}
+          draft: false
+          prerelease: false
+          files: ./dist/**/*

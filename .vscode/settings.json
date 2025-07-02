@@ -1,0 +1,11 @@
+{
+  "files.exclude": {
+    "**/node_modules/": true,
+    "**/build/": true,
+    "**/data/": true,
+    "**/temp/": true,
+    "**LICENSE": true,
+    "**.gitattributes": true,
+    "**/yarn.lock": true
+  }
+}

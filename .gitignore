@@ -1,0 +1,11 @@
+**/node_modules/
+**/build/
+**/data/
+**/temp/
+**/dist/
+/backend-update-server/uploads/launcher
+/backend-update-server/uploads/game
+/frontend-electron-launcher/.valkream-launcher
+/game-updater/Valheim Valkream Data
+game-updater/game-build.zip
+frontend-electron-launcher/launcher-build.zip
