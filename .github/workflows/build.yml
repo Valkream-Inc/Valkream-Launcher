@@ -72,7 +72,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         with:
           tag_name: ${{ needs.build-launcher.outputs.version }}
-          release_name: release ${{ needs.build-launcher.outputs.version }}
+          name: release ${{ needs.build-launcher.outputs.version }}
           draft: false
           prerelease: false
           files: ./dist/**/*
