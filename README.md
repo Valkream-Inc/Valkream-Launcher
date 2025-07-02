@@ -11,7 +11,7 @@ Launcher et système de mise à jour pour le serveur Valheim Valkream.
 - [Installation (Développement)](#installation-développement)
 - [Utilisation (Développement)](#utilisation-développement)
 - [Déploiement (Production/Test)](#déploiement-productiontest)
-- [Commandes utiles](#commandes-utiles)
+- [Pour la prod copier le backend dans le serveur](#pour-la-prod-copier-le-backend-dans-le-serveur)
 - [Auteurs](#auteurs)
 
 ---
