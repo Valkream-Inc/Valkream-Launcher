@@ -19,6 +19,8 @@ let dev = process.env.NODE_ENV === "dev";
 const { config } = require("@valkream/shared");
 const { baseUrl } = config;
 
+// process.env.DEV_TOOL === "open";
+
 // Configuration de l'icône globale pour l'application
 if (process.platform === "win32") {
   app.setAppUserModelId("Valkream-Launcher");

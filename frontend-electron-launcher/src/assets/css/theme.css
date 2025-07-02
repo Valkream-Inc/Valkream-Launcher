@@ -7,4 +7,5 @@ body {
   --svg-color: brightness(0) saturate(100%) invert(100%) sepia(55%)
     saturate(23%) hue-rotate(236deg) brightness(108%) contrast(92%);
   --secondary-color: #1976d2;
+  --third-color: #1565c0;
 }

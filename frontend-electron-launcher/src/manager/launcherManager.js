@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
 const { execFile } = require("child_process");
-const { ipcRenderer, shell, app } = require("electron");
+const { ipcRenderer, shell } = require("electron");
 const yaml = require("yaml");
 
 const { cleanGameFolder, config } = require("@valkream/shared");
@@ -148,10 +148,11 @@ async function openLauncherFolder() {
   try {
     const installPath = await ipcRenderer.invoke("get-app-path");
     if (fs.existsSync(installPath)) {
-      shell.openPath(installPath);
+      shell.openPath(path.dirname(installPath));
       return true;
+    } else {
+      throw new Error("Dossier de l'application est introuvable !");
     }
-    return false;
   } catch {
     return false;
   }

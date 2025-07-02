@@ -5,21 +5,20 @@ const progress = require("progress-stream");
 const path = require("path");
 const { Throttle } = require("stream-throttle");
 
-const { apiKey, apiToken } = require("../../secured_config.js");
 const { consoleStreamAnswer } = require("./consoleStreamAnswer");
 const { formatBytes } = require("./formatBytes");
 
 const sendZip = (
   zipPath,
   uploadUrl,
+  customApiKey,
+  customApiToken,
   callback = (processedBytes, totalBytes, percent, speed) =>
     consoleStreamAnswer(
       `📤 Envoi du zip ${zipPath}: ${percent}% (${formatBytes(
         processedBytes
       )} / ${formatBytes(totalBytes)}) à ${formatBytes(speed)}/s`
-    ),
-  customApiKey = apiKey,
-  customApiToken = apiToken
+    )
 ) => {
   return new Promise((resolve, reject) => {
     const fileSize = fs.statSync(zipPath).size;
