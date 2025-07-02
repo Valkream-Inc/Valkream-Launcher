@@ -85,7 +85,7 @@ jobs:
           prerelease: false
           fail_on_unmatched_files: true
           overwrite: true
-         files: ./dist/**/*
+          files: ./dist/**/*
           # files: ${{ steps.filtered_files.outputs.files }}
         env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}  
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
