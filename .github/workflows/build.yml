@@ -65,16 +65,27 @@ jobs:
       - name: List downloaded files (debug)
         run: ls -R ./dist
 
+      - name: Find files to upload
+        id: filtered_files
+        run: |
+          # Rechercher les 3 fichiers spécifiques
+          files=$(find ./dist -type f \( -name "Valkream-Launcher-linux-x86_64.AppImage" -o -name "Valkream-Launcher-mac-universal.dmg" -o -name "Valkream-Launcher-mac-universal.dmg.blockmap" -o -name "Valkream-Launcher-mac-universal.zip" -o -name "Valkream-Launcher-mac-universal.zip.blockmap" -o -name "Valkream-Launcher-win-x64.exe" -o -name "Valkream-Launcher-win-x64.exe.blockmap" -o -name "Valkream-Launcher.exe"\) -print)
+          echo "Matched files:"
+          echo "$files"
+          echo "files=$(echo "$files" | paste -sd "," -)" >> $GITHUB_OUTPUT
+
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         with:
+          with:
           tag_name: ${{ needs.build-launcher.outputs.version }}
           name: release ${{ needs.build-launcher.outputs.version }}
-         draft: false
-         prerelease: false
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          overwrite: true
          files: ./dist/**/*
-         fail_on_unmatched_files: true
-         overwrite: true
+          # files: ${{ steps.filtered_files.outputs.files }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}  
