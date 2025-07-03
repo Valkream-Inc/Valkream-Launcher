@@ -9,7 +9,7 @@ class EventManager {
   }
 
   init = () => {
-    // Lancer la récupération toutes les 5 secondes
+    this.getEvent();
     this.interval = setInterval(this.getEvent, 5000);
   };
 
@@ -30,4 +30,4 @@ class EventManager {
   };
 }
 
-module.exports = EventManager;
+export default EventManager;
