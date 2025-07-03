@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend-update-server:
+    image: btherin/valkream-update-server:latest
+    container_name: backend-update-server
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    # Ajoute ici d'autres variables d'environnement si besoin
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --interval 60 
