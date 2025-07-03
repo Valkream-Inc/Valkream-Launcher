@@ -11,9 +11,11 @@ const downloadZip = (
   destPath,
   callback = (downloadedBytes, totalBytes, percent, speed) =>
     consoleStreamAnswer(
-      `📥 Téléchargement du zip vers ${destPath}: ${percent}% (${formatBytes(
-        downloadedBytes
-      )} / ${formatBytes(totalBytes)}) à ${formatBytes(speed)}/s`
+      `📥 Téléchargement du zip ${path.basename(
+        destPath
+      )}: ${percent}% (${formatBytes(downloadedBytes)} / ${formatBytes(
+        totalBytes
+      )}) à ${formatBytes(speed)}/s`
     )
 ) => {
   return new Promise(async (resolve, reject) => {

@@ -10,7 +10,7 @@ const unZip = async (
   outputPath,
   callback = (processedBytes, totalBytes, percent, speed) =>
     consoleStreamAnswer(
-      `📦 Décompression ${zipPath}: ${percent}% (${formatBytes(
+      `📦 Décompression ${path.basename(zipPath)}: ${percent}% (${formatBytes(
         processedBytes
       )} / ${formatBytes(totalBytes)}) à ${formatBytes(speed)}/s`
     )

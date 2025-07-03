@@ -15,7 +15,7 @@ const sendZip = (
   customApiToken,
   callback = (processedBytes, totalBytes, percent, speed) =>
     consoleStreamAnswer(
-      `📤 Envoi du zip ${zipPath}: ${percent}% (${formatBytes(
+      `📤 Envoi du zip ${path.basename(zipPath)}: ${percent}% (${formatBytes(
         processedBytes
       )} / ${formatBytes(totalBytes)}) à ${formatBytes(speed)}/s`
     )

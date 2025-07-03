@@ -9,7 +9,9 @@ const zipFolder = async (
   zipOutputPath,
   callback = (processedBytes) =>
     consoleStreamAnswer(
-      `🗜️  Compression ${zipOutputPath} : ${formatBytes(processedBytes)}`
+      `🗜️  Compression ${path.basename(zipOutputPath)} : ${formatBytes(
+        processedBytes
+      )}`
     )
 ) => {
   return new Promise((resolve, reject) => {

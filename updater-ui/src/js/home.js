@@ -1,5 +1,9 @@
 import { changePage } from "./utils/utils.js";
 const fs = require("fs");
+const PostGamePanel = require("../js/panels/post-game.js");
+
+// Variable globale pour suivre l'état d'exécution
+window.isProcessRunning = false;
 
 class Home {
   static id = "home";
@@ -16,21 +20,35 @@ class Home {
   }
 
   initButtons() {
-    this.title.addEventListener("click", () => this.changePanel(0, this.title));
+    this.title.addEventListener("click", () => {
+      if (!window.isProcessRunning) {
+        this.changePanel(0, this.title);
+      }
+    });
 
-    this.btnGame.addEventListener("click", () =>
-      this.changePanel(1, this.btnGame)
-    );
+    this.btnGame.addEventListener("click", () => {
+      if (!window.isProcessRunning) {
+        this.changePanel(1, this.btnGame);
+      }
+    });
 
-    this.btnLauncher.addEventListener("click", () =>
-      this.changePanel(2, this.btnLauncher)
-    );
+    this.btnLauncher.addEventListener("click", () => {
+      if (!window.isProcessRunning) {
+        this.changePanel(2, this.btnLauncher);
+      }
+    });
 
-    this.btnEvent.addEventListener("click", () =>
-      this.changePanel(3, this.btnEvent)
-    );
+    this.btnEvent.addEventListener("click", () => {
+      if (!window.isProcessRunning) {
+        this.changePanel(3, this.btnEvent);
+      }
+    });
 
-    this.btnSettings.addEventListener("click", () => changePage("config"));
+    this.btnSettings.addEventListener("click", () => {
+      if (!window.isProcessRunning) {
+        changePage("config");
+      }
+    });
   }
 
   changePanel(step, btn) {
@@ -75,19 +93,31 @@ class Home {
     panelsGame.style.display = "block";
 
     buildBtn.addEventListener("click", () => {
-      renderPanel("build-game-panel");
+      if (!window.isProcessRunning) {
+        renderPanel("build-game-panel");
+      }
     });
 
     postBtn.addEventListener("click", () => {
-      renderPanel("post-game-panel");
+      if (!window.isProcessRunning) {
+        renderPanel("post-game-panel");
+        // Initialiser le panel post-game
+        setTimeout(() => {
+          new PostGamePanel();
+        }, 100);
+      }
     });
 
     changeVersionBtn.addEventListener("click", () => {
-      renderPanel("change-version-game-panel");
+      if (!window.isProcessRunning) {
+        renderPanel("change-version-game-panel");
+      }
     });
 
     deleteVersionBtn.addEventListener("click", () => {
-      renderPanel("delete-version-game-panel");
+      if (!window.isProcessRunning) {
+        renderPanel("delete-version-game-panel");
+      }
     });
 
     const renderPanel = (panelToRender) => {
