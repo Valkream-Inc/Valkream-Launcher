@@ -54,7 +54,7 @@ async function downloadGame(callback = () => {}) {
     });
 
     ipcRenderer
-      .invoke("download-multiple-zips", [
+      .invoke("download-multiple-files", [
         {
           url: gameZipLink,
           destPath: gameZipPath,
