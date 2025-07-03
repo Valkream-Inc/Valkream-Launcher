@@ -3,7 +3,7 @@
   align-items: center;
   background: var(--background);
   padding: 2.5rem 1.5rem;
-  border-radius: 0 0 90px 90px;
+  border-radius: 0 0 0 90px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   position: relative;
   height: 56px;
@@ -41,16 +41,19 @@
 .topbar-btn:hover {
   background: #3766b1;
 }
+.topbar-btn.active {
+  background: rgb(165, 21, 21);
+}
 .topbar-settings {
   margin-left: auto;
   margin-right: 0;
-  background: transparent;
+  background: transparent !important;
   color: var(--color);
   box-shadow: none;
   padding: 0.5rem;
 }
 .topbar-settings:hover {
-  background: var(--secondary-color, #4f8cff);
+  background: var(--secondary-color, #4f8cff) !important;
   color: #fff;
 }
 .topbar .material-icons {
@@ -126,3 +129,44 @@
   background: #f44336;
   color: #fff;
 }
+
+/* Panels */
+
+.panel {
+  position: absolute;
+  background: var(--background);
+  left: calc(70px + 1cm);
+  width: calc(100vw - 3.5cm - 70px);
+  height: calc(100vh - 5cm - 56px);
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 90px 0 0 0;
+  padding: 32px 40px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.panel::-webkit-scrollbar-track {
+  background: var(--background);
+  border-radius: 4px;
+}
+
+.panel::-webkit-scrollbar-thumb {
+  background: var(--color);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.panel::-webkit-scrollbar-corner {
+  background: var(--background);
+}
+/* .panel {
+  display: none;
+}
+.panel.active {
+  display: block;
+} */

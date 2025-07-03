@@ -1,4 +1,4 @@
-#config-panel {
+#config-page {
   position: relative;
   top: 0.5cm;
   left: 50%;
@@ -10,7 +10,7 @@
   overflow-y: auto;
 }
 
-#config-panel h2 {
+#config-page h2 {
   text-align: center;
   margin-bottom: 2rem;
   color: var(--color, #fff);

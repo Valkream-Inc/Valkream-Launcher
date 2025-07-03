@@ -1,7 +1,7 @@
 @import "./utils/font.css";
 @import "./utils/theme.css";
-@import "./panels/config.css";
-@import "./panels/home.css";
+@import "config.css";
+@import "home.css";
 
 body {
   position: relative;
@@ -150,7 +150,7 @@ input::-webkit-inner-spin-button {
   margin-top: 1cm;
 }
 
-.panel {
+.page {
   opacity: 0;
   z-index: 0;
   pointer-events: none;

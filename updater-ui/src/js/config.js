@@ -1,5 +1,6 @@
 const { ipcRenderer } = require("electron");
-import { database, showSnackbar, changePanel } from "../utils/utils.js";
+import { database, showSnackbar, changePage } from "./utils/utils.js";
+const fs = require("fs");
 
 class Config {
   static id = "config";
@@ -69,14 +70,26 @@ class Config {
     const serverUrl = document.getElementById("serverUrl").value;
     const folderPath = document.getElementById("folderPath").value;
 
-    await this.db.updateData("configClient", {
-      apiKey: apiKey,
-      apiToken: apiToken,
-      serverUrl: serverUrl,
-      folderPath: folderPath,
-    });
-    await changePanel("home");
-    showSnackbar("Configuration enregistrée !", "success");
+    if (
+      fs.existsSync(folderPath) &&
+      fs.existsSync(folderPath + "/package.json")
+    ) {
+      const packageJson = JSON.parse(
+        fs.readFileSync(folderPath + "/package.json", "utf8")
+      );
+      if (packageJson.name === "Updater-Saver-Game-Launcher-Valkream") {
+        await this.db.updateData("configClient", {
+          apiKey: apiKey,
+          apiToken: apiToken,
+          serverUrl: serverUrl,
+          folderPath: folderPath,
+        });
+
+        showSnackbar("Configuration enregistrée !", "success");
+        return await changePage("home");
+      } else showSnackbar("Le dossier n'est pas un projet Valkream !", "error");
+    } else showSnackbar("Le dossier n'est pas un projet Valkream !", "error");
+    return;
   }
 
   resetForm() {

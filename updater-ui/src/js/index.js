@@ -6,10 +6,10 @@
 // import panel
 
 // import modules
-import Config from "./panels/config.js";
-import Home from "./panels/home.js";
+import Config from "./config.js";
+import Home from "./home.js";
 
-import { changePanel } from "./utils/utils.js";
+import { changePage } from "./utils/utils.js";
 
 // libs
 const { ipcRenderer } = require("electron");
@@ -18,7 +18,7 @@ const fs = require("fs");
 class UpdaterUI {
   async init() {
     this.initFrame();
-    this.createPanels(Config, Home);
+    this.createPages(Config, Home);
     this.startUpdaterUI();
   }
 
@@ -39,24 +39,21 @@ class UpdaterUI {
     });
   }
 
-  async createPanels(...panels) {
-    let panelsElem = document.querySelector(".panels");
-    for (let panel of panels) {
-      console.log(`Initializing ${panel.name} Panel...`);
+  async createPages(...pages) {
+    let pagesElem = document.querySelector(".pages");
+    for (let page of pages) {
+      console.log(`Initializing ${page.name} Page...`);
       let div = document.createElement("div");
-      div.id = `${panel.id}-panel`;
-      div.classList.add("panel", panel.id, "content-scroll");
-      div.innerHTML = fs.readFileSync(
-        `${__dirname}/panels/${panel.id}.html`,
-        "utf8"
-      );
-      panelsElem.appendChild(div);
-      new panel().init(this.config);
+      div.id = `${page.id}-page`;
+      div.classList.add("page", page.id, "content-scroll");
+      div.innerHTML = fs.readFileSync(`${__dirname}/${page.id}.html`, "utf8");
+      pagesElem.appendChild(div);
+      new page().init(this.config);
     }
   }
 
   async startUpdaterUI() {
-    changePanel("config");
+    changePage("config");
   }
 }
 

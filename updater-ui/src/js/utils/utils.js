@@ -8,8 +8,8 @@ import database from "./database.js";
 import logger from "./logger.js";
 import popup from "./popup.js";
 
-async function changePanel(id) {
-  let panel = document.querySelector(`#${id}-panel`);
+async function changePage(id) {
+  let panel = document.querySelector(`#${id}-page`);
   let active = document.querySelector(`.active`);
   if (active) active.classList.toggle("active");
   panel.classList.add("active");
@@ -27,25 +27,9 @@ function showSnackbar(message, type = "success", duration = 3000) {
   }, duration);
 }
 
-async function applyMusicSetting() {
-  try {
-    const videoElement = document.getElementById("background-video");
-    const db = new database();
-    const configClient = await db.readData("configClient");
-    const musicEnabled = configClient?.launcher_config?.musicEnabled;
-
-    if (videoElement) {
-      videoElement.muted = musicEnabled;
-    }
-  } catch (error) {
-    console.error("Erreur lors de l'application du paramètre musique:", error);
-  }
-}
-
 export {
-  changePanel as changePanel,
+  changePage as changePage,
   showSnackbar as showSnackbar,
-  applyMusicSetting as applyMusicSetting,
   hasInternetConnection as hasInternetConnection,
   database as database,
   logger as logger,
