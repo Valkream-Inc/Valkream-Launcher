@@ -136,26 +136,31 @@
   position: absolute;
   background: var(--background);
   left: calc(70px + 1cm);
-  width: calc(100vw - 3.5cm - 70px);
-  height: calc(100vh - 5cm - 56px);
+  width: calc(100vw - 3.2cm - 70px);
+  height: calc(100vh - 4.7cm - 56px);
   background: rgba(0, 0, 0, 0.5);
   border-radius: 90px 0 0 0;
   padding: 32px 40px;
 
+  border-top: 5px solid;
+  border-left: 5px solid;
+  overflow: hidden;
+}
+
+.panel-content {
   overflow-y: auto;
   overflow-x: hidden;
+  max-height: calc(80vh - 4.7cm - 56px);
 }
-
-.panel::-webkit-scrollbar {
+.panel-content::-webkit-scrollbar {
   width: 8px;
 }
-
-.panel::-webkit-scrollbar-track {
+.panel-content::-webkit-scrollbar-track {
   background: var(--background);
   border-radius: 4px;
 }
 
-.panel::-webkit-scrollbar-thumb {
+.panel-content::-webkit-scrollbar-thumb {
   background: var(--color);
   border-radius: 4px;
   transition: background 0.2s ease;
@@ -164,9 +169,95 @@
 .panel::-webkit-scrollbar-corner {
   background: var(--background);
 }
-/* .panel {
-  display: none;
+
+.panel-title {
+  color: var(--color);
 }
-.panel.active {
-  display: block;
-} */
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.run-btn {
+  color: #222;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
+  color: var(--color);
+}
+
+.run-btn.background-yellow {
+  color: #222;
+}
+.run-btn.background-yellow .material-icons {
+  color: #222;
+}
+
+.run-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.4);
+}
+
+.run-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.run-btn .material-icons {
+  font-size: 20px;
+  color: var(--color);
+}
+
+.background-yellow {
+  background: #ffc107;
+}
+.background-green {
+  background: #4caf50;
+}
+.background-red {
+  background: #f44336;
+}
+.background-blue {
+  background: #2196f3;
+}
+
+.panel.border-yellow {
+  border-color: #ffc107;
+}
+.panel.border-green {
+  border-color: #4caf50;
+}
+.panel.border-red {
+  border-color: #f44336;
+}
+.panel.border-blue {
+  border-color: #2196f3;
+}
+
+.color-yellow {
+  color: #ffc107;
+}
+.color-green {
+  color: #4caf50;
+}
+.color-red {
+  color: #f44336;
+}
+.color-blue {
+  color: #2196f3;
+}
+
+.panel-content {
+  margin-top: 2rem;
+}
