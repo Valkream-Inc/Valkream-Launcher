@@ -1,15 +1,24 @@
 {
   "name": "Valkream-Launcher",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Launcher Valheim moddé pour Valkream",
   "main": "src/app.js",
   "author": "Valkream Team",
+  "url": {
+    "baseUrl": "https://api.valkream.fr",
+    "baseUrlDev": "http://localhost:3000"
+  },
+  "GameFoldersToClean": [
+    "/BepInEx/cache",
+    "/BepInEx/config/wackysDatabase/Cache",
+    "/BepInEx/config/Marketplace/SavedData"
+  ],
   "scripts": {
     "start": "cross-env-shell NODE_ENV=dev electron .",
     "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
     "build": "node ./scripts/build-launcher.js --obf=true --build=platform",
-    "post": "node ./scripts/post-launcher.js",
-    "change": "node ./scripts/change-launcher.js"
+    "post": "node ./scripts/post-launcher.js --dev",
+    "change": "node ./scripts/change-launcher.js --dev"
   },
   "license": "MIT",
   "nodemonConfig": {
@@ -42,5 +51,9 @@
     "appId": "com.valkream.launcher",
     "productName": "Valkream Launcher",
     "icon": "src/assets/images/icon.png"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ton-compte/ton-repo.git"
   }
 }

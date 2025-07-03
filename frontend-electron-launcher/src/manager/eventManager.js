@@ -1,6 +1,6 @@
 const axios = require("axios");
-const { config } = require("@valkream/shared");
-const { baseUrl } = config;
+
+const baseUrl = require("../baseUrl");
 
 class EventManager {
   constructor(callback) {

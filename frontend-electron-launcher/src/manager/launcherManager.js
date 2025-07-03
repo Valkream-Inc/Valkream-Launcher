@@ -5,8 +5,8 @@ const { execFile } = require("child_process");
 const { ipcRenderer, shell } = require("electron");
 const yaml = require("yaml");
 
-const { cleanGameFolder, config } = require("@valkream/shared");
-const { baseUrl } = config;
+const baseUrl = require("../baseUrl");
+const { cleanGameFolder } = require("../utils/cleanGameFolder");
 
 const appdataDir = path.join(process.cwd(), ".valkream-launcher");
 const serverGameRoot = path.join(baseUrl, "game/latest");

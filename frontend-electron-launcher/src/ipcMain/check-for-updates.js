@@ -5,9 +5,7 @@
 
 const { autoUpdater } = require("electron-updater");
 const { hasInternetConnection } = require("../assets/js/utils/internet.js");
-
-const { config } = require("@valkream/shared");
-const { baseUrl } = config;
+const baseUrl = require("../baseUrl");
 
 class CheckForUpdates {
   constructor(event) {

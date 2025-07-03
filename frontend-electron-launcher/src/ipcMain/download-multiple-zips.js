@@ -4,7 +4,7 @@
  */
 
 const axios = require("axios");
-const { downloadZip } = require("@valkream/shared");
+const { downloadZip } = require("valkream-function-lib");
 
 class DowloadMultiplefiles {
   async init(event, files) {

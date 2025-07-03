@@ -15,7 +15,7 @@ import EventManager from "../../../manager/eventManager.js";
 
 const { shell } = require("electron");
 const launcherManager = require("./manager/launcherManager");
-const { formatBytes } = require("@valkream/shared");
+const { formatBytes } = require("valkream-function-lib");
 
 class Home {
   static id = "home";

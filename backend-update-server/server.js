@@ -8,7 +8,7 @@ const path = require("path");
 const yaml = require("yaml");
 const cors = require("cors");
 
-const { unZip } = require("@valkream/shared");
+const { unZip } = require("valkream-function-lib");
 const e = require("express");
 const { apiKey, apiToken } = process.env;
 

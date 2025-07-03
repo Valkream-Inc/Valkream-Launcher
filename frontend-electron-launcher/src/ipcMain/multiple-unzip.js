@@ -3,7 +3,7 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { unZip } = require("@valkream/shared");
+const { unZip } = require("valkream-function-lib");
 
 class MultipleUnzip {
   async init(event, zips) {
