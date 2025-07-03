@@ -1,18 +1,21 @@
 @import "./utils/font.css";
 @import "./utils/theme.css";
-@import "./config.css";
+@import "./panels/config.css";
+@import "./panels/home.css";
 
 body {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
   background-color: var(--background);
   color: var(--color);
   font-family: "Poppins";
   letter-spacing: 0px;
   margin: 0;
-  padding: 0;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 img {
@@ -148,18 +151,17 @@ input::-webkit-inner-spin-button {
 }
 
 .panel {
-  position: absolute;
-  width: 100%;
-  height: 100%;
   opacity: 0;
   z-index: 0;
   pointer-events: none;
+  display: none;
 }
 
 .active {
   opacity: 1;
   z-index: 1;
   pointer-events: all;
+  display: block;
 }
 
 #background-video {

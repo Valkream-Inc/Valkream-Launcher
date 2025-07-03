@@ -9,7 +9,7 @@ import logger from "./logger.js";
 import popup from "./popup.js";
 
 async function changePanel(id) {
-  let panel = document.querySelector(`.${id}`);
+  let panel = document.querySelector(`#${id}-panel`);
   let active = document.querySelector(`.active`);
   if (active) active.classList.toggle("active");
   panel.classList.add("active");

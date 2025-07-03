@@ -3,7 +3,7 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { app, ipcMain } = require("electron");
+const { app, ipcMain, dialog } = require("electron");
 const MainWindow = require("./mainWindow.js");
 const path = require("path");
 const fs = require("fs");
@@ -43,3 +43,8 @@ ipcMain.on("main-window-maximize", () => {
 
 // general
 app.on("window-all-closed", () => app.quit());
+ipcMain.handle("show-open-dialog", async () => {
+  return await dialog.showOpenDialog({
+    properties: ["openDirectory"],
+  });
+});

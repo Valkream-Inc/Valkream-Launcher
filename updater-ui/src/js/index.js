@@ -6,8 +6,10 @@
 // import panel
 
 // import modules
-import { database } from "./utils/utils.js";
-import Config from "./config.js";
+import Config from "./panels/config.js";
+import Home from "./panels/home.js";
+
+import { changePanel } from "./utils/utils.js";
 
 // libs
 const { ipcRenderer } = require("electron");
@@ -16,9 +18,7 @@ const fs = require("fs");
 class UpdaterUI {
   async init() {
     this.initFrame();
-    this.db = new database();
-    await this.initConfigClient();
-    this.createPanels(Config);
+    this.createPanels(Config, Home);
     this.startUpdaterUI();
   }
 
@@ -39,32 +39,24 @@ class UpdaterUI {
     });
   }
 
-  async initConfigClient() {
-    console.log("Initializing Config Client...");
-    let configData = await this.db.readData("configClient");
-    if (!configData) {
-      await this.db.createData("configClient", {
-        apiKey: "API_KEY",
-        apiToken: "API_TOKEN",
-        serverUrl: "http://localhost:3000",
-      });
-    }
-  }
-
   async createPanels(...panels) {
     let panelsElem = document.querySelector(".panels");
     for (let panel of panels) {
       console.log(`Initializing ${panel.name} Panel...`);
       let div = document.createElement("div");
-      div.classList.add("panel", panel.id);
-      div.innerHTML = fs.readFileSync(`${__dirname}/${panel.id}.html`, "utf8");
+      div.id = `${panel.id}-panel`;
+      div.classList.add("panel", panel.id, "content-scroll");
+      div.innerHTML = fs.readFileSync(
+        `${__dirname}/panels/${panel.id}.html`,
+        "utf8"
+      );
       panelsElem.appendChild(div);
       new panel().init(this.config);
     }
   }
 
   async startUpdaterUI() {
-    // changePanel("home");
+    changePanel("config");
   }
 }
 
