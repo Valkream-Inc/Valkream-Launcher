@@ -3,6 +3,7 @@ const path = require("path");
 
 const { sendZip, config } = require("@valkream/shared");
 const { baseUrl } = config;
+const { apiKey, apiToken } = require("../../secured_config.js");
 
 class PostGame {
   async init() {
@@ -16,7 +17,7 @@ class PostGame {
       }
 
       const uploadUrl = `${baseUrl}/game/latest/`;
-      await sendZip(uploadZipPath, uploadUrl);
+      await sendZip(uploadZipPath, uploadUrl, apiKey, apiToken);
       console.log("\n✅ Fichier envoyé avec succès !");
 
       const buildDir = path.join(basePath, "build");

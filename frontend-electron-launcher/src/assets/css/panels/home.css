@@ -1,12 +1,3 @@
-/*
-.home .container {
-  display: flex;
-  height: 100%;
-  flex-direction: column;
-  align-items: center;
-}
-*/
-
 /*******************************************************************************
  *                                                                             *
  * Header Logo                                                                 *
@@ -64,17 +55,15 @@
   cursor: pointer;
   align-items: center;
   justify-content: center;
+  transition: background 0.2s ease-in-out;
 }
 
 .social-block:hover .icon-social {
   transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
 }
 .social-block:hover {
-  background: var(--background);
-}
-
-.social-block:active {
-  background-color: var(--color);
+  background: var(--secondary-color);
 }
 
 .social-block .icon-social {
@@ -87,178 +76,9 @@
 
 /*******************************************************************************
  *                                                                             *
- * sidebar                                                                     *
+ * bottom actions                                                              *
  *                                                                             *
  ******************************************************************************/
-/* 
-.sidebar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  height: 90px;
-  background: var(--background-transparent);
-}
-
-.player-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 15px;
-  height: 3rem;
-  margin: 0 1.5rem;
-}
-
-.player-head {
-  background: url("../../images/default/setve.png"), no-repeat;
-  background-size: cover;
-  image-rendering: pixelated;
-  transition: var(--transition);
-  height: 3rem;
-  width: 3rem;
-  pointer-events: none;
-  border-radius: 15px;
-}
-
-.player-menu {
-  color: var(--element-color);
-  transform: rotate(270deg);
-  pointer-events: none;
-}
-
-.play-elements {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.play-instance {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-  border: solid 3px var(--element-color);
-  border-radius: 15px;
-  height: 3.2rem;
-  padding-right: 1.9rem;
-}
-
-.play-btn {
-  border: none;
-  border-radius: 10px;
-  background: none;
-  color: var(--color);
-  font-size: 2rem;
-  font-weight: bolder;
-  padding: 0 1.5rem;
-  pointer-events: none;
-}
-
-.instance-select {
-  display: flex;
-  align-items: center;
-  position: absolute;
-  right: -3;
-  top: -2;
-  color: var(--element-color);
-  font-size: 1rem;
-  height: calc(100% - 1px);
-  border: solid 3px var(--element-color);
-  text-align: center;
-  border-radius: 15px;
-  padding: 0 0.5rem;
-  cursor: pointer;
-}
-
-.instance-select:before {
-  transform: rotate(270deg);
-  pointer-events: none;
-}
-
-.info-starting-game {
-  display: none;
-  text-align: center;
-}
-
-.progress-bar {
-  appearance: none;
-  height: 10px;
-  margin: 0.5rem 0;
-}
-
-.progress-bar::-webkit-progress-bar {
-  background-color: var(--background);
-  border: solid 1px var(--element-color);
-  border-radius: 10px;
-}
-
-.progress-bar::-webkit-progress-value {
-  background-color: var(--element-color);
-  border-radius: 10px;
-}
-
-.settings-btn {
-  width: 3rem;
-  height: 3rem;
-  font-size: 3rem;
-  color: var(--element-color);
-  margin: 0 1.5rem;
-}
-
-.instance-popup {
-  position: absolute;
-  display: none;
-  width: 100%;
-  height: 100%;
-  background: #000000b3;
-  z-index: 10;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.instances-tab {
-  position: relative;
-  background: var(--background);
-  border-radius: 10px;
-  padding: 1rem 3rem;
-}
-
-.close-popup {
-  position: absolute;
-  display: flex;
-  top: 10px;
-  right: 10px;
-  background: var(--shadow);
-  height: 30px;
-  width: 30px;
-  border-radius: 10px;
-  align-items: center;
-  justify-content: center;
-}
-
-.instances-tab p {
-  margin-top: 1.5rem;
-  font-size: 2rem;
-}
-
-.instance-elements {
-  background: var(--background-element);
-  text-align: center;
-  border-radius: 10px;
-  margin: 0.5rem 0;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.instance-elements:hover {
-  background: var(--element-color);
-}
-
-.active-instance {
-  background: var(--element-color);
-} */
 
 .bottom-actions {
   position: fixed;
@@ -274,7 +94,7 @@
 
 .play-btn {
   background: var(--secondary-color);
-  color: #fff;
+  color: var(--color);
   border: none;
   border-radius: 10px;
   font-size: 1.5rem;
@@ -285,7 +105,7 @@
   transition: background 0.2s, transform 0.2s;
 }
 .play-btn:hover {
-  background: #1565c0;
+  background: var(--third-color);
   transform: scale(1.05);
 }
 
@@ -302,10 +122,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 .bottom-actions .settings-btn:hover {
-  background: var(--background);
+  background: var(--secondary-color);
+  transform: scale(1.1);
 }
 
 /* Bouton tips positionné en bas à gauche */
@@ -332,4 +153,66 @@
 
 .tips-bottom-left:hover .tips-icon {
   filter: brightness(1.2) drop-shadow(0 0 6px #ffd60088);
+}
+
+/* =========================
+ * Conteneur d'événement
+ * ========================= */
+.event-container {
+  display: flex;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-transparent);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem 2rem;
+  width: 50vw;
+  min-height: 120px;
+  position: absolute;
+  top: 36px;
+  left: calc((100vw - 90px) / 4 + 90px);
+  transition: background 0.2s, transform 0.2s;
+  gap: 1.5rem;
+}
+
+.event-container:hover {
+  background: var(--secondary-color);
+  transform: scale(1.05);
+}
+
+.event-image {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.event-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 90px;
+  padding: 0;
+}
+
+.event-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color);
+  margin: 0;
+  text-align: center;
+}
+
+.event-date {
+  font-size: 1.2rem;
+  position: relative;
+  color: var(--color);
+  margin-top: 10px;
+  text-align: center;
+  text-decoration: bold;
 }

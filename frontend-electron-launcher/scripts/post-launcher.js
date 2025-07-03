@@ -3,6 +3,7 @@ const path = require("path");
 
 const { zipFolder, sendZip, config } = require("@valkream/shared");
 const { baseUrl } = config;
+const { apiKey, apiToken } = require("../../secured_config.js");
 
 class Post {
   async init() {
@@ -36,7 +37,7 @@ class Post {
     }
 
     await zipFolder(folderToZip, zipFilePath);
-    await sendZip(zipFilePath, uploadUrl);
+    await sendZip(zipFilePath, uploadUrl, apiKey, apiToken);
 
     if (fs.existsSync(distFolder)) {
       fs.rmSync(distFolder, { recursive: true });
