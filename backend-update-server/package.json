@@ -5,15 +5,16 @@
   "author": "Valkream Team",
   "license": "MIT",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^17.0.0",
     "express": "^5.1.0",
     "fs": "^0.0.1-security",
     "fs-extra": "^11.3.0",
-    "yaml": "^2.2.2",
     "multer": "^2.0.1",
     "nodemon": "^3.1.10",
     "path": "^0.12.7",
-    "valkream-shared": "^1.0.0"
+    "valkream-shared": "^1.0.0",
+    "yaml": "^2.2.2"
   },
   "scripts": {
     "start": "node server.js",
