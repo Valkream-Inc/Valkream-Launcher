@@ -68,10 +68,21 @@ jobs:
       - name: Find files to upload
         id: filtered_files
         run: |
-          # Rechercher les 3 fichiers spécifiques
-          files=$(find ./dist -type f \( -name "Valkream-Launcher-linux-x86_64.AppImage" -o -name "Valkream-Launcher-mac-universal.dmg" -o -name "Valkream-Launcher-mac-universal.dmg.blockmap" -o -name "Valkream-Launcher-mac-universal.zip" -o -name "Valkream-Launcher-mac-universal.zip.blockmap" -o -name "Valkream-Launcher-win-x64.exe" -o -name "Valkream-Launcher-win-x64.exe.blockmap" -o -name "Valkream-Launcher.exe"\) -print)
+          files=$(find ./dist -type f \( \
+            -name "Valkream-Launcher-linux-x86_64.AppImage" -o \
+            -name "Valkream-Launcher-mac-universal.dmg" -o \
+            -name "Valkream-Launcher-mac-universal.dmg.blockmap" -o \
+            -name "Valkream-Launcher-mac-universal.zip" -o \
+            -name "Valkream-Launcher-mac-universal.zip.blockmap" -o \
+            -name "Valkream-Launcher-win-x64.exe" -o \
+            -name "Valkream-Launcher-win-x64.exe.blockmap" -o \
+            -name "Valkream-Launcher.exe" \
+          \))
+
           echo "Matched files:"
           echo "$files"
+
+          # Format GitHub Actions : écrire dans le fichier de sortie
           echo "files=$(echo "$files" | paste -sd "," -)" >> $GITHUB_OUTPUT
 
       - name: Create Release
@@ -85,7 +96,7 @@ jobs:
           prerelease: false
           fail_on_unmatched_files: true
           overwrite: true
-          files: ./dist/**/*
-          # files: ${{ steps.filtered_files.outputs.files }}
+          files: ${{ steps.filtered_files.outputs.files }}
+          # files: ./dist/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
