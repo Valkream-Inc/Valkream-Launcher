@@ -70,78 +70,28 @@
   font-family: "Icons";
   content: "\e90d";
 }
-/*
-.icon-account-add:before {
-  font-family: "Icons";
-  content: "\e901";
-}
-.icon-account-delete:before {
-  font-family: "Icons";
-  content: "\e902";
-}
-*/
+
 .icon-settings:before {
   font-family: "Icons";
   content: "\e909";
 }
-/*
-.icon-monitor:before {
-  font-family: "Icons";
-  content: "\e90a";
-}
-.icon-arrow:before {
-  font-family: "Social-icons";
-  content: "\e002";
-}
-*/
 
+/* link icons */
 .icon-discord {
-  background-image: url("../images/svgs/discord.svg");
+  background-image: url("../images/svgs/link/discord.svg");
   background-size: contain;
 }
-/*
-.icon-facebook {
-  background-image: url("../images/svgs/facebook.svg");
-  background-size: contain;
-}
-.icon-github {
-  background-image: url("../images/svgs/github.svg");
-  background-size: contain;
-}
-.icon-instagram {
-  background-image: url("../images/svgs/instagram.svg");
-  background-size: contain;
-}
-.icon-reddit {
-  background-image: url("../images/svgs/reddit.svg");
-  background-size: contain;
-}
-.icon-telegram {
-  background-image: url("../images/svgs/telegram.svg");
-  background-size: contain;
-}
-.icon-twitch {
-  background-image: url("../images/svgs/twitch.svg");
-  background-size: contain;
-}
-.icon-twitter {
-  background-image: url("../images/svgs/twitter.svg");
-  background-size: contain;
-}
-.icon-youtube {
-  background-image: url("../images/svgs/youtube.svg");
-  background-size: contain;
-}
-.icon-tiktok {
-  background-image: url("../images/svgs/tiktok.svg");
-  background-size: contain;
-}
-*/
 .icon-web {
-  background-image: url("../images/svgs/web.svg");
+  background-image: url("../images/svgs/link/web.svg");
   background-size: contain;
 }
 .icon-topserver {
-  background-image: url("../images/svgs/topserver.svg");
+  background-image: url("../images/svgs/link/topserver.svg");
+  background-size: contain;
+}
+
+/* other icons */
+.icon-light {
+  background-image: url("../images/svgs/light.svg");
   background-size: contain;
 }
