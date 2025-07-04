@@ -1,5 +1,6 @@
 const archiver = require("archiver");
 const fs = require("fs");
+const path = require("path");
 
 const { consoleStreamAnswer } = require("./consoleStreamAnswer");
 const { formatBytes } = require("./formatBytes");

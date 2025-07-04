@@ -26,6 +26,6 @@
     "fs": "^0.0.1-security",
     "path": "^0.12.7",
     "yaml": "^2.2.2",
-    "valkream-function-lib": "1.0.3"
+    "valkream-function-lib": "latest"
   }
 }

@@ -34,7 +34,7 @@
     "node-fetch": "^2.7.0",
     "yaml": "^2.2.2",
     "path": "^0.12.7",
-    "valkream-function-lib": "^1.0.0"
+    "valkream-function-lib": "latest"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

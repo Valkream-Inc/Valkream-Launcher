@@ -1,62 +1,24 @@
 <div id="build-game-panel" class="panel border-yellow">
   <div class="panel-header">
     <h1 class="panel-title color-yellow">Build Game</h1>
-    <button id="run-build-btn-game" class="run-btn background-yellow">
-      <span class="material-icons">build</span>
-      Run build
-    </button>
-  </div>
-  <div class="panel-content">
-    <div class="panel-content-item">
-      <h2>Build Game</h2>
+    <div style="display: flex; gap: 8px">
+      <button id="run-build-btn-game" class="run-btn background-yellow">
+        <span class="material-icons">build</span>
+        Run build
+      </button>
+      <button
+        id="cancel-build-btn-game"
+        class="run-btn cancel-btn"
+        style="display: none"
+      >
+        <span class="material-icons color-red">cancel</span>
+        Annuler
+      </button>
     </div>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-    </p>
   </div>
+  <div class="form-group">
+    <label for="build-version-input">Version à builder</label>
+    <input type="text" id="build-version-input" placeholder="Version" />
+  </div>
+  <div class="panel-content"></div>
 </div>

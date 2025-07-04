@@ -21,8 +21,8 @@ class Config {
   }
 
   DEFAULTS = {
-    apiKey: "API_KEY",
-    apiToken: "API_TOKEN",
+    apiKey: "SECRET_API_KEY",
+    apiToken: "SECRET_API_TOKEN",
     serverUrl: "http://localhost:3000",
     folderPath: "C:\\code\\Valkream-Launcher",
   };
@@ -30,7 +30,7 @@ class Config {
   async initializeClientConfig() {
     console.log("Initializing Config Client...");
     let configData = await this.db.readData("configClient");
-    if (!configData) await this.db.createData("configClient", DEFAULTS);
+    if (!configData) await this.db.createData("configClient", this.DEFAULTS);
   }
 
   async loadConfig() {

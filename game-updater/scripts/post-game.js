@@ -2,10 +2,23 @@ const fs = require("fs");
 const path = require("path");
 
 const packageJson = require("../package.json");
-const isDevArg = process.argv.includes("--dev");
-const dev = isDevArg || process.env.NODE_ENV === "dev";
-const baseUrl = dev ? packageJson.url.baseUrlDev : packageJson.url.baseUrl;
-const { apiKey, apiToken } = packageJson.api;
+
+let baseUrl = "";
+let apiKey = "";
+let apiToken = "";
+
+if (process.argv.includes("--custom")) {
+  const customIndex = process.argv.indexOf("--custom");
+  baseUrl = process.argv[customIndex + 1];
+  apiKey = process.argv[customIndex + 2];
+  apiToken = process.argv[customIndex + 3];
+} else {
+  const isDevArg = process.argv.includes("--dev");
+  const dev = isDevArg || process.env.NODE_ENV === "dev";
+  baseUrl = dev ? packageJson.url.baseUrlDev : packageJson.url.baseUrl;
+  apiKey = packageJson.api.apiKey;
+  apiToken = packageJson.api.apiToken;
+}
 
 const { sendZip } = require("valkream-function-lib");
 

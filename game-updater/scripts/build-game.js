@@ -12,7 +12,17 @@ const {
 
 const packageJson = require("../package.json");
 const dev = process.env.NODE_ENV === "dev";
-const baseUrl = dev ? packageJson.url.baseUrlDev : packageJson.url.baseUrl;
+
+let baseUrl = "";
+let versionArg = null;
+
+if (process.argv.includes("--custom")) {
+  const customIndex = process.argv.indexOf("--custom");
+  baseUrl = process.argv[customIndex + 1];
+  versionArg = process.argv[customIndex + 2];
+} else {
+  baseUrl = dev ? packageJson.url.baseUrlDev : packageJson.url.baseUrl;
+}
 
 class BuildGame {
   async init() {
@@ -46,9 +56,11 @@ class BuildGame {
       } catch (err) {
         console.warn("⚠️ Impossible de récupérer la version en ligne.");
       }
-      const version = await consoleQuestion(
-        `Entrez la version à packager (latest: ${remoteVersion}):`
-      );
+      const version =
+        versionArg ||
+        (await consoleQuestion(
+          `Entrez la version à packager (latest: ${remoteVersion}):`
+        ));
       if (!version.match(/^\d+\.\d+\.\d+$/)) {
         console.error("❌ Version invalide. Utilisez le format X.Y.Z");
         return;

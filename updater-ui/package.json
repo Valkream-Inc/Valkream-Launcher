@@ -6,7 +6,8 @@
   "author": "Valkream Team",
   "scripts": {
     "start": "cross-env-shell NODE_ENV=dev electron .",
-    "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start"
+    "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
+    "start-watch": "cross-env-shell electron ."
   },
   "license": "MIT",
   "nodemonConfig": {
@@ -22,7 +23,7 @@
     "node-fetch": "^2.7.0",
     "yaml": "^2.2.2",
     "path": "^0.12.7",
-    "valkream-function-lib": "^1.0.2"
+    "valkream-function-lib": "latest"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
