@@ -147,6 +147,7 @@ class BuildGamePanel {
       plugins: null,
       final: null,
     };
+    this.progressContainer.innerHTML = "";
   }
 
   async executeBuildScript() {
