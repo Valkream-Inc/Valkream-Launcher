@@ -1,9 +1,11 @@
 const { ipcRenderer } = require("electron");
 const path = require("path");
+import Process from "../utils/process.js";
 import { database, showSnackbar } from "../utils/utils.js";
 const fs = require("fs");
 const axios = require("axios");
 const yaml = require("yaml");
+const { formatBytes } = require("valkream-function-lib");
 
 class BuildGamePanel {
   static id = "build-game-panel";
@@ -20,44 +22,12 @@ class BuildGamePanel {
       "build-progress-container"
     );
 
-    // Éléments pour chaque fichier
-    this.progressItems = {
-      main: {
-        element: document.getElementById("progress-main-file"),
-        status: document.getElementById("main-file-status"),
-        progress: document.getElementById("main-file-progress"),
-        text: document.getElementById("main-file-text"),
-        bytes: document.getElementById("main-file-bytes"),
-        current: document.getElementById("main-file-current"),
-        speed: document.getElementById("main-file-speed"),
-      },
-      config: {
-        element: document.getElementById("progress-config-file"),
-        status: document.getElementById("config-file-status"),
-        progress: document.getElementById("config-file-progress"),
-        text: document.getElementById("config-file-text"),
-        bytes: document.getElementById("config-file-bytes"),
-        current: document.getElementById("config-file-current"),
-        speed: document.getElementById("config-file-speed"),
-      },
-      plugins: {
-        element: document.getElementById("progress-plugins-file"),
-        status: document.getElementById("plugins-file-status"),
-        progress: document.getElementById("plugins-file-progress"),
-        text: document.getElementById("plugins-file-text"),
-        bytes: document.getElementById("plugins-file-bytes"),
-        current: document.getElementById("plugins-file-current"),
-        speed: document.getElementById("plugins-file-speed"),
-      },
-      final: {
-        element: document.getElementById("progress-final-file"),
-        status: document.getElementById("final-file-status"),
-        progress: document.getElementById("final-file-progress"),
-        text: document.getElementById("final-file-text"),
-        bytes: document.getElementById("final-file-bytes"),
-        current: document.getElementById("final-file-current"),
-        speed: document.getElementById("final-file-speed"),
-      },
+    // Instances Process pour chaque étape
+    this.processes = {
+      main: null,
+      config: null,
+      plugins: null,
+      final: null,
     };
 
     this.db = new database();
@@ -135,96 +105,48 @@ class BuildGamePanel {
     });
   }
 
-  updateProgress(
-    fileType,
-    fileName,
-    bytesProcessed,
-    totalBytes = 0,
-    speed = 0
-  ) {
-    const item = this.progressItems[fileType];
-    if (!item) return;
-
-    if (fileName) {
-      item.current.textContent = fileName;
-    }
-
-    if (bytesProcessed !== undefined) {
-      const bytesText = this.formatBytes(bytesProcessed);
-      item.bytes.textContent = bytesText;
-    }
-
-    if (totalBytes > 0) {
-      const percentage = Math.round((bytesProcessed / totalBytes) * 100);
-      item.progress.style.width = `${percentage}%`;
-      item.text.textContent = `${percentage}%`;
-    }
-
-    if (speed !== undefined) {
-      const speedText = this.formatSpeed(speed);
-      item.speed.textContent = speedText;
-    }
-  }
-
-  setFileStatus(fileType, status) {
-    const item = this.progressItems[fileType];
-    if (!item) return;
-
-    // Retirer toutes les classes de statut
-    item.status.className = "progress-item-status";
-    item.element.className = "progress-item";
-
-    switch (status) {
-      case "waiting":
-        item.status.textContent = "En attente";
-        break;
-      case "active":
-        item.status.textContent = "En cours";
-        item.status.classList.add("active");
-        item.element.classList.add("active");
-        break;
-      case "completed":
-        item.status.textContent = "Terminé";
-        item.status.classList.add("completed");
-        item.element.classList.add("completed");
-        break;
-      case "error":
-        item.status.textContent = "Erreur";
-        item.status.classList.add("error");
-        item.element.classList.add("error");
-        break;
-    }
-  }
-
-  formatBytes(bytes) {
-    if (bytes === 0) return "0 bytes";
-    const k = 1024;
-    const sizes = ["bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  }
-
-  formatSpeed(bytesPerSecond) {
-    if (bytesPerSecond === 0) return "0 B/s";
-    const k = 1024;
-    const sizes = ["B/s", "KB/s", "MB/s", "GB/s"];
-    const i = Math.floor(Math.log(bytesPerSecond) / Math.log(k));
-    return (
-      parseFloat((bytesPerSecond / Math.pow(k, i)).toFixed(1)) + " " + sizes[i]
-    );
-  }
-
   showProgress() {
     this.progressContainer.style.display = "block";
-    // Initialiser tous les éléments
-    Object.keys(this.progressItems).forEach((type) => {
-      this.setFileStatus(type, "waiting");
-      this.updateProgress(type, "-", 0, 0);
-    });
+
+    // Créer les instances Process pour chaque étape
+    this.processes.main = new Process(
+      "main-file",
+      this.progressContainer,
+      "Dossier principal",
+      "folder"
+    );
+
+    this.processes.config = new Process(
+      "config-file",
+      this.progressContainer,
+      "Configurations",
+      "settings"
+    );
+
+    this.processes.plugins = new Process(
+      "plugins-file",
+      this.progressContainer,
+      "Plugins",
+      "extension"
+    );
+
+    this.processes.final = new Process(
+      "final-file",
+      this.progressContainer,
+      "Build final",
+      "archive"
+    );
   }
 
   hideProgress() {
     this.progressContainer.style.display = "none";
+    // Nettoyer les processus
+    this.processes = {
+      main: null,
+      config: null,
+      plugins: null,
+      final: null,
+    };
   }
 
   async executeBuildScript() {
@@ -256,23 +178,39 @@ class BuildGamePanel {
         if (this.isCancelled) return;
 
         if (data.type === "progress") {
-          this.updateProgress(
-            this.currentFileType,
-            data.fileName,
-            data.processedBytes,
-            data.totalBytes,
-            data.speed
-          );
+          const process = this.processes[this.currentFileType];
+          if (process) {
+            process.updateProgress(
+              data.processedBytes,
+              data.totalBytes || 0,
+              data.speed || 0,
+              data.fileName
+            );
+          }
         } else if (data.type === "complete") {
           console.log("Zip completed:", data.filePath);
-          this.setFileStatus(this.currentFileType, "completed");
+          const process = this.processes[this.currentFileType];
+          if (process) {
+            process.setStatus({
+              text: "Terminé",
+              class: "completed",
+            });
+          }
         }
       });
 
       // Zip main game folder
       this.currentFileType = "main";
-      this.setFileStatus("main", "active");
-      this.updateProgress("main", "Compression du dossier principal...", 0);
+      this.processes.main.setStatus({
+        text: "En cours",
+        class: "active",
+      });
+      this.processes.main.updateProgress(
+        0,
+        0,
+        0,
+        "Compression du dossier principal..."
+      );
       await ipcRenderer.invoke(
         "zip-folder",
         this.path,
@@ -284,8 +222,16 @@ class BuildGamePanel {
 
       // Zip config folder
       this.currentFileType = "config";
-      this.setFileStatus("config", "active");
-      this.updateProgress("config", "Compression des configurations...", 0);
+      this.processes.config.setStatus({
+        text: "En cours",
+        class: "active",
+      });
+      this.processes.config.updateProgress(
+        0,
+        0,
+        0,
+        "Compression des configurations..."
+      );
       await ipcRenderer.invoke(
         "zip-folder",
         configFolderToZip,
@@ -297,8 +243,16 @@ class BuildGamePanel {
 
       // Zip plugins folder
       this.currentFileType = "plugins";
-      this.setFileStatus("plugins", "active");
-      this.updateProgress("plugins", "Compression des plugins...", 0);
+      this.processes.plugins.setStatus({
+        text: "En cours",
+        class: "active",
+      });
+      this.processes.plugins.updateProgress(
+        0,
+        0,
+        0,
+        "Compression des plugins..."
+      );
       await ipcRenderer.invoke(
         "zip-folder",
         pluginsFolderToZip,
@@ -309,7 +263,7 @@ class BuildGamePanel {
       if (this.isCancelled) return;
 
       // PART 5 : Hash the folders
-      this.updateProgress("final", "Calcul des hashes...", 0);
+      this.processes.final.updateProgress(0, 0, 0, "Calcul des hashes...");
       const configHash = await ipcRenderer.invoke(
         "hash-folder",
         configFolderToZip
@@ -322,7 +276,12 @@ class BuildGamePanel {
       if (this.isCancelled) return;
 
       // PART 6 : Create the latest.yaml file
-      this.updateProgress("final", "Création du fichier de version...", 0);
+      this.processes.final.updateProgress(
+        0,
+        0,
+        0,
+        "Création du fichier de version..."
+      );
       const localLatest = {
         version: this.version,
         buildDate: new Date().toISOString(),
@@ -335,8 +294,11 @@ class BuildGamePanel {
 
       // PART 7 : Zip the build folder
       this.currentFileType = "final";
-      this.setFileStatus("final", "active");
-      this.updateProgress("final", "Finalisation du build...", 0);
+      this.processes.final.setStatus({
+        text: "En cours",
+        class: "active",
+      });
+      this.processes.final.updateProgress(0, 0, 0, "Finalisation du build...");
       const uploadZipPath = path.join(this.appDataPath, "./game-build.zip");
       await ipcRenderer.invoke(
         "zip-folder",
@@ -348,13 +310,27 @@ class BuildGamePanel {
       if (this.isCancelled) return;
 
       // PART 8 : Upload the zip file
-      this.updateProgress("final", "Build terminé avec succès!", 0);
-      this.setFileStatus("final", "completed");
+      this.processes.final.updateProgress(
+        0,
+        0,
+        0,
+        "Build terminé avec succès!"
+      );
+      this.processes.final.setStatus({
+        text: "Terminé",
+        class: "completed",
+      });
       showSnackbar("Build terminé avec succès!", "success");
     } catch (error) {
       console.error(error);
       if (!this.isCancelled) {
-        this.setFileStatus(this.currentFileType, "error");
+        const process = this.processes[this.currentFileType];
+        if (process) {
+          process.setStatus({
+            text: "Erreur",
+            class: "error",
+          });
+        }
         showSnackbar("Erreur lors du build: " + error.message, "error");
       }
     } finally {
@@ -379,6 +355,8 @@ class BuildGamePanel {
 
     // Nettoyer les listeners
     ipcRenderer.removeAllListeners(`zip-folder-${BuildGamePanel.id}`);
+
+    this.init();
   }
 }
 
