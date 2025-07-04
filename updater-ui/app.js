@@ -8,6 +8,7 @@ const MainWindow = require("./mainWindow.js");
 const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
+const { zipFolder, hashFolder } = require("valkream-function-lib");
 
 const dev = process.env.NODE_ENV === "development";
 
@@ -23,10 +24,15 @@ else
 // Configuration du repertoir pour la base de données
 if (dev) {
   let appPath = path.resolve("./data/Updater").replace(/\\/g, "/");
+  let appDataPath = path.resolve("./data/AppData").replace(/\\/g, "/");
   if (!fs.existsSync(appPath)) fs.mkdirSync(appPath, { recursive: true });
+  if (!fs.existsSync(appDataPath))
+    fs.mkdirSync(appDataPath, { recursive: true });
   app.setPath("userData", appPath);
+  app.setPath("appData", appDataPath);
 }
 ipcMain.handle("path-user-data", () => app.getPath("userData"));
+ipcMain.handle("path-app-data", () => app.getPath("appData"));
 
 // windows
 ipcMain.on("main-window-open", () => MainWindow.createWindow());
@@ -53,6 +59,8 @@ ipcMain.handle("show-open-dialog", async () => {
 
 // Map pour stocker les processus enfants par nom de script
 const runningScripts = {};
+// Map pour stocker les processus de zippage par nom de script
+const runningZipProcesses = {};
 
 // Exécution de scripts Node.js
 ipcMain.handle(
@@ -128,97 +136,94 @@ ipcMain.handle("cancel-node-script", (event, scriptName = "default") => {
   }
 });
 
-// Handler IPC pour upload de fichiers/dossiers
-ipcMain.handle("upload-folder", async (event, files, targetDirArg) => {
-  if (!targetDirArg) {
-    throw new Error("Le dossier cible n'est pas spécifié");
-  }
-  const targetDir = path.resolve(targetDirArg);
-  const fsPromises = fs.promises;
-
-  // Fonction récursive pour supprimer tout le dossier
-  async function removeDirContents(dir) {
-    if (!fs.existsSync(dir)) return;
-    const entries = await fsPromises.readdir(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        await fsPromises.rm(fullPath, { recursive: true, force: true });
-      } else {
-        try {
-          await fsPromises.unlink(fullPath);
-        } catch (err) {
-          if (err.code !== 'ENOENT') throw err;
-          // Sinon, on ignore l'erreur si le fichier n'existe pas
-        }
+ipcMain.handle(
+  "zip-folder",
+  async (event, sourceFolderPath, zipOutputPath, scriptName) => {
+    return new Promise((resolve, reject) => {
+      // Vérifier si le processus est déjà annulé
+      if (
+        runningZipProcesses[scriptName] &&
+        runningZipProcesses[scriptName].cancelled
+      ) {
+        reject(new Error("Processus annulé"));
+        return;
       }
-    }
-  }
 
-  // Supprimer tout le contenu du dossier cible
-  await removeDirContents(targetDir);
-
-  // Calcul du total des bytes à écrire
-  let totalBytes = files.reduce((acc, file) => acc + file.size, 0);
-  let writtenBytes = 0;
-
-  // Fonction pour créer les dossiers parents si besoin
-  function ensureDirSync(filePath) {
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-  }
-
-  // Copie des fichiers avec progression via stream amélioré
-  for (const file of files) {
-    const destPath = path.join(targetDir, file.relativePath);
-    ensureDirSync(destPath);
-    await new Promise((resolve, reject) => {
-      const readStream = fs.createReadStream(file.path);
-      const writeStream = fs.createWriteStream(destPath);
-      let fileWritten = 0;
-      let lastProgressSent = Date.now();
-      let errorOccurred = false;
-      const sendProgress = (errMsg = null) => {
-        event.sender.send("upload-progress", {
-          writtenBytes,
-          totalBytes,
-          percent: Math.min(100, Math.round((writtenBytes / totalBytes) * 100)),
-          error: errMsg || undefined,
-        });
+      const zipProcess = {
+        cancelled: false,
+        resolve,
+        reject,
       };
-      readStream.on("data", (chunk) => {
-        writeStream.write(chunk, () => {
-          fileWritten += chunk.length;
-          writtenBytes += chunk.length;
-          if (Date.now() - lastProgressSent > 50) {
-            sendProgress();
-            lastProgressSent = Date.now();
+
+      runningZipProcesses[scriptName] = zipProcess;
+
+      zipFolder(
+        sourceFolderPath,
+        zipOutputPath,
+        (processedBytes, totalBytes, fileName, speed) => {
+          // Vérifier si le processus a été annulé
+          if (zipProcess.cancelled) {
+            return;
           }
+
+          event.sender.send(`zip-folder-${scriptName}`, {
+            type: "progress",
+            processedBytes,
+            totalBytes,
+            fileName: fileName || path.basename(zipOutputPath),
+            percentage:
+              totalBytes > 0
+                ? Math.round((processedBytes / totalBytes) * 100)
+                : 0,
+            speed,
+          });
+        },
+        zipProcess // Passer le token d'annulation
+      )
+        .then((result) => {
+          if (!zipProcess.cancelled) {
+            event.sender.send(`zip-folder-${scriptName}`, {
+              type: "complete",
+              filePath: zipOutputPath,
+              result,
+            });
+            resolve(result);
+          }
+          delete runningZipProcesses[scriptName];
+        })
+        .catch((error) => {
+          if (!zipProcess.cancelled) {
+            reject(error);
+          }
+          delete runningZipProcesses[scriptName];
         });
-      });
-      readStream.on("end", () => {
-        sendProgress();
-      });
-      readStream.on("error", (err) => {
-        errorOccurred = true;
-        sendProgress("Erreur de lecture: " + err.message);
-        reject(err);
-      });
-      writeStream.on("error", (err) => {
-        errorOccurred = true;
-        sendProgress("Erreur d'écriture: " + err.message);
-        reject(err);
-      });
-      writeStream.on("close", () => {
-        if (!errorOccurred) resolve();
-      });
-      readStream.pipe(writeStream, { end: true });
     });
   }
-  return {
-    success: true,
-    message: `Upload de ${files.length} fichiers terminé.`,
-  };
+);
+
+// Handler pour annuler un processus de zippage
+ipcMain.handle("cancel-zip-process", (event, scriptName) => {
+  const zipProcess = runningZipProcesses[scriptName];
+  if (zipProcess) {
+    zipProcess.cancelled = true;
+    zipProcess.reject(new Error("Processus annulé"));
+    delete runningZipProcesses[scriptName];
+    return {
+      success: true,
+      message: `Processus de zippage ${scriptName} annulé.`,
+    };
+  } else {
+    return {
+      success: false,
+      message: `Aucun processus de zippage ${scriptName} en cours.`,
+    };
+  }
+});
+
+ipcMain.handle("hash-folder", async (event, folderPath) => {
+  return await hashFolder(folderPath);
+});
+
+ipcMain.handle("progress-process", async (event, process_id, data) => {
+  event.sender.send(`process-progress-${process_id}`, data);
 });
