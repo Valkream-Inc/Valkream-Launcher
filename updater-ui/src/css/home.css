@@ -97,6 +97,14 @@
 .left-menu-btn .material-icons {
   font-size: 2rem;
 }
+.left-menu-btn.upload {
+  background: rgba(255, 255, 255, 0.15);
+  color: #000;
+}
+.left-menu-btn.upload:hover {
+  background: #fff;
+  color: #000;
+}
 .left-menu-btn.build {
   background: rgba(255, 193, 7, 0.15);
   color: #ffc107;
@@ -218,7 +226,9 @@
   font-size: 20px;
   color: var(--color);
 }
-
+.background-white {
+  background: #fff;
+}
 .background-yellow {
   background: #ffc107;
 }
@@ -232,6 +242,9 @@
   background: #2196f3;
 }
 
+.panel.border-white {
+  border-color: #fff;
+}
 .panel.border-yellow {
   border-color: #ffc107;
 }
@@ -245,6 +258,9 @@
   border-color: #2196f3;
 }
 
+.panel.border-white {
+  border-color: #fff;
+}
 .color-yellow {
   color: #ffc107;
 }
@@ -260,4 +276,34 @@
 
 .panel-content {
   margin-top: 2rem;
+}
+
+.dropzone {
+  border: 2px dashed var(--color, #fff);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color, #fff);
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.dropzone.dragover {
+  background: rgba(80, 150, 255, 0.15);
+  border-color: #4f8cff;
+}
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: var(--background);
+  border-radius: 8px;
+  margin-top: 1rem;
+  display: none;
+}
+.progress-bar-inner {
+  height: 100%;
+  background: var(--color);
+  border-radius: 8px;
+  transition: width 0.2s;
 }

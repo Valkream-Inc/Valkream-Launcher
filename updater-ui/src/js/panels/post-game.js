@@ -115,5 +115,4 @@ class PostGamePanel {
   }
 }
 
-// Exporter la classe pour qu'elle puisse être utilisée dans home.js
-module.exports = PostGamePanel;
+export default PostGamePanel;

@@ -21,7 +21,7 @@ else
 
 // Configuration du repertoir pour la base de données
 if (dev) {
-  let appPath = path.resolve("./data/Launcher").replace(/\\/g, "/");
+  let appPath = path.resolve("./data/Updater").replace(/\\/g, "/");
   if (!fs.existsSync(appPath)) fs.mkdirSync(appPath, { recursive: true });
   app.setPath("userData", appPath);
 }
@@ -90,4 +90,63 @@ ipcMain.handle("execute-node-script", async (event, scriptPath, args = []) => {
       reject(error);
     });
   });
+});
+
+// Handler IPC pour upload de fichiers/dossiers
+ipcMain.handle("upload-folder", async (event, files, targetDirArg) => {
+  console.log(targetDirArg);
+  if (!targetDirArg) {
+    throw new Error("Le dossier cible n'est pas spécifié");
+  }
+  const targetDir = path.resolve(targetDirArg);
+  const fsPromises = fs.promises;
+
+  // Fonction récursive pour supprimer tout le dossier
+  async function removeDirContents(dir) {
+    if (!fs.existsSync(dir)) return;
+    const entries = await fsPromises.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await fsPromises.rm(fullPath, { recursive: true, force: true });
+      } else {
+        await fsPromises.unlink(fullPath);
+      }
+    }
+  }
+
+  // Supprimer tout le contenu du dossier cible
+  await removeDirContents(targetDir);
+
+  // Calcul du total des bytes à écrire
+  let totalBytes = files.reduce((acc, file) => acc + file.size, 0);
+  let writtenBytes = 0;
+
+  // Fonction pour créer les dossiers parents si besoin
+  function ensureDirSync(filePath) {
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  }
+
+  // Écriture des fichiers avec progression
+  for (const file of files) {
+    const destPath = path.join(targetDir, file.relativePath);
+    ensureDirSync(destPath);
+    const buffer = fs.readFileSync(file.path);
+    fs.writeFileSync(destPath, buffer);
+    writtenBytes += buffer.length;
+
+    // Envoi progression
+    event.sender.send("upload-progress", {
+      writtenBytes,
+      totalBytes,
+      percent: Math.round((writtenBytes / totalBytes) * 100),
+    });
+  }
+  return {
+    success: true,
+    message: `Upload de ${files.length} fichiers terminé.`,
+  };
 });

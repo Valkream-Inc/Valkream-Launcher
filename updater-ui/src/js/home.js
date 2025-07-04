@@ -1,6 +1,5 @@
 import { changePage } from "./utils/utils.js";
-const fs = require("fs");
-const PostGamePanel = require("../js/panels/post-game.js");
+import HomeGameManager from "./home-game-manager.js";
 
 // Variable globale pour suivre l'état d'exécution
 window.isProcessRunning = false;
@@ -16,42 +15,32 @@ class Home {
     this.btnEvent = document.getElementById("btn-event");
     this.btnSettings = document.getElementById("btn-settings");
     this.initButtons();
-    this.initPanelsGameButtons();
+    new HomeGameManager().init();
   }
 
   initButtons() {
     this.title.addEventListener("click", () => {
-      if (!window.isProcessRunning) {
-        this.changePanel(0, this.title);
-      }
+      this.changeStep(0, this.title);
     });
 
     this.btnGame.addEventListener("click", () => {
-      if (!window.isProcessRunning) {
-        this.changePanel(1, this.btnGame);
-      }
+      this.changeStep(1, this.btnGame);
     });
 
     this.btnLauncher.addEventListener("click", () => {
-      if (!window.isProcessRunning) {
-        this.changePanel(2, this.btnLauncher);
-      }
+      this.changeStep(2, this.btnLauncher);
     });
 
     this.btnEvent.addEventListener("click", () => {
-      if (!window.isProcessRunning) {
-        this.changePanel(3, this.btnEvent);
-      }
+      this.changeStep(3, this.btnEvent);
     });
 
     this.btnSettings.addEventListener("click", () => {
-      if (!window.isProcessRunning) {
-        changePage("config");
-      }
+      changePage("config");
     });
   }
 
-  changePanel(step, btn) {
+  changeStep(step, btn) {
     this.step = step;
     const steps = document.querySelectorAll(".home-content-step");
     steps.forEach((step) => {
@@ -64,69 +53,6 @@ class Home {
     this.btnLauncher.classList.remove("active");
     this.btnEvent.classList.remove("active");
     if (btn) btn.classList.add("active");
-  }
-
-  initPanelsGameButtons() {
-    let isActive = true;
-    const panels = document.querySelector(".game-panels");
-
-    const buildBtn = document.getElementById("btn-build-game");
-    const postBtn = document.getElementById("btn-post-game");
-    const changeVersionBtn = document.getElementById("btn-change-version-game");
-    const deleteVersionBtn = document.getElementById("btn-delete-version-game");
-
-    for (let panel of fs.readdirSync(`${__dirname}/../html/panels/`)) {
-      if (panel.includes("game")) {
-        const html = fs.readFileSync(
-          `${__dirname}/../html/panels/${panel}`,
-          "utf8"
-        );
-        panels.innerHTML += html;
-      }
-    }
-
-    for (let panel of panels.children) {
-      panel.style.display = "none";
-    }
-
-    const panelsGame = document.querySelector("#build-game-panel");
-    panelsGame.style.display = "block";
-
-    buildBtn.addEventListener("click", () => {
-      if (!window.isProcessRunning) {
-        renderPanel("build-game-panel");
-      }
-    });
-
-    postBtn.addEventListener("click", () => {
-      if (!window.isProcessRunning) {
-        renderPanel("post-game-panel");
-        // Initialiser le panel post-game
-        setTimeout(() => {
-          new PostGamePanel();
-        }, 100);
-      }
-    });
-
-    changeVersionBtn.addEventListener("click", () => {
-      if (!window.isProcessRunning) {
-        renderPanel("change-version-game-panel");
-      }
-    });
-
-    deleteVersionBtn.addEventListener("click", () => {
-      if (!window.isProcessRunning) {
-        renderPanel("delete-version-game-panel");
-      }
-    });
-
-    const renderPanel = (panelToRender) => {
-      for (let panel of panels.children) {
-        panel.style.display = "none";
-      }
-      const panelToDisplay = document.getElementById(panelToRender);
-      if (panelToDisplay) panelToDisplay.style.display = "block";
-    };
   }
 }
 
