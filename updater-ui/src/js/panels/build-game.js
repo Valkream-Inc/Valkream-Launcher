@@ -126,7 +126,7 @@ class BuildGamePanel {
     this.runBtn.disabled = false;
     if (this.cancelBtn) this.cancelBtn.style.display = "none";
     this.runBtn.innerHTML =
-      '<span class="material-icons">send</span> Run build';
+      '<span class="material-icons">build</span> Run build';
   }
 }
 

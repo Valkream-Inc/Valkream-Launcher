@@ -5,6 +5,7 @@
     "./backend-update-server",
     "./frontend-electron-launcher",
     "./game-updater",
+    "./updater-ui",
     "./shared function"
   ]
 }

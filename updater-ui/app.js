@@ -9,7 +9,7 @@ const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
 
-const dev = process.env.NODE_ENV === "dev";
+const dev = process.env.NODE_ENV === "development";
 
 if (process.platform === "win32") app.setAppUserModelId("Updater-UI");
 if (!app.requestSingleInstanceLock()) app.quit();
@@ -130,7 +130,6 @@ ipcMain.handle("cancel-node-script", (event, scriptName = "default") => {
 
 // Handler IPC pour upload de fichiers/dossiers
 ipcMain.handle("upload-folder", async (event, files, targetDirArg) => {
-  console.log(targetDirArg);
   if (!targetDirArg) {
     throw new Error("Le dossier cible n'est pas spécifié");
   }
@@ -146,7 +145,12 @@ ipcMain.handle("upload-folder", async (event, files, targetDirArg) => {
       if (entry.isDirectory()) {
         await fsPromises.rm(fullPath, { recursive: true, force: true });
       } else {
-        await fsPromises.unlink(fullPath);
+        try {
+          await fsPromises.unlink(fullPath);
+        } catch (err) {
+          if (err.code !== 'ENOENT') throw err;
+          // Sinon, on ignore l'erreur si le fichier n'existe pas
+        }
       }
     }
   }
@@ -166,19 +170,51 @@ ipcMain.handle("upload-folder", async (event, files, targetDirArg) => {
     }
   }
 
-  // Écriture des fichiers avec progression
+  // Copie des fichiers avec progression via stream amélioré
   for (const file of files) {
     const destPath = path.join(targetDir, file.relativePath);
     ensureDirSync(destPath);
-    const buffer = fs.readFileSync(file.path);
-    fs.writeFileSync(destPath, buffer);
-    writtenBytes += buffer.length;
-
-    // Envoi progression
-    event.sender.send("upload-progress", {
-      writtenBytes,
-      totalBytes,
-      percent: Math.round((writtenBytes / totalBytes) * 100),
+    await new Promise((resolve, reject) => {
+      const readStream = fs.createReadStream(file.path);
+      const writeStream = fs.createWriteStream(destPath);
+      let fileWritten = 0;
+      let lastProgressSent = Date.now();
+      let errorOccurred = false;
+      const sendProgress = (errMsg = null) => {
+        event.sender.send("upload-progress", {
+          writtenBytes,
+          totalBytes,
+          percent: Math.min(100, Math.round((writtenBytes / totalBytes) * 100)),
+          error: errMsg || undefined,
+        });
+      };
+      readStream.on("data", (chunk) => {
+        writeStream.write(chunk, () => {
+          fileWritten += chunk.length;
+          writtenBytes += chunk.length;
+          if (Date.now() - lastProgressSent > 50) {
+            sendProgress();
+            lastProgressSent = Date.now();
+          }
+        });
+      });
+      readStream.on("end", () => {
+        sendProgress();
+      });
+      readStream.on("error", (err) => {
+        errorOccurred = true;
+        sendProgress("Erreur de lecture: " + err.message);
+        reject(err);
+      });
+      writeStream.on("error", (err) => {
+        errorOccurred = true;
+        sendProgress("Erreur d'écriture: " + err.message);
+        reject(err);
+      });
+      writeStream.on("close", () => {
+        if (!errorOccurred) resolve();
+      });
+      readStream.pipe(writeStream, { end: true });
     });
   }
   return {

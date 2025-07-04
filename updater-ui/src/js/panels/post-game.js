@@ -6,6 +6,7 @@ class PostGamePanel {
   static id = "post-game-panel";
   constructor() {
     this.runBtn = document.getElementById("run-post-btn-game");
+    this.cancelBtn = document.getElementById("cancel-post-btn-game");
     this.outputContainer = document.querySelector(
       "#post-game-panel .panel-content"
     );
@@ -39,6 +40,11 @@ class PostGamePanel {
         }
       });
     }
+    if (this.cancelBtn) {
+      this.cancelBtn.addEventListener("click", () => {
+        this.cancelPostScript();
+      });
+    }
   }
 
   bindIpcEvents() {
@@ -64,28 +70,22 @@ class PostGamePanel {
 
   async executePostScript() {
     try {
-      // Marquer comme en cours d'exécution
       this.isRunning = true;
-      window.isProcessRunning = true;
-
-      // Désactiver le bouton pendant l'exécution
+      window.isGameProcessRunning = true;
+      this.cancelBtn.style = "";
       this.runBtn.disabled = true;
       this.runBtn.innerHTML =
         '<span class="material-icons">hourglass_empty</span> Exécution...';
-
-      // Afficher le conteneur de sortie et le vider
       this.outputContainer.style.display = "block";
       this.outputContainer.innerHTML =
         '<span style="color: #ffffff">🚀 Démarrage de l\'exécution du script post-game...<br></span>';
 
-      // Chemin vers le script post-game.js
       const config = await this.db.readData("configClient");
       const scriptPath = path.join(
         config.folderPath,
         "game-updater/scripts/post-game.js"
       );
 
-      // Exécuter le script via IPC
       const result = await ipcRenderer.invoke(
         "execute-node-script",
         scriptPath,
@@ -93,26 +93,60 @@ class PostGamePanel {
         PostGamePanel.id
       );
 
-      // Afficher le résultat final
+        if (result.errorOutput) {
+          this.appendOutput({
+            type: "stderr",
+            data: result.errorOutput,
+          });
+        }
+        if (result.output) {
+          this.appendOutput({
+            type: "stdout",
+            data: result.output,
+          });
+        }
+
       if (!result.success) {
-        this.appendOutput({
-          type: "stderr",
-          data: `\n❌ Erreur lors de l'exécution du script ! (Code: ${result.exitCode})\n`,
-        });
+        if (result.signal) {
+          this.appendOutput({
+            type: "stderr",
+            data: `\n⏹️ Script annulé par signal (${result.signal})\n`,
+          });
+        } else {
+          this.appendOutput({
+            type: "stderr",
+            data: `\n❌ Erreur lors de l'exécution du script ! (Code: ${result.exitCode})\n`,
+          });
+        }
       }
     } catch (error) {
+      console.error("Erreur fatale :", error);
       this.appendOutput({
         type: "stderr",
         data: `\n💥 Erreur fatale: ${error.message}\n`,
       });
     } finally {
-      // Réactiver le bouton et marquer comme terminé
       this.isRunning = false;
-      window.isProcessRunning = false;
+      window.isGameProcessRunning = false;
       this.runBtn.disabled = false;
       this.runBtn.innerHTML =
         '<span class="material-icons">send</span> Run post';
+      this.cancelBtn.style = "display: none";
     }
+  }
+
+  cancelPostScript() {
+    ipcRenderer.invoke("cancel-node-script", PostGamePanel.id);
+    this.appendOutput({
+      type: "stderr",
+      data: "\n⏹️ Annulation demandée...\n",
+    });
+    this.isRunning = false;
+    window.isGameProcessRunning = false;
+    this.runBtn.disabled = false;
+    if (this.cancelBtn) this.cancelBtn.style.display = "none";
+    this.runBtn.innerHTML =
+      '<span class="material-icons">send</span> Run post';
   }
 }
 
