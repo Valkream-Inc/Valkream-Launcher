@@ -7,11 +7,9 @@
 - [ ] Ajouter la supression de l'applis dans settings
 - [ ] Reorganiser launcherManager en launcherManger + gameManager
 - [ ] Reorganiser les panels js
-- [ ] Modifier les icons svg html via font.css
 - [ ] Preserver l'installation du jeu lors de la mise a jour du launcher
 
 ## Backend
 
 - [ ] Ajouter la supression des anciennes versions
 - [ ] Changer l'architecture du backend --> Rest API
-- [ ] Mettre à jour la licence
