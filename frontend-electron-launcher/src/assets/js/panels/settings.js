@@ -82,7 +82,6 @@ class Settings {
       "#open-launcher-folder"
     );
     openLauncherFolderBtn.addEventListener("click", async () => {
-      console.log("clickclick");
       if (await launcherManager.openLauncherFolder()) {
         showSnackbar("Dossier de l'application ouvert !");
       } else {

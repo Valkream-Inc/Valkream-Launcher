@@ -1,10 +1,3 @@
-/*
-.settings .container {
-  display: flex;
-  height: 100%;
-}
-*/
-
 .nav-settings {
   position: fixed;
   top: 0;
@@ -32,6 +25,14 @@
   align-items: center;
 }
 
+.nav-box div:hover {
+  color: var(--secondary-color);
+}
+
+.nav-box div:active {
+  color: var(--color);
+}
+
 .nav-box #save {
   border: solid 4px var(--background-element);
   margin: 3rem;
@@ -39,6 +40,7 @@
 
 .nav-box #save:hover {
   border: solid 4px var(--secondary-color);
+  color: var(--color) !important;
 }
 
 .nav-settings-btn {

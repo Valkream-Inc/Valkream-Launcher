@@ -6,6 +6,7 @@ const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
 const yaml = require("yaml");
+const cors = require("cors");
 
 const { unZip } = require("@valkream/shared");
 const e = require("express");
@@ -47,6 +48,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 app.use(express.json());
+app.use(cors());
 
 //get old version
 app.get("/launcher/old/", (req, res) => {
