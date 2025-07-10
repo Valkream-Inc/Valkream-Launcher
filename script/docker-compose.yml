@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend-update-server:
     image: btherin/valkream-update-server:latest
@@ -7,8 +5,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    environment:
-      - PORT=3000
+    volumes:
+      - ./uploads:/app/uploads
     # Ajoute ici d'autres variables d'environnement si besoin
 
   watchtower:
@@ -17,4 +15,4 @@ services:
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --cleanup --interval 60 
+    command: --cleanup --interval 60

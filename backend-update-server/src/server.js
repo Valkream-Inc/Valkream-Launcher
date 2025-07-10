@@ -14,7 +14,7 @@ const { apiKey, apiToken } = process.env;
 
 const app = express();
 
-const uploadsDir = path.join(__dirname, "uploads");
+const uploadsDir = path.join(__dirname, "../uploads");
 const configDir = path.join(uploadsDir, "config");
 
 const launcherDir = path.join(uploadsDir, "launcher");
@@ -282,4 +282,8 @@ app.listen(process.env.PORT, () => {
       process.env.PORT
     }`
   );
+});
+
+process.on("uncaughtException", function (e) {
+  console.log("uncaughtException" + e);
 });
