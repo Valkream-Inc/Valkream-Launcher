@@ -8,11 +8,11 @@ const { app, ipcMain } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
-const UpdateWindow = require("./assets/js/windows/updateWindow.js");
-const MainWindow = require("./assets/js/windows/mainWindow.js");
-const CheckForUpdates = require("./ipcMain/check-for-updates.js");
-const DowloadMultiplefiles = require("./ipcMain/download-multiple-zips.js");
-const MultipleUnzip = require("./ipcMain/multiple-unzip.js");
+const UpdateWindow = require("./main/windows/updateWindow.js");
+const MainWindow = require("./main/windows/mainWindow.js");
+const CheckForUpdates = require("./main/ipcMain/check-for-updates.js");
+const DowloadMultiplefiles = require("./main/ipcMain/download-multiple-zips.js");
+const MultipleUnzip = require("./main/ipcMain/multiple-unzip.js");
 
 let dev = process.env.NODE_ENV === "dev";
 
