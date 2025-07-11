@@ -3,7 +3,7 @@ const fs = require("fs");
 const fse = require("fs-extra");
 const yaml = require("yaml");
 
-const { unZip } = require("valkream-function-lib");
+const { unZip, formatBytes } = require("valkream-function-lib");
 
 const { ServerError } = require("../compoment/error.compoment");
 const paths = require("../config/paths.config");
@@ -16,15 +16,26 @@ const AddVersion = function (props) {
   this.user = props.user;
 };
 
-AddVersion.init = async (props) => {
+AddVersion.init = async (props, onProgress) => {
   const zipPath = props.zip_path;
   const extractDir = props.extract_dir;
   const latestDir = props.latest_dir;
   const oldDir = props.old_dir;
 
+  const callback = (processedBytes, totalBytes, percent, speed) => {
+    if (onProgress)
+      onProgress(
+        `Extraction en cours : ${percent}% (${formatBytes(
+          processedBytes
+        )}/${formatBytes(totalBytes)}) à ${formatBytes(speed)}/s`
+      );
+  };
   try {
-    await unZip(zipPath, extractDir);
+    if (onProgress) onProgress("Début de l'extraction...");
+    await unZip(zipPath, extractDir, callback);
 
+    if (onProgress)
+      onProgress("Extraction terminée, lecture du fichier de version...");
     const versionFile = path.join(latestDir, "latest.yml");
     if (fs.existsSync(versionFile)) {
       const ymlContent = fs.readFileSync(versionFile, "utf8");
@@ -32,15 +43,23 @@ AddVersion.init = async (props) => {
       const version = parsed.version;
       const archivePath = path.join(oldDir, version);
 
+      if (onProgress) onProgress("Déplacement de l'ancienne version...");
       await fse.move(latestDir, archivePath, { overwrite: true });
     }
 
+    if (onProgress)
+      onProgress("Création du dossier de version la plus récente...");
     fs.mkdirSync(latestDir, { recursive: true });
+    if (onProgress) onProgress("Copie des fichiers extraits...");
     await fse.copy(extractDir, latestDir, { overwrite: true });
 
     // Nettoyage
-    fs.rmSync(extractDir, { recursive: true, force: true });
-    fs.unlinkSync(zipPath);
+    if (onProgress) onProgress("Nettoyage...");
+    if (fs.existsSync(extractDir))
+      fs.rmSync(extractDir, { recursive: true, force: true });
+    if (onProgress) onProgress("Suppression du fichier zip...");
+    if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+    if (onProgress) onProgress("Terminé !");
 
     return { msg: "✅ Mise à jour installée avec succès." };
   } catch (err) {

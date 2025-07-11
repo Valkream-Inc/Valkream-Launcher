@@ -3,6 +3,14 @@ const { apiKey, apiToken } = process.env;
 
 class Auth {
   ensureIsAuthorized = (req, res, next) => {
+    if (!req || !req.body || !req.body.api_key || !req.body.api_token) {
+      throw new ClientError(
+        "error_empty_info",
+        400,
+        req && req.connection ? req.connection.remoteAddress : undefined,
+        "Auth"
+      );
+    }
     const send_api_key = req.body.api_key;
     const send_api_token = req.body.api_token;
 

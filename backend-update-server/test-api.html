@@ -184,13 +184,18 @@
             required
           />
           <label for="post-data">Données JSON :</label>
-          <input type="text" id="post-data" value='{"key":"value"}' />
+          <input
+            type="text"
+            id="post-data"
+            value='{"api_key":"SECRET_API_KEY", "api_token":"SECRET_API_TOKEN", "key": "value"}'
+          />
           <center>
             <label for="post-zip" id="zip-label" class="custom-file-label"
               >Ajouter un ZIP (optionnel)</label
             >
+            <input type="file" id="post-zip" accept=".zip" />
           </center>
-          <input type="file" id="post-zip" accept=".zip" />
+
           <span
             id="file-name"
             style="
@@ -204,7 +209,7 @@
         </form>
       </div>
       <div class="result-col">
-        <pre id="result"></pre>
+        <pre id="result" style="height: 90vh; overflow: auto"></pre>
       </div>
     </div>
     <script>
@@ -221,14 +226,14 @@
           let data;
           try {
             data = JSON.parse(text);
-            resultDiv.textContent =
+            resultDiv.innerHTML =
               "GET " + endpoint + ":\n" + JSON.stringify(data, null, 2);
           } catch (jsonErr) {
-            resultDiv.textContent =
+            resultDiv.innerHTML =
               "GET " + endpoint + " (réponse non-JSON):\n" + text;
           }
         } catch (err) {
-          resultDiv.textContent = "Erreur GET: " + (err.message || err);
+          resultDiv.innerHTML = "Erreur GET: " + (err.message || err);
         }
       });
 
@@ -237,71 +242,71 @@
         const endpoint = document.getElementById("post-endpoint").value;
         const zipInput = document.getElementById("post-zip");
         const file = zipInput.files[0];
+
+        // Prépare les données
+        let postData;
+        try {
+          postData = JSON.parse(document.getElementById("post-data").value);
+        } catch (err) {
+          resultDiv.innerHTML = "JSON invalide: " + (err.message || err);
+          return;
+        }
+
+        // Utilise FormData si fichier, sinon JSON
+        let fetchOptions = {
+          method: "POST",
+        };
         if (file) {
-          // Envoi du ZIP en multipart/form-data
           const formData = new FormData();
+          // Ajoute les champs JSON à FormData
+          Object.entries(postData).forEach(([key, value]) => {
+            formData.append(key, value);
+          });
           formData.append("file", file);
-          // Ajout des données JSON si présentes
-          let postData;
-          try {
-            postData = JSON.parse(document.getElementById("post-data").value);
-            for (const key in postData) {
-              formData.append(key, postData[key]);
-            }
-          } catch (err) {
-            resultDiv.textContent = "JSON invalide: " + (err.message || err);
-            return;
-          }
-          try {
-            const res = await fetch(endpoint, {
-              method: "POST",
-              body: formData,
-            });
-            const text = await res.text();
-            let data;
-            try {
-              data = JSON.parse(text);
-              resultDiv.textContent =
-                "POST (ZIP) " +
-                endpoint +
-                ":\n" +
-                JSON.stringify(data, null, 2);
-            } catch (jsonErr) {
-              resultDiv.textContent =
-                "POST (ZIP) " + endpoint + " (réponse non-JSON):\n" + text;
-            }
-          } catch (err) {
-            resultDiv.textContent =
-              "Erreur POST (ZIP): " + (err.message || err);
-          }
+          fetchOptions.body = formData;
+          // Pas besoin de définir Content-Type, le navigateur le fait
         } else {
-          // Envoi classique JSON
-          let postData;
-          try {
-            postData = JSON.parse(document.getElementById("post-data").value);
-          } catch (err) {
-            resultDiv.textContent = "JSON invalide: " + (err.message || err);
-            return;
-          }
-          try {
-            const res = await fetch(endpoint, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(postData),
-            });
-            const text = await res.text();
-            let data;
-            try {
-              data = JSON.parse(text);
-              resultDiv.textContent =
-                "POST " + endpoint + ":\n" + JSON.stringify(data, null, 2);
-            } catch (jsonErr) {
-              resultDiv.textContent =
-                "POST " + endpoint + " (réponse non-JSON):\n" + text;
+          fetchOptions.headers = { "Content-Type": "application/json" };
+          fetchOptions.body = JSON.stringify(postData);
+        }
+
+        try {
+          resultDiv.innerHTML = "Envoie..."; // Reset
+          const res = await fetch(endpoint, fetchOptions);
+
+          // Si le serveur répond en stream texte
+          if (res.body && window.ReadableStream) {
+            resultDiv.innerHTML = ""; // Reset
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let buffer = "";
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              // Affiche uniquement la dernière ligne reçue
+              let lines = buffer.split("\n");
+              buffer = lines.pop(); // La dernière ligne peut être incomplète
+              for (const line of lines) {
+                if (line.trim() !== "") {
+                  resultDiv.innerHTML = ""; // Clear previous lines
+                  resultDiv.insertAdjacentHTML("beforeend", line + "<br>");
+                  resultDiv.scrollTop = resultDiv.scrollHeight; // Ajout du scroll auto
+                }
+              }
             }
-          } catch (err) {
-            resultDiv.textContent = "Erreur POST: " + (err.message || err);
+            if (buffer && buffer.trim() !== "") {
+              resultDiv.innerHTML = ""; // Clear previous lines
+              resultDiv.insertAdjacentHTML("beforeend", buffer + "<br>");
+              resultDiv.scrollTop = resultDiv.scrollHeight; // Ajout du scroll auto
+            }
+          } else {
+            // Fallback : réponse classique
+            const text = await res.text();
+            resultDiv.innerHTML = text;
           }
+        } catch (err) {
+          resultDiv.innerHTML = "Erreur POST: " + (err.message || err);
         }
       });
 
@@ -309,7 +314,6 @@
       const zipInput = document.getElementById("post-zip");
       const zipLabel = document.getElementById("zip-label");
       const fileNameSpan = document.getElementById("file-name");
-      zipLabel.addEventListener("click", () => zipInput.click());
       zipInput.addEventListener("change", () => {
         if (zipInput.files.length > 0) {
           zipLabel.classList.add("file-selected");

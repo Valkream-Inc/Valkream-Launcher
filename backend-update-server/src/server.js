@@ -7,7 +7,7 @@ const fse = require("fs-extra");
 const path = require("path");
 const yaml = require("yaml");
 const cors = require("cors");
-// const rateLimit = require("express-rate-limit");
+const rateLimit = require("express-rate-limit");
 
 const { ClientError } = require("./compoment/error.compoment.js");
 
@@ -52,17 +52,22 @@ const upload = multer({ storage });
 app.use(express.json());
 
 // Middleware de protection contre le DDoS (rate limiting)
-// const limiter = rateLimit({
-//   windowMs: 10 * 1000, // 10 secondes
-//   max: 100, // Limite chaque IP à 100 requêtes par fenêtre
-//   message: {
-//     error: "Trop de requêtes, merci de réessayer plus tard.",
-//     code: 429,
-//   },
-//   standardHeaders: true, // Retourne les headers RateLimit-* standard
-//   legacyHeaders: false, // Désactive les headers X-RateLimit-*
-// });
-// app.use(limiter);
+const getLimiter = rateLimit({
+  windowMs: 5 * 1000, // 5 secondes
+  max: 1,
+  message: "Trop de requêtes GET. Réessaie dans 5 secondes.",
+  keyGenerator: (req) => req.connection.remoteAddress,
+  skip: (req) => req.method !== "GET",
+});
+const postLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 1,
+  message: "Trop de requêtes POST. Réessaie dans 1 minute.",
+  keyGenerator: (req) => req.connection.remoteAddress,
+  skip: (req) => req.method !== "POST",
+});
+app.use(getLimiter);
+app.use(postLimiter);
 
 // CORS configuration
 const corsOptions = {
@@ -315,6 +320,13 @@ require("./routes/add_version.route.js")(app);
 
 //handle error
 require("./config/error.config.js")(app);
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    // Erreur Multer (ex: FILE_ENDED, FILE_TOO_LARGE, etc.)
+    return res.status(400).json({ error: err.code, message: err.message });
+  }
+  next(err);
+});
 
 // Démarrer le serveur
 app.listen(process.env.PORT, () => {

@@ -7,16 +7,16 @@ const add_version = require("../controllers/add_version.controller.js");
 
 module.exports = (app) => {
   router.post(
-    "/latest/game",
-    Auth.ensureIsAuthorized,
+    "/game/latest",
     temp.single("file"),
+    Auth.ensureIsAuthorized,
     ErrorHandler.Async(add_version.add_version_game)
   );
 
   router.post(
-    "/latest/launcher",
-    Auth.ensureIsAuthorized,
+    "/launcher/latest",
     temp.single("file"),
+    Auth.ensureIsAuthorized,
     ErrorHandler.Async(add_version.add_version_launcher)
   );
 
