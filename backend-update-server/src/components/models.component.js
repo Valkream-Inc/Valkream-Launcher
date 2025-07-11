@@ -1,5 +1,5 @@
 class Models {
-  constructor(props) {
+  constructor(props = {}) {
     this.user = props.user;
   }
 }

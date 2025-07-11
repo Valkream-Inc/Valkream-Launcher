@@ -8,7 +8,7 @@ const Models = require("../components/models.component.js");
 
 class ChangeVersion extends Models {
   constructor(props) {
-    super();
+    super(props);
     this.latestDir = props.latestDir;
     this.oldDir = props.oldDir;
     this.requestedVersion = props.requestedVersion;

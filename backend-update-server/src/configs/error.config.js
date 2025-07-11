@@ -6,6 +6,8 @@ const {
 
 module.exports = (app) => {
   app.use((err, req, res, next) => {
+    res.setHeader("Content-Type", "application/json");
+
     if (err instanceof ClientError) {
       log(err.user, err.process, err.message);
       res.status(err.statusCode).json({ err: err.message });

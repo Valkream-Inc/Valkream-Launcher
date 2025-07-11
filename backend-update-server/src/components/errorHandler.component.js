@@ -1,6 +1,6 @@
 class ErrorHandler {
   Async = (func) => (req, res, next) => {
-    func(req, res, next).catch(next);
+    Promise.resolve(func(req, res, next)).catch(next);
   };
 }
 

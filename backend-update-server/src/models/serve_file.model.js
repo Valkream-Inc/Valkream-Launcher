@@ -6,7 +6,7 @@ const Models = require("../components/models.component.js");
 
 class ServeFile extends Models {
   constructor(props) {
-    super();
+    super(props);
     this.baseDir = props.baseDir;
     this.filename = props.filename;
   }

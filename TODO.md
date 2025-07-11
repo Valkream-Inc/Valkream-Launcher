@@ -12,4 +12,4 @@
 ## Backend
 
 - [ ] Ajouter la supression des anciennes versions
-- [ ] Changer l'architecture du backend --> Rest API
+- [ ] Ajoute un system pour desactiver les get durant les changements de version

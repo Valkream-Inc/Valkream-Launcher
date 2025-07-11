@@ -5,7 +5,7 @@ const Models = require("../components/models.component.js");
 
 class GetOldVersion extends Models {
   constructor(props) {
-    super();
+    super(props);
     this.old_dir = props.old_dir;
   }
 
@@ -15,7 +15,7 @@ class GetOldVersion extends Models {
     try {
       const data = fs.readdirSync(old_dir);
 
-      return { msg: "✅ Ancienne version récupérée avec succès.", data: data };
+      return { msg: "Ancienne version récupérée avec succès.", data: data };
     } catch (err) {
       throw new ServerError(err, undefined, "Get old version");
     }

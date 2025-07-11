@@ -6,7 +6,7 @@ const Models = require("../components/models.component.js");
 
 class Config extends Models {
   constructor(props) {
-    super();
+    super(props);
     this.configDir = props.configDir;
     this.event = props.event;
   }

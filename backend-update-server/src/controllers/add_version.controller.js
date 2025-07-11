@@ -12,7 +12,7 @@ exports.add_version_game = async (req, res) => {
       "add_version_game"
     );
 
-  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Content-Type", "text/plain; charset=utf-8; stream");
 
   const data = await AddVersion.init(
     new AddVersion({
@@ -41,7 +41,7 @@ exports.add_version_launcher = async (req, res) => {
       "add_version_launcher"
     );
 
-  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Content-Type", "text/plain; charset=utf-8; stream");
 
   const data = await AddVersion.init(
     new AddVersion({
