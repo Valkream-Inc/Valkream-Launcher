@@ -1,7 +1,7 @@
 var router = require("express").Router();
-const { temp } = require("../config/storage.config.js");
-const ErrorHandler = require("../compoment/errorHandler.component.js");
-const Auth = require("../compoment/auth.component.js");
+const { temp } = require("../configs/storage.config.js");
+const ErrorHandler = require("../components/errorHandler.component.js");
+const Auth = require("../components/auth.component.js");
 
 const add_version = require("../controllers/add_version.controller.js");
 

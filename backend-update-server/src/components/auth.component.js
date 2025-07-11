@@ -1,4 +1,4 @@
-const { ClientError } = require("./error.compoment.js");
+const { ClientError } = require("./error.component.js");
 const { apiKey, apiToken } = process.env;
 
 class Auth {

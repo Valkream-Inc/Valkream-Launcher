@@ -1,5 +1,8 @@
-const log = require("../compoment/log.compoment.js");
-const { ClientError, ServerError } = require("../compoment/error.compoment.js");
+const log = require("../components/log.component.js");
+const {
+  ClientError,
+  ServerError,
+} = require("../components/error.component.js");
 
 module.exports = (app) => {
   app.use((err, req, res, next) => {

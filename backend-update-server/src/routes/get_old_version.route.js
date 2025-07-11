@@ -1,5 +1,5 @@
 var router = require("express").Router();
-const ErrorHandler = require("../compoment/errorHandler.component.js");
+const ErrorHandler = require("../components/errorHandler.component.js");
 
 const get_old_version = require("../controllers/get_old_version.controller.js");
 

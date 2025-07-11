@@ -1,11 +1,12 @@
-const log = require("../compoment/log.compoment.js");
+const log = require("../components/log.component.js");
 const GetOldVersion = require("../models/get_old_version.model.js");
-const paths = require("../config/paths.config");
+const paths = require("../configs/paths.config");
 
 exports.get_old_version_game = async (req, res) => {
   const data = await GetOldVersion.init(
     new GetOldVersion({
       old_dir: paths.gameOldDir,
+      user: req.connection.remoteAddress,
     })
   );
 
@@ -17,6 +18,7 @@ exports.get_old_version_launcher = async (req, res) => {
   const data = await GetOldVersion.init(
     new GetOldVersion({
       old_dir: paths.launcherOldDir,
+      user: req.connection.remoteAddress,
     })
   );
 

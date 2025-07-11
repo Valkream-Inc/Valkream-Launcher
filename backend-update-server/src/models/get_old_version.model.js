@@ -1,20 +1,25 @@
 const fs = require("fs");
 
-const { ServerError } = require("../compoment/error.compoment");
+const { ServerError } = require("../components/error.component.js");
+const Models = require("../components/models.component.js");
 
-const GetOldVersion = function (props) {
-  this.old_dir = props.old_dir;
-};
-
-GetOldVersion.init = async (props) => {
-  const oldDir = props.old_dir;
-  try {
-    const data = fs.readdirSync(oldDir);
-
-    return { msg: "✅ Ancienne version récupérée avec succès.", data: data };
-  } catch (err) {
-    throw new ServerError(err, props.user, "Get old version");
+class GetOldVersion extends Models {
+  constructor(props) {
+    super();
+    this.old_dir = props.old_dir;
   }
-};
+
+  static async init(props) {
+    const { old_dir } = props;
+
+    try {
+      const data = fs.readdirSync(old_dir);
+
+      return { msg: "✅ Ancienne version récupérée avec succès.", data: data };
+    } catch (err) {
+      throw new ServerError(err, undefined, "Get old version");
+    }
+  }
+}
 
 module.exports = GetOldVersion;

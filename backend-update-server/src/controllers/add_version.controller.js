@@ -1,7 +1,7 @@
-const log = require("../compoment/log.compoment.js");
-const { ClientError } = require("../compoment/error.compoment.js");
+const log = require("../components/log.component.js");
+const { ClientError } = require("../components/error.component.js");
 const AddVersion = require("../models/add_version.model.js");
-const paths = require("../config/paths.config");
+const paths = require("../configs/paths.config");
 
 exports.add_version_game = async (req, res) => {
   if (!req.file || !req.file.path)
