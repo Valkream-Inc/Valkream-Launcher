@@ -11,7 +11,7 @@ GetOldVersion.init = async (props) => {
   try {
     const data = fs.readdirSync(oldDir);
 
-    return { msg: "✅ Mise à jour installée avec succès.", data: data };
+    return { msg: "✅ Ancienne version récupérée avec succès.", data: data };
   } catch (err) {
     throw new ServerError(err, props.user, "Get old version");
   }
