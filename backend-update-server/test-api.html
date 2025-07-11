@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Test API</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        min-height: 100vh;
+        background: #111;
+        color: #f5f5f5;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-top: 4vh;
+        padding-bottom: 4vh;
+      }
+      .main-flex {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 3vw;
+        width: 100%;
+        max-width: 1100px;
+        min-height: 60vh;
+      }
+      .forms-col {
+        display: flex;
+        flex-direction: column;
+        gap: 2em;
+        flex: 1 1 350px;
+        min-width: 340px;
+        max-width: 420px;
+      }
+      .result-col {
+        flex: 1 1 350px;
+        min-width: 340px;
+        max-width: 520px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      h1 {
+        margin-bottom: 2em;
+        letter-spacing: 2px;
+        font-size: 2.2em;
+        color: #fff;
+        text-align: center;
+      }
+      form {
+        background: #1a1a1a;
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+        padding: 2em 2.5em 1.5em 2.5em;
+        margin: 1.5em 0;
+        min-width: 340px;
+        max-width: 90vw;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      label {
+        margin: 0.7em 0 0.2em 0;
+        align-self: flex-start;
+        color: #e0e0e0;
+        font-size: 1.05em;
+      }
+      input[type="text"],
+      input[type="file"] {
+        width: 100%;
+        padding: 0.7em 1em;
+        border-radius: 8px;
+        border: 1px solid #333;
+        background: #222;
+        color: #f5f5f5;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        box-sizing: border-box;
+        transition: border 0.2s;
+      }
+      input[type="text"]:focus,
+      input[type="file"]:focus {
+        border: 1.5px solid #4f8cff;
+        outline: none;
+      }
+      button {
+        margin-top: 1em;
+        padding: 0.7em 2.2em;
+        border-radius: 8px;
+        border: none;
+        background: #4f8cff;
+        color: #fff;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 8px rgba(79, 140, 255, 0.15);
+      }
+      button:hover {
+        background: #3570c9;
+      }
+      #result {
+        margin-top: 2em;
+        padding: 1.5em;
+        border-radius: 12px;
+        border: 1px solid #333;
+        background: #181818;
+        color: #e0e0e0;
+        min-width: 340px;
+        max-width: 90vw;
+        font-size: 1.05em;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+      }
+      @media (max-width: 900px) {
+        .main-flex {
+          flex-direction: column;
+          align-items: center;
+          gap: 2em;
+        }
+        .forms-col,
+        .result-col {
+          max-width: 98vw;
+          min-width: unset;
+          width: 100%;
+        }
+      }
+      input[type="file"] {
+        display: none;
+      }
+      .custom-file-label {
+        display: inline-block;
+        padding: 0.7em 2em;
+        border-radius: 8px;
+        background: #232b3b;
+        color: #b6d2ff;
+        font-size: 1em;
+        font-weight: 500;
+        cursor: pointer;
+        margin-bottom: 0.5em;
+        border: 1.5px solid #4f8cff;
+        transition: background 0.2s, color 0.2s;
+        box-shadow: 0 2px 8px rgba(79, 140, 255, 0.1);
+      }
+      .custom-file-label:hover {
+        background: #4f8cff;
+        color: #fff;
+      }
+      .file-selected {
+        color: #7fffa7;
+        border-color: #7fffa7;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test API</h1>
+    <div class="main-flex">
+      <div class="forms-col">
+        <form id="getForm" autocomplete="off">
+          <h2>Test GET</h2>
+          <label for="get-endpoint">Endpoint :</label>
+          <input
+            type="text"
+            id="get-endpoint"
+            value="http://localhost:3000/api/test"
+            required
+          />
+          <button type="submit">Envoyer GET</button>
+        </form>
+        <form id="postForm" autocomplete="off">
+          <h2>Test POST</h2>
+          <label for="post-endpoint">Endpoint :</label>
+          <input
+            type="text"
+            id="post-endpoint"
+            value="http://localhost:3000/api/test"
+            required
+          />
+          <label for="post-data">Données JSON :</label>
+          <input type="text" id="post-data" value='{"key":"value"}' />
+          <center>
+            <label for="post-zip" id="zip-label" class="custom-file-label"
+              >Ajouter un ZIP (optionnel)</label
+            >
+          </center>
+          <input type="file" id="post-zip" accept=".zip" />
+          <span
+            id="file-name"
+            style="
+              font-size: 0.95em;
+              color: #7fffa7;
+              margin-bottom: 0.5em;
+              display: none;
+            "
+          ></span>
+          <button type="submit">Envoyer POST</button>
+        </form>
+      </div>
+      <div class="result-col">
+        <pre id="result"></pre>
+      </div>
+    </div>
+    <script>
+      const getForm = document.getElementById("getForm");
+      const postForm = document.getElementById("postForm");
+      const resultDiv = document.getElementById("result");
+
+      getForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const endpoint = document.getElementById("get-endpoint").value;
+        try {
+          const res = await fetch(endpoint);
+          const text = await res.text();
+          let data;
+          try {
+            data = JSON.parse(text);
+            resultDiv.textContent =
+              "GET " + endpoint + ":\n" + JSON.stringify(data, null, 2);
+          } catch (jsonErr) {
+            resultDiv.textContent =
+              "GET " + endpoint + " (réponse non-JSON):\n" + text;
+          }
+        } catch (err) {
+          resultDiv.textContent = "Erreur GET: " + (err.message || err);
+        }
+      });
+
+      postForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const endpoint = document.getElementById("post-endpoint").value;
+        const zipInput = document.getElementById("post-zip");
+        const file = zipInput.files[0];
+        if (file) {
+          // Envoi du ZIP en multipart/form-data
+          const formData = new FormData();
+          formData.append("file", file);
+          // Ajout des données JSON si présentes
+          let postData;
+          try {
+            postData = JSON.parse(document.getElementById("post-data").value);
+            for (const key in postData) {
+              formData.append(key, postData[key]);
+            }
+          } catch (err) {
+            resultDiv.textContent = "JSON invalide: " + (err.message || err);
+            return;
+          }
+          try {
+            const res = await fetch(endpoint, {
+              method: "POST",
+              body: formData,
+            });
+            const text = await res.text();
+            let data;
+            try {
+              data = JSON.parse(text);
+              resultDiv.textContent =
+                "POST (ZIP) " +
+                endpoint +
+                ":\n" +
+                JSON.stringify(data, null, 2);
+            } catch (jsonErr) {
+              resultDiv.textContent =
+                "POST (ZIP) " + endpoint + " (réponse non-JSON):\n" + text;
+            }
+          } catch (err) {
+            resultDiv.textContent =
+              "Erreur POST (ZIP): " + (err.message || err);
+          }
+        } else {
+          // Envoi classique JSON
+          let postData;
+          try {
+            postData = JSON.parse(document.getElementById("post-data").value);
+          } catch (err) {
+            resultDiv.textContent = "JSON invalide: " + (err.message || err);
+            return;
+          }
+          try {
+            const res = await fetch(endpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(postData),
+            });
+            const text = await res.text();
+            let data;
+            try {
+              data = JSON.parse(text);
+              resultDiv.textContent =
+                "POST " + endpoint + ":\n" + JSON.stringify(data, null, 2);
+            } catch (jsonErr) {
+              resultDiv.textContent =
+                "POST " + endpoint + " (réponse non-JSON):\n" + text;
+            }
+          } catch (err) {
+            resultDiv.textContent = "Erreur POST: " + (err.message || err);
+          }
+        }
+      });
+
+      // Ajout du style pour le bouton ZIP
+      const zipInput = document.getElementById("post-zip");
+      const zipLabel = document.getElementById("zip-label");
+      const fileNameSpan = document.getElementById("file-name");
+      zipLabel.addEventListener("click", () => zipInput.click());
+      zipInput.addEventListener("change", () => {
+        if (zipInput.files.length > 0) {
+          zipLabel.classList.add("file-selected");
+          fileNameSpan.style.display = "inline";
+          fileNameSpan.textContent = zipInput.files[0].name;
+        } else {
+          zipLabel.classList.remove("file-selected");
+          fileNameSpan.style.display = "none";
+          fileNameSpan.textContent = "";
+        }
+      });
+    </script>
+  </body>
+</html>

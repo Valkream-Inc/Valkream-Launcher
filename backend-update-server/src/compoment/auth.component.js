@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const { ClientError } = require("./error.compoment.js");
 const { apiKey, apiToken } = process.env;
 
@@ -20,4 +18,4 @@ class Auth {
   };
 }
 
-module.exports = Auth;
+module.exports = new Auth();

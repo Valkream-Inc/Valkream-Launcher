@@ -3,3 +3,5 @@ class ErrorHandler {
     func(req, res, next).catch(next);
   };
 }
+
+module.exports = new ErrorHandler();

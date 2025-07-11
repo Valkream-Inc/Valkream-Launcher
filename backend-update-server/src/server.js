@@ -7,9 +7,11 @@ const fse = require("fs-extra");
 const path = require("path");
 const yaml = require("yaml");
 const cors = require("cors");
+// const rateLimit = require("express-rate-limit");
+
+const { ClientError } = require("./compoment/error.compoment.js");
 
 const { unZip } = require("valkream-function-lib");
-const e = require("express");
 const { apiKey, apiToken } = process.env;
 
 const app = express();
@@ -48,7 +50,41 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 app.use(express.json());
-app.use(cors());
+
+// Middleware de protection contre le DDoS (rate limiting)
+// const limiter = rateLimit({
+//   windowMs: 10 * 1000, // 10 secondes
+//   max: 100, // Limite chaque IP à 100 requêtes par fenêtre
+//   message: {
+//     error: "Trop de requêtes, merci de réessayer plus tard.",
+//     code: 429,
+//   },
+//   standardHeaders: true, // Retourne les headers RateLimit-* standard
+//   legacyHeaders: false, // Désactive les headers X-RateLimit-*
+// });
+// app.use(limiter);
+
+// CORS configuration
+const corsOptions = {
+  origin: "*",
+  methods: ["POST", "GET"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+app.use((req, res, next) => {
+  cors(corsOptions)(req, res, (err) => {
+    if (err) {
+      return new ClientError(
+        "Origine non autorisée par la politique CORS.",
+        403,
+        req.connection.remoteAddress,
+        "CORS"
+      );
+    }
+    next();
+  });
+});
 
 //get old version
 app.get("/launcher/old/", (req, res) => {
@@ -165,86 +201,86 @@ app.get("/config/:filename", (req, res) => {
   res.download(filePath);
 });
 
-//post url
-app.post("/launcher/latest", upload.single("file"), async (req, res) => {
-  const zipPath = req.file.path;
-  if (ensureIsAuthorized(req, res)) {
-    try {
-      console.log("📦 Fichier ZIP reçu :", zipPath);
-      res.status(200).send("ok");
+// //post url
+// app.post("/launcher/latest", upload.single("file"), async (req, res) => {
+//   const zipPath = req.file.path;
+//   if (ensureIsAuthorized(req, res)) {
+//     try {
+//       console.log("📦 Fichier ZIP reçu :", zipPath);
+//       res.status(200).send("ok");
 
-      const ExtractDir = path.join(tempDir, "extract-launcher");
-      if (fs.existsSync(ExtractDir)) {
-        fs.rmSync(ExtractDir, { recursive: true, force: true });
-      }
-      fs.mkdirSync(ExtractDir, { recursive: true });
+//       const ExtractDir = path.join(tempDir, "extract-launcher");
+//       if (fs.existsSync(ExtractDir)) {
+//         fs.rmSync(ExtractDir, { recursive: true, force: true });
+//       }
+//       fs.mkdirSync(ExtractDir, { recursive: true });
 
-      await unZip(zipPath, ExtractDir);
+//       await unZip(zipPath, ExtractDir);
 
-      const versionFile = path.join(launcherLatestDir, "latest.yml");
-      if (fs.existsSync(versionFile)) {
-        const ymlContent = fs.readFileSync(versionFile, "utf8");
-        const parsed = yaml.parse(ymlContent);
-        const version = parsed.version;
-        const archivePath = path.join(launcherOldDir, version);
+//       const versionFile = path.join(launcherLatestDir, "latest.yml");
+//       if (fs.existsSync(versionFile)) {
+//         const ymlContent = fs.readFileSync(versionFile, "utf8");
+//         const parsed = yaml.parse(ymlContent);
+//         const version = parsed.version;
+//         const archivePath = path.join(launcherOldDir, version);
 
-        await fse.move(launcherLatestDir, archivePath, { overwrite: true });
-      }
+//         await fse.move(launcherLatestDir, archivePath, { overwrite: true });
+//       }
 
-      fs.mkdirSync(launcherLatestDir, { recursive: true });
-      await fse.copy(ExtractDir, launcherLatestDir, { overwrite: true });
+//       fs.mkdirSync(launcherLatestDir, { recursive: true });
+//       await fse.copy(ExtractDir, launcherLatestDir, { overwrite: true });
 
-      // Nettoyage
-      fs.rmSync(ExtractDir, { recursive: true, force: true });
-      fs.unlinkSync(zipPath);
+//       // Nettoyage
+//       fs.rmSync(ExtractDir, { recursive: true, force: true });
+//       fs.unlinkSync(zipPath);
 
-      console.log("\n✅ Mise à jour installée avec succès.");
-    } catch (err) {
-      console.error("❌ Erreur de mise à jour :", err);
-      res.status(500).send("Erreur lors de la mise à jour.");
-    }
-  }
-});
+//       console.log("\n✅ Mise à jour installée avec succès.");
+//     } catch (err) {
+//       console.error("❌ Erreur de mise à jour :", err);
+//       res.status(500).send("Erreur lors de la mise à jour.");
+//     }
+//   }
+// });
 
-app.post("/game/latest", upload.single("file"), async (req, res) => {
-  const zipPath = req.file.path;
-  if (ensureIsAuthorized(req, res)) {
-    try {
-      console.log("📦 Fichier ZIP reçu :", zipPath);
-      res.status(200).send("ok");
+// app.post("/game/latest", upload.single("file"), async (req, res) => {
+//   const zipPath = req.file.path;
+//   if (ensureIsAuthorized(req, res)) {
+//     try {
+//       console.log("📦 Fichier ZIP reçu :", zipPath);
+//       res.status(200).send("ok");
 
-      const ExtractDir = path.join(tempDir, "extract-game");
-      if (fs.existsSync(ExtractDir)) {
-        fs.rmSync(ExtractDir, { recursive: true, force: true });
-      }
-      fs.mkdirSync(ExtractDir, { recursive: true });
+//       const ExtractDir = path.join(tempDir, "extract-game");
+//       if (fs.existsSync(ExtractDir)) {
+//         fs.rmSync(ExtractDir, { recursive: true, force: true });
+//       }
+//       fs.mkdirSync(ExtractDir, { recursive: true });
 
-      await unZip(zipPath, ExtractDir);
+//       await unZip(zipPath, ExtractDir);
 
-      const versionFile = path.join(gameLatestDir, "latest.yml");
-      if (fs.existsSync(versionFile)) {
-        const ymlContent = fs.readFileSync(versionFile, "utf8");
-        const parsed = yaml.parse(ymlContent);
-        const version = parsed.version;
-        const archivePath = path.join(gameOldDir, version);
+//       const versionFile = path.join(gameLatestDir, "latest.yml");
+//       if (fs.existsSync(versionFile)) {
+//         const ymlContent = fs.readFileSync(versionFile, "utf8");
+//         const parsed = yaml.parse(ymlContent);
+//         const version = parsed.version;
+//         const archivePath = path.join(gameOldDir, version);
 
-        await fse.move(gameLatestDir, archivePath, { overwrite: true });
-      }
+//         await fse.move(gameLatestDir, archivePath, { overwrite: true });
+//       }
 
-      fs.mkdirSync(gameLatestDir, { recursive: true });
-      await fse.copy(ExtractDir, gameLatestDir, { overwrite: true });
+//       fs.mkdirSync(gameLatestDir, { recursive: true });
+//       await fse.copy(ExtractDir, gameLatestDir, { overwrite: true });
 
-      // Nettoyage
-      fs.rmSync(ExtractDir, { recursive: true, force: true });
-      fs.unlinkSync(zipPath);
+//       // Nettoyage
+//       fs.rmSync(ExtractDir, { recursive: true, force: true });
+//       fs.unlinkSync(zipPath);
 
-      console.log("\n✅ Mise à jour installée avec succès.");
-    } catch (err) {
-      console.error("❌ Erreur de mise à jour :", err);
-      res.status(500).send("Erreur lors de la mise à jour.");
-    }
-  }
-});
+//       console.log("\n✅ Mise à jour installée avec succès.");
+//     } catch (err) {
+//       console.error("❌ Erreur de mise à jour :", err);
+//       res.status(500).send("Erreur lors de la mise à jour.");
+//     }
+//   }
+// });
 
 //change event
 app.post("/config/change-event/", async (req, res) => {
@@ -274,6 +310,13 @@ const ensureIsAuthorized = (req, res) => {
   }
 };
 
+// routes
+require("./routes/add_version.route.js")(app);
+
+//handle error
+require("./config/error.config.js")(app);
+
+// Démarrer le serveur
 app.listen(process.env.PORT, () => {
   console.log(
     `   
