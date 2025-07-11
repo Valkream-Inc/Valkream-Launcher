@@ -91,15 +91,6 @@ app.use((req, res, next) => {
   });
 });
 
-//get old version
-app.get("/launcher/old/", (req, res) => {
-  res.json(fs.readdirSync(launcherOldDir));
-});
-
-app.get("/game/old/", (req, res) => {
-  res.json(fs.readdirSync(gameOldDir));
-});
-
 //change version
 app.post("/launcher/change/", async (req, res) => {
   if (!req.body.version) return res.status(400).send("Version invalide");
@@ -317,6 +308,7 @@ const ensureIsAuthorized = (req, res) => {
 
 // routes
 require("./routes/add_version.route.js")(app);
+require("./routes/get_old_version.route.js")(app);
 
 //handle error
 require("./config/error.config.js")(app);
