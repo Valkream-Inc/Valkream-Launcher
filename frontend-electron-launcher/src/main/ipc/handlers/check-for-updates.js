@@ -4,7 +4,7 @@
  */
 
 const { autoUpdater } = require("electron-updater");
-const PathManager = require("../../shared/utils/pathsManager.js");
+const PathManager = require("../../../shared/utils/pathsManager.js");
 const { hasInternetConnection } = require(PathManager.getSharedUtils());
 const { baseUrl } = require(PathManager.getConstants());
 

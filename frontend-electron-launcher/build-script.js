@@ -3,15 +3,15 @@ const fs = require("fs");
 const builder = require("electron-builder");
 const JavaScriptObfuscator = require("javascript-obfuscator");
 const nodeFetch = require("node-fetch");
+const png2icons = require("png2icons");
 const Jimp = require("jimp");
 
-const { name } = require("../package.json");
+const { name } = require("./package.json");
 
 class Index {
   async init() {
     this.obf = true;
     this.Fileslist = [];
-    await this.updateVersion();
     process.argv.forEach(async (val) => {
       if (val.startsWith("--icon")) {
         return this.iconSet(val.split("=")[1]);
@@ -29,23 +29,6 @@ class Index {
     });
   }
 
-  async updateVersion() {
-    try {
-      const data = fs.readFileSync("./package.json", "utf8");
-      const json = JSON.parse(data);
-
-      // Incrémentation du numéro de patch (ex: 1.0.3 → 1.0.4)
-      const versionParts = json.version.split(".");
-      versionParts[2] = parseInt(versionParts[2]) + 1;
-      json.version = versionParts.join(".");
-
-      fs.writeFileSync("./package.json", JSON.stringify(json, null, 2));
-      console.log(`✅ Version mise à jour : ${json.version}`);
-    } catch (err) {
-      console.error("❌ Erreur lors de la mise à jour de la version :", err);
-    }
-  }
-
   async Obfuscate() {
     if (fs.existsSync("./build")) fs.rmSync("./build", { recursive: true });
 
@@ -59,7 +42,8 @@ class Index {
       if (extFile == "js") {
         let code = fs.readFileSync(path, "utf8");
         code = code.replace(/src\//g, "build/");
-        if (this.obf) {
+        // ignore main process files that create some problems after being obsfuscate
+        if (this.obf && !path.includes("src/main/")) {
           await new Promise((resolve) => {
             console.log(`Obfuscate ${path}`);
             let obf = JavaScriptObfuscator.obfuscate(code, {
@@ -108,7 +92,7 @@ class Index {
             },
           ],
           win: {
-            icon: "./build/assets/images/icon.png",
+            icon: "./build/assets/images/icon.ico",
             target: [
               {
                 target: "nsis",
@@ -123,7 +107,7 @@ class Index {
             runAfterFinish: true,
           },
           mac: {
-            icon: "./build/assets/images/icon.png",
+            icon: "./build/assets/images/icon.icns",
             category: "public.app-category.games",
             identity: null,
             target: [
@@ -149,15 +133,10 @@ class Index {
         },
       })
       .then(() => {
-        console.log("✅ Build terminé !");
-
-        if (fs.existsSync("./build")) {
-          fs.rmSync("./build", { recursive: true });
-          console.log("✅ Dossier de build supprimé !");
-        }
+        console.log("le build est terminé");
       })
       .catch((err) => {
-        console.error("❌ Erreur lors du build :", err);
+        console.error("Error during build!", err);
       });
   }
 
@@ -174,17 +153,38 @@ class Index {
     return file;
   }
 
-  async iconSet(url) {
-    let Buffer = await nodeFetch(url);
-    if (Buffer.status == 200) {
-      Buffer = await Buffer.buffer();
-      const image = await Jimp.read(Buffer);
-      Buffer = await image.resize(256, 256).getBufferAsync(Jimp.MIME_PNG);
-      fs.writeFileSync("src/assets/images/icon.png", Buffer);
-      console.log("new icon set");
+  async iconSet(pathOrUrl) {
+    let Buffer;
+    if (/^https?:\/\//.test(pathOrUrl)) {
+      // Si c'est une URL
+      let response = await nodeFetch(pathOrUrl);
+      if (response.status == 200) {
+        Buffer = await response.buffer();
+      } else {
+        console.log("connection error");
+        return;
+      }
     } else {
-      console.log("connection error");
+      // Sinon, on suppose que c'est un chemin local
+      if (fs.existsSync(pathOrUrl)) {
+        Buffer = fs.readFileSync(pathOrUrl);
+      } else {
+        console.log("Fichier local introuvable : " + pathOrUrl);
+        return;
+      }
     }
+    const image = await Jimp.read(Buffer);
+    Buffer = await image.resize(256, 256).getBufferAsync(Jimp.MIME_PNG);
+    fs.writeFileSync(
+      "src/assets/images/icon.icns",
+      png2icons.createICNS(Buffer, png2icons.BILINEAR, 0)
+    );
+    fs.writeFileSync(
+      "src/assets/images/icon.ico",
+      png2icons.createICO(Buffer, png2icons.HERMITE, 0, false)
+    );
+    fs.writeFileSync("src/assets/images/icon.png", Buffer);
+    console.log("new icon set");
   }
 }
 

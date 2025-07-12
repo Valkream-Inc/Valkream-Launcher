@@ -40,7 +40,7 @@ function createWindow() {
   Menu.setApplicationMenu(null);
   updateWindow.setMenuBarVisibility(false);
   updateWindow.loadFile(
-    PathsManager.getRendererPath("/windows/update/update.html")
+    PathsManager.getRendererPath("/windows/updater/updater.html")
   );
   updateWindow.once("ready-to-show", () => {
     if (updateWindow) {

@@ -1,5 +1,5 @@
 @import "./utils/font.css";
-@import "./theme.css";
+@import "../theme.css";
 
 body {
   background-color: var(--background);

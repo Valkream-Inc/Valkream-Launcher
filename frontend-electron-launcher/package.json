@@ -4,21 +4,10 @@
   "description": "Launcher Valheim moddé pour Valkream",
   "main": "src/app.js",
   "author": "Valkream Team",
-  "url": {
-    "baseUrl": "https://api.valkream.fr",
-    "baseUrlDev": "http://localhost:3000"
-  },
-  "GameFoldersToClean": [
-    "/BepInEx/cache",
-    "/BepInEx/config/wackysDatabase/Cache",
-    "/BepInEx/config/Marketplace/SavedData"
-  ],
   "scripts": {
     "start": "cross-env-shell NODE_ENV=dev electron .",
     "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
-    "build": "node ./scripts/build-launcher.js --obf=true --build=platform",
-    "post": "node ./scripts/post-launcher.js --dev",
-    "change": "node ./scripts/change-launcher.js --dev"
+    "build": "node ./build-script.js --obf=true --build=platform --icon=src/assets/images/icon.png"
   },
   "license": "MIT",
   "nodemonConfig": {
@@ -32,9 +21,10 @@
     "fs": "^0.0.1-security",
     "node-bdd": "^2.0.4",
     "node-fetch": "^2.7.0",
-    "yaml": "^2.2.2",
     "path": "^0.12.7",
-    "valkream-function-lib": "latest"
+    "png2icons": "^2.0.1",
+    "valkream-function-lib": "latest",
+    "yaml": "^2.2.2"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
@@ -46,11 +36,6 @@
   },
   "win": {
     "target": "nsis"
-  },
-  "build": {
-    "appId": "com.valkream.launcher",
-    "productName": "Valkream Launcher",
-    "icon": "src/assets/images/icon.png"
   },
   "repository": {
     "type": "git",
