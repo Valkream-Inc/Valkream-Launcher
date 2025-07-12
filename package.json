@@ -3,8 +3,6 @@
   "private": true,
   "workspaces": [
     "./backend-update-server",
-    "./frontend-electron-launcher",
-    "./game-updater",
-    "./shared function"
+    "./frontend-electron-launcher"
   ]
 }

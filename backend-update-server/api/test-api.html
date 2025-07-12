@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Test API</title>
+    <link rel="stylesheet" href="test-api.css" />
+  </head>
+  <body>
+    <h1>Test API</h1>
+    <div class="main-flex">
+      <div class="forms-col">
+        <form id="getForm" autocomplete="off">
+          <h2>Test GET</h2>
+          <label for="get-endpoint">Endpoint :</label>
+          <input
+            type="text"
+            id="get-endpoint"
+            value="http://localhost:3000/api/test"
+            required
+          />
+          <button type="submit">Envoyer GET</button>
+        </form>
+        <form id="postForm" autocomplete="off">
+          <h2>Test POST</h2>
+          <label for="post-endpoint">Endpoint :</label>
+          <input
+            type="text"
+            id="post-endpoint"
+            value="http://localhost:3000/api/test"
+            required
+          />
+          <label for="post-data">Données JSON :</label>
+          <input
+            type="text"
+            id="post-data"
+            value='{"api_key":"SECRET_API_KEY", "api_token":"SECRET_API_TOKEN", "key": "value"}'
+          />
+          <center>
+            <label for="post-zip" id="zip-label" class="custom-file-label"
+              >Ajouter un ZIP (optionnel)</label
+            >
+            <input type="file" id="post-zip" accept=".zip" />
+          </center>
+          <span id="file-name" class="file-name"></span>
+          <button type="submit">Envoyer POST</button>
+        </form>
+      </div>
+      <div class="result-col">
+        <pre id="result"></pre>
+      </div>
+    </div>
+    <script src="test-api.js"></script>
+  </body>
+</html>
