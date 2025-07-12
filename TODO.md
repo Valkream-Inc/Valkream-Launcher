@@ -12,4 +12,5 @@
 ## Backend
 
 - [ ] Ajouter la supression des anciennes versions
+- [ ] Ajouter la gestion de la config de la maintenance.
 - [ ] Ajoute un system pour desactiver les get durant les changements de version

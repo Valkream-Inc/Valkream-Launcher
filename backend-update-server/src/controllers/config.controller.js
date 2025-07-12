@@ -1,7 +1,8 @@
 const paths = require("../configs/paths.config");
-const Config = require("../models/config.model.js");
-
+const log = require("../components/log.component.js");
 const { ClientError } = require("../components/error.component.js");
+
+const Config = require("../models/config.model.js");
 
 exports.config_change_event = async (req, res) => {
   if (!req.body.event)
@@ -14,11 +15,12 @@ exports.config_change_event = async (req, res) => {
 
   const data = await Config.changeEvent(
     new Config({
-      configDir: paths.configDir,
+      configDir: paths.configUploadDir,
       event: req.body.event,
       user: req.connection.remoteAddress,
     })
   );
 
-  res.status(200).send(data.msg);
+  log(req.connection.remoteAddress, "change_event", data.msg);
+  res.status(200).send(data);
 };
