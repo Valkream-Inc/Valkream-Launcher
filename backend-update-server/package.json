@@ -5,6 +5,7 @@
   "author": "Valkream Team",
   "license": "MIT",
   "dependencies": {
+    "async-mutex": "^0.5.0",
     "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "dotenv": "^17.0.0",
