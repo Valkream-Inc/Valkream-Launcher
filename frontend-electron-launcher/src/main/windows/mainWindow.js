@@ -47,8 +47,7 @@ function createWindow() {
   );
   mainWindow.once("ready-to-show", () => {
     if (mainWindow) {
-      // if (dev)
-      mainWindow.webContents.openDevTools(/*{ mode: "detach" }*/);
+      if (dev) mainWindow.webContents.openDevTools(/*{ mode: "detach" }*/);
       mainWindow.show();
     }
   });
