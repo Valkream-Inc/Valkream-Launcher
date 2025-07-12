@@ -29,6 +29,8 @@ class Index {
     });
   }
 
+  isObfuscationEnabled = false;
+
   async Obfuscate() {
     if (fs.existsSync("./build")) fs.rmSync("./build", { recursive: true });
 
@@ -43,7 +45,11 @@ class Index {
         let code = fs.readFileSync(path, "utf8");
         code = code.replace(/src\//g, "build/");
         // ignore main process files that create some problems after being obsfuscate
-        if (this.obf && !path.includes("src/main/")) {
+        if (
+          this.obf &&
+          !path.includes("src/main/") &&
+          this.isObfuscationEnabled
+        ) {
           await new Promise((resolve) => {
             console.log(`Obfuscate ${path}`);
             let obf = JavaScriptObfuscator.obfuscate(code, {

@@ -7,6 +7,8 @@ services:
       - "3000:3000"
     volumes:
       - ./uploads:/app/uploads
+    env_file:
+      - ./.env # Chemin relatif vers votre .env custom
     # Ajoute ici d'autres variables d'environnement si besoin
 
   watchtower:

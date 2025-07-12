@@ -8,6 +8,8 @@
 - [ ] Reorganiser launcherManager en launcherManger + gameManager
 - [ ] Preserver l'installation du jeu lors de la mise a jour du launcher
 - [ ] mettre valkream team partout
+- [ ] corrige les erreurs d'obfuscation
+- [ ] ajouter le statut du serveur (online/offline) player connected maintenance
 
 ## Backend
 

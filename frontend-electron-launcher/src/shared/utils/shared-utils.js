@@ -1,6 +1,7 @@
 const database = require("./database");
 const { hasInternetConnection } = require("./internet");
 const Logger = require("./logger");
+const pkg = require("../../../package.json");
 
 // managers
 const PathsManager = require("./pathsManager");
@@ -10,4 +11,5 @@ module.exports = {
   hasInternetConnection,
   Logger,
   PathsManager,
+  pkg,
 };
