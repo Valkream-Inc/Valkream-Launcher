@@ -1,7 +1,7 @@
 # TODO
 
 ## Frontend
-TEST
+
 - [ ] Ajouter la gestion des mises à jour subminor
 - [ ] Modifier le style du settings panels (Box, boutons, etc)
 - [ ] Ajouter la supression de l'applis dans settings
