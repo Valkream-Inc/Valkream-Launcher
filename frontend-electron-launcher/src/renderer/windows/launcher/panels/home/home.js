@@ -8,6 +8,7 @@ const {
   Popup,
   showSnackbar,
   EventManager,
+  ServerInfosManager,
   LauncherManager,
 } = require(window.PathsManager.getUtils());
 const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
@@ -27,6 +28,7 @@ class Home {
     this.tipsEvent();
     this.showActualEvent();
     this.checkOnlineVersion();
+    this.showServerInfo();
   }
 
   updateCopyright = () => {
@@ -67,6 +69,13 @@ class Home {
         });
       });
   };
+
+  showServerInfo = async () => {
+    const infos = new ServerInfosManager((infos) => {
+      document.querySelector(".server-infos").innerHTML = `${infos.players.online}/${infos.players.max}`
+    })
+    infos.init()
+  }
 
   showActualEvent = async () => {
     const eventPopup = new Popup();
@@ -232,6 +241,10 @@ class Home {
     const playInstallBtn = document.querySelector("#play-install-btn");
     playInstallBtn.disabled = false;
   };
+  setServerInfos = (infos) => {
+    const serverInfos = document.querySelector("#server-infos");
+    serverInfos.innerHTML = `${infos.players.online}/${infos.players.max}`
+  }
 }
 
 module.exports = Home;
