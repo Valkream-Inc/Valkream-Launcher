@@ -8,14 +8,13 @@ const {
   Popup,
   showSnackbar,
   EventManager,
-  ServerInfosManager,
   LauncherManager,
 } = require(window.PathsManager.getUtils());
 const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
 const { serverInfos } = require(window.PathsManager.getConstants());
 const pkg = require(window.PathsManager.getAbsolutePath("package.json"));
 
-const { shell } = require("electron");
+const { shell, ipcRenderer } = require("electron");
 const { formatBytes } = require("valkream-function-lib");
 
 class Home {
@@ -72,34 +71,25 @@ class Home {
   };
 
   showServerInfo = async () => {
-    const infos = new ServerInfosManager((infos) => {      
-      if (infos.ping != "timeout") {
-        document.getElementById("server-infos").innerHTML = `🟢 ${infos.players.online}/${infos.players.max}`
-        document.getElementById("server-infos").className = "server-infos online"
-        document.getElementById("server-ping").className = "server-ping online"
-        document.getElementById("server-ping").innerHTML = `${infos.ping} ms`
-      } else {
-        let hour = new Date().getUTCHours()
-        let minute = new Date().getUTCMinutes()
-        let maintenance = false
-        serverInfos.maintenance.forEach( item => {
-          if (item.hour = hour && item.minute + 10 > minute) maintenance = true
-        })
-        if (maintenance) {
-          document.getElementById("server-infos").innerHTML = `🟠 --/--`
-          document.getElementById("server-infos").className = "server-infos maintenance"
-          document.getElementById("server-ping").className = "server-ping maintenance"
-          document.getElementById("server-ping").innerHTML = `maintenance<br />serveur`
-        } else {
-          document.getElementById("server-infos").innerHTML = `🔴 ${infos.players.online}/${infos.players.max}`
-          document.getElementById("server-infos").className = "server-infos offline"
-          document.getElementById("server-ping").className = "server-ping offline"
-          document.getElementById("server-ping").innerHTML = `timeout`
-        }
-      }
-    })
-    infos.init()
-  }
+    ipcRenderer.send("get-server-infos");
+    ipcRenderer.on("update-server-info", (event, infos) => {
+      console.log("infos: ", infos);
+      this.setServerInfos(infos);
+    });
+  };
+
+  setServerInfos = (infos) => {
+    const serverInfosText = document.querySelector("#server-infos");
+    const serverPingText = document.querySelector("#server-ping");
+    const serverPlayersText = document.querySelector("#server-players");
+
+    const isOnline = infos.status === "server online";
+    serverInfosText.innerHTML = isOnline ? "🟢 En ligne" : "🔴 Hors ligne";
+    serverPingText.innerHTML = isOnline ? `${infos.ping} ms` : "";
+    serverPlayersText.innerHTML = isOnline
+      ? `${infos.players.online}/${infos.players.max}`
+      : "--/--";
+  };
 
   showActualEvent = async () => {
     const eventPopup = new Popup();
@@ -265,10 +255,6 @@ class Home {
     const playInstallBtn = document.querySelector("#play-install-btn");
     playInstallBtn.disabled = false;
   };
-  setServerInfos = (infos) => {
-    const serverInfos = document.querySelector("#server-infos");
-    serverInfos.innerHTML = `${infos.players.online}/${infos.players.max}`
-  }
 }
 
 module.exports = Home;
