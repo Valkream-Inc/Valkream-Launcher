@@ -145,15 +145,6 @@
 .server-infos {  
   text-align: center; 
 }
-.online {
-  color: white;
-}
-.offline {
-  color: red;
-}
-.maintenance {
-  color: orange;
-}
 
 /* Bouton tips positionné en bas à gauche */
 .tips-bottom-left {
