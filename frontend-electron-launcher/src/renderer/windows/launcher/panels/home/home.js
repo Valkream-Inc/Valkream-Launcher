@@ -70,25 +70,27 @@ class Home {
   };
 
   showServerInfo = async () => {
+    const setServerInfos = (infos) => {
+      const serverInfosText = document.querySelector("#server-infos");
+      const serverPingText = document.querySelector("#server-ping");
+      const serverPlayersText = document.querySelector("#server-players");
+
+      const isOnline = infos.status === "server online";
+      serverInfosText.innerHTML = isOnline ? "🟢 En ligne" : "🔴 Hors ligne";
+      serverPingText.innerHTML = isOnline ? `(${infos.ping} ms)` : "";
+      serverPlayersText.innerHTML = isOnline
+        ? `${infos.players.online}/${infos.players.max}`
+        : "--/--";
+    };
+    
     ipcRenderer.send("get-server-infos");
     ipcRenderer.on("update-server-info", (event, infos) => {
       console.log("infos: ", infos);
-      this.setServerInfos(infos);
+      setServerInfos(infos);
     });
   };
 
-  setServerInfos = (infos) => {
-    const serverInfosText = document.querySelector("#server-infos");
-    const serverPingText = document.querySelector("#server-ping");
-    const serverPlayersText = document.querySelector("#server-players");
 
-    const isOnline = infos.status === "server online";
-    serverInfosText.innerHTML = isOnline ? "🟢 En ligne" : "🔴 Hors ligne";
-    serverPingText.innerHTML = isOnline ? `${infos.ping} ms` : "";
-    serverPlayersText.innerHTML = isOnline
-      ? `${infos.players.online}/${infos.players.max}`
-      : "--/--";
-  };
 
   showActualEvent = async () => {
     const eventPopup = new Popup();
