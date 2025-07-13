@@ -74,9 +74,9 @@ class Home {
   showServerInfo = async () => {
     const infos = new ServerInfosManager((infos) => {      
       if (infos.ping != "timeout") {
-        document.getElementById("server-infos").innerHTML = `${infos.players.online}/${infos.players.max}`
-        document.getElementById("server-infos").className = "server-infos"
-        document.getElementById("server-ping").className = "server-ping"
+        document.getElementById("server-infos").innerHTML = `<li>${infos.players.online}/${infos.players.max}</li>`
+        document.getElementById("server-infos").className = "server-infos online"
+        document.getElementById("server-ping").className = "server-ping online"
         document.getElementById("server-ping").innerHTML = `${infos.ping} ms`
       } else {
         let hour = new Date().getUTCHours()
@@ -86,15 +86,14 @@ class Home {
           if (item.hour = hour && item.minute + 10 > minute) maintenance = true
         })
         if (maintenance) {
-          document.getElementById("server-infos").innerHTML = `--/--`
-          document.getElementById("server-infos").className = "server-maintenance"
-          document.getElementById("server-ping").className = "server-ping"
-          document.getElementById("server-ping").style.color = "orange"
+          document.getElementById("server-infos").innerHTML = `<li>--/--</li>`
+          document.getElementById("server-infos").className = "server-infos maintenance"
+          document.getElementById("server-ping").className = "server-ping maintenance"
           document.getElementById("server-ping").innerHTML = `maintenance<br />serveur`
         } else {
           document.getElementById("server-infos").innerHTML = `${infos.players.online}/${infos.players.max}`
-          document.getElementById("server-infos").className = "server-offline"
-          document.getElementById("server-ping").className = "server-timeout"
+          document.getElementById("server-infos").className = "server-infos offline"
+          document.getElementById("server-ping").className = "server-ping offline"
           document.getElementById("server-ping").innerHTML = `timeout`
         }
       }

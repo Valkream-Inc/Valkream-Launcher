@@ -132,47 +132,38 @@
 /* ********************************************
  *              SERVER STATS                  *
  * ********************************************/
-.server-infos{ 
+ .server-infos-container {
+  position: absolute;
+  top: 6rem;
+  left: 8rem;
+  border: 0px;
+  z-index: 10;
+ }
+.server-infos {  
   text-align: center; 
-  border: 1px solid var(--secondary-color);
+}
+.online {
   color: white;
-  border-radius: 5px;
-  padding: 3px;
-  width: 50px;
-  height: 25px;
 }
-.server-offline {
-  text-align: center;
-  border: 1px solid red;
+.online li::marker {
+  color: green;
+}
+.offline {
   color: red;
-  border-radius: 5px;
-  padding: 3px;
-  width: 50px;
-  height: 25px;
 }
-.server-maintenance {
-  text-align: center;
-  border: 1px solid orange;
+.offline li::marker {
+  color: red;
+}
+.maintenance {
   color: orange;
-  border-radius: 5px;
-  padding: 3px;
-  width: 50px;
-  height: 25px;
+}
+.maintenance li::marker {
+  color: orange;
 }
 .server-ping {
-  padding-top: 3px;
   text-align: center;
   font-size: 12px;
-  color: #fff;
 }
-.server-timeout {
-  text-align: center;
-  padding-top: 3px;
-  text-align: center;
-  font-size: 12px;
-  color: #f00;
-}
-
 
 /* Bouton tips positionné en bas à gauche */
 .tips-bottom-left {
