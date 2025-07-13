@@ -10,7 +10,6 @@ class LoadingPage {
     this.message = document.querySelector("#loading-message");
     this.loadingSection = document.querySelector("#loading-section");
     this.preloadVideo = document.querySelector("#preload-video");
-    this.serverInfos = document.querySelector("#server-infos");
 
     document.addEventListener("DOMContentLoaded", () => {
       this.handleVideoEnd();
@@ -26,20 +25,11 @@ class LoadingPage {
       });
     }
   }
-  /*
-  handleServerInfos() {
-    ipcRenderer.send("check-for-serverInfos");
-
-    ipcRenderer.on("update_serverInfos", (_event, message) => {
-      this.setMessage(message);
-    });
-  }
-  */
   checkForUpdates() {
     ipcRenderer.send("check-for-updates");
 
     ipcRenderer.on("update_status", (_event, message) => {
-      this.setServerInfos(message);
+      this.setMessage(message);
     });
 
     ipcRenderer.on("launch_main_window", () => {
@@ -51,11 +41,6 @@ class LoadingPage {
   setMessage(text) {
     this.message.innerHTML = text;
   }
-  /*
-  setServerInfos(text) {
-    this.serverInfos.innerHTML = text;
-  }
-  */
 }
 
 new LoadingPage();
