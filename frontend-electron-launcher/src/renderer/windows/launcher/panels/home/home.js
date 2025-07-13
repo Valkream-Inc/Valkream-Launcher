@@ -83,15 +83,12 @@ class Home {
         ? `${infos.players.online}/${infos.players.max}`
         : "--/--";
     };
-    
+
     ipcRenderer.send("get-server-infos");
-    ipcRenderer.on("update-server-info", (event, infos) => {
-      console.log("infos: ", infos);
-      setServerInfos(infos);
-    });
+    ipcRenderer.on("update-server-info", (event, infos) =>
+      setServerInfos(infos)
+    );
   };
-
-
 
   showActualEvent = async () => {
     const eventPopup = new Popup();
