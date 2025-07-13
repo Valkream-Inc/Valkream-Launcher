@@ -11,7 +11,6 @@ const {
   LauncherManager,
 } = require(window.PathsManager.getUtils());
 const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
-const { serverInfos } = require(window.PathsManager.getConstants());
 const pkg = require(window.PathsManager.getAbsolutePath("package.json"));
 
 const { shell, ipcRenderer } = require("electron");
