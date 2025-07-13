@@ -5,13 +5,9 @@
  ******************************************************************************/
 
 .header-logo {
-  position: absolute;
-  top: 2rem;
-  left: 2rem;
   display: flex;
-  align-items: center;
+  flex-direction: row;
   gap: 1rem;
-  z-index: 10;
 }
 
 .logo-image {
@@ -134,11 +130,18 @@
  * ********************************************/
 .server-infos-container {
   position: absolute;
-  top: 6rem;
-  left: 8rem;
-  border: 0px;
+  top: 2rem;
+  left: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   z-index: 10;
- }
+}
+.server-connected {
+  font-size: 24px;
+  text-align: center;
+  align-self: center;
+}
 .server-infos {  
   text-align: center; 
 }
@@ -150,10 +153,6 @@
 }
 .maintenance {
   color: orange;
-}
-.server-ping {
-  text-align: center;
-  font-size: 12px;
 }
 
 /* Bouton tips positionné en bas à gauche */
@@ -198,7 +197,7 @@
   min-height: 120px;
   position: absolute;
   top: 36px;
-  left: calc((100vw - 90px) / 4 + 90px);
+  left: calc((100vw - 90px) / 4 + 140px);
   transition: background 0.2s, transform 0.2s;
   gap: 1.5rem;
 }

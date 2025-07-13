@@ -72,12 +72,17 @@ class Home {
   };
 
   showServerInfo = async () => {
+    function updateElements(connected, infos, classname) {
+      document.getElementById("server-connected").innerHTML = connected
+      document.getElementById("server-infos").innerHTML = infos 
+      document.querySelector(".server-infos-container").className = classname
+    } 
     const infos = new ServerInfosManager((infos) => {      
       if (infos.ping != "timeout") {
-        document.getElementById("server-infos").innerHTML = `🟢 ${infos.players.online}/${infos.players.max}`
-        document.getElementById("server-infos").className = "server-infos online"
-        document.getElementById("server-ping").className = "server-ping online"
-        document.getElementById("server-ping").innerHTML = `${infos.ping} ms`
+        updateElements(`${infos.players.online}/${infos.players.max}`, `🟢 serveur en ligne: ${infos.ping} ms`, "server-infos-container online")
+        //document.getElementById("server-infos").innerHTML = `🟢 serveur en ligne: ${infos.ping} ms` //${infos.players.online}/${infos.players.max}`
+        //document.querySelector(".server-infos-container").className = "server-infos-container online"
+        //document.getElementById("server-ping").innerHTML = `${infos.ping} ms`
       } else {
         let hour = new Date().getUTCHours()
         let minute = new Date().getUTCMinutes()
@@ -86,15 +91,15 @@ class Home {
           if (item.hour = hour && item.minute + 10 > minute) maintenance = true
         })
         if (maintenance) {
-          document.getElementById("server-infos").innerHTML = `🟠 --/--`
-          document.getElementById("server-infos").className = "server-infos maintenance"
-          document.getElementById("server-ping").className = "server-ping maintenance"
-          document.getElementById("server-ping").innerHTML = `maintenance<br />serveur`
+          updateElements( '--/--', `🟠 maintenance serveur`, "server-infos-container maintenance")
+          //document.getElementById("server-connected").innerHTML = '--/--'
+          //document.getElementById("server-infos").innerHTML = `🟠 maintenance serveur` 
+          //document.querySelector(".server-infos-container").className = "server-infos-container maintenance"
+
         } else {
-          document.getElementById("server-infos").innerHTML = `🔴 ${infos.players.online}/${infos.players.max}`
-          document.getElementById("server-infos").className = "server-infos offline"
-          document.getElementById("server-ping").className = "server-ping offline"
-          document.getElementById("server-ping").innerHTML = `timeout`
+          updateElements(`${infos.players.online}/${infos.players.max}`, `🔴 serveur offline`, "server-infos-container offline")
+          // document.getElementById("server-infos").innerHTML = `🔴 serveur offline` // ${infos.players.online}/${infos.players.max}`
+          // document.querySelector(".server-infos-container").className = "server-infos-container offline"
         }
       }
     })

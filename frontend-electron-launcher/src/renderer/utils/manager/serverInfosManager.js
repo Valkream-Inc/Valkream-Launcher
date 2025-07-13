@@ -39,7 +39,6 @@ class ServerInfosManager {
     }
   }
 
-
   stop = () => {
     if (this.interval) {
       clearInterval(this.interval);
