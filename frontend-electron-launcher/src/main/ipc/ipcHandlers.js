@@ -38,11 +38,6 @@ class IpcHandlers {
     ipcMain.on("check-for-updates", (event) =>
       new CheckForUpdates(event).init()
     );
-    /*
-    ipcMain.on("", (event) => {
-      new ServerInfos().getServerInfos();
-    })
-    */
 
     // zips
     ipcMain.handle(

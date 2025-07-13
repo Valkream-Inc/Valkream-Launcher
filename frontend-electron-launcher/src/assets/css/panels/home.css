@@ -132,7 +132,7 @@
 /* ********************************************
  *              SERVER STATS                  *
  * ********************************************/
- .server-infos-container {
+.server-infos-container {
   position: absolute;
   top: 6rem;
   left: 8rem;
@@ -145,19 +145,10 @@
 .online {
   color: white;
 }
-.online li::marker {
-  color: green;
-}
 .offline {
   color: red;
 }
-.offline li::marker {
-  color: red;
-}
 .maintenance {
-  color: orange;
-}
-.maintenance li::marker {
   color: orange;
 }
 .server-ping {
