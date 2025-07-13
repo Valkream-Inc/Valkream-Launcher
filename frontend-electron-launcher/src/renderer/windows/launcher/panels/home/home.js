@@ -74,7 +74,7 @@ class Home {
   showServerInfo = async () => {
     const infos = new ServerInfosManager((infos) => {      
       if (infos.ping != "timeout") {
-        document.getElementById("server-infos").innerHTML = `<li>${infos.players.online}/${infos.players.max}</li>`
+        document.getElementById("server-infos").innerHTML = `🟢 ${infos.players.online}/${infos.players.max}`
         document.getElementById("server-infos").className = "server-infos online"
         document.getElementById("server-ping").className = "server-ping online"
         document.getElementById("server-ping").innerHTML = `${infos.ping} ms`
@@ -86,12 +86,12 @@ class Home {
           if (item.hour = hour && item.minute + 10 > minute) maintenance = true
         })
         if (maintenance) {
-          document.getElementById("server-infos").innerHTML = `<li>--/--</li>`
+          document.getElementById("server-infos").innerHTML = `🟠 --/--`
           document.getElementById("server-infos").className = "server-infos maintenance"
           document.getElementById("server-ping").className = "server-ping maintenance"
           document.getElementById("server-ping").innerHTML = `maintenance<br />serveur`
         } else {
-          document.getElementById("server-infos").innerHTML = `${infos.players.online}/${infos.players.max}`
+          document.getElementById("server-infos").innerHTML = `🔴 ${infos.players.online}/${infos.players.max}`
           document.getElementById("server-infos").className = "server-infos offline"
           document.getElementById("server-ping").className = "server-ping offline"
           document.getElementById("server-ping").innerHTML = `timeout`
