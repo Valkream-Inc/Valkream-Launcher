@@ -12,6 +12,7 @@ const {
   LauncherManager,
 } = require(window.PathsManager.getUtils());
 const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
+const { serverInfos } = require(window.PathsManager.getConstants());
 const pkg = require(window.PathsManager.getAbsolutePath("package.json"));
 
 const { shell } = require("electron");
@@ -71,8 +72,32 @@ class Home {
   };
 
   showServerInfo = async () => {
-    const infos = new ServerInfosManager((infos) => {
-      document.querySelector(".server-infos").innerHTML = `${infos.players.online}/${infos.players.max}`
+    const infos = new ServerInfosManager((infos) => {      
+      if (infos.ping != "timeout") {
+        document.getElementById("server-infos").innerHTML = `${infos.players.online}/${infos.players.max}`
+        document.getElementById("server-infos").className = "server-infos"
+        document.getElementById("server-ping").className = "server-ping"
+        document.getElementById("server-ping").innerHTML = `${infos.ping} ms`
+      } else {
+        let hour = new Date().getUTCHours()
+        let minute = new Date().getUTCMinutes()
+        let maintenance = false
+        serverInfos.maintenance.forEach( item => {
+          if (item.hour = hour && item.minute + 10 > minute) maintenance = true
+        })
+        if (maintenance) {
+          document.getElementById("server-infos").innerHTML = `--/--`
+          document.getElementById("server-infos").className = "server-maintenance"
+          document.getElementById("server-ping").className = "server-ping"
+          document.getElementById("server-ping").style.color = "orange"
+          document.getElementById("server-ping").innerHTML = `maintenance<br />serveur`
+        } else {
+          document.getElementById("server-infos").innerHTML = `${infos.players.online}/${infos.players.max}`
+          document.getElementById("server-infos").className = "server-offline"
+          document.getElementById("server-ping").className = "server-timeout"
+          document.getElementById("server-ping").innerHTML = `timeout`
+        }
+      }
     })
     infos.init()
   }
