@@ -9,7 +9,6 @@
 - [ ] Preserver l'installation du jeu lors de la mise a jour du launcher
 - [ ] mettre valkream team partout
 - [ ] corrige les erreurs d'obfuscation
-- ['En cours - Boris Therin - feat: feature/serverstat] ajouter le statut du serveur (online/offline) player connected maintenance
 
 ## Backend
 

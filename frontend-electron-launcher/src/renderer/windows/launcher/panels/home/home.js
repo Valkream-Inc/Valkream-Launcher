@@ -11,9 +11,10 @@ const {
   LauncherManager,
 } = require(window.PathsManager.getUtils());
 const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
+const { serverInfos } = require(window.PathsManager.getConstants());
 const pkg = require(window.PathsManager.getAbsolutePath("package.json"));
 
-const { shell } = require("electron");
+const { shell, ipcRenderer } = require("electron");
 const { formatBytes } = require("valkream-function-lib");
 
 class Home {
@@ -27,6 +28,7 @@ class Home {
     this.tipsEvent();
     this.showActualEvent();
     this.checkOnlineVersion();
+    this.showServerInfo();
   }
 
   updateCopyright = () => {
@@ -66,6 +68,26 @@ class Home {
           options: true,
         });
       });
+  };
+
+  showServerInfo = async () => {
+    const setServerInfos = (infos) => {
+      const serverInfosText = document.querySelector("#server-infos");
+      const serverPingText = document.querySelector("#server-ping");
+      const serverPlayersText = document.querySelector("#server-players");
+
+      const isOnline = infos.status === "server online";
+      serverInfosText.innerHTML = isOnline ? "🟢 En ligne" : "🔴 Hors ligne";
+      serverPingText.innerHTML = isOnline ? `(${infos.ping} ms)` : "";
+      serverPlayersText.innerHTML = isOnline
+        ? `${infos.players.online}/${infos.players.max}`
+        : "--/--";
+    };
+
+    ipcRenderer.send("get-server-infos");
+    ipcRenderer.on("update-server-info", (event, infos) =>
+      setServerInfos(infos)
+    );
   };
 
   showActualEvent = async () => {

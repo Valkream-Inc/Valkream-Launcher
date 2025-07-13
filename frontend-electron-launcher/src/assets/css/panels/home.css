@@ -5,13 +5,9 @@
  ******************************************************************************/
 
 .header-logo {
-  position: absolute;
-  top: 2rem;
-  left: 2rem;
   display: flex;
-  align-items: center;
+  flex-direction: row;
   gap: 1rem;
-  z-index: 10;
 }
 
 .logo-image {
@@ -129,6 +125,27 @@
   transform: scale(1.1);
 }
 
+/* ********************************************
+ *              SERVER STATS                  *
+ * ********************************************/
+.server-infos-container {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+#server-players {
+  font-size: 24px;
+  text-align: center;
+  align-self: center;
+}
+.server-infos {  
+  text-align: center; 
+}
+
 /* Bouton tips positionné en bas à gauche */
 .tips-bottom-left {
   position: fixed;
@@ -171,7 +188,7 @@
   min-height: 120px;
   position: absolute;
   top: 36px;
-  left: calc((100vw - 90px) / 4 + 90px);
+  left: calc((100vw - 140px) / 4 + 140px);
   transition: background 0.2s, transform 0.2s;
   gap: 1.5rem;
 }

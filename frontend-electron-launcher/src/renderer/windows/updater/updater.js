@@ -25,7 +25,6 @@ class LoadingPage {
       });
     }
   }
-
   checkForUpdates() {
     ipcRenderer.send("check-for-updates");
 
