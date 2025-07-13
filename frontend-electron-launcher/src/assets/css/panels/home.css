@@ -188,7 +188,7 @@
   min-height: 120px;
   position: absolute;
   top: 36px;
-  left: calc((100vw - 90px) / 4 + 140px);
+  left: calc((100vw - 140px) / 4 + 140px);
   transition: background 0.2s, transform 0.2s;
   gap: 1.5rem;
 }
