@@ -3,6 +3,7 @@ const { ipcMain, app } = require("electron");
 const CheckForUpdates = require("./handlers/check-for-updates.js");
 const DowloadMultiplefiles = require("./handlers/download-multiple-zips.js");
 const MultipleUnzip = require("./handlers/multiple-unzip.js");
+// const ServerInfos = require("./handlers/get-server-infos.js")
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
@@ -37,6 +38,11 @@ class IpcHandlers {
     ipcMain.on("check-for-updates", (event) =>
       new CheckForUpdates(event).init()
     );
+    /*
+    ipcMain.on("", (event) => {
+      new ServerInfos().getServerInfos();
+    })
+    */
 
     // zips
     ipcMain.handle(

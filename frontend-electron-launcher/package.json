@@ -15,6 +15,7 @@
     "ignore": "**/test"
   },
   "dependencies": {
+    "@fabricio-191/valve-server-query": "^4.1.9",
     "axios": "^1.10.0",
     "electron-updater": "^6.1.8",
     "form-data": "^4.0.3",

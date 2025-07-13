@@ -128,6 +128,11 @@
   background: var(--secondary-color);
   transform: scale(1.1);
 }
+.server-infos{
+  border: 1px solid var(--secondary-color);
+  border-radius: 5px;
+  padding: 3px;
+}
 
 /* Bouton tips positionné en bas à gauche */
 .tips-bottom-left {
