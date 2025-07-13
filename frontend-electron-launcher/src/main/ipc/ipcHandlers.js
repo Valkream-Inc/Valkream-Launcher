@@ -37,6 +37,10 @@ class IpcHandlers {
     ipcMain.on("check-for-updates", (event) =>
       new CheckForUpdates(event).init()
     );
+    ipcMain.on("app-quit", () => {
+      app.quit();
+      app.exit(0);
+    });
 
     // zips
     ipcMain.handle(
