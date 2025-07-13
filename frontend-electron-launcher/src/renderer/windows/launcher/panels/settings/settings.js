@@ -3,7 +3,11 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { changePanel, showSnackbar } = require(window.PathsManager.getUtils());
+const {
+  changePanel,
+  showSnackbar,
+  LauncherManager,
+} = require(window.PathsManager.getUtils());
 const { database } = require(window.PathsManager.getSharedUtils());
 const { ipcRenderer } = require("electron");
 
@@ -50,7 +54,7 @@ class Settings {
     uninstallBtn.addEventListener("click", async () => {
       uninstallBtn.disabled = true;
       uninstallBtn.innerHTML = "Deinstallation...";
-      if (await launcherManager.uninstallGame()) {
+      if (await new LauncherManager().uninstallGame()) {
         showSnackbar("Application supprimée !");
         setTimeout(() => {
           ipcRenderer.invoke("main-window-restart");
@@ -69,7 +73,7 @@ class Settings {
     cacheBtn.addEventListener("click", async () => {
       cacheBtn.disabled = true;
       cacheBtn.innerHTML = "Vidange...";
-      await launcherManager.clearCache();
+      await new LauncherManager().clearCache();
       showSnackbar("Cache vidé !");
       cacheBtn.disabled = false;
       cacheBtn.innerHTML = "Vider le cache";
@@ -81,7 +85,7 @@ class Settings {
       "#open-launcher-folder"
     );
     openLauncherFolderBtn.addEventListener("click", async () => {
-      if (await launcherManager.openLauncherFolder()) {
+      if (await new LauncherManager().openInstallationFolder()) {
         showSnackbar("Dossier de l'application ouvert !");
       } else {
         showSnackbar("Dossier de l'application non ouvert !", "error");
@@ -92,7 +96,7 @@ class Settings {
   openGameFolder() {
     const openGameFolderBtn = document.querySelector("#open-game-folder");
     openGameFolderBtn.addEventListener("click", async () => {
-      if (await launcherManager.openGameFolder()) {
+      if (await new LauncherManager().openGameFolder()) {
         showSnackbar("Dossier du jeu ouvert !");
       } else {
         showSnackbar("Dossier du jeu non ouvert !", "error");

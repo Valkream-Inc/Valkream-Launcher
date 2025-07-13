@@ -13,6 +13,7 @@ const Popup = require("./popup.js");
 const EventManager = require("./manager/eventManager.js");
 const HashManager = require("./manager/hashManager.js");
 const LauncherManager = require("./manager/launcherManager.js");
+const GameManager = require("./manager/gameManager.js");
 
 module.exports = {
   // utils
@@ -23,4 +24,5 @@ module.exports = {
   EventManager,
   HashManager,
   LauncherManager,
+  GameManager,
 };

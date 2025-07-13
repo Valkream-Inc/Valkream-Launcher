@@ -35,6 +35,7 @@ class IpcHandlers {
     // general
     ipcMain.handle("path-user-data", () => app.getPath("userData"));
     ipcMain.handle("get-app-path", () => app.getAppPath());
+    ipcMain.handle("get-appdata-path", () => app.getPath("appData"));
     ipcMain.on("check-for-updates", (event) =>
       new CheckForUpdates(event).init()
     );
