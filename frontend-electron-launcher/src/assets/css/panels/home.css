@@ -137,7 +137,7 @@
   align-items: center;
   z-index: 10;
 }
-.server-connected {
+#server-players {
   font-size: 24px;
   text-align: center;
   align-self: center;
