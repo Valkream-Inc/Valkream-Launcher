@@ -18,7 +18,7 @@ function getWindow() {
 
 function destroyWindow() {
   if (!mainWindow) return;
-  app.quit();
+  mainWindow.close();
   mainWindow = undefined;
 }
 

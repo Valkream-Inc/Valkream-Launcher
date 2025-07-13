@@ -30,6 +30,4 @@ else {
       return MainWindow.createWindow();
     } else UpdateWindow.createWindow();
   });
-
-  app.on("window-all-closed", () => app.quit());
 }

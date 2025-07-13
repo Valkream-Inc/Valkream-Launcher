@@ -10,7 +10,6 @@
 - [ ] mettre valkream team partout
 - [ ] corrige les erreurs d'obfuscation
 - ['En cours - Boris Therin - feat: feature/serverstat] ajouter le statut du serveur (online/offline) player connected maintenance
-- ['En cours - Jean-Chante - fix: close launcher'] corrige le bug pour fermer le launcher avec la croix (uniquement aprés le build)
 
 ## Backend
 

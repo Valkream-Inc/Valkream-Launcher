@@ -60,6 +60,7 @@ class Launcher {
 
     document.querySelector(`#close`).addEventListener("click", () => {
       ipcRenderer.send("main-window-close");
+      ipcRenderer.send("app-quit");
     });
   }
 
