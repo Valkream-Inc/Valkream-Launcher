@@ -5,7 +5,7 @@ const path = require("path");
 
 const pkg = require(window.PathsManager.getAbsolutePath("package.json"));
 const Manager = require("./manager.js");
-const { warn } = require("console");
+const { showSnackbar } = require(window.PathsManager.getUtils());
 class LauncherManager {
   async init() {
     this.installDir = path.join(
@@ -27,16 +27,13 @@ class LauncherManager {
 
   async uninstall() {
     const uninstallerPath = path.join(
-      installDir,
+      this.installDir,
       "Uninstall Valkream-Launcher.exe"
     );
 
     return new Manager().handleError({
       ensure: fs.existsSync(uninstallerPath),
-      then: () =>
-        execFile(uninstallerPath, (err) => {
-          warn(err);
-        }),
+      then: () => execFile(uninstallerPath, () => {}),
     });
   }
 }

@@ -86,11 +86,7 @@ class Settings {
         wait: "Désinstallation...",
         success: "Application supprimée !",
         error: "Application non installé !",
-      },
-      () =>
-        setTimeout(() => {
-          ipcRenderer.invoke("main-window-restart");
-        }, 2000)
+      }
     );
   }
 
