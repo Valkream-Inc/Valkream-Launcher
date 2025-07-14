@@ -5,8 +5,13 @@ const path = require("path");
 
 const pkg = require(window.PathsManager.getAbsolutePath("package.json"));
 const Manager = require("./manager.js");
+const { warn } = require("console");
 class LauncherManager {
-  init() {}
+  async init() {
+    this.installDir = path.join(
+      await ipcRenderer.invoke("get-installation-path")
+    );
+  }
 
   getVersion() {
     if (pkg && pkg.version) return pkg.version;
@@ -15,20 +20,23 @@ class LauncherManager {
 
   async openInstallationFolder() {
     return new Manager().handleError({
-      ensure: fs.existsSync(this.appdataDir),
-      then: async () => await shell.openPath(this.appdataDir),
+      ensure: fs.existsSync(this.installDir),
+      then: async () => await shell.openPath(this.installDir),
     });
   }
 
   async uninstall() {
     const uninstallerPath = path.join(
-      await ipcRenderer.invoke("get-installation-path"),
+      installDir,
       "Uninstall Valkream-Launcher.exe"
     );
 
     return new Manager().handleError({
       ensure: fs.existsSync(uninstallerPath),
-      then: () => execFile(uninstallerPath),
+      then: () =>
+        execFile(uninstallerPath, (err) => {
+          warn(err);
+        }),
     });
   }
 }

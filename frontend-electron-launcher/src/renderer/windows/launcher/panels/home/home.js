@@ -11,8 +11,6 @@ const {
   LauncherManager,
 } = require(window.PathsManager.getUtils());
 const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
-const { serverInfos } = require(window.PathsManager.getConstants());
-const pkg = require(window.PathsManager.getAbsolutePath("package.json"));
 
 const { shell, ipcRenderer } = require("electron");
 const { formatBytes } = require("valkream-function-lib");
@@ -95,7 +93,6 @@ class Home {
       document.querySelector(".event-date").textContent = new Date(
         event.date
       ).toLocaleString();
-      document.querySelector(".event-image").src = event.image;
       document.querySelector(".event-image").src = event.image;
       document.querySelector(".event-container").style = event.enabled
         ? ""

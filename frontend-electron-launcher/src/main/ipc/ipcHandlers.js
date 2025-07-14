@@ -9,6 +9,7 @@ const ServerInfos = require("./handlers/server-info.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
+const { cwd } = require("process");
 
 class IpcHandlers {
   init() {
@@ -41,7 +42,7 @@ class IpcHandlers {
         ".valkream-launcher-data"
       )
     );
-    ipcMain.handle("get-installation-path", () => app.getAppPath());
+    ipcMain.handle("get-installation-path", () => process.cwd());
     ipcMain.on("check-for-updates", (event) =>
       new CheckForUpdates(event).init()
     );
