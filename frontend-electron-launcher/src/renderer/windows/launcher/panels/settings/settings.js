@@ -21,7 +21,7 @@ class Settings {
 
     this.changeIsMusicEnabled();
     this.uninstallGame();
-
+    this.uninstallLauncher();
     this.clearCache();
     this.openGameFolder();
     this.openLauncherFolder();
@@ -76,6 +76,24 @@ class Settings {
     );
   }
 
+  uninstallLauncher() {
+    console.log("uninstall launcher");
+    return this.buttonAction(
+      document.querySelector("#uninstall-launcher"),
+      async () => await LauncherManager.uninstall(),
+      {
+        base: "Désinstaller",
+        wait: "Désinstallation...",
+        success: "Application supprimée !",
+        error: "Application non installé !",
+      },
+      () =>
+        setTimeout(() => {
+          ipcRenderer.invoke("main-window-restart");
+        }, 2000)
+    );
+  }
+
   clearCache() {
     return this.buttonAction(
       document.querySelector("#close-cache"),
@@ -92,7 +110,7 @@ class Settings {
   openLauncherFolder() {
     return this.buttonAction(
       document.querySelector("#open-launcher-folder"),
-      async () => await new LauncherManager().openInstallationFolder(),
+      async () => await LauncherManager.openInstallationFolder(),
       {
         base: "Ouvrir le dossier du launcher",
         wait: "Ouverture du dossier du launcher...",

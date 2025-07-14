@@ -33,9 +33,7 @@ class Home {
 
   updateCopyright = () => {
     const versionEl = document.getElementById("version");
-    if (versionEl && pkg && pkg.version) {
-      versionEl.textContent = pkg.version;
-    }
+    if (versionEl) versionEl.textContent = LauncherManager.getVersion();
   };
 
   socialLick = () => {
