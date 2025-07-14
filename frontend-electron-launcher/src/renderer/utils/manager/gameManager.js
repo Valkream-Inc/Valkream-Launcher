@@ -1,8 +1,12 @@
 const path = require("path");
 const fs = require("fs");
 const { ipcRenderer, shell } = require("electron");
-const { baseUrl } = require(window.PathsManager.getConstants());
-
+const { cleanGameFolder } = require("valkream-function-lib");
+const Manager = require("./manager.js");
+const {
+  baseUrl,
+  gameFolderToRemove,
+} = require(window.PathsManager.getConstants());
 class GameManager {
   constructor() {
     this.init();
@@ -33,19 +37,17 @@ class GameManager {
   }
 
   async openFolder() {
-    try {
-      if (fs.existsSync(this.appdataDir)) {
-        shell.openPath(this.appdataDir);
-        return true;
-      } else return false;
-    } catch (err) {
-      console.error(err);
-      return false;
-    }
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.gameDir),
+      then: async () => await shell.openPath(this.gameDir),
+    });
   }
 
-  cleanFolder() {
-    return true;
+  clean() {
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.gameDir),
+      then: () => cleanGameFolder(this.gameDir, gameFolderToRemove),
+    });
   }
 
   getLocalVersion() {
@@ -69,7 +71,13 @@ class GameManager {
   }
 
   uninstall() {
-    return true;
+    return new Manager().handleError({
+      ensure: fs.readdirSync(this.gameDir).length !== 0,
+      then: () => {
+        fs.rmSync(this.gameDir, { recursive: true });
+        fs.mkdirSync(this.gameDir, { recursive: true });
+      },
+    });
   }
 
   play() {

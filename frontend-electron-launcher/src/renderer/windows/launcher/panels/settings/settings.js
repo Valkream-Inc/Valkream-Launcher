@@ -44,60 +44,75 @@ class Settings {
     });
   }
 
-  uninstallGame() {
-    const uninstallBtn = document.querySelector("#uninstall-game");
+  buttonAction(btn, action, message, onSuccess = () => {}) {
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      message.wait ? (btn.innerHTML = message.wait) : () => {};
+      if (await action()) {
+        showSnackbar(message.success || "Sucessfully saved !");
+        onSuccess();
+      } else {
+        showSnackbar(message.error || "Error while saving !", "error");
+      }
+      btn.disabled = false;
+      message.base ? (btn.innerHTML = message.base) : () => {};
+    });
+  }
 
-    uninstallBtn.addEventListener("click", async () => {
-      uninstallBtn.disabled = true;
-      uninstallBtn.innerHTML = "Deinstallation...";
-      if (await new LauncherManager().uninstallGame()) {
-        showSnackbar("Application supprimée !");
+  uninstallGame() {
+    return this.buttonAction(
+      document.querySelector("#uninstall-game"),
+      async () => await GameManager.uninstall(),
+      {
+        base: "Deinstaller",
+        wait: "Deinstallation...",
+        success: "Application supprimée !",
+        error: "Application non installé !",
+      },
+      () =>
         setTimeout(() => {
           ipcRenderer.invoke("main-window-restart");
-        }, 2000);
-      } else {
-        showSnackbar("Application non installé !", "error");
-      }
-      uninstallBtn.disabled = false;
-      uninstallBtn.innerHTML = "Deinstaller";
-    });
+        }, 2000)
+    );
   }
 
   clearCache() {
-    const cacheBtn = document.querySelector("#close-cache");
-
-    cacheBtn.addEventListener("click", async () => {
-      cacheBtn.disabled = true;
-      cacheBtn.innerHTML = "Vidange...";
-      await new LauncherManager().clearCache();
-      showSnackbar("Cache vidé !");
-      cacheBtn.disabled = false;
-      cacheBtn.innerHTML = "Vider le cache";
-    });
+    return this.buttonAction(
+      document.querySelector("#close-cache"),
+      async () => await GameManager.clean(),
+      {
+        base: "Vider le cache",
+        wait: "Vidange du cache...",
+        success: "Cache du jeu vidée !",
+        error: "Cache du jeu non vidée !",
+      }
+    );
   }
 
   openLauncherFolder() {
-    const openLauncherFolderBtn = document.querySelector(
-      "#open-launcher-folder"
-    );
-    openLauncherFolderBtn.addEventListener("click", async () => {
-      if (await new LauncherManager().openInstallationFolder()) {
-        showSnackbar("Dossier de l'application ouvert !");
-      } else {
-        showSnackbar("Dossier de l'application non ouvert !", "error");
+    return this.buttonAction(
+      document.querySelector("#open-launcher-folder"),
+      async () => await new LauncherManager().openInstallationFolder(),
+      {
+        base: "Ouvrir le dossier du launcher",
+        wait: "Ouverture du dossier du launcher...",
+        success: "Dossier de l'application ouvert !",
+        error: "Dossier de l'application non ouvert !",
       }
-    });
+    );
   }
 
   openGameFolder() {
-    const openGameFolderBtn = document.querySelector("#open-game-folder");
-    openGameFolderBtn.addEventListener("click", async () => {
-      if (await GameManager.openFolder()) {
-        showSnackbar("Dossier du jeu ouvert !");
-      } else {
-        showSnackbar("Dossier du jeu non ouvert !", "error");
+    return this.buttonAction(
+      document.querySelector("#open-game-folder"),
+      async () => await GameManager.openFolder(),
+      {
+        base: "Ouvrir le dossier du jeu",
+        wait: "Ouverture du dossier du jeu...",
+        success: "Dossier du jeu ouvert !",
+        error: "Dossier du jeu non ouvert !",
       }
-    });
+    );
   }
 
   activeDevTab() {
