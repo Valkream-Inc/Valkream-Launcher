@@ -6,5 +6,5 @@
 
 /backend-update-server/uploads/launcher
 /backend-update-server/uploads/game
-/frontend-electron-launcher/.valkream-launcher
+/frontend-electron-launcher/.valkream-launcher-data
 frontend-electron-launcher/launcher-build.zip

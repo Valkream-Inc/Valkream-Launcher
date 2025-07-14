@@ -1,4 +1,6 @@
 const { ipcMain, app } = require("electron");
+const path = require("path");
+const dev = process.env.NODE_ENV === "dev" || process.env.DEV_TOOL === "open";
 
 const CheckForUpdates = require("./handlers/check-for-updates.js");
 const DowloadMultiplefiles = require("./handlers/download-multiple-zips.js");
@@ -33,9 +35,13 @@ class IpcHandlers {
     });
 
     // general
-    ipcMain.handle("path-user-data", () => app.getPath("userData"));
-    ipcMain.handle("get-app-path", () => app.getAppPath());
-    ipcMain.handle("get-appdata-path", () => app.getPath("appData"));
+    ipcMain.handle("data-path", () =>
+      path.join(
+        dev ? app.getAppPath() : app.getPath("appData"),
+        ".valkream-launcher-data"
+      )
+    );
+    ipcMain.handle("get-installation-path", () => app.getAppPath());
     ipcMain.on("check-for-updates", (event) =>
       new CheckForUpdates(event).init()
     );

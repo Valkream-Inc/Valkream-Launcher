@@ -1,27 +1,47 @@
 const path = require("path");
+const fs = require("fs");
+const { ipcRenderer, shell } = require("electron");
 const { baseUrl } = require(window.PathsManager.getConstants());
 
-const appdataDir = path.join(process.cwd(), ".valkream-launcher");
-const serverGameRoot = path.join(baseUrl, "game/latest");
-
-const gameVersionFileName = "latest.yml";
-const gameVersionFileLink = path.join(serverGameRoot, gameVersionFileName);
-const gameVersionFilePath = path.join(appdataDir, gameVersionFileName);
-
-const gameZipName = "game.zip";
-const gameZipLink = path.join(serverGameRoot, gameZipName);
-const gameZipPath = path.join(appdataDir, gameZipName);
-
-const gameDir = path.join(appdataDir, "Valheim Valkream Data");
-const gameExePath = path.join(gameDir, "ValheimValkream.exe");
-
 class GameManager {
+  constructor() {
+    this.init();
+  }
+
+  async init() {
+    this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
+    this.serverGameRoot = path.join(baseUrl, "game/latest");
+
+    this.gameVersionFileLink = path.join(this.serverGameRoot, "latest.yml");
+    this.gameVersionFilePath = path.join(this.appdataDir, "latest.yml");
+
+    this.gameZipLink = path.join(this.serverGameRoot, "game.zip");
+    this.gameZipPath = path.join(this.appdataDir, "game.zip");
+
+    this.gameDir = path.join(this.appdataDir, "game", "Valheim Valkream Data");
+    this.gameExePath = path.join(this.gameDir, "ValheimValkream.exe");
+
+    for (const dir of [this.appdataDir, this.gameDir]) {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    }
+  }
+
   install() {
     return true;
   }
 
-  openFolder() {
-    return true;
+  async openFolder() {
+    try {
+      if (fs.existsSync(this.appdataDir)) {
+        shell.openPath(this.appdataDir);
+        return true;
+      } else return false;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
   }
 
   cleanFolder() {
@@ -57,4 +77,6 @@ class GameManager {
   }
 }
 
-module.exports = GameManager;
+const gameManager = new GameManager();
+gameManager.init();
+module.exports = gameManager;

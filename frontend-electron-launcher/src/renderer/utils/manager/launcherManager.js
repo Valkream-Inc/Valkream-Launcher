@@ -199,25 +199,13 @@ class LauncherManager {
 
   async openInstallationFolder() {
     try {
-      const installPath = await ipcRenderer.invoke("get-app-path");
+      const installPath = await ipcRenderer.invoke("get-installation-path");
       if (fs.existsSync(installPath)) {
         shell.openPath(path.dirname(path.dirname(installPath)));
         return true;
       } else return false;
     } catch (err) {
       console.error(err);
-      return false;
-    }
-  }
-
-  async openAppdataFolder() {
-    try {
-      const appdataPath = await ipcRenderer.invoke("get-appdata-path");
-      if (fs.existsSync(appdataPath)) {
-        shell.openPath(path.dirname(path.dirname(appdataPath)));
-        return true;
-      } else return false;
-    } catch {
       return false;
     }
   }

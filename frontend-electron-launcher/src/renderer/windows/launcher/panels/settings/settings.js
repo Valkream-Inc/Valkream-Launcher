@@ -7,6 +7,7 @@ const {
   changePanel,
   showSnackbar,
   LauncherManager,
+  GameManager,
 } = require(window.PathsManager.getUtils());
 const { database } = require(window.PathsManager.getSharedUtils());
 const { ipcRenderer } = require("electron");
@@ -29,23 +30,18 @@ class Settings {
   changeIsMusicEnabled() {
     const videoBackground = document.getElementById("background-video");
     const musicToggle = document.querySelector(".video-music-toggle");
-    if (musicToggle) {
-      musicToggle.checked = !videoBackground.muted;
-      musicToggle.addEventListener("change", async (e) => {
-        // Lecture de la configuration actuelle
-        let configData = await this.db.readData("configClient");
-        if (!configData) configData = {};
-        if (!configData.launcher_config) configData.launcher_config = {};
-        // Mise à jour du paramètre
-        configData.launcher_config.musicEnabled = !e.target.checked;
-        // Sauvegarde dans la base
-        await this.db.updateData("configClient", configData);
-        videoBackground.muted = !e.target.checked;
-        showSnackbar(
-          e.target.checked ? "Musique activée !" : "Musique désactivée !"
-        );
-      });
-    }
+
+    musicToggle.checked = !videoBackground.muted;
+    musicToggle.addEventListener("change", async (e) => {
+      let configData = await this.db.readData("configClient");
+      configData.launcher_config.musicEnabled = !e.target.checked;
+
+      await this.db.updateData("configClient", configData);
+      videoBackground.muted = !e.target.checked;
+      showSnackbar(
+        e.target.checked ? "Musique activée !" : "Musique désactivée !"
+      );
+    });
   }
 
   uninstallGame() {
@@ -96,7 +92,7 @@ class Settings {
   openGameFolder() {
     const openGameFolderBtn = document.querySelector("#open-game-folder");
     openGameFolderBtn.addEventListener("click", async () => {
-      if (await new LauncherManager().openGameFolder()) {
+      if (await GameManager.openFolder()) {
         showSnackbar("Dossier du jeu ouvert !");
       } else {
         showSnackbar("Dossier du jeu non ouvert !", "error");
