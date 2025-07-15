@@ -77,15 +77,17 @@ class Settings {
   }
 
   uninstallLauncher() {
-    console.log("uninstall launcher");
     return this.buttonAction(
       document.querySelector("#uninstall-launcher"),
-      async () => await LauncherManager.uninstall(),
+      async () => {
+        await GameManager.uninstall();
+        return await LauncherManager.uninstall();
+      },
       {
         base: "Désinstaller",
         wait: "Désinstallation...",
         success: "Application supprimée !",
-        error: "Application non installé !",
+        error: "Application non supprimée !",
       }
     );
   }
