@@ -6,6 +6,7 @@ const { ipcRenderer } = require("electron");
 
 const { baseUrl } = require(window.PathsManager.getConstants());
 const Manager = require("./manager.js");
+const { hashFolder } = require("valkream-function-lib");
 
 class ThunderstoreManager {
   static id = "thunderstore-manager";
@@ -72,11 +73,11 @@ class ThunderstoreManager {
               destPath: destination,
             },
           ],
-          ThunderstoreManager.id
+          ThunderstoreManager.id + "-download-modpack"
         );
 
         ipcRenderer.on(
-          `download-multi-progress-${ThunderstoreManager.id}`,
+          `download-multi-progress-${ThunderstoreManager.id}-download-modpack`,
           (event, data) => {
             callback(...data);
           }
@@ -92,11 +93,11 @@ class ThunderstoreManager {
         ipcRenderer.send(
           "multiple-unzip",
           [{ path: zipPath, destPath: destination }],
-          ThunderstoreManager.id
+          ThunderstoreManager.id + "-unzip-modpack"
         );
 
         ipcRenderer.on(
-          `multi-unzip-progress-${ThunderstoreManager.id}`,
+          `multi-unzip-progress-${ThunderstoreManager.id}-unzip-modpack`,
           (event, data) => {
             callback(...data);
           }
@@ -105,8 +106,90 @@ class ThunderstoreManager {
     });
   }
 
-  async dowloadMods(mods, callback = () => {}) {}
-  async unzipMods(mods, callback = () => {}) {}
+  async dowloadMods(mods, callback = () => {}) {
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.gameDir),
+      then: async () => {
+        ipcRenderer.send(
+          "download-multiple-files",
+          mods.map((mod) => ({
+            url: this.getModInfos(mod.name).then((mod) => mod.url),
+            destPath: path.join(this.serverGameRoot, "mods", mod.name),
+          })),
+          ThunderstoreManager.id + "-download-mods"
+        );
+
+        ipcRenderer.on(
+          `download-multi-progress-${ThunderstoreManager.id}-download-mods`,
+          (event, data) => {
+            callback(...data);
+          }
+        );
+      },
+    });
+  }
+
+  async unzipMods(mods, callback = () => {}) {
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.gameDir),
+      then: async () => {
+        ipcRenderer.send(
+          "multiple-unzip",
+          mods.map((mod) => ({
+            path: path.join(this.serverGameRoot, "mods", mod.name),
+            destPath: path.join(this.gameDir, "BepInEx", "plugins", mod.name),
+          })),
+          ThunderstoreManager.id + "-unzip-mods"
+        );
+
+        ipcRenderer.on(
+          `multi-unzip-progress-${ThunderstoreManager.id}-unzip-mods`,
+          (event, data) => {
+            callback(...data);
+          }
+        );
+      },
+    });
+  }
+
+  getModInfos(modName) {
+    const [author, name, version] = modName.split("-");
+
+    return new Manager().handleError({
+      ensure: author && name && version,
+      then: () => {
+        return {
+          url: `https://thunderstore.io/package/download/${author}/${name}/${version}/`,
+          author,
+          name,
+          version,
+        };
+      },
+    });
+  }
+
+  async ckeckPluginsAndConfig() {
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.gameDir),
+      then: async () => {
+        const pluginsDir = await fs.readdir(
+          path.join(this.gameDir, "BepInEx", "plugins")
+        );
+        const configsDir = await fs.readdir(
+          path.join(this.gameDir, "BepInEx", "config")
+        );
+
+        const pluginsHash = hashFolder(pluginsDir);
+        const configsHash = hashFolder(configsDir);
+
+        if (
+          pluginsHash !== this.getOnlineVersionConfig().hash.plugins ||
+          configsHash !== this.getOnlineVersionConfig().hash.config
+        )
+          throw new Error("Plugins or configs are not up to date");
+      },
+    });
+  }
 }
 
 module.exports = ThunderstoreManager;

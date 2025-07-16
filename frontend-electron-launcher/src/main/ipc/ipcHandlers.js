@@ -6,7 +6,6 @@ const CheckForUpdates = require("./handlers/check-for-updates.js");
 const DowloadMultiplefiles = require("./handlers/download-multiple-zips.js");
 const MultipleUnzip = require("./handlers/multiple-unzip.js");
 const ServerInfos = require("./handlers/server-info.js");
-const UpdateValheim = require("./handlers/update-valheim.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
@@ -77,11 +76,6 @@ class IpcHandlers {
       });
       if (result.canceled || !result.filePaths.length) return null;
       return result.filePaths[0];
-    });
-
-    // update valheim
-    ipcMain.on("valheim:update:start", (event, updateDir) => {
-      new UpdateValheim().init(event, updateDir);
     });
   }
 }

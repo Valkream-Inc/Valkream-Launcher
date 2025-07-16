@@ -154,9 +154,14 @@ const ThunderstoreManager = require("./thunderstoreManager.js");
 const Manager = require("./manager.js");
 const { database } = require(PathsManager.getSharedUtils());
 
-const { gameFolderToRemove } = require(window.PathsManager.getConstants());
+const {
+  gameFolderToRemove,
+  bepInExUrl,
+} = require(window.PathsManager.getConstants());
 
 class GameManager extends ThunderstoreManager {
+  static id = "game-manager";
+
   constructor() {
     super();
     this.init();
@@ -192,7 +197,30 @@ class GameManager extends ThunderstoreManager {
     });
   }
 
-  async installBepInEx(callback = () => {}) {}
+  async installBepInEx(callback = () => {}) {
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.gameDir),
+      then: () => {
+        ipcRenderer.invoke(
+          "download-multiple-files",
+          [
+            {
+              url: bepInExUrl,
+              destPath: path.join(this.gameDir, "BepInEx"),
+            },
+          ],
+          GameManager.id
+        );
+
+        ipcRenderer.on(
+          `download-multi-progress-${GameManager.id}`,
+          (event, data) => {
+            callback(...data);
+          }
+        );
+      },
+    });
+  }
 
   async openFolder() {
     return new Manager().handleError({
@@ -214,23 +242,13 @@ class GameManager extends ThunderstoreManager {
 
   async update() {
     return new Manager().handleError({
-      ensure: fs.existsSync(this.gameDir) && fs.existsSync(this.gameExePath),
-      then: () => {
-        ipcRenderer.send("valheim:update:start", this.gameDir);
-        ipcRenderer.on("valheim:update:log", (event, data) => {
-          console.log(data);
-        });
-        ipcRenderer.on("valheim:update:error", (event, data) => {
-          throw new Error(data);
-        });
-        ipcRenderer.on("valheim:update:done", (event, data) => {
-          if (data) {
-            console.log("update done", data);
-            return data;
-          } else {
-            throw new Error("update failed");
-          }
-        });
+      ensure: fs.existsSync(this.gamePath),
+      then: async () => {
+        if (await this.uninstall()) {
+          return this.install();
+        } else {
+          return false;
+        }
       },
     });
   }
