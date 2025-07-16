@@ -151,8 +151,7 @@ class SteamCheck {
     }
 
     document.getElementById("open-steam").onclick = () => {
-      shell.openExternal("steam://open");
-      console.log("open steam");
+      shell.openExternal("steam://open/games");
     };
   }
 
