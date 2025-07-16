@@ -6,6 +6,7 @@
 const { NodeBDD, DataType } = require("node-bdd");
 const nodedatabase = new NodeBDD();
 const { ipcRenderer } = require("electron");
+const path = require("path");
 
 let dev = process.env.NODE_ENV === "dev";
 
@@ -15,9 +16,7 @@ class database {
       databaseName: "Databases",
       fileType: dev ? "sqlite" : "db",
       tableName: tableName,
-      path: `${await ipcRenderer.invoke("path-user-data")}${
-        dev ? "../.." : "/databases"
-      }`,
+      path: path.join(await ipcRenderer.invoke("data-path"), "databases"),
       tableColumns: tableConfig,
     });
   }

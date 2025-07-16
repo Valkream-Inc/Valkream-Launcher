@@ -7,7 +7,7 @@
     />
     <div class="nav-box">
       <div id="launcher" class="nav-settings-btn">LAUNCHER</div>
-      <div id="game" class="nav-settings-btn">JEU</div>
+      <!-- <div id="game" class="nav-settings-btn">JEU</div> -->
       <div id="dev" class="nav-settings-btn" style="display: none">DEV</div>
       <div id="save" class="nav-settings-btn">ACCUEIL</div>
     </div>
@@ -31,7 +31,8 @@
       </div>
     </div>
 
-    <div class="settings-elements-box">
+    <div class="titre-tab warn">⚠️ Danger zone !</div>
+    <div class="settings-elements-box warn">
       <div class="setting-text">
         Besoin d'activer les outils de développement ? Faites-le ici.
       </div>
@@ -43,22 +44,21 @@
         <p>Activer les outils de développement</p>
       </div>
     </div>
-  </div>
-
-  <!-- game tab -->
-  <div id="game-tab" class="container-settings content-scroll">
-    <div class="titre-tab">Deinstaller le jeu</div>
-    <div class="settings-elements-box">
+    <div class="settings-elements-box warn">
       <div class="setting-text">
-        Vous pouvez supprimer les fichiers de jeux valkream
+        Vous voulez déinstaller l'applis ? Faites-le ici. Mais attention, cela
+        supprimera tous vos paramètres et données.
       </div>
       <div class="settings-elements content-evenly close-box">
-        <div id="uninstall-game" class="close-btn" style="background: red">
+        <div id="uninstall-launcher" class="close-btn" style="background: red">
           Deinstaller
         </div>
       </div>
     </div>
   </div>
+
+  <!-- game tab -->
+  <div id="game-tab" class="container-settings content-scroll"></div>
 
   <!-- dev tab -->
   <div id="dev-tab" class="container-settings content-scroll">
@@ -73,6 +73,19 @@
         </div>
       </div>
     </div>
+
+    <div class="titre-tab">Deinstaller le jeu</div>
+    <div class="settings-elements-box">
+      <div class="setting-text">
+        Vous pouvez supprimer les fichiers de jeux valkream
+      </div>
+      <div class="settings-elements content-evenly close-box">
+        <div id="uninstall-game" class="close-btn" style="background: red">
+          Deinstaller
+        </div>
+      </div>
+    </div>
+
     <div class="titre-tab">Ouvrir les dossiers d'installation</div>
     <div class="settings-elements-box">
       <div class="setting-text">

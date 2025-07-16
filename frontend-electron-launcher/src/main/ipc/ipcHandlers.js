@@ -1,12 +1,16 @@
-const { ipcMain, app } = require("electron");
+const { ipcMain, app, dialog } = require("electron");
+const path = require("path");
+const dev = process.env.NODE_ENV === "dev" || process.env.DEV_TOOL === "open";
 
 const CheckForUpdates = require("./handlers/check-for-updates.js");
 const DowloadMultiplefiles = require("./handlers/download-multiple-zips.js");
 const MultipleUnzip = require("./handlers/multiple-unzip.js");
 const ServerInfos = require("./handlers/server-info.js");
+const UpdateValheim = require("./handlers/update-valheim.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
+const { cwd } = require("process");
 
 class IpcHandlers {
   init() {
@@ -33,8 +37,13 @@ class IpcHandlers {
     });
 
     // general
-    ipcMain.handle("path-user-data", () => app.getPath("userData"));
-    ipcMain.handle("get-app-path", () => app.getAppPath());
+    ipcMain.handle("data-path", () =>
+      path.join(
+        dev ? app.getAppPath() : app.getPath("appData"),
+        ".valkream-launcher-data"
+      )
+    );
+    ipcMain.handle("get-installation-path", () => process.cwd());
     ipcMain.on("check-for-updates", (event) =>
       new CheckForUpdates(event).init()
     );
@@ -46,12 +55,12 @@ class IpcHandlers {
     // zips
     ipcMain.handle(
       "download-multiple-files",
-      async (event, files) =>
-        await new DowloadMultiplefiles().init(event, files)
+      async (event, files, id) =>
+        await new DowloadMultiplefiles().init(event, files, id)
     );
     ipcMain.handle(
       "multiple-unzip",
-      async (event, zips) => await new MultipleUnzip().init(event, zips)
+      async (event, zips, id) => await new MultipleUnzip().init(event, zips, id)
     );
 
     // server infos
@@ -59,6 +68,21 @@ class IpcHandlers {
       "get-server-infos",
       async (event) => await new ServerInfos().init(event)
     );
+
+    // Sélection dossier Steam
+    ipcMain.handle("choose-steam-folder", async () => {
+      const result = await dialog.showOpenDialog(MainWindow.getWindow(), {
+        properties: ["openDirectory"],
+        title: "Choisissez le dossier Steam",
+      });
+      if (result.canceled || !result.filePaths.length) return null;
+      return result.filePaths[0];
+    });
+
+    // update valheim
+    ipcMain.on("valheim:update:start", (event, updateDir) => {
+      new UpdateValheim().init(event, updateDir);
+    });
   }
 }
 

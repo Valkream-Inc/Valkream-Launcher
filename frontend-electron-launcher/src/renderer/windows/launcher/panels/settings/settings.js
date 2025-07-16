@@ -3,7 +3,12 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { changePanel, showSnackbar } = require(window.PathsManager.getUtils());
+const {
+  changePanel,
+  showSnackbar,
+  LauncherManager,
+  GameManager,
+} = require(window.PathsManager.getUtils());
 const { database } = require(window.PathsManager.getSharedUtils());
 const { ipcRenderer } = require("electron");
 
@@ -16,7 +21,7 @@ class Settings {
 
     this.changeIsMusicEnabled();
     this.uninstallGame();
-
+    this.uninstallLauncher();
     this.clearCache();
     this.openGameFolder();
     this.openLauncherFolder();
@@ -25,79 +30,105 @@ class Settings {
   changeIsMusicEnabled() {
     const videoBackground = document.getElementById("background-video");
     const musicToggle = document.querySelector(".video-music-toggle");
-    if (musicToggle) {
-      musicToggle.checked = !videoBackground.muted;
-      musicToggle.addEventListener("change", async (e) => {
-        // Lecture de la configuration actuelle
-        let configData = await this.db.readData("configClient");
-        if (!configData) configData = {};
-        if (!configData.launcher_config) configData.launcher_config = {};
-        // Mise à jour du paramètre
-        configData.launcher_config.musicEnabled = !e.target.checked;
-        // Sauvegarde dans la base
-        await this.db.updateData("configClient", configData);
-        videoBackground.muted = !e.target.checked;
-        showSnackbar(
-          e.target.checked ? "Musique activée !" : "Musique désactivée !"
-        );
-      });
-    }
+
+    musicToggle.checked = !videoBackground.muted;
+    musicToggle.addEventListener("change", async (e) => {
+      let configData = await this.db.readData("configClient");
+      configData.launcher_config.musicEnabled = !e.target.checked;
+
+      await this.db.updateData("configClient", configData);
+      videoBackground.muted = !e.target.checked;
+      showSnackbar(
+        e.target.checked ? "Musique activée !" : "Musique désactivée !"
+      );
+    });
+  }
+
+  buttonAction(btn, action, message, onSuccess = () => {}) {
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      message.wait ? (btn.innerHTML = message.wait) : () => {};
+      if (await action()) {
+        showSnackbar(message.success || "Sucessfully saved !");
+        onSuccess();
+      } else {
+        showSnackbar(message.error || "Error while saving !", "error");
+      }
+      btn.disabled = false;
+      message.base ? (btn.innerHTML = message.base) : () => {};
+    });
   }
 
   uninstallGame() {
-    const uninstallBtn = document.querySelector("#uninstall-game");
-
-    uninstallBtn.addEventListener("click", async () => {
-      uninstallBtn.disabled = true;
-      uninstallBtn.innerHTML = "Deinstallation...";
-      if (await launcherManager.uninstallGame()) {
-        showSnackbar("Application supprimée !");
+    return this.buttonAction(
+      document.querySelector("#uninstall-game"),
+      async () => await GameManager.uninstall(),
+      {
+        base: "Deinstaller",
+        wait: "Deinstallation...",
+        success: "Application supprimée !",
+        error: "Application non installé !",
+      },
+      () =>
         setTimeout(() => {
           ipcRenderer.invoke("main-window-restart");
-        }, 2000);
-      } else {
-        showSnackbar("Application non installé !", "error");
+        }, 2000)
+    );
+  }
+
+  uninstallLauncher() {
+    return this.buttonAction(
+      document.querySelector("#uninstall-launcher"),
+      async () => {
+        await GameManager.uninstall();
+        return await LauncherManager.uninstall();
+      },
+      {
+        base: "Désinstaller",
+        wait: "Désinstallation...",
+        success: "Application supprimée !",
+        error: "Application non supprimée !",
       }
-      uninstallBtn.disabled = false;
-      uninstallBtn.innerHTML = "Deinstaller";
-    });
+    );
   }
 
   clearCache() {
-    const cacheBtn = document.querySelector("#close-cache");
-
-    cacheBtn.addEventListener("click", async () => {
-      cacheBtn.disabled = true;
-      cacheBtn.innerHTML = "Vidange...";
-      await launcherManager.clearCache();
-      showSnackbar("Cache vidé !");
-      cacheBtn.disabled = false;
-      cacheBtn.innerHTML = "Vider le cache";
-    });
+    return this.buttonAction(
+      document.querySelector("#close-cache"),
+      async () => await GameManager.clean(),
+      {
+        base: "Vider le cache",
+        wait: "Vidange du cache...",
+        success: "Cache du jeu vidée !",
+        error: "Cache du jeu non vidée !",
+      }
+    );
   }
 
   openLauncherFolder() {
-    const openLauncherFolderBtn = document.querySelector(
-      "#open-launcher-folder"
-    );
-    openLauncherFolderBtn.addEventListener("click", async () => {
-      if (await launcherManager.openLauncherFolder()) {
-        showSnackbar("Dossier de l'application ouvert !");
-      } else {
-        showSnackbar("Dossier de l'application non ouvert !", "error");
+    return this.buttonAction(
+      document.querySelector("#open-launcher-folder"),
+      async () => await LauncherManager.openInstallationFolder(),
+      {
+        base: "Ouvrir le dossier du launcher",
+        wait: "Ouverture du dossier du launcher...",
+        success: "Dossier de l'application ouvert !",
+        error: "Dossier de l'application non ouvert !",
       }
-    });
+    );
   }
 
   openGameFolder() {
-    const openGameFolderBtn = document.querySelector("#open-game-folder");
-    openGameFolderBtn.addEventListener("click", async () => {
-      if (await launcherManager.openGameFolder()) {
-        showSnackbar("Dossier du jeu ouvert !");
-      } else {
-        showSnackbar("Dossier du jeu non ouvert !", "error");
+    return this.buttonAction(
+      document.querySelector("#open-game-folder"),
+      async () => await GameManager.openFolder(),
+      {
+        base: "Ouvrir le dossier du jeu",
+        wait: "Ouverture du dossier du jeu...",
+        success: "Dossier du jeu ouvert !",
+        error: "Dossier du jeu non ouvert !",
       }
-    });
+    );
   }
 
   activeDevTab() {

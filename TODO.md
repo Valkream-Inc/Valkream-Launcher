@@ -2,13 +2,10 @@
 
 ## Frontend
 
-- [ ] Ajouter la gestion des mises à jour subminor
-- ['En cours - Jean-Chante - feat: feature/settings-panels-enchant'] Modifier le style du settings panels (Box, boutons, etc)
-- ['En cours - Jean-Chante - feat: feature/settings-panels-enchant'] Ajouter la supression de l'applis dans settings
-- ['En cours - Jean-Chante - feat: feature/settings-panels-enchant'] Reorganiser launcherManager en launcherManger + gameManager
-- [ ] Preserver l'installation du jeu lors de la mise a jour du launcher
 - [ ] mettre valkream team partout
+- [ ] mettre logger partout
 - [ ] corrige les erreurs d'obfuscation
+- [ ] mettre en place l'install du jeu via steam, thunderstore et via le zip github BepInEx (https://github.com/BepInEx/BepInEx/releases), GameManager pour steam, ThunderstoreManager pour les mods via un url sur le server perso et HashManager pour la vérification des mods et configs
 
 ## Backend
 

@@ -6,9 +6,10 @@
 const { unZip } = require("valkream-function-lib");
 
 class MultipleUnzip {
-  async init(event, zips) {
+  async init(event, zips, id) {
     this.event = event;
     this.zips = zips;
+    this.id = id;
     // zips: tableau [{ path, destPath }]
     const totalSizes = new Array(this.zips.length).fill(0);
     const decompressed = new Array(this.zips.length).fill(0);
@@ -35,7 +36,7 @@ class MultipleUnzip {
                 (decompressedGlobal / totalGlobal) * 100
               );
 
-              this.event.sender.send("multi-unzip-progress", {
+              this.event.sender.send(`multi-unzip-progress-${this.id}`, {
                 percent,
                 decompressedBytes: decompressedGlobal,
                 totalBytes: totalGlobal,

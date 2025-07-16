@@ -6,6 +6,7 @@
 
 @import "panels/home.css";
 @import "panels/settings.css";
+@import "panels/steam-check.css";
 
 body {
   margin: 0;
@@ -36,22 +37,22 @@ input::-webkit-inner-spin-button {
   overflow-x: hidden;
 }
 
-.content-scroll::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 8px;
 }
 
-.content-scroll::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background: var(--background);
   border-radius: 4px;
 }
 
-.content-scroll::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
   background: var(--color);
   border-radius: 4px;
   transition: background 0.2s ease;
 }
 
-.content-scroll::-webkit-scrollbar-corner {
+*::-webkit-scrollbar-corner {
   background: var(--background);
 }
 

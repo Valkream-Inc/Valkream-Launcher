@@ -7,9 +7,10 @@ const axios = require("axios");
 const { downloadZip } = require("valkream-function-lib");
 
 class DowloadMultiplefiles {
-  async init(event, files) {
+  async init(event, files, id) {
     this.event = event;
     this.files = files;
+    this.id = id;
 
     // files: tableau [{ path, destPath }]
     const totalSizes = new Array(this.files.length).fill(0);
@@ -45,7 +46,7 @@ class DowloadMultiplefiles {
                 (downloadedGlobal / totalGlobal) * 100
               );
 
-              this.event.sender.send("download-multi-progress", {
+              this.event.sender.send(`download-multi-progress-${this.id}`, {
                 percent,
                 downloadedBytes: downloadedGlobal,
                 totalBytes: totalGlobal,
