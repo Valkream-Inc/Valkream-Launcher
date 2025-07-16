@@ -1,4 +1,4 @@
-const { ipcMain, app } = require("electron");
+const { ipcMain, app, dialog } = require("electron");
 const path = require("path");
 const dev = process.env.NODE_ENV === "dev" || process.env.DEV_TOOL === "open";
 
@@ -67,6 +67,16 @@ class IpcHandlers {
       "get-server-infos",
       async (event) => await new ServerInfos().init(event)
     );
+
+    // Sélection dossier Steam
+    ipcMain.handle("choose-steam-folder", async () => {
+      const result = await dialog.showOpenDialog(MainWindow.getWindow(), {
+        properties: ["openDirectory"],
+        title: "Choisissez le dossier Steam",
+      });
+      if (result.canceled || !result.filePaths.length) return null;
+      return result.filePaths[0];
+    });
   }
 }
 

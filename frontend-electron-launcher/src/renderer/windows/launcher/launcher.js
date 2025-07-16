@@ -9,6 +9,7 @@ window.PathsManager = PathsManager;
 // import panel
 const Home = require("./panels/home/home.js");
 const Settings = require("./panels/settings/settings.js");
+const SteamCheck = require("./panels/steam-check/steam-check.js");
 
 // import modules
 const { changePanel } = require(PathsManager.getUtils());
@@ -24,7 +25,7 @@ class Launcher {
     this.db = new database();
     await this.initConfigClient();
     await this.applyMusicSetting();
-    this.createPanels(Home, Settings);
+    this.createPanels(Home, Settings, SteamCheck);
     this.startLauncher();
   }
 
@@ -79,7 +80,7 @@ class Launcher {
     for (let panel of panels) {
       console.log(`Initializing ${panel.name} Panel...`);
       let div = document.createElement("div");
-      div.classList.add("panel", panel.id);
+      div.classList.add("panel", "content-scroll", panel.id);
       div.innerHTML = fs.readFileSync(
         `${__dirname}/panels/${panel.id}/${panel.id}.html`,
         "utf8"
@@ -90,7 +91,7 @@ class Launcher {
   }
 
   async startLauncher() {
-    changePanel("home");
+    changePanel("steam-check");
   }
 }
 
