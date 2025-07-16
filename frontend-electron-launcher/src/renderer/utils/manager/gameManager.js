@@ -146,29 +146,27 @@
 
 const path = require("path");
 const fs = require("fs");
+const fse = require("fs-extra");
 const { ipcRenderer, shell } = require("electron");
 const { cleanGameFolder } = require("valkream-function-lib");
+const { execFile } = require("child_process");
+const ThunderstoreManager = require("./thunderstoreManager.js");
 const Manager = require("./manager.js");
-const {
-  baseUrl,
-  gameFolderToRemove,
-} = require(window.PathsManager.getConstants());
-class GameManager {
+const { database } = require(PathsManager.getSharedUtils());
+
+const { gameFolderToRemove } = require(window.PathsManager.getConstants());
+
+class GameManager extends ThunderstoreManager {
   constructor() {
+    super();
     this.init();
+    this.db = new database();
   }
 
   async init() {
     this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
-    this.serverGameRoot = path.join(baseUrl, "game/latest");
 
-    this.gameVersionFileLink = path.join(this.serverGameRoot, "latest.yml");
-    this.gameVersionFilePath = path.join(this.appdataDir, "latest.yml");
-
-    this.gameZipLink = path.join(this.serverGameRoot, "game.zip");
-    this.gameZipPath = path.join(this.appdataDir, "game.zip");
-
-    this.gameDir = path.join(this.appdataDir, "game", "Valheim Valkream Data");
+    this.gameDir = path.join(this.appdataDir, "game", "Valheim");
     this.gameExePath = path.join(this.gameDir, "ValheimValkream.exe");
 
     for (const dir of [this.appdataDir, this.gameDir]) {
@@ -176,11 +174,25 @@ class GameManager {
         fs.mkdirSync(dir, { recursive: true });
       }
     }
+
+    this.initThunderstore(this.gameDir);
   }
 
-  install() {
-    return true;
+  getGameDir = () => this.gameDir;
+
+  async install() {
+    const steamValheimPath = (await this.db.readData("configClient"))
+      ?.launcher_config?.valheim_steam_path;
+
+    return new Manager().handleError({
+      ensure: steamValheimPath,
+      then: () => {
+        fse.copySync(path.join(steamValheimPath), this.gameDir);
+      },
+    });
   }
+
+  async installBepInEx(callback = () => {}) {}
 
   async openFolder() {
     return new Manager().handleError({
@@ -196,24 +208,31 @@ class GameManager {
     });
   }
 
-  getLocalVersion() {
-    return "0.0.0";
+  getIsInstalled() {
+    return fs.existsSync(this.gameDir) && fs.existsSync(this.gameExePath);
   }
 
-  getOnlineVersion() {
-    return "0.0.0";
-  }
-
-  getLocalHash() {
-    return { config: "0", plugins: "0" };
-  }
-
-  getOnlineHash() {
-    return { config: "0", plugins: "0" };
-  }
-
-  update() {
-    return true;
+  async update() {
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.gameDir) && fs.existsSync(this.gameExePath),
+      then: () => {
+        ipcRenderer.send("valheim:update:start", this.gameDir);
+        ipcRenderer.on("valheim:update:log", (event, data) => {
+          console.log(data);
+        });
+        ipcRenderer.on("valheim:update:error", (event, data) => {
+          throw new Error(data);
+        });
+        ipcRenderer.on("valheim:update:done", (event, data) => {
+          if (data) {
+            console.log("update done", data);
+            return data;
+          } else {
+            throw new Error("update failed");
+          }
+        });
+      },
+    });
   }
 
   uninstall() {
@@ -227,7 +246,18 @@ class GameManager {
   }
 
   play() {
-    return true;
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.gameExePath),
+      then: () => {
+        ipcRenderer.send("main-window-hide");
+        const child = execFile(this.gameExePath, (err) => {
+          throw new Error(err);
+        });
+        child.on("exit", () => {
+          ipcRenderer.send("main-window-show");
+        });
+      },
+    });
   }
 }
 

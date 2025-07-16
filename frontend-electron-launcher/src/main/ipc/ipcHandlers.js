@@ -6,6 +6,7 @@ const CheckForUpdates = require("./handlers/check-for-updates.js");
 const DowloadMultiplefiles = require("./handlers/download-multiple-zips.js");
 const MultipleUnzip = require("./handlers/multiple-unzip.js");
 const ServerInfos = require("./handlers/server-info.js");
+const UpdateValheim = require("./handlers/update-valheim.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
@@ -54,12 +55,12 @@ class IpcHandlers {
     // zips
     ipcMain.handle(
       "download-multiple-files",
-      async (event, files) =>
-        await new DowloadMultiplefiles().init(event, files)
+      async (event, files, id) =>
+        await new DowloadMultiplefiles().init(event, files, id)
     );
     ipcMain.handle(
       "multiple-unzip",
-      async (event, zips) => await new MultipleUnzip().init(event, zips)
+      async (event, zips, id) => await new MultipleUnzip().init(event, zips, id)
     );
 
     // server infos
@@ -76,6 +77,11 @@ class IpcHandlers {
       });
       if (result.canceled || !result.filePaths.length) return null;
       return result.filePaths[0];
+    });
+
+    // update valheim
+    ipcMain.on("valheim:update:start", (event, updateDir) => {
+      new UpdateValheim().init(event, updateDir);
     });
   }
 }

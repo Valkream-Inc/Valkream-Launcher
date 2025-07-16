@@ -41,7 +41,7 @@ class SteamCheck {
 
   async init() {
     const configClient = await this.db.readData("configClient");
-    const steamPath = configClient?.launcher_config?.steamPath;
+    const steamPath = configClient?.launcher_config?.steam_path;
     if (steamPath) {
       this.STEAM_PATHS.push(steamPath);
     }
@@ -172,7 +172,7 @@ class SteamCheck {
 
     await this.db.updateData("configClient", {
       launcher_config: {
-        steamPath: foundSteam,
+        steam_path: foundSteam,
       },
     });
 
@@ -184,6 +184,12 @@ class SteamCheck {
       this.displayError({ steamFound: true, valheimFound: false });
       return;
     }
+
+    await this.db.updateData("configClient", {
+      launcher_config: {
+        valheim_steam_path: foundValheim,
+      },
+    });
 
     this.setStatus(valheimStatus, true, "OK");
     errorMessage.textContent = "";
