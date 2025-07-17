@@ -11,13 +11,20 @@ const { hashFolder } = require("valkream-function-lib");
 class ThunderstoreManager {
   static id = "thunderstore-manager";
 
-  async initThunderstore(gameDir) {
+  async init() {
     this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
     this.serverGameRoot = path.join(baseUrl, "game/latest");
 
     this.gameVersionFileLink = path.join(this.serverGameRoot, "latest.yml");
     this.gameVersionFilePath = path.join(this.appdataDir, "game", "latest.yml");
-    this.gameDir = gameDir;
+
+    this.gameDir = path.join(this.appdataDir, "game", "Valheim");
+
+    for (const dir of [this.appdataDir, this.gameDir]) {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    }
   }
 
   async getOnlineVersionConfig() {
@@ -192,4 +199,6 @@ class ThunderstoreManager {
   }
 }
 
-module.exports = ThunderstoreManager;
+const thunderstoreManager = new ThunderstoreManager();
+thunderstoreManager.init();
+module.exports = thunderstoreManager;

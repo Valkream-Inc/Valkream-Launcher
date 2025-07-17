@@ -3,17 +3,21 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
+const { shell, ipcRenderer } = require("electron");
+const { formatBytes } = require("valkream-function-lib");
+
 const {
   changePanel,
   Popup,
   showSnackbar,
   EventManager,
   LauncherManager,
+  GameManager,
+  SteamManager,
+  ThunderstoreManager,
 } = require(window.PathsManager.getUtils());
 const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
-
-const { shell, ipcRenderer } = require("electron");
-const { formatBytes } = require("valkream-function-lib");
+const { isSteamInstallation } = require(window.PathsManager.getConstants());
 
 class Home {
   static id = "home";
@@ -125,93 +129,180 @@ class Home {
   };
 
   checkOnlineVersion = async () => {
-    const isInternetConnected = await hasInternetConnection();
-    let localVersion = await LauncherManager.getLocalVersion();
-
-    if (!isInternetConnected) {
-      if (localVersion === "0.0.0")
-        // pas de connexion internet et pas de version local
+    this.disabledMainButton();
+    const callback = (text, downloadedBytes, totalBytes, percent, speed) => {
+      this.changeMainButtonEvent({
+        text: `${text}
+        (${percent}%)
+        (${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)})
+        à ${formatBytes(speed)}/s`,
+      });
+    };
+    try {
+      const isInternetConnected = await hasInternetConnection();
+      const isInstalled = GameManager.getIsInstalled();
+      let localVersionConfig = null;
+      let onlineVersionConfig = null;
+      let upToDate = false;
+      let maintenance = false;
+      if (isInternetConnected) {
+        try {
+          onlineVersionConfig =
+            await ThunderstoreManager.getOnlineVersionConfig();
+          maintenance = onlineVersionConfig.maintenance || false;
+        } catch (e) {
+          showSnackbar("Impossible de récupérer la version en ligne.", "error");
+        }
+        try {
+          localVersionConfig =
+            await ThunderstoreManager.getLocalVersionConfig();
+        } catch (e) {
+          localVersionConfig = { version: "0.0.0" };
+        }
+        upToDate =
+          localVersionConfig &&
+          onlineVersionConfig &&
+          localVersionConfig.version === onlineVersionConfig.version;
+      }
+      // Cas 1 : Pas installé et pas de connexion internet
+      if (!isInstalled && !isInternetConnected) {
         this.changeMainButtonEvent({
-          text: "❌ Installation Impossible - Pas de connection internet",
+          text: "❌ Installation Impossible - Pas de connexion internet",
           onclick: this.checkOnlineVersion,
         });
-      // pas de connexion internet et version local
-      else
+        return;
+      }
+      // Cas 2 : Pas installé et internet OK
+      if (!isInstalled && isInternetConnected) {
+        this.changeMainButtonEvent({
+          text: "Installer",
+          onclick: async () => {
+            this.disabledMainButton();
+            try {
+              if (isSteamInstallation) {
+                await SteamManager.install();
+                await GameManager.installBepInEx(callback);
+              } else {
+                await GameManager.dowload(callback);
+                await GameManager.unzip(callback);
+                await GameManager.installBepInEx(callback);
+              }
+              // Installation des modpacks
+              // await ThunderstoreManager.installModpacks(); // À adapter si besoin
+              showSnackbar("La dernière version a été installée avec succès !");
+            } catch (err) {
+              showSnackbar("Erreur lors de l'installation !", "error");
+            } finally {
+              this.enableMainButton();
+              this.checkOnlineVersion();
+            }
+          },
+        });
+        return;
+      }
+      // Cas 3 : Installé, pas internet
+      if (isInstalled && !isInternetConnected) {
         this.changeMainButtonEvent({
           text: "Jouer - ⚠️ Attention: Pas de connexion internet",
           onclick: this.startGame,
         });
-    } else {
-      let onlineVersion = await LauncherManager.getOnlineVersion();
-
-      if (localVersion === "0.0.0")
-        // connexion internet mais pas de version local
-        this.changeMainButtonEvent({
-          text: "Installer",
-          onclick: this.installGame,
-        });
-      else if (localVersion !== onlineVersion)
-        // connexion internet et version local pas à jour
-        this.changeMainButtonEvent({
-          text: "Mettre à jour",
-          onclick: this.updateGame,
-        });
-      // connexion internet et version local à jour
-      else
-        this.changeMainButtonEvent({
-          text: "Jouer à la v" + onlineVersion,
-          onclick: this.startGame,
-        });
-    }
-  };
-
-  installGame = async () => {
-    const callback = (text, downloadedBytes, totalBytes, percent, speed) => {
+        return;
+      }
+      // Cas 4 : Installé, internet, pas à jour (majeur)
+      if (
+        isInstalled &&
+        isInternetConnected &&
+        !upToDate &&
+        onlineVersionConfig &&
+        localVersionConfig
+      ) {
+        const [majorLocal] = (localVersionConfig.version || "0.0.0").split(".");
+        const [majorOnline] = (onlineVersionConfig.version || "0.0.0").split(
+          "."
+        );
+        if (majorLocal !== majorOnline) {
+          this.changeMainButtonEvent({
+            text: "Réinstaller (nouvelle version majeure)",
+            onclick: async () => {
+              this.disabledMainButton();
+              try {
+                await GameManager.uninstall();
+                if (isSteamInstallation) {
+                  await SteamManager.install();
+                  await GameManager.installBepInEx(callback);
+                } else {
+                  await GameManager.dowload(callback);
+                  await GameManager.unzip(callback);
+                  await GameManager.installBepInEx(callback);
+                }
+                await ThunderstoreManager.installModpacks();
+                showSnackbar("Réinstallation terminée !");
+              } catch (err) {
+                showSnackbar("Erreur lors de la réinstallation !", "error");
+              } finally {
+                this.enableMainButton();
+                this.checkOnlineVersion();
+              }
+            },
+          });
+          return;
+        } else {
+          // Cas 5 : Installé, internet, pas à jour (mineur)
+          this.changeMainButtonEvent({
+            text: "Mettre à jour",
+            onclick: async () => {
+              this.disabledMainButton();
+              try {
+                await GameManager.uninstall();
+                if (isSteamInstallation) {
+                  await SteamManager.install();
+                  await GameManager.installBepInEx(callback);
+                } else {
+                  await GameManager.dowload(callback);
+                  await GameManager.unzip(callback);
+                  await GameManager.installBepInEx(callback);
+                }
+                // await ThunderstoreManager.installModpacks();
+                showSnackbar("Mise à jour terminée !");
+              } catch (err) {
+                showSnackbar("Erreur lors de la mise à jour !", "error");
+              } finally {
+                this.enableMainButton();
+                this.checkOnlineVersion();
+              }
+            },
+          });
+          return;
+        }
+      }
+      // Cas 6 : Installé, internet, à jour
+      if (isInstalled && isInternetConnected && upToDate) {
+        if (maintenance) {
+          this.changeMainButtonEvent({
+            text: `Jouer (⚠️ Maintenance en cours)`,
+            onclick: this.startGame,
+          });
+        } else {
+          this.changeMainButtonEvent({
+            text: `Jouer à la v${onlineVersionConfig.version}`,
+            onclick: this.startGame,
+          });
+        }
+        return;
+      }
+      // Cas par défaut
       this.changeMainButtonEvent({
-        text: `${text} 
-        (${percent}%) 
-        (${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}) 
-        à ${formatBytes(speed)}/s`,
+        text: "Erreur inconnue, contactez le support.",
+        onclick: this.checkOnlineVersion,
       });
-    };
-
-    this.disabledMainButton();
-    try {
-      await LauncherManager.downloadGame(
-        (downloadedBytes, totalBytes, percent, speed) =>
-          callback(
-            "Téléchargement...",
-            downloadedBytes,
-            totalBytes,
-            percent,
-            speed
-          )
-      );
-
-      await LauncherManager.extractGame(
-        (downloadedBytes, totalBytes, percent, speed) =>
-          callback(
-            "Décompression...",
-            downloadedBytes,
-            totalBytes,
-            percent,
-            speed
-          )
-      );
-
-      await LauncherManager.setLocalVersion(
-        await LauncherManager.getOnlineVersion()
-      );
-
-      showSnackbar("La derniére version a été installée avec succès !");
     } catch (err) {
-      showSnackbar(
-        "Erreur lors de l'installation de la derniére version !",
-        "error"
-      );
+      showSnackbar("Erreur lors de la vérification de la version !", "error");
+      this.changeMainButtonEvent({
+        text: "Erreur lors de la vérification",
+        onclick: this.checkOnlineVersion,
+      });
     } finally {
       this.enableMainButton();
-      this.checkOnlineVersion();
     }
   };
 

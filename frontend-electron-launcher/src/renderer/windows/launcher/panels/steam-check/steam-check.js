@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { ipcRenderer, shell } = require("electron");
+const { isSteamInstallation } = require(PathsManager.getConstants());
 const { changePanel } = require(PathsManager.getUtils());
 const { database } = require(PathsManager.getSharedUtils());
 
@@ -40,6 +41,8 @@ class SteamCheck {
   }
 
   async init() {
+    if (!isSteamInstallation) return changePanel("home");
+
     const configClient = await this.db.readData("configClient");
     const steamPath = configClient?.launcher_config?.steam_path;
     if (steamPath) {
