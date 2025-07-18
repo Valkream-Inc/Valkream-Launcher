@@ -10,6 +10,7 @@ const { database } = require(PathsManager.getSharedUtils());
 const {
   gameFolderToRemove,
   bepInExUrl,
+  baseUrl,
 } = require(window.PathsManager.getConstants());
 
 class GameManager {
@@ -40,7 +41,9 @@ class GameManager {
     }
   }
 
-  async dowload(callback = () => {}) {
+  async dowload(
+    callback = (text, downloadedBytes, totalBytes, percent, speed) => {}
+  ) {
     return new Manager().handleError({
       ensure: fs.existsSync(this.gameDir),
       then: async () => {

@@ -1,5 +1,5 @@
 const axios = require("axios");
-const fs = require("fs").promises;
+const fs = require("fs");
 const path = require("path");
 const yaml = require("yaml");
 const { ipcRenderer } = require("electron");

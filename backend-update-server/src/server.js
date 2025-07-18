@@ -52,6 +52,7 @@ app.use(getLimiter);
 app.use(postLimiter);
 
 // routes
+app.use("/", (req, res) => res.status(200).send("Connected !"));
 require("./routes/add_version.route.js")(app);
 require("./routes/serve_file.route.js")(app);
 require("./routes/change_version.route.js")(app);
