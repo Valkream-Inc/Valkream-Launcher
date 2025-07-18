@@ -4,3 +4,16 @@ modpack_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2
 hash:
   config: 105517d181528eb09cc8c3360efaa275
   plugins: cfd5fcbfa9de15c716f52f7ce7f2d61e
+BepInEx:
+  version: 5.4.19
+  dowload_url:
+    win32: https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.3/BepInEx_win_x64_5.4.23.3.zip
+    linux: https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.3/BepInEx_linux_x64_5.4.23.3.zip
+    darwin: https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.3/BepInEx_macos_x64_5.4.23.3.zip
+gameFolderToRemove:
+  - /BepInEx/cache
+  - /BepInEx/config/wackysDatabase/Cache
+  - /BepInEx/config/Marketplace/SavedData
+  - /BepInEx/config/Marketplace_Sounds
+gameFolderToPreserve:
+  - /BepInEx/config/valheim

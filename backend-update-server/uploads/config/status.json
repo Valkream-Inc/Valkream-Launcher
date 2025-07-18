@@ -1,6 +1,4 @@
 {
   "isInMaintenance": false,
-  "isInMaintenanceReason": "We are currently in maintenance mode.",
-  "isInMaintenanceSince": "2023-03-01T00:00:00.000Z",
-  "isInMaintenanceUntil": "2023-03-01T00:00:00.000Z"
+  "isInMaintenanceText": ""
 }

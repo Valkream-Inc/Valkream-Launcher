@@ -1,3 +1,3 @@
-const isSteamInstallation = true;
+const isSteamInstallation = false;
 
 module.exports = isSteamInstallation;
