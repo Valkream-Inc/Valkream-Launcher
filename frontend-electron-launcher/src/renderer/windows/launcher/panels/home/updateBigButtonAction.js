@@ -28,6 +28,8 @@ class UpdateBigButtonAction {
     enableMainButton = () => {},
     changeMainButtonEvent = ({ text, onclick }) => {}
   ) => {
+    this.disabledMainButton = disabledMainButton;
+    this.enableMainButton = enableMainButton;
     this.changeMainButtonEvent = changeMainButtonEvent;
 
     try {
@@ -57,47 +59,21 @@ class UpdateBigButtonAction {
           text: `❌ Installation Impossible - Pas de connexion ${
             isInternetConnected ? "au server" : "internet"
           }`,
-          onclick: async () =>
-            await new UpdateBigButtonAction().init(
-              disabledMainButton,
-              enableMainButton,
-              changeMainButtonEvent
-            ),
+          onclick: this.reload,
         });
 
       // Cas 2 : Pas installé et internet OK
-      if (!isInstalled && isServerConnected) {
-        changeMainButtonEvent({
+      if (!isInstalled && isServerConnected)
+        return changeMainButtonEvent({
           text: "Installer",
-          onclick: async () => {
-            disabledMainButton();
-            try {
-              if (isSteamInstallation) {
-                await SteamManager.install();
-                await GameManager.installBepInEx(callback);
-              } else {
-                await GameManager.dowload(callback);
-                await GameManager.unzip(callback);
-                await GameManager.installBepInEx(callback);
-              }
-              // Installation des modpacks
-              // await ThunderstoreManager.installModpacks(); // À adapter si besoin
-              showSnackbar("La dernière version a été installée avec succès !");
-            } catch (err) {
-              showSnackbar("Erreur lors de l'installation !", "error");
-            } finally {
-              enableMainButton();
-              checkOnlineVersion();
-            }
-          },
+          onclick: this.installGame,
         });
-        return;
-      }
+
       // Cas 3 : Installé, pas internet
       if (isInstalled && !isServerConnected) {
         changeMainButtonEvent({
           text: "Jouer - ⚠️ Attention: Pas de connexion internet",
-          onclick: startGame,
+          onclick: this.startGame,
         });
         return;
       }
@@ -196,6 +172,41 @@ class UpdateBigButtonAction {
       });
     } finally {
       enableMainButton();
+    }
+  };
+
+  reload = async () =>
+    await new UpdateBigButtonAction().init(
+      this.disabledMainButton,
+      this.enableMainButton,
+      this.changeMainButtonEvent
+    );
+
+  installGame = async () => {
+    this.disabledMainButton();
+    try {
+      let isOk = false;
+
+      if (isSteamInstallation) {
+        // await SteamManager.install();
+        // await GameManager.installBepInEx(callback);
+      } else {
+        isOk = await GameManager.dowload(this.callback);
+        if (isOk) isOk = await GameManager.unzip(this.callback);
+        // await GameManager.installBepInEx((...args) =>
+        //   this.callback("Dowloading...", ...args)
+        // );
+      }
+
+      if (!isOk) throw new Error("Erreur lors de l'installation !");
+      // await ThunderstoreManager.installModpacks(); // À adapter si besoin
+      showSnackbar("La dernière version a été installée avec succès !");
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Erreur lors de l'installation !", "error");
+    } finally {
+      this.enableMainButton();
+      this.reload();
     }
   };
 }

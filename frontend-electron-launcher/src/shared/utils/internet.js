@@ -11,7 +11,6 @@ function hasInternetConnection(hostname = "google.com") {
     dns.lookup(hostname, (err) => {
       if (err && err.code === "ENOTFOUND") {
         resolve(false);
-        console.log("Pas de connexion internet");
       } else {
         resolve(true);
       }

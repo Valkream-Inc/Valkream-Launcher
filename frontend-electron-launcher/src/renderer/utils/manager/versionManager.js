@@ -24,17 +24,22 @@ class VersionManager {
     }
   }
 
-  async getOnlineVersionConfig() {
+  async updateOnlineVersionConfig() {
     return new Manager().handleError({
-      ensure: fs.existsSync(this.gameVersionFilePath),
+      ensure: true,
       then: async () => {
         const yamlContent = (
           await axios.get(this.gameVersionFileLink)
         ).data.trim();
         const parsed = yaml.parse(yamlContent);
-        return parsed;
+        this.onlineVersionConfig = parsed;
       },
     });
+  }
+
+  async getOnlineVersionConfig() {
+    if (!this.onlineVersionConfig) await this.updateOnlineVersionConfig();
+    return this.onlineVersionConfig;
   }
 
   async getLocalVersionConfig() {
@@ -61,6 +66,21 @@ class VersionManager {
       ensure: fs.existsSync(this.gameVersionFilePath),
       then: async () => {
         fs.writeFileSync(this.gameVersionFilePath, content);
+      },
+    });
+  }
+
+  async toURL(url) {
+    return await new Manager().handleError({
+      ensure: url,
+      then: () => {
+        if (typeof url !== "string") return url;
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+          return url;
+        } else {
+          // S'assurer qu'il n'y a pas de double slash
+          return baseUrl.replace(/\/$/, "") + "/" + url.replace(/^\//, "");
+        }
       },
     });
   }

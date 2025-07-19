@@ -88,9 +88,14 @@ class Home {
         serverInfosBox.onclick = () =>
           maintenancePopup.openPopup({
             title: "Maintenance",
-            content: window.maintenance?.maintanceHTML,
+            content:
+              window.maintenance?.maintanceHTML +
+              `<br><br>La maintenance prendra fin le ${new Date(
+                window.maintenance?.maintenanceEndDate
+              ).toLocaleString()} si tout se passe bien.`,
             bottomContent: "Bonne Attente !",
             background: true,
+            color: "white",
             options: true,
           });
       } else {

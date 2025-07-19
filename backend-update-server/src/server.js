@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 // Middleware de protection contre le DDoS (rate limiting)
 const getLimiter = rateLimit({
   windowMs: 5 * 1000, // 5 secondes
-  max: 10,
+  max: 20,
   message: "Trop de requêtes GET. Réessaie dans 5 secondes.",
   keyGenerator: (req) => req.connection.remoteAddress,
   skip: (req) => req.method !== "GET",

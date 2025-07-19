@@ -5,7 +5,8 @@ const { cleanGameFolder } = require("valkream-function-lib");
 const { execFile } = require("child_process");
 const { platform } = require("os");
 
-const { VersionManager, Manager } = require(window.PathsManager.getUtils());
+const Manager = require("./manager.js");
+const VersionManager = require("./versionManager.js");
 const { database } = require(window.PathsManager.getSharedUtils());
 const { baseUrl } = require(window.PathsManager.getConstants());
 
@@ -21,9 +22,10 @@ class GameManager {
     this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
     this.serverGameRoot = path.join(baseUrl, "game/latest");
 
-    this.gameZipLink = path.join(
-      this.serverGameRoot,
-      `build-game-${platform()}.zip`
+    this.gameZipLink = await VersionManager.toURL(
+      (
+        await VersionManager.getOnlineVersionConfig()
+      ).valheim.dowload_url[platform()]
     );
     this.gameZipPath = path.join(this.appdataDir, "game", "build-game.zip");
 
@@ -38,48 +40,88 @@ class GameManager {
   }
 
   async dowload(
-    callback = (text, downloadedBytes, totalBytes, percent, speed) => {}
+    callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
+    text = "Téléchargement..."
   ) {
     return new Manager().handleError({
       ensure: fs.existsSync(this.gameDir),
       then: async () => {
-        ipcRenderer.invoke(
-          "download-multiple-files",
-          [
-            {
-              url: this.gameZipLink,
-              destPath: this.gameZipPath,
-            },
-          ],
-          GameManager.id + "-download"
-        );
+        return new Promise((resolve, reject) => {
+          ipcRenderer.invoke(
+            "download-multiple-files",
+            [
+              {
+                url: this.gameZipLink,
+                destPath: this.gameZipPath,
+              },
+            ],
+            GameManager.id + "-download"
+          );
 
-        ipcRenderer.on(
-          `download-multi-progress-${GameManager.id}-download`,
-          (event, data) => {
-            callback(...data);
-          }
-        );
+          const progressListener = (event, data) => {
+            callback(
+              text,
+              data.downloadedBytes,
+              data.totalBytes,
+              data.percent,
+              data.speed
+            );
+            if (data.downloadedBytes === data.totalBytes) {
+              ipcRenderer.removeListener(
+                `download-multi-progress-${GameManager.id}-download`,
+                progressListener
+              );
+              resolve(true);
+            }
+          };
+
+          ipcRenderer.on(
+            `download-multi-progress-${GameManager.id}-download`,
+            progressListener
+          );
+        });
       },
     });
   }
 
-  async unzip(callback = () => {}) {
+  async unzip(
+    callback = (text, decompressedBytes, totalBytes, percent, speed) => {},
+    text = "Décompression..."
+  ) {
     return new Manager().handleError({
       ensure: fs.existsSync(this.gameZipPath),
       then: async () => {
-        ipcRenderer.send(
-          "multiple-unzip",
-          [{ path: this.gameZipPath, destPath: this.gameDir }],
-          GameManager.id + "-unzip"
-        );
+        return new Promise((resolve, reject) => {
+          ipcRenderer.invoke(
+            "multiple-unzip",
+            [{ path: this.gameZipPath, destPath: this.gameDir }],
+            GameManager.id + "-unzip"
+          );
 
-        ipcRenderer.on(
-          `multi-unzip-progress-${GameManager.id}-unzip`,
-          (event, data) => {
-            callback(...data);
-          }
-        );
+          const progressListener = (event, data) => {
+            callback(
+              text,
+              data.decompressedBytes,
+              data.totalBytes,
+              data.percent,
+              data.speed
+            );
+            if (data.decompressedBytes === data.totalBytes) {
+              ipcRenderer.removeListener(
+                `multi-unzip-progress-${GameManager.id}-unzip`,
+                progressListener
+              );
+
+              fs.unlinkSync(this.gameZipPath);
+              resolve(true);
+            }
+          };
+
+          ipcRenderer.on(
+            `multi-unzip-progress-${GameManager.id}-unzip`,
+            progressListener
+          );
+        });
       },
     });
   }
