@@ -13,11 +13,6 @@ class ThunderstoreManager {
 
   async init() {
     this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
-    this.serverGameRoot = path.join(baseUrl, "game/latest");
-
-    this.gameVersionFileLink = path.join(this.serverGameRoot, "latest.yml");
-    this.gameVersionFilePath = path.join(this.appdataDir, "game", "latest.yml");
-
     this.gameDir = path.join(this.appdataDir, "game", "Valheim");
 
     for (const dir of [this.appdataDir, this.gameDir]) {
@@ -25,47 +20,6 @@ class ThunderstoreManager {
         fs.mkdirSync(dir, { recursive: true });
       }
     }
-  }
-
-  async getOnlineVersionConfig() {
-    return new Manager().handleError({
-      ensure: fs.existsSync(this.gameVersionFilePath),
-      then: async () => {
-        const yamlContent = (
-          await axios.get(this.gameVersionFileLink)
-        ).data.trim();
-        const parsed = yaml.parse(yamlContent);
-        return parsed;
-      },
-    });
-  }
-
-  async getLocalVersionConfig() {
-    return new Manager().handleError({
-      ensure: fs.existsSync(this.gameVersionFilePath),
-      then: async () => {
-        const yamlContent = fs
-          .readFileSync(this.gameVersionFilePath, "utf8")
-          .trim();
-        const parsed = yaml.parse(yamlContent);
-        return parsed;
-      },
-    });
-  }
-
-  async isVersionUpToDate() {
-    const localVersionConfig = await this.getLocalVersionConfig();
-    const onlineVersionConfig = await this.getOnlineVersionConfig();
-    return localVersionConfig.version === onlineVersionConfig.version;
-  }
-
-  setLocalVersionConfig(content) {
-    return new Manager().handleError({
-      ensure: fs.existsSync(this.gameVersionFilePath),
-      then: async () => {
-        await fs.writeFile(this.gameVersionFilePath, content);
-      },
-    });
   }
 
   async downloadModpack(url, destination, callback = () => {}) {

@@ -41,8 +41,6 @@ class SteamCheck {
   }
 
   async init() {
-    if (!isSteamInstallation) return changePanel("home");
-
     const configClient = await this.db.readData("configClient");
     const steamPath = configClient?.launcher_config?.steam_path;
     if (steamPath) {
@@ -159,6 +157,8 @@ class SteamCheck {
   }
 
   async mainCheck(steamDir = null) {
+    if (!isSteamInstallation) return changePanel("home");
+
     const steamStatus = document.getElementById("steam-status");
     const valheimStatus = document.getElementById("valheim-status");
     const errorMessage = document.getElementById("error-message");

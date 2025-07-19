@@ -20,7 +20,13 @@ class Popup {
     else this.popup.style.background = "#000000b3";
     this.popupTitle.innerHTML = info.title;
     this.popupContent.style.color = info.color ? info.color : "#e21212";
-    this.popupContent.innerHTML = info.content;
+    this.popupContent.innerHTML =
+      info.content +
+      `<br><br>
+      <span${
+        info.bottomId ? ` id=\"${info.bottomId}\"` : ""
+      } class='popup-bottom-content'>${info.bottomContent || "Bon Jeu !"}</span>
+    `;
 
     if (info.options) this.popupOptions.style.display = "flex";
 

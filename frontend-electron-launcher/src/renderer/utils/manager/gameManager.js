@@ -3,15 +3,11 @@ const fs = require("fs");
 const { ipcRenderer, shell } = require("electron");
 const { cleanGameFolder } = require("valkream-function-lib");
 const { execFile } = require("child_process");
-const Manager = require("./manager.js");
 const { platform } = require("os");
-const { database } = require(PathsManager.getSharedUtils());
 
-const {
-  gameFolderToRemove,
-  bepInExUrl,
-  baseUrl,
-} = require(window.PathsManager.getConstants());
+const { VersionManager, Manager } = require(window.PathsManager.getUtils());
+const { database } = require(window.PathsManager.getSharedUtils());
+const { baseUrl } = require(window.PathsManager.getConstants());
 
 class GameManager {
   static id = "game-manager";
@@ -89,6 +85,10 @@ class GameManager {
   }
 
   async installBepInEx(callback = () => {}) {
+    const bepInExUrl = await new VersionManager()
+      .getOnlineVersionConfig()
+      .then((config) => config.bepInExUrl[platform()]);
+
     return new Manager().handleError({
       ensure: fs.existsSync(this.gameDir),
       then: () => {

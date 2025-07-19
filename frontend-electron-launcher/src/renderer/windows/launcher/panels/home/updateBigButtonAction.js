@@ -5,8 +5,12 @@ const {
   GameManager,
   SteamManager,
   ThunderstoreManager,
+  VersionManager,
 } = require(window.PathsManager.getUtils());
-const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
+const {
+  hasInternetConnection,
+  isServerReachable,
+} = require(window.PathsManager.getSharedUtils());
 const { isSteamInstallation } = require(window.PathsManager.getConstants());
 
 class UpdateBigButtonAction {
@@ -27,9 +31,8 @@ class UpdateBigButtonAction {
     this.changeMainButtonEvent = changeMainButtonEvent;
 
     try {
-      const isInternetConnected = await hasInternetConnection("google.com");
-      const isServerConnected = await hasInternetConnection();
-      const isConnected = isInternetConnected && isServerConnected;
+      const isInternetConnected = await hasInternetConnection();
+      const isServerConnected = await isServerReachable();
       const isInstalled = GameManager.getIsInstalled();
 
       let localVersionConfig = null;
@@ -37,10 +40,9 @@ class UpdateBigButtonAction {
       let upToDate = false;
       let maintenance = false;
 
-      if (isConnected) {
-        onlineVersionConfig =
-          await ThunderstoreManager.getOnlineVersionConfig();
-        localVersionConfig = await ThunderstoreManager.getLocalVersionConfig();
+      if (isServerConnected) {
+        onlineVersionConfig = await VersionManager.getOnlineVersionConfig();
+        localVersionConfig = await VersionManager.getLocalVersionConfig();
         maintenance = false;
 
         upToDate =
@@ -50,7 +52,7 @@ class UpdateBigButtonAction {
       }
 
       // Cas 1 : Pas installé et pas de connexion internet
-      if (!isInstalled && !isConnected)
+      if (!isInstalled && !isServerConnected)
         return changeMainButtonEvent({
           text: `❌ Installation Impossible - Pas de connexion ${
             isInternetConnected ? "au server" : "internet"
@@ -64,7 +66,7 @@ class UpdateBigButtonAction {
         });
 
       // Cas 2 : Pas installé et internet OK
-      if (!isInstalled && isConnected) {
+      if (!isInstalled && isServerConnected) {
         changeMainButtonEvent({
           text: "Installer",
           onclick: async () => {
@@ -92,7 +94,7 @@ class UpdateBigButtonAction {
         return;
       }
       // Cas 3 : Installé, pas internet
-      if (isInstalled && !isInternetConnected) {
+      if (isInstalled && !isServerConnected) {
         changeMainButtonEvent({
           text: "Jouer - ⚠️ Attention: Pas de connexion internet",
           onclick: startGame,
@@ -102,7 +104,7 @@ class UpdateBigButtonAction {
       // Cas 4 : Installé, internet, pas à jour (majeur)
       if (
         isInstalled &&
-        isInternetConnected &&
+        isServerConnected &&
         !upToDate &&
         onlineVersionConfig &&
         localVersionConfig

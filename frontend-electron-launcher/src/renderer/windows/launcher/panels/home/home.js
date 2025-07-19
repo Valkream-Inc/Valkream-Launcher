@@ -9,6 +9,7 @@ const {
   changePanel,
   Popup,
   EventManager,
+  MaintenanceManager,
   LauncherManager,
 } = require(window.PathsManager.getUtils());
 
@@ -25,6 +26,7 @@ class Home {
     this.showActualEvent();
     this.checkOnlineVersion();
     this.showServerInfo();
+    this.updateMaintenanceStatus();
   }
 
   updateCopyright = () => {
@@ -55,8 +57,7 @@ class Home {
             "<span style='color:#4ec3ff;'>Bienvenue sur le serveur Valkream</span>",
           content: `
             Lorsque vous êtes en jeu, soyez connecté sur le serveur Mumble et dans le canal « Vocal en jeu » du serveur Discord Valkream.<br><br>
-            Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous rejoindre sur notre serveur Discord)<br><br>
-            <span style='display:block;text-align:center;color:#4ec3ff;font-weight:bold;font-size:1.2em;margin-top:1em;'>Bon Jeu!</span>`,
+            Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous rejoindre sur notre serveur Discord)`,
           color: "white",
           background: true,
           options: true,
@@ -66,16 +67,35 @@ class Home {
 
   showServerInfo = async () => {
     const setServerInfos = (infos) => {
+      const serverInfosBox = document.querySelector(".server-infos-container");
       const serverInfosText = document.querySelector("#server-infos");
       const serverPingText = document.querySelector("#server-ping");
       const serverPlayersText = document.querySelector("#server-players");
 
       const isOnline = infos.status === "server online";
-      serverInfosText.innerHTML = isOnline ? "🟢 En ligne" : "🔴 Hors ligne";
+      serverInfosText.innerHTML = window.maintenance?.isInMaintenance
+        ? "🔵 En Maintenance"
+        : isOnline
+        ? "🟢 En ligne"
+        : "🔴 Hors ligne";
       serverPingText.innerHTML = isOnline ? `(${infos.ping} ms)` : "";
       serverPlayersText.innerHTML = isOnline
         ? `${infos.players.online}/${infos.players.max}`
         : "--/--";
+
+      if (window.maintenance?.isInMaintenance) {
+        const maintenancePopup = new Popup();
+        serverInfosBox.onclick = () =>
+          maintenancePopup.openPopup({
+            title: "Maintenance",
+            content: window.maintenance?.maintanceHTML,
+            bottomContent: "Bonne Attente !",
+            background: true,
+            options: true,
+          });
+      } else {
+        serverInfosBox.onclick = () => {};
+      }
     };
 
     ipcRenderer.send("get-server-infos");
@@ -83,6 +103,11 @@ class Home {
       setServerInfos(infos)
     );
   };
+
+  updateMaintenanceStatus = async () =>
+    new MaintenanceManager((maintenance) => {
+      window.maintenance = maintenance;
+    }).init();
 
   showActualEvent = async () => {
     const eventPopup = new Popup();
@@ -101,11 +126,9 @@ class Home {
 
         eventPopup.openPopup({
           title: `<span style='color:#4ec3ff;'>${event.name}</span>`,
-          content: `${event.description}<br\>
-            <span id="${linkId}" style="display:block;text-align:center;color:#4ec3ff;font-weight:bold;font-size:1.2em;margin-top:1em;cursor:pointer;">
-              Voir sur le site Web
-            </span>
-          `,
+          content: event.description,
+          bottomContent: "Voir sur le site Web",
+          bottomId: linkId,
           color: "white",
           background: true,
           options: true,

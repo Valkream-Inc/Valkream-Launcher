@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 // Middleware de protection contre le DDoS (rate limiting)
 const getLimiter = rateLimit({
   windowMs: 5 * 1000, // 5 secondes
-  max: 5,
+  max: 10,
   message: "Trop de requêtes GET. Réessaie dans 5 secondes.",
   keyGenerator: (req) => req.connection.remoteAddress,
   skip: (req) => req.method !== "GET",
@@ -52,7 +52,7 @@ app.use(getLimiter);
 app.use(postLimiter);
 
 // routes
-app.use("/", (req, res) => res.status(200).send("Connected !"));
+app.get("/", (req, res) => res.status(200).send("Connected !"));
 require("./routes/add_version.route.js")(app);
 require("./routes/serve_file.route.js")(app);
 require("./routes/change_version.route.js")(app);
