@@ -35,18 +35,24 @@ class UpdateBigButtonAction {
     try {
       const isInternetConnected = await hasInternetConnection();
       const isServerConnected = await isServerReachable();
-      const isInstalled = await GameManager.getIsInstalled();
+      const localVersionConfig = await VersionManager.getLocalVersionConfig();
+      const isInstalled =
+        (await GameManager.getIsInstalled()) && localVersionConfig;
 
-      let localVersionConfig = null;
       let onlineVersionConfig = null;
       let upToDate = false;
       let maintenance = false;
+      let isMajorUpdate = false;
 
       if (isServerConnected) {
-        ThunderstoreManager.init();
-
         onlineVersionConfig = await VersionManager.getOnlineVersionConfig();
-        localVersionConfig = await VersionManager.getLocalVersionConfig();
+
+        const [majorLocal] = (localVersionConfig.version || "0.0.0").split(".");
+        const [majorOnline] = (onlineVersionConfig.version || "0.0.0").split(
+          "."
+        );
+        isMajorUpdate = majorLocal !== majorOnline;
+
         maintenance = window.maintenance?.isInMaintenance;
 
         upToDate =
@@ -79,98 +85,42 @@ class UpdateBigButtonAction {
         });
         return;
       }
+
       // Cas 4 : Installé, internet, pas à jour (majeur)
-      if (
-        isInstalled &&
-        isServerConnected &&
-        !upToDate &&
-        onlineVersionConfig &&
-        localVersionConfig
-      ) {
-        const [majorLocal] = (localVersionConfig.version || "0.0.0").split(".");
-        const [majorOnline] = (onlineVersionConfig.version || "0.0.0").split(
-          "."
-        );
-        if (majorLocal !== majorOnline) {
-          changeMainButtonEvent({
-            text: "Réinstaller (nouvelle version majeure)",
-            onclick: async () => {
-              disabledMainButton();
-              try {
-                await GameManager.uninstall();
-                if (isSteamInstallation) {
-                  await SteamManager.install();
-                  await GameManager.installBepInEx(callback);
-                } else {
-                  await GameManager.dowload(callback);
-                  await GameManager.unzip(callback);
-                  await GameManager.installBepInEx(callback);
-                }
-                await ThunderstoreManager.installModpacks();
-                showSnackbar("Réinstallation terminée !");
-              } catch (err) {
-                showSnackbar("Erreur lors de la réinstallation !", "error");
-              } finally {
-                enableMainButton();
-                checkOnlineVersion();
-              }
-            },
-          });
-          return;
-        } else {
-          // Cas 5 : Installé, internet, pas à jour (mineur)
-          changeMainButtonEvent({
-            text: "Mettre à jour",
-            onclick: async () => {
-              disabledMainButton();
-              try {
-                await GameManager.uninstall();
-                if (isSteamInstallation) {
-                  await SteamManager.install();
-                  await GameManager.installBepInEx(callback);
-                } else {
-                  await GameManager.dowload(callback);
-                  await GameManager.unzip(callback);
-                  await GameManager.installBepInEx(callback);
-                }
-                // await ThunderstoreManager.installModpacks();
-                showSnackbar("Mise à jour terminée !");
-              } catch (err) {
-                showSnackbar("Erreur lors de la mise à jour !", "error");
-              } finally {
-                enableMainButton();
-                checkOnlineVersion();
-              }
-            },
-          });
-          return;
-        }
+      if (isInstalled && isServerConnected && !upToDate && isMajorUpdate) {
+        return changeMainButtonEvent({
+          text: "Réinstaller <br/>(nouvelle version majeure)",
+          onclick: this.reinstall,
+        });
       }
+
+      // Cas 5 : Installé, internet, pas à jour (mineur)
+      if (isInstalled && isServerConnected && !upToDate && !isMajorUpdate) {
+        return changeMainButtonEvent({
+          text: "Mettre à jour",
+          onclick: this.upToDate,
+        });
+      }
+
       // Cas 6 : Installé, internet, à jour
-      if (isInstalled && isInternetConnected && upToDate) {
-        if (maintenance) {
-          changeMainButtonEvent({
-            text: `Jouer à la v${onlineVersionConfig.version} <br/> (⚠️ Maintenance en cours)`,
-            onclick: this.startGame,
-          });
-        } else {
-          changeMainButtonEvent({
-            text: `Jouer à la v${onlineVersionConfig.version}`,
-            onclick: this.startGame,
-          });
-        }
-        return;
-      }
+      if (isInstalled && isServerConnected && upToDate)
+        return changeMainButtonEvent({
+          text: `Jouer à la v${onlineVersionConfig.version} ${
+            maintenance ? " <br/> (⚠️ Maintenance en cours)" : null
+          }`,
+          onclick: this.startGame,
+        });
+
       // Cas par défaut
       changeMainButtonEvent({
         text: "Erreur inconnue, contactez le support.",
-        onclick: checkOnlineVersion,
+        onclick: this.reload,
       });
     } catch (err) {
       showSnackbar("Erreur lors de la vérification de la version !", "error");
       changeMainButtonEvent({
         text: "Erreur lors de la vérification",
-        onclick: checkOnlineVersion,
+        onclick: this.reload,
       });
     } finally {
       enableMainButton();
@@ -187,19 +137,19 @@ class UpdateBigButtonAction {
   installGame = async () => {
     this.disabledMainButton();
     try {
-      let isOk = false;
+      let isOk = true;
       this.changeMainButtonEvent({ text: "Installation...", onclick: null });
 
       if (isSteamInstallation) {
         // await SteamManager.install();
         // await GameManager.installBepInEx(callback);
       } else {
-        isOk = await GameManager.dowload(this.callback);
+        if (isOk) isOk = await GameManager.dowload(this.callback);
         if (isOk) isOk = await GameManager.unzip(this.callback);
-
-        if (isOk) isOk = await GameManager.dowloadBepInEx(this.callback);
-        if (isOk) isOk = await GameManager.unzipBepInEx(this.callback);
       }
+
+      if (isOk) isOk = await GameManager.dowloadBepInEx(this.callback);
+      if (isOk) isOk = await GameManager.unzipBepInEx(this.callback);
 
       if (isOk) isOk = await ThunderstoreManager.downloadModpack(this.callback);
       if (isOk) isOk = await ThunderstoreManager.unzipModpack(this.callback);
@@ -207,6 +157,7 @@ class UpdateBigButtonAction {
       if (isOk) isOk = await ThunderstoreManager.dowloadMods(this.callback);
       if (isOk) isOk = await ThunderstoreManager.unzipMods(this.callback);
 
+      this.changeMainButtonEvent({ text: "Verification...", onclick: null });
       // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
       if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
 
@@ -225,6 +176,51 @@ class UpdateBigButtonAction {
     this.disabledMainButton();
     await GameManager.play();
     this.enableMainButton();
+  };
+
+  reinstall = async () => {
+    this.disabledMainButton();
+    try {
+      let isOk = true;
+      this.changeMainButtonEvent({ text: "Réinstallation...", onclick: null });
+
+      if (isOk) isOk = await GameManager.uninstall();
+
+      if (!isOk) throw new Error("Erreur lors de la réinstallation !");
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Erreur lors de la réinstallation !", "error");
+    } finally {
+      enableMainButton();
+    }
+    await this.installGame();
+  };
+
+  upToDate = async () => {
+    this.disabledMainButton();
+    try {
+      let isOk = true;
+      this.changeMainButtonEvent({ text: "Mise à jour...", onclick: null });
+
+      if (isOk) isOk = await ThunderstoreManager.downloadModpack(this.callback);
+      if (isOk) isOk = await ThunderstoreManager.unzipModpack(this.callback);
+
+      this.changeMainButtonEvent({ text: "Préparation...", onclick: null });
+      if (isOk) isOk = await ThunderstoreManager.update(this.callback);
+
+      this.changeMainButtonEvent({ text: "Verification...", onclick: null });
+      // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
+      if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
+
+      if (!isOk) throw new Error("Erreur lors de la mise à jour !");
+      else showSnackbar("La dernière version a été installée avec succès !");
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Erreur lors de la mise à jour !", "error");
+    } finally {
+      enableMainButton();
+      await this.reload();
+    }
   };
 }
 

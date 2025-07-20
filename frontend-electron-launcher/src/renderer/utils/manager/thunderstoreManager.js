@@ -1,19 +1,19 @@
-const axios = require("axios");
 const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
-const yaml = require("yaml");
 const { ipcRenderer } = require("electron");
 
 const Manager = require("./manager.js");
 const VersionManager = require("./versionManager.js");
+const { isServerReachable } = require(window.PathsManager.getSharedUtils());
 
 class ThunderstoreManager {
   static id = "thunderstore-manager";
 
   async init() {
     this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
-    this.gameDir = path.join(this.appdataDir, "game", "Valheim");
+    this.gameRootDir = path.join(this.appdataDir, "game");
+    this.gameDir = path.join(this.gameRootDir, "Valheim");
 
     this.BepInExDir = path.join(this.gameDir, "BepInEx");
     this.BepInExConfigDir = path.join(this.BepInExDir, "config");
@@ -22,12 +22,18 @@ class ThunderstoreManager {
     this.ModPackDir = path.join(this.appdataDir, "game", "Modpack");
     this.modsDir = path.join(this.ModPackDir, "mods");
 
-    this.modpackZipLink = await VersionManager.toURL(
-      (
-        await VersionManager.getOnlineVersionConfig()
-      ).modpack.dowload_url
-    );
-    this.modpackZipPath = path.join(this.appdataDir, "game", "modpack.zip");
+    this.manifestPath = path.join(this.appdataDir, "game", "modpack.json");
+    this.newManifestPath = path.join(this.ModPackDir, "manifest.json");
+
+    const isServerConnected = await isServerReachable();
+    if (isServerConnected) {
+      this.modpackZipLink = await VersionManager.toURL(
+        (
+          await VersionManager.getOnlineVersionConfig()
+        ).modpack.dowload_url
+      );
+      this.modpackZipPath = path.join(this.appdataDir, "game", "modpack.zip");
+    }
 
     for (const dir of [
       this.appdataDir,
@@ -143,17 +149,22 @@ class ThunderstoreManager {
 
   async dowloadMods(
     callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
-    text = "Téléchargement des mods..."
+    text = "Téléchargement des mods...",
+    customMods = null
   ) {
     return new Manager().handleError({
       ensure:
-        fs.existsSync(this.gameDir) &&
-        fs.existsSync(path.join(this.ModPackDir, "manifest.json")),
+        fs.existsSync(this.gameDir) && fs.existsSync(this.newManifestPath),
       then: async () => {
         const manifest = JSON.parse(
-          fs.readFileSync(path.join(this.ModPackDir, "manifest.json"), "utf-8")
+          fs.readFileSync(this.newManifestPath, "utf-8")
         );
-        const mods = manifest.dependencies || [];
+        fse.moveSync(this.newManifestPath, this.manifestPath, {
+          overwrite: true,
+          force: true,
+        });
+
+        const mods = customMods || manifest.dependencies || [];
 
         return new Promise((resolve, reject) => {
           ipcRenderer.invoke(
@@ -196,7 +207,8 @@ class ThunderstoreManager {
     text = "Décompression des mods..."
   ) {
     return new Manager().handleError({
-      ensure: fs.existsSync(this.ModPackDir),
+      ensure:
+        fs.existsSync(this.modsDir) && fs.existsSync(this.BepInExPluginsDir),
       then: async () => {
         const mods = fs.readdirSync(this.modsDir);
         return new Promise((resolve, reject) => {
@@ -204,7 +216,10 @@ class ThunderstoreManager {
             "multiple-unzip",
             mods.map((mod) => ({
               path: path.join(this.modsDir, mod),
-              destPath: path.join(this.BepInExPluginsDir, mod),
+              destPath: path.join(
+                this.BepInExPluginsDir,
+                mod.replace(".zip", "")
+              ),
             })),
             ThunderstoreManager.id + "-unzip-mods"
           );
@@ -255,14 +270,12 @@ class ThunderstoreManager {
 
   async ckeckPluginsAndConfig() {
     return new Manager().handleError({
-      ensure: fs.existsSync(this.gameDir),
+      ensure:
+        fs.existsSync(this.BepInExPluginsDir) &&
+        fs.existsSync(this.BepInExConfigDir),
       then: async () => {
-        const pluginsDir = await fs.readdir(
-          path.join(this.gameDir, "BepInEx", "plugins")
-        );
-        const configsDir = await fs.readdir(
-          path.join(this.gameDir, "BepInEx", "config")
-        );
+        const pluginsDir = fs.readdir(this.BepInExPluginsDir);
+        const configsDir = fs.readdir(this.BepInExConfigDir);
 
         const pluginsHash = hashFolder(pluginsDir);
         const configsHash = hashFolder(configsDir);
@@ -275,7 +288,51 @@ class ThunderstoreManager {
       },
     });
   }
+
+  update = async (
+    callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
+    text_dowload = "Téléchargement des mods...",
+    text_unzip = "Décompression des mods..."
+  ) => {
+    let isOk = true;
+
+    return await new Manager().handleError({
+      ensure:
+        fs.existsSync(this.manifestPath) && fs.existsSync(this.newManifestPath),
+      then: async () => {
+        const NewManifest = JSON.parse(
+          fs.readFileSync(this.newManifestPath, "utf-8")
+        );
+        const ActualManifest = JSON.parse(
+          fs.readFileSync(this.manifestPath, "utf-8")
+        );
+
+        const actual_mods = ActualManifest.dependencies || [];
+        const new_mods = NewManifest.dependencies || [];
+        const to_delete = actual_mods.filter((mod) => !new_mods.includes(mod));
+        const to_add = new_mods.filter((mod) => !actual_mods.includes(mod));
+
+        await new Promise.all(
+          to_delete.map((mod) => {
+            if (fs.existsSync(path.join(this.BepInExPluginsDir, mod))) {
+              fs.rmSync(path.join(this.modsDir, mod), {
+                recursive: true,
+              });
+            }
+            return;
+          })
+        );
+
+        if (isOk)
+          isOk = await this.downloadModpack(callback, text_dowload, to_add);
+        if (isOk) isOk = await this.unzipModpack(callback, text_unzip);
+
+        if (!isOk) throw new Error("Erreur lors de l'update du modpack !");
+      },
+    });
+  };
 }
 
 const thunderstoreManager = new ThunderstoreManager();
+thunderstoreManager.init();
 module.exports = thunderstoreManager;
