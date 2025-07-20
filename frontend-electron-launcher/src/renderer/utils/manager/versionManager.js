@@ -61,11 +61,12 @@ class VersionManager {
     return localVersionConfig.version === onlineVersionConfig.version;
   }
 
-  async setLocalVersionConfig(content = this.getOnlineVersionConfig()) {
-    return await new Manager().handleError({
-      ensure: fs.existsSync(this.gameVersionFilePath),
+  async updateLocalVersionConfig(content) {
+    const dataToWrite = content || (await this.getOnlineVersionConfig());
+    return new Manager().handleError({
+      ensure: dataToWrite,
       then: async () => {
-        fs.writeFileSync(this.gameVersionFilePath, content);
+        fs.writeFileSync(this.gameVersionFilePath, yaml.stringify(dataToWrite));
       },
     });
   }

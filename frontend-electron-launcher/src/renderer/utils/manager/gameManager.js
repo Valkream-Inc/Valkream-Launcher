@@ -7,7 +7,10 @@ const { platform } = require("os");
 
 const Manager = require("./manager.js");
 const VersionManager = require("./versionManager.js");
-const { database } = require(window.PathsManager.getSharedUtils());
+const {
+  database,
+  isServerReachable,
+} = require(window.PathsManager.getSharedUtils());
 const { baseUrl } = require(window.PathsManager.getConstants());
 
 class GameManager {
@@ -22,15 +25,29 @@ class GameManager {
     this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
     this.serverGameRoot = path.join(baseUrl, "game/latest");
 
-    this.gameZipLink = await VersionManager.toURL(
-      (
-        await VersionManager.getOnlineVersionConfig()
-      ).valheim.dowload_url[platform()]
-    );
-    this.gameZipPath = path.join(this.appdataDir, "game", "build-game.zip");
+    const isServerConnected = await isServerReachable();
+    if (isServerConnected) {
+      this.gameZipLink = await VersionManager.toURL(
+        (
+          await VersionManager.getOnlineVersionConfig()
+        ).valheim.dowload_url[platform()]
+      );
+      this.gameZipPath = path.join(this.appdataDir, "game", "build-game.zip");
+
+      this.bepInExZipLink = await VersionManager.toURL(
+        (
+          await VersionManager.getOnlineVersionConfig()
+        ).bepinex.dowload_url[platform()]
+      );
+      this.bepInExZipPath = path.join(
+        this.appdataDir,
+        "game",
+        "build-bepinex.zip"
+      );
+    }
 
     this.gameDir = path.join(this.appdataDir, "game", "Valheim");
-    this.gameExePath = path.join(this.gameDir, "ValheimValkream.exe");
+    this.gameExePath = path.join(this.gameDir, "Valheim.exe");
 
     for (const dir of [this.appdataDir, this.gameDir]) {
       if (!fs.existsSync(dir)) {
@@ -126,31 +143,94 @@ class GameManager {
     });
   }
 
-  async installBepInEx(callback = () => {}) {
-    const bepInExUrl = await new VersionManager()
-      .getOnlineVersionConfig()
-      .then((config) => config.bepInExUrl[platform()]);
-
+  async dowloadBepInEx(
+    callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
+    text = "Téléchargement de BepInEx..."
+  ) {
     return new Manager().handleError({
       ensure: fs.existsSync(this.gameDir),
-      then: () => {
-        ipcRenderer.invoke(
-          "download-multiple-files",
-          [
-            {
-              url: bepInExUrl,
-              destPath: path.join(this.gameDir, "BepInEx"),
-            },
-          ],
-          GameManager.id + "-download-bepInEx"
-        );
+      then: async () => {
+        return new Promise((resolve, reject) => {
+          ipcRenderer.invoke(
+            "download-multiple-files",
+            [
+              {
+                url: this.bepInExZipLink,
+                destPath: this.bepInExZipPath,
+              },
+            ],
+            GameManager.id + "-download-bepInEx"
+          );
 
-        ipcRenderer.on(
-          `download-multi-progress-${GameManager.id}-download-bepInEx`,
-          (event, data) => {
-            callback(...data);
-          }
-        );
+          const progressListener = (event, data) => {
+            callback(
+              text,
+              data.downloadedBytes,
+              data.totalBytes,
+              data.percent,
+              data.speed
+            );
+            if (data.downloadedBytes === data.totalBytes) {
+              ipcRenderer.removeListener(
+                `download-multi-progress-${GameManager.id}-download-bepInEx`,
+                progressListener
+              );
+              resolve(true);
+            }
+          };
+
+          ipcRenderer.on(
+            `download-multi-progress-${GameManager.id}-download-bepInEx`,
+            progressListener
+          );
+        });
+      },
+    });
+  }
+
+  async unzipBepInEx(
+    callback = (decompressedBytes, totalBytes, percent, speed) => {},
+    text = "Décompression de BepInEx..."
+  ) {
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.bepInExZipPath),
+      then: async () => {
+        return new Promise((resolve, reject) => {
+          ipcRenderer.invoke(
+            "multiple-unzip",
+            [
+              {
+                path: this.bepInExZipPath,
+                destPath: this.gameDir,
+              },
+            ],
+            GameManager.id + "-unzip-bepInEx"
+          );
+
+          const progressListener = (event, data) => {
+            callback(
+              text,
+              data.decompressedBytes,
+              data.totalBytes,
+              data.percent,
+              data.speed
+            );
+            if (data.decompressedBytes === data.totalBytes) {
+              ipcRenderer.removeListener(
+                `multi-unzip-progress-${GameManager.id}-unzip-bepInEx`,
+                progressListener
+              );
+
+              fs.unlinkSync(this.bepInExZipPath);
+              resolve(true);
+            }
+          };
+
+          ipcRenderer.on(
+            `multi-unzip-progress-${GameManager.id}-unzip-bepInEx`,
+            progressListener
+          );
+        });
       },
     });
   }
@@ -169,7 +249,7 @@ class GameManager {
     });
   }
 
-  getIsInstalled() {
+  async getIsInstalled() {
     return fs.existsSync(this.gameDir) && fs.existsSync(this.gameExePath);
   }
 

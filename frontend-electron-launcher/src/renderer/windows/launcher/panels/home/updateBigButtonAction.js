@@ -16,7 +16,7 @@ const { isSteamInstallation } = require(window.PathsManager.getConstants());
 class UpdateBigButtonAction {
   callback = (text, downloadedBytes, totalBytes, percent, speed) => {
     this.changeMainButtonEvent({
-      text: `${text}
+      text: `${text}<br/>
     (${percent}%)
     (${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)})
     à ${formatBytes(speed)}/s`,
@@ -35,7 +35,7 @@ class UpdateBigButtonAction {
     try {
       const isInternetConnected = await hasInternetConnection();
       const isServerConnected = await isServerReachable();
-      const isInstalled = GameManager.getIsInstalled();
+      const isInstalled = await GameManager.getIsInstalled();
 
       let localVersionConfig = null;
       let onlineVersionConfig = null;
@@ -43,9 +43,11 @@ class UpdateBigButtonAction {
       let maintenance = false;
 
       if (isServerConnected) {
+        ThunderstoreManager.init();
+
         onlineVersionConfig = await VersionManager.getOnlineVersionConfig();
         localVersionConfig = await VersionManager.getLocalVersionConfig();
-        maintenance = false;
+        maintenance = window.maintenance?.isInMaintenance;
 
         upToDate =
           localVersionConfig &&
@@ -56,9 +58,9 @@ class UpdateBigButtonAction {
       // Cas 1 : Pas installé et pas de connexion internet
       if (!isInstalled && !isServerConnected)
         return changeMainButtonEvent({
-          text: `❌ Installation Impossible - Pas de connexion ${
+          text: `❌ Installation Impossible <br/> (Pas de connexion ${
             isInternetConnected ? "au server" : "internet"
-          }`,
+          })`,
           onclick: this.reload,
         });
 
@@ -72,7 +74,7 @@ class UpdateBigButtonAction {
       // Cas 3 : Installé, pas internet
       if (isInstalled && !isServerConnected) {
         changeMainButtonEvent({
-          text: "Jouer - ⚠️ Attention: Pas de connexion internet",
+          text: "Jouer (⚠️ Pas de connexion internet)",
           onclick: this.startGame,
         });
         return;
@@ -148,13 +150,13 @@ class UpdateBigButtonAction {
       if (isInstalled && isInternetConnected && upToDate) {
         if (maintenance) {
           changeMainButtonEvent({
-            text: `Jouer (⚠️ Maintenance en cours)`,
-            onclick: startGame,
+            text: `Jouer à la v${onlineVersionConfig.version} <br/> (⚠️ Maintenance en cours)`,
+            onclick: this.startGame,
           });
         } else {
           changeMainButtonEvent({
             text: `Jouer à la v${onlineVersionConfig.version}`,
-            onclick: startGame,
+            onclick: this.startGame,
           });
         }
         return;
@@ -186,6 +188,7 @@ class UpdateBigButtonAction {
     this.disabledMainButton();
     try {
       let isOk = false;
+      this.changeMainButtonEvent({ text: "Installation...", onclick: null });
 
       if (isSteamInstallation) {
         // await SteamManager.install();
@@ -193,21 +196,35 @@ class UpdateBigButtonAction {
       } else {
         isOk = await GameManager.dowload(this.callback);
         if (isOk) isOk = await GameManager.unzip(this.callback);
-        // await GameManager.installBepInEx((...args) =>
-        //   this.callback("Dowloading...", ...args)
-        // );
+
+        if (isOk) isOk = await GameManager.dowloadBepInEx(this.callback);
+        if (isOk) isOk = await GameManager.unzipBepInEx(this.callback);
       }
 
+      if (isOk) isOk = await ThunderstoreManager.downloadModpack(this.callback);
+      if (isOk) isOk = await ThunderstoreManager.unzipModpack(this.callback);
+
+      if (isOk) isOk = await ThunderstoreManager.dowloadMods(this.callback);
+      if (isOk) isOk = await ThunderstoreManager.unzipMods(this.callback);
+
+      // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
+      if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
+
       if (!isOk) throw new Error("Erreur lors de l'installation !");
-      // await ThunderstoreManager.installModpacks(); // À adapter si besoin
-      showSnackbar("La dernière version a été installée avec succès !");
+      else showSnackbar("La dernière version a été installée avec succès !");
     } catch (err) {
       console.error(err);
       showSnackbar("Erreur lors de l'installation !", "error");
     } finally {
       this.enableMainButton();
-      this.reload();
+      await this.reload();
     }
+  };
+
+  startGame = async () => {
+    this.disabledMainButton();
+    await GameManager.play();
+    this.enableMainButton();
   };
 }
 
