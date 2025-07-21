@@ -38,7 +38,6 @@ class UpdateBigButtonAction {
       await ThunderstoreManager.init();
 
       const isInternetConnected = await hasInternetConnection();
-      const isServerConnected = await isServerReachable();
       const localVersionConfig = await VersionManager.getLocalVersionConfig();
       const isInstalled =
         (await GameManager.getIsInstalled()) &&
@@ -49,7 +48,7 @@ class UpdateBigButtonAction {
       let upToDate = false;
       let isMajorUpdate = false;
 
-      if (isServerConnected) {
+      if (window.isServerReachable) {
         onlineVersionConfig = await VersionManager.getOnlineVersionConfig();
 
         const [majorLocal] = (localVersionConfig.version || "0.0.0").split(".");
@@ -65,40 +64,54 @@ class UpdateBigButtonAction {
       }
 
       // Cas 1 : Pas installé et pas de connexion internet
-      if (!isInstalled && !isServerConnected)
+      if (!isInstalled && !window.isServerReachable)
         return changeMainButtonEvent({
-          text: `❌ Installation Impossible <br/> (Pas de connexion ${
+          text: `Installation Impossible <br/> (❌ Pas de connexion ${
             isInternetConnected ? "au server" : "internet"
-          })`,
+          }.)`,
           onclick: this.reload,
         });
 
       // Cas 2 : Pas installé et internet OK
-      if (!isInstalled && isServerConnected)
+      if (!isInstalled && window.isServerReachable)
         return changeMainButtonEvent({
           text: "Installer",
           onclick: this.install,
         });
 
       // Cas 3 : Installé, pas internet
-      if (isInstalled && !isServerConnected) {
+      if (isInstalled && !window.isServerReachable) {
         changeMainButtonEvent({
-          text: `Jouer à la ${onlineVersionConfig.version} <br /> (⚠️ Pas de connexion internet)`,
+          text: `Jouer à la ${
+            onlineVersionConfig.version
+          } <br /> (⚠️ Pas de connexion ${
+            isInternetConnected ? "au server" : "internet"
+          }.)`,
           onclick: this.start,
         });
         return;
       }
 
       // Cas 4 : Installé, internet, pas à jour (majeur)
-      if (isInstalled && isServerConnected && !upToDate && isMajorUpdate) {
+      if (
+        isInstalled &&
+        window.isServerReachable &&
+        !upToDate &&
+        isMajorUpdate
+      ) {
         return changeMainButtonEvent({
-          text: "Réinstaller <br/>(nouvelle version majeure)",
+          text: "Réinstaller <br/>(⚠️ Nouvelle version majeure.)",
           onclick: this.install,
         });
       }
 
       // Cas 5 : Installé, internet, pas à jour (mineur)
-      if (isInstalled && isServerConnected && !upToDate && !isMajorUpdate) {
+      if (
+        isInstalled &&
+        window.isServerReachable &&
+        !upToDate &&
+        !isMajorUpdate
+      ) {
         return changeMainButtonEvent({
           text: "Mettre à jour",
           onclick: this.upDate,
@@ -106,11 +119,11 @@ class UpdateBigButtonAction {
       }
 
       // Cas 6 : Installé, internet, à jour
-      if (isInstalled && isServerConnected && upToDate)
+      if (isInstalled && window.isServerReachable && upToDate)
         return changeMainButtonEvent({
           text: `Jouer à la v${onlineVersionConfig.version} ${
             window.maintenance?.isInMaintenance
-              ? " <br> (⚠️ Maintenance en cours)"
+              ? " <br> (⚠️ Maintenance en cours.)"
               : ""
           }`,
           onclick: this.start,

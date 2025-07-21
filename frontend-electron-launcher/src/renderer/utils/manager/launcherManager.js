@@ -5,7 +5,6 @@ const path = require("path");
 
 const pkg = require(window.PathsManager.getAbsolutePath("package.json"));
 const Manager = require("./manager.js");
-const { showSnackbar } = require(window.PathsManager.getUtils());
 class LauncherManager {
   async init() {
     this.installDir = path.join(

@@ -7,10 +7,8 @@ const { platform } = require("os");
 
 const Manager = require("./manager.js");
 const VersionManager = require("./versionManager.js");
-const {
-  database,
-  isServerReachable,
-} = require(window.PathsManager.getSharedUtils());
+
+const { database } = require(window.PathsManager.getSharedUtils());
 const { baseUrl } = require(window.PathsManager.getConstants());
 
 class GameManager {
@@ -25,8 +23,7 @@ class GameManager {
     this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
     this.serverGameRoot = path.join(baseUrl, "game/latest");
 
-    const isServerConnected = await isServerReachable();
-    if (isServerConnected) {
+    if (window.isServerReachable) {
       this.gameZipLink = await VersionManager.toURL(
         (
           await VersionManager.getOnlineVersionConfig()

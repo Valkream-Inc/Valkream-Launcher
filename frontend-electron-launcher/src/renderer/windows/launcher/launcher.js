@@ -13,7 +13,7 @@ const SteamCheck = require("./panels/steam-check/steam-check.js");
 
 // import modules
 const { changePanel } = require(PathsManager.getUtils());
-const { database } = require(PathsManager.getSharedUtils());
+const { database, isServerReachable } = require(PathsManager.getSharedUtils());
 
 // libs
 const { ipcRenderer } = require("electron");
@@ -25,6 +25,7 @@ class Launcher {
     this.db = new database();
     await this.initConfigClient();
     await this.applyMusicSetting();
+    await this.initIsServerReachable();
     this.createPanels(Home, Settings, SteamCheck);
     this.startLauncher();
   }
@@ -92,6 +93,16 @@ class Launcher {
 
   async startLauncher() {
     changePanel("steam-check");
+  }
+
+  async initIsServerReachable() {
+    const getIsServerReachable = async () => {
+      const IsServerReachable = await isServerReachable();
+      window.isServerReachable = IsServerReachable;
+    };
+
+    getIsServerReachable();
+    setInterval(getIsServerReachable, 1000);
   }
 }
 

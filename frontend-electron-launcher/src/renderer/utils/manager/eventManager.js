@@ -1,6 +1,5 @@
 const axios = require("axios");
 
-const { isServerReachable } = require(window.PathsManager.getSharedUtils());
 const { baseUrl } = require(window.PathsManager.getConstants());
 
 class EventManager {
@@ -16,9 +15,7 @@ class EventManager {
 
   getEvent = async () => {
     try {
-      const isServerConnected = await isServerReachable();
-
-      if (isServerConnected) {
+      if (window.isServerReachable) {
         const res = await axios.get(`${baseUrl}/config/event.json`);
         this.callback(res.data);
       }

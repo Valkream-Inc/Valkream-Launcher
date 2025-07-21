@@ -1,6 +1,5 @@
 const axios = require("axios");
 
-const { isServerReachable } = require(window.PathsManager.getSharedUtils());
 const { baseUrl } = require(window.PathsManager.getConstants());
 
 class MaintenanceManager {
@@ -16,9 +15,7 @@ class MaintenanceManager {
 
   getMaintenance = async () => {
     try {
-      const isServerConnected = await isServerReachable();
-
-      if (isServerConnected) {
+      if (window.isServerReachable) {
         const res = await axios.get(`${baseUrl}/config/maintenance.json`);
         this.callback(res.data);
       }
