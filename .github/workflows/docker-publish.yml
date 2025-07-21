@@ -19,4 +19,6 @@ jobs:
         with:
           context: ./backend-update-server
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/valkream-backend-update-server:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/valkream-backend-update-server:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/valkream-backend-update-server:latest-${{ github.sha }}
