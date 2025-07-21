@@ -21,4 +21,4 @@ ENV PORT=$PORT
 EXPOSE $PORT
 
 # Commande de lancement
-CMD ["node", "server.js"] 
+CMD ["node", "src/server.js"] 
