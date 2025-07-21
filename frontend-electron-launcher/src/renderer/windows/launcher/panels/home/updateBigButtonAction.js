@@ -74,14 +74,14 @@ class UpdateBigButtonAction {
       if (!isInstalled && isServerConnected)
         return changeMainButtonEvent({
           text: "Installer",
-          onclick: this.installGame,
+          onclick: this.install,
         });
 
       // Cas 3 : Installé, pas internet
       if (isInstalled && !isServerConnected) {
         changeMainButtonEvent({
           text: "Jouer (⚠️ Pas de connexion internet)",
-          onclick: this.startGame,
+          onclick: this.start,
         });
         return;
       }
@@ -90,7 +90,7 @@ class UpdateBigButtonAction {
       if (isInstalled && isServerConnected && !upToDate && isMajorUpdate) {
         return changeMainButtonEvent({
           text: "Réinstaller <br/>(nouvelle version majeure)",
-          onclick: this.reinstall,
+          onclick: this.install,
         });
       }
 
@@ -98,7 +98,7 @@ class UpdateBigButtonAction {
       if (isInstalled && isServerConnected && !upToDate && !isMajorUpdate) {
         return changeMainButtonEvent({
           text: "Mettre à jour",
-          onclick: this.upToDate,
+          onclick: this.upDate,
         });
       }
 
@@ -127,18 +127,25 @@ class UpdateBigButtonAction {
     }
   };
 
-  reload = async () =>
+  reload = async () => {
     await new UpdateBigButtonAction().init(
       this.disabledMainButton,
       this.enableMainButton,
       this.changeMainButtonEvent
     );
+  };
 
-  installGame = async () => {
+  install = async () => {
     this.disabledMainButton();
     try {
       let isOk = true;
       this.changeMainButtonEvent({ text: "Installation...", onclick: null });
+      if (isOk) isOk = await GameManager.uninstall();
+
+      // initialisation des sous-folders supprimés
+      await GameManager.init();
+      await ThunderstoreManager.init();
+      await VersionManager.updateOnlineVersionConfig();
 
       if (isSteamInstallation) {
         // await SteamManager.install();
@@ -172,31 +179,13 @@ class UpdateBigButtonAction {
     }
   };
 
-  startGame = async () => {
+  start = async () => {
     this.disabledMainButton();
     await GameManager.play();
     this.enableMainButton();
   };
 
-  reinstall = async () => {
-    this.disabledMainButton();
-    try {
-      let isOk = true;
-      this.changeMainButtonEvent({ text: "Réinstallation...", onclick: null });
-
-      if (isOk) isOk = await GameManager.uninstall();
-
-      if (!isOk) throw new Error("Erreur lors de la réinstallation !");
-    } catch (err) {
-      console.error(err);
-      showSnackbar("Erreur lors de la réinstallation !", "error");
-    } finally {
-      enableMainButton();
-    }
-    await this.installGame();
-  };
-
-  upToDate = async () => {
+  upDate = async () => {
     this.disabledMainButton();
     try {
       let isOk = true;

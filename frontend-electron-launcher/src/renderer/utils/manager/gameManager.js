@@ -44,10 +44,18 @@ class GameManager {
         "game",
         "build-bepinex.zip"
       );
+
+      this.gameFolderToRemove = await VersionManager.getOnlineVersionConfig()
+        .gameFolderToRemove;
     }
 
-    this.gameDir = path.join(this.appdataDir, "game", "Valheim");
-    this.gameExePath = path.join(this.gameDir, "Valheim.exe");
+    this.gameRootDir = path.join(this.appdataDir, "game");
+    this.gameDir = path.join(this.gameRootDir, "Valheim");
+    this.gameExePath = {
+      win32: path.join(this.gameDir, "Valheim.exe"),
+      linux: path.join(this.gameDir, "Valheim"),
+      darwin: path.join(this.gameDir, "Valheim"),
+    };
 
     for (const dir of [this.appdataDir, this.gameDir]) {
       if (!fs.existsSync(dir)) {
@@ -83,18 +91,27 @@ class GameManager {
               data.percent,
               data.speed
             );
-            if (data.downloadedBytes === data.totalBytes) {
-              ipcRenderer.removeListener(
-                `download-multi-progress-${GameManager.id}-download`,
-                progressListener
-              );
-              resolve(true);
-            }
+          };
+
+          const finishedListener = () => {
+            ipcRenderer.removeListener(
+              `download-multi-progress-${GameManager.id}-download`,
+              progressListener
+            );
+            ipcRenderer.removeListener(
+              `download-multi-finished-${GameManager.id}-download`,
+              finishedListener
+            );
+            resolve(true);
           };
 
           ipcRenderer.on(
             `download-multi-progress-${GameManager.id}-download`,
             progressListener
+          );
+          ipcRenderer.once(
+            `download-multi-finished-${GameManager.id}-download`,
+            finishedListener
           );
         });
       },
@@ -123,20 +140,28 @@ class GameManager {
               data.percent,
               data.speed
             );
-            if (data.decompressedBytes === data.totalBytes) {
-              ipcRenderer.removeListener(
-                `multi-unzip-progress-${GameManager.id}-unzip`,
-                progressListener
-              );
+          };
 
-              fs.unlinkSync(this.gameZipPath);
-              resolve(true);
-            }
+          const finishedListener = () => {
+            ipcRenderer.removeListener(
+              `multi-unzip-progress-${GameManager.id}-unzip`,
+              progressListener
+            );
+            ipcRenderer.removeListener(
+              `multi-unzip-finished-${GameManager.id}-unzip`,
+              finishedListener
+            );
+            fs.unlinkSync(this.gameZipPath);
+            resolve(true);
           };
 
           ipcRenderer.on(
             `multi-unzip-progress-${GameManager.id}-unzip`,
             progressListener
+          );
+          ipcRenderer.once(
+            `multi-unzip-finished-${GameManager.id}-unzip`,
+            finishedListener
           );
         });
       },
@@ -170,18 +195,27 @@ class GameManager {
               data.percent,
               data.speed
             );
-            if (data.downloadedBytes === data.totalBytes) {
-              ipcRenderer.removeListener(
-                `download-multi-progress-${GameManager.id}-download-bepInEx`,
-                progressListener
-              );
-              resolve(true);
-            }
+          };
+
+          const finishedListener = () => {
+            ipcRenderer.removeListener(
+              `download-multi-progress-${GameManager.id}-download-bepInEx`,
+              progressListener
+            );
+            ipcRenderer.removeListener(
+              `download-multi-finished-${GameManager.id}-download-bepInEx`,
+              finishedListener
+            );
+            resolve(true);
           };
 
           ipcRenderer.on(
             `download-multi-progress-${GameManager.id}-download-bepInEx`,
             progressListener
+          );
+          ipcRenderer.once(
+            `download-multi-finished-${GameManager.id}-download-bepInEx`,
+            finishedListener
           );
         });
       },
@@ -215,20 +249,28 @@ class GameManager {
               data.percent,
               data.speed
             );
-            if (data.decompressedBytes === data.totalBytes) {
-              ipcRenderer.removeListener(
-                `multi-unzip-progress-${GameManager.id}-unzip-bepInEx`,
-                progressListener
-              );
+          };
 
-              fs.unlinkSync(this.bepInExZipPath);
-              resolve(true);
-            }
+          const finishedListener = () => {
+            ipcRenderer.removeListener(
+              `multi-unzip-progress-${GameManager.id}-unzip-bepInEx`,
+              progressListener
+            );
+            ipcRenderer.removeListener(
+              `multi-unzip-finished-${GameManager.id}-unzip-bepInEx`,
+              finishedListener
+            );
+            fs.unlinkSync(this.bepInExZipPath);
+            resolve(true);
           };
 
           ipcRenderer.on(
             `multi-unzip-progress-${GameManager.id}-unzip-bepInEx`,
             progressListener
+          );
+          ipcRenderer.once(
+            `multi-unzip-finished-${GameManager.id}-unzip-bepInEx`,
+            finishedListener
           );
         });
       },
@@ -236,15 +278,15 @@ class GameManager {
   }
 
   async openFolder() {
-    return new Manager().handleError({
+    return await new Manager().handleError({
       ensure: fs.existsSync(this.gameDir),
       then: async () => await shell.openPath(this.gameDir),
     });
   }
 
-  clean() {
-    return new Manager().handleError({
-      ensure: fs.existsSync(this.gameDir),
+  async clean(gameFolderToRemove = this.gameFolderToRemove) {
+    return await new Manager().handleError({
+      ensure: fs.existsSync(this.gameDir) && gameFolderToRemove.length > 0,
       then: () => cleanGameFolder(this.gameDir, gameFolderToRemove),
     });
   }
@@ -253,12 +295,12 @@ class GameManager {
     return fs.existsSync(this.gameDir) && fs.existsSync(this.gameExePath);
   }
 
-  uninstall() {
-    return new Manager().handleError({
-      ensure: fs.readdirSync(this.gameDir).length !== 0,
+  async uninstall() {
+    return await new Manager().handleError({
+      ensure: fs.readdirSync(this.gameRootDir).length !== 0,
       then: () => {
-        fs.rmSync(this.gameDir, { recursive: true });
-        fs.mkdirSync(this.gameDir, { recursive: true });
+        fs.rmSync(this.gameRootDir, { recursive: true });
+        fs.mkdirSync(this.gameRootDir, { recursive: true });
       },
     });
   }
@@ -268,7 +310,7 @@ class GameManager {
       ensure: fs.existsSync(this.gameExePath),
       then: () => {
         ipcRenderer.send("main-window-hide");
-        const child = execFile(this.gameExePath, (err) => {
+        const child = execFile(this.gameExePath[platform()], (err) => {
           throw new Error(err);
         });
         child.on("exit", () => {

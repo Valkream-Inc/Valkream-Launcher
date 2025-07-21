@@ -8,15 +8,11 @@ exports.serve_launcher_file = (req, res) => {
     new ServeFile({
       baseDir: paths.launcherLatestDir,
       filename: req.params.filename,
-      user: req.connection.remoteAddress,
+      user: req.ip,
     })
   );
 
-  log(
-    req.connection.remoteAddress,
-    "serve_launcher_file",
-    path.basename(filePath)
-  );
+  log(req.ip, "serve_launcher_file", path.basename(filePath));
   res.download(filePath);
 };
 
@@ -25,11 +21,11 @@ exports.serve_game_file = (req, res) => {
     new ServeFile({
       baseDir: paths.gameLatestDir,
       filename: req.params.filename,
-      user: req.connection.remoteAddress,
+      user: req.ip,
     })
   );
 
-  log(req.connection.remoteAddress, "serve_game_file", path.basename(filePath));
+  log(req.ip, "serve_game_file", path.basename(filePath));
   res.download(filePath);
 };
 
@@ -38,14 +34,10 @@ exports.serve_config_file = (req, res) => {
     new ServeFile({
       baseDir: paths.configUploadDir,
       filename: req.params.filename,
-      user: req.connection.remoteAddress,
+      user: req.ip,
     })
   );
 
-  log(
-    req.connection.remoteAddress,
-    "serve_config_file",
-    path.basename(filePath)
-  );
+  log(req.ip, "serve_config_file", path.basename(filePath));
   res.download(filePath);
 };

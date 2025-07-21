@@ -8,7 +8,7 @@ exports.change_launcher_version = async (req, res) => {
     throw new ClientError(
       "error_empty_info",
       400,
-      req.connection.remoteAddress,
+      req.ip,
       "change_launcher_version"
     );
 
@@ -16,10 +16,10 @@ exports.change_launcher_version = async (req, res) => {
     latestDir: paths.launcherLatestDir,
     oldDir: paths.launcherOldDir,
     requestedVersion: req.body.version,
-    user: req.connection.remoteAddress,
+    user: req.ip,
   });
 
-  log(req.connection.remoteAddress, "change_launcher_version", data.msg);
+  log(req.ip, "change_launcher_version", data.msg);
   res.status(200).send(data);
 };
 
@@ -28,7 +28,7 @@ exports.change_game_version = async (req, res) => {
     throw new ClientError(
       "error_empty_info",
       400,
-      req.connection.remoteAddress,
+      req.ip,
       "change_game_version"
     );
 
@@ -36,9 +36,9 @@ exports.change_game_version = async (req, res) => {
     latestDir: paths.gameLatestDir,
     oldDir: paths.gameOldDir,
     requestedVersion: req.body.version,
-    user: req.connection.remoteAddress,
+    user: req.ip,
   });
 
-  log(req.connection.remoteAddress, "change_game_version", data.msg);
+  log(req.ip, "change_game_version", data.msg);
   res.status(200).send(data);
 };

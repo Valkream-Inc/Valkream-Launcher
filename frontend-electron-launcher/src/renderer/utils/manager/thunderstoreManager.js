@@ -77,18 +77,27 @@ class ThunderstoreManager {
               data.percent,
               data.speed
             );
-            if (data.downloadedBytes === data.totalBytes) {
-              ipcRenderer.removeListener(
-                `download-multi-progress-${ThunderstoreManager.id}-download-modpack`,
-                progressListener
-              );
-              resolve(true);
-            }
+          };
+
+          const finishedListener = () => {
+            ipcRenderer.removeListener(
+              `download-multi-progress-${ThunderstoreManager.id}-download-modpack`,
+              progressListener
+            );
+            ipcRenderer.removeListener(
+              `download-multi-finished-${ThunderstoreManager.id}-download-modpack`,
+              finishedListener
+            );
+            resolve(true);
           };
 
           ipcRenderer.on(
             `download-multi-progress-${ThunderstoreManager.id}-download-modpack`,
             progressListener
+          );
+          ipcRenderer.once(
+            `download-multi-finished-${ThunderstoreManager.id}-download-modpack`,
+            finishedListener
           );
         });
       },
@@ -122,25 +131,33 @@ class ThunderstoreManager {
               data.percent,
               data.speed
             );
-            if (data.decompressedBytes === data.totalBytes) {
-              ipcRenderer.removeListener(
-                `multi-unzip-progress-${ThunderstoreManager.id}-unzip-modpack`,
-                progressListener
-              );
+          };
 
-              fse.moveSync(
-                path.join(this.ModPackDir, "config"),
-                this.BepInExConfigDir,
-                { overwrite: true, force: true }
-              );
-              fs.unlinkSync(this.modpackZipPath);
-              resolve(true);
-            }
+          const finishedListener = () => {
+            ipcRenderer.removeListener(
+              `multi-unzip-progress-${ThunderstoreManager.id}-unzip-modpack`,
+              progressListener
+            );
+            ipcRenderer.removeListener(
+              `multi-unzip-finished-${ThunderstoreManager.id}-unzip-modpack`,
+              finishedListener
+            );
+            fse.moveSync(
+              path.join(this.ModPackDir, "config"),
+              this.BepInExConfigDir,
+              { overwrite: true, force: true }
+            );
+            fs.unlinkSync(this.modpackZipPath);
+            resolve(true);
           };
 
           ipcRenderer.on(
             `multi-unzip-progress-${ThunderstoreManager.id}-unzip-modpack`,
             progressListener
+          );
+          ipcRenderer.once(
+            `multi-unzip-finished-${ThunderstoreManager.id}-unzip-modpack`,
+            finishedListener
           );
         });
       },
@@ -184,18 +201,27 @@ class ThunderstoreManager {
               data.percent,
               data.speed
             );
-            if (data.downloadedBytes === data.totalBytes) {
-              ipcRenderer.removeListener(
-                `download-multi-progress-${ThunderstoreManager.id}-download-mods`,
-                progressListener
-              );
-              resolve(true);
-            }
+          };
+
+          const finishedListener = () => {
+            ipcRenderer.removeListener(
+              `download-multi-progress-${ThunderstoreManager.id}-download-mods`,
+              progressListener
+            );
+            ipcRenderer.removeListener(
+              `download-multi-finished-${ThunderstoreManager.id}-download-mods`,
+              finishedListener
+            );
+            resolve(true);
           };
 
           ipcRenderer.on(
             `download-multi-progress-${ThunderstoreManager.id}-download-mods`,
             progressListener
+          );
+          ipcRenderer.once(
+            `download-multi-finished-${ThunderstoreManager.id}-download-mods`,
+            finishedListener
           );
         });
       },
@@ -232,25 +258,34 @@ class ThunderstoreManager {
               data.percent,
               data.speed
             );
-            if (data.decompressedBytes === data.totalBytes) {
-              ipcRenderer.removeListener(
-                `multi-unzip-progress-${ThunderstoreManager.id}-unzip-mods`,
-                progressListener
-              );
-              // Suppression des archives zip des mods si besoin :
-              mods.forEach((mod) => {
-                const modZip = path.join(this.modsDir, mod);
-                if (fs.existsSync(modZip)) {
-                  fs.unlinkSync(modZip);
-                }
-              });
-              resolve(true);
-            }
+          };
+
+          const finishedListener = () => {
+            ipcRenderer.removeListener(
+              `multi-unzip-progress-${ThunderstoreManager.id}-unzip-mods`,
+              progressListener
+            );
+            ipcRenderer.removeListener(
+              `multi-unzip-finished-${ThunderstoreManager.id}-unzip-mods`,
+              finishedListener
+            );
+            // Suppression des archives zip des mods si besoin :
+            mods.forEach((mod) => {
+              const modZip = path.join(this.modsDir, mod);
+              if (fs.existsSync(modZip)) {
+                fs.unlinkSync(modZip);
+              }
+            });
+            resolve(true);
           };
 
           ipcRenderer.on(
             `multi-unzip-progress-${ThunderstoreManager.id}-unzip-mods`,
             progressListener
+          );
+          ipcRenderer.once(
+            `multi-unzip-finished-${ThunderstoreManager.id}-unzip-mods`,
+            finishedListener
           );
         });
       },

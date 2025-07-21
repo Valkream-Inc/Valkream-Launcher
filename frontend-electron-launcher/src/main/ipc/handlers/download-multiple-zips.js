@@ -62,7 +62,9 @@ class DowloadMultiplefiles {
     });
 
     // 3. Attente de tous les téléchargements
-    return Promise.all(downloads);
+    await Promise.all(downloads);
+    await this.event.sender.send(`download-multi-finished-${this.id}`);
+    return;
   }
 }
 

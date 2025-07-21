@@ -6,8 +6,15 @@ const rateLimit = require("express-rate-limit");
 const { ClientError } = require("./components/error.component.js");
 
 const app = express();
+app.set("trust proxy", true);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Middleware pour attacher req.ip
+app.use((req, res, next) => {
+  req.ip = req.ip || req.connection.remoteAddress;
+  next();
+});
 
 // CORS configuration
 const corsOptions = {

@@ -52,7 +52,9 @@ class MultipleUnzip {
     });
 
     // 2. Attente de tous les téléchargements
-    return Promise.all(decompressions);
+    await Promise.all(decompressions);
+    await this.event.sender.send(`multi-unzip-finished-${this.id}`);
+    return;
   }
 }
 

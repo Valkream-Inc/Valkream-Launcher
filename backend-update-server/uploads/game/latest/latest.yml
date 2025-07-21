@@ -17,7 +17,7 @@ bepinex:
 
 modpack:
   version: 2.1.13
-  dowload_url: /game/latest/ValheimValkream-Valkream-2.1.11.zip
+  dowload_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.1.13/
   hash:
     config: 105517d181528eb09cc8c3360efaa275
     plugins: cfd5fcbfa9de15c716f52f7ce7f2d61e
