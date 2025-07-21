@@ -148,6 +148,14 @@ input::-webkit-inner-spin-button {
   margin: 15px 10px;
   margin-top: 1cm;
 }
+.popup-bottom-content {
+  display: block;
+  text-align: center;
+  color: #4ec3ff;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-top: 1em;
+}
 
 .panel {
   position: absolute;

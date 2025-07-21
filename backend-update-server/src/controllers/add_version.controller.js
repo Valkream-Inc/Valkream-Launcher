@@ -5,12 +5,7 @@ const paths = require("../configs/paths.config");
 
 exports.add_version_game = async (req, res) => {
   if (!req.file || !req.file.path)
-    throw new ClientError(
-      "error_empty_info",
-      400,
-      req.connection.remoteAddress,
-      "add_version_game"
-    );
+    throw new ClientError("error_empty_info", 400, req.ip, "add_version_game");
 
   res.setHeader("Content-Type", "text/plain; charset=utf-8; stream");
 
@@ -20,14 +15,14 @@ exports.add_version_game = async (req, res) => {
       latest_dir: paths.gameLatestDir,
       old_dir: paths.gameOldDir,
       extract_dir: paths.gameTempDir,
-      user: req.connection.remoteAddress,
+      user: req.ip,
     }),
     (progressMsg) => {
       res.write(progressMsg + "\n");
     }
   );
 
-  log(req.connection.remoteAddress, "add_version_game", data.msg);
+  log(req.ip, "add_version_game", data.msg);
   res.write(data.msg + "\n");
   return res.end();
 };
@@ -37,7 +32,7 @@ exports.add_version_launcher = async (req, res) => {
     throw new ClientError(
       "error_empty_info",
       400,
-      req.connection.remoteAddress,
+      req.ip,
       "add_version_launcher"
     );
 
@@ -49,14 +44,14 @@ exports.add_version_launcher = async (req, res) => {
       latest_dir: paths.launcherLatestDir,
       old_dir: paths.launcherOldDir,
       extract_dir: paths.launcherTempDir,
-      user: req.connection.remoteAddress,
+      user: req.ip,
     }),
     (progressMsg) => {
       res.write(progressMsg + "\n");
     }
   );
 
-  log(req.connection.remoteAddress, "add_version_launcher", data.msg);
+  log(req.ip, "add_version_launcher", data.msg);
   res.write(data.msg + "\n");
   return res.end();
 };

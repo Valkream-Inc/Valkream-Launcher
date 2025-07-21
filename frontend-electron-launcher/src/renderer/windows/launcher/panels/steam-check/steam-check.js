@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { ipcRenderer, shell } = require("electron");
+const { isSteamInstallation } = require(PathsManager.getConstants());
 const { changePanel } = require(PathsManager.getUtils());
 const { database } = require(PathsManager.getSharedUtils());
 
@@ -156,6 +157,8 @@ class SteamCheck {
   }
 
   async mainCheck(steamDir = null) {
+    if (!isSteamInstallation) return changePanel("home");
+
     const steamStatus = document.getElementById("steam-status");
     const valheimStatus = document.getElementById("valheim-status");
     const errorMessage = document.getElementById("error-message");

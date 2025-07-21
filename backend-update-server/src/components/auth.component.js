@@ -7,7 +7,7 @@ class Auth {
       throw new ClientError(
         "error_empty_info",
         400,
-        req && req.connection ? req.connection.remoteAddress : undefined,
+        req && req.ip ? req.ip : undefined,
         "Auth"
       );
     }
@@ -18,7 +18,7 @@ class Auth {
       throw new ClientError(
         "error_API key ou token invalide.",
         401,
-        req.connection.remoteAddress,
+        req.ip,
         "Auth"
       );
 

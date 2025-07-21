@@ -3,18 +3,17 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
+const { shell, ipcRenderer } = require("electron");
+
 const {
   changePanel,
   Popup,
-  showSnackbar,
   EventManager,
+  MaintenanceManager,
   LauncherManager,
 } = require(window.PathsManager.getUtils());
-const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
 
-const { shell, ipcRenderer } = require("electron");
-const { formatBytes } = require("valkream-function-lib");
-
+const UpdateBigButtonAction = require("./updateBigButtonAction");
 class Home {
   static id = "home";
   async init() {
@@ -27,6 +26,7 @@ class Home {
     this.showActualEvent();
     this.checkOnlineVersion();
     this.showServerInfo();
+    this.updateMaintenanceStatus();
   }
 
   updateCopyright = () => {
@@ -57,8 +57,7 @@ class Home {
             "<span style='color:#4ec3ff;'>Bienvenue sur le serveur Valkream</span>",
           content: `
             Lorsque vous êtes en jeu, soyez connecté sur le serveur Mumble et dans le canal « Vocal en jeu » du serveur Discord Valkream.<br><br>
-            Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous rejoindre sur notre serveur Discord)<br><br>
-            <span style='display:block;text-align:center;color:#4ec3ff;font-weight:bold;font-size:1.2em;margin-top:1em;'>Bon Jeu!</span>`,
+            Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous rejoindre sur notre serveur Discord)`,
           color: "white",
           background: true,
           options: true,
@@ -68,23 +67,56 @@ class Home {
 
   showServerInfo = async () => {
     const setServerInfos = (infos) => {
+      const serverInfosBox = document.querySelector(".server-infos-container");
       const serverInfosText = document.querySelector("#server-infos");
       const serverPingText = document.querySelector("#server-ping");
       const serverPlayersText = document.querySelector("#server-players");
 
       const isOnline = infos.status === "server online";
-      serverInfosText.innerHTML = isOnline ? "🟢 En ligne" : "🔴 Hors ligne";
+      serverInfosText.innerHTML = window.maintenance?.isInMaintenance
+        ? "🔵 En Maintenance"
+        : isOnline
+        ? "🟢 En ligne"
+        : "🔴 Hors ligne";
       serverPingText.innerHTML = isOnline ? `(${infos.ping} ms)` : "";
       serverPlayersText.innerHTML = isOnline
         ? `${infos.players.online}/${infos.players.max}`
         : "--/--";
+
+      if (window.maintenance?.isInMaintenance) {
+        const maintenancePopup = new Popup();
+        serverInfosBox.onclick = () =>
+          maintenancePopup.openPopup({
+            title: "Maintenance",
+            content:
+              window.maintenance?.maintanceHTML +
+              `<br><br>La maintenance prendra fin le ${new Date(
+                window.maintenance?.maintenanceEndDate
+              ).toLocaleString()} si tout se passe bien.`,
+            bottomContent: "Bonne Attente !",
+            background: true,
+            color: "white",
+            options: true,
+          });
+      } else {
+        serverInfosBox.onclick = () => {};
+      }
     };
 
+    let skip = 0;
     ipcRenderer.send("get-server-infos");
-    ipcRenderer.on("update-server-info", (event, infos) =>
-      setServerInfos(infos)
-    );
+    ipcRenderer.on("update-server-info", (event, infos) => {
+      setServerInfos(infos);
+      if (this.isMainButtonEnabled() && skip === 0) this.checkOnlineVersion();
+      if (skip > 5) skip = 0;
+      else skip++;
+    });
   };
+
+  updateMaintenanceStatus = async () =>
+    new MaintenanceManager((maintenance) => {
+      window.maintenance = maintenance;
+    }).init();
 
   showActualEvent = async () => {
     const eventPopup = new Popup();
@@ -103,11 +135,9 @@ class Home {
 
         eventPopup.openPopup({
           title: `<span style='color:#4ec3ff;'>${event.name}</span>`,
-          content: `${event.description}<br\>
-            <span id="${linkId}" style="display:block;text-align:center;color:#4ec3ff;font-weight:bold;font-size:1.2em;margin-top:1em;cursor:pointer;">
-              Voir sur le site Web
-            </span>
-          `,
+          content: event.description,
+          bottomContent: "Voir sur le site Web",
+          bottomId: linkId,
           color: "white",
           background: true,
           options: true,
@@ -125,115 +155,11 @@ class Home {
   };
 
   checkOnlineVersion = async () => {
-    const isInternetConnected = await hasInternetConnection();
-    let localVersion = await LauncherManager.getLocalVersion();
-
-    if (!isInternetConnected) {
-      if (localVersion === "0.0.0")
-        // pas de connexion internet et pas de version local
-        this.changeMainButtonEvent({
-          text: "❌ Installation Impossible - Pas de connection internet",
-          onclick: this.checkOnlineVersion,
-        });
-      // pas de connexion internet et version local
-      else
-        this.changeMainButtonEvent({
-          text: "Jouer - ⚠️ Attention: Pas de connexion internet",
-          onclick: this.startGame,
-        });
-    } else {
-      let onlineVersion = await LauncherManager.getOnlineVersion();
-
-      if (localVersion === "0.0.0")
-        // connexion internet mais pas de version local
-        this.changeMainButtonEvent({
-          text: "Installer",
-          onclick: this.installGame,
-        });
-      else if (localVersion !== onlineVersion)
-        // connexion internet et version local pas à jour
-        this.changeMainButtonEvent({
-          text: "Mettre à jour",
-          onclick: this.updateGame,
-        });
-      // connexion internet et version local à jour
-      else
-        this.changeMainButtonEvent({
-          text: "Jouer à la v" + onlineVersion,
-          onclick: this.startGame,
-        });
-    }
-  };
-
-  installGame = async () => {
-    const callback = (text, downloadedBytes, totalBytes, percent, speed) => {
-      this.changeMainButtonEvent({
-        text: `${text} 
-        (${percent}%) 
-        (${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}) 
-        à ${formatBytes(speed)}/s`,
-      });
-    };
-
-    this.disabledMainButton();
-    try {
-      await LauncherManager.downloadGame(
-        (downloadedBytes, totalBytes, percent, speed) =>
-          callback(
-            "Téléchargement...",
-            downloadedBytes,
-            totalBytes,
-            percent,
-            speed
-          )
-      );
-
-      await LauncherManager.extractGame(
-        (downloadedBytes, totalBytes, percent, speed) =>
-          callback(
-            "Décompression...",
-            downloadedBytes,
-            totalBytes,
-            percent,
-            speed
-          )
-      );
-
-      await LauncherManager.setLocalVersion(
-        await LauncherManager.getOnlineVersion()
-      );
-
-      showSnackbar("La derniére version a été installée avec succès !");
-    } catch (err) {
-      showSnackbar(
-        "Erreur lors de l'installation de la derniére version !",
-        "error"
-      );
-    } finally {
-      this.enableMainButton();
-      this.checkOnlineVersion();
-    }
-  };
-
-  startGame = async () => {
-    this.disabledMainButton();
-    LauncherManager.playGame();
-    this.enableMainButton();
-  };
-
-  updateGame = async () => {
-    const playInstallBtn = document.querySelector("#play-install-btn");
-    playInstallBtn.disabled = true;
-    try {
-      await LauncherManager.uninstallGame();
-      await this.installGame();
-    } catch (err) {
-      console.error(err);
-      showSnackbar("Erreur lors de la mise à jour du jeu !", 3000, "error");
-    } finally {
-      await this.checkOnlineVersion();
-      playInstallBtn.disabled = false;
-    }
+    new UpdateBigButtonAction().init(
+      this.disabledMainButton,
+      this.enableMainButton,
+      this.changeMainButtonEvent
+    );
   };
 
   changeMainButtonEvent = ({ text, onclick }) => {
@@ -248,6 +174,10 @@ class Home {
   enableMainButton = () => {
     const playInstallBtn = document.querySelector("#play-install-btn");
     playInstallBtn.disabled = false;
+  };
+  isMainButtonEnabled = () => {
+    const playInstallBtn = document.querySelector("#play-install-btn");
+    return !playInstallBtn.disabled;
   };
 }
 

@@ -3,36 +3,36 @@ const axios = require("axios");
 const { isServerReachable } = require(window.PathsManager.getSharedUtils());
 const { baseUrl } = require(window.PathsManager.getConstants());
 
-class EventManager {
+class MaintenanceManager {
   constructor(callback) {
     this.callback = callback;
     this.interval = null;
   }
 
   init = () => {
-    this.getEvent();
-    this.interval = setInterval(this.getEvent, 5000);
+    this.getMaintenance();
+    this.interval = setInterval(this.getMaintenance, 5000);
   };
 
-  getEvent = async () => {
+  getMaintenance = async () => {
     try {
       const isServerConnected = await isServerReachable();
 
       if (isServerConnected) {
-        const res = await axios.get(`${baseUrl}/config/event.json`);
+        const res = await axios.get(`${baseUrl}/config/maintenance.json`);
         this.callback(res.data);
       }
     } catch (err) {
-      console.error("Error getting event:", err.message);
+      console.error("Error getting Maintenance:", err.message);
     }
   };
 
   stop = () => {
     if (this.interval) {
       clearInterval(this.interval);
-      console.log("Event polling stopped.");
+      console.log("Maintenance polling stopped.");
     }
   };
 }
 
-module.exports = EventManager;
+module.exports = MaintenanceManager;
