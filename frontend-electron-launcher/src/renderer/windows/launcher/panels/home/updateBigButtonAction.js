@@ -33,15 +33,20 @@ class UpdateBigButtonAction {
     this.changeMainButtonEvent = changeMainButtonEvent;
 
     try {
+      await GameManager.init();
+      await ThunderstoreManager.init();
+      await VersionManager.updateOnlineVersionConfig();
+
       const isInternetConnected = await hasInternetConnection();
       const isServerConnected = await isServerReachable();
       const localVersionConfig = await VersionManager.getLocalVersionConfig();
       const isInstalled =
-        (await GameManager.getIsInstalled()) && localVersionConfig;
+        (await GameManager.getIsInstalled()) &&
+        (await ThunderstoreManager.getIsInstalled()) &&
+        (await VersionManager.getIsInstalled());
 
       let onlineVersionConfig = null;
       let upToDate = false;
-      let maintenance = false;
       let isMajorUpdate = false;
 
       if (isServerConnected) {
@@ -52,8 +57,6 @@ class UpdateBigButtonAction {
           "."
         );
         isMajorUpdate = majorLocal !== majorOnline;
-
-        maintenance = window.maintenance?.isInMaintenance;
 
         upToDate =
           localVersionConfig &&
@@ -80,7 +83,7 @@ class UpdateBigButtonAction {
       // Cas 3 : Installé, pas internet
       if (isInstalled && !isServerConnected) {
         changeMainButtonEvent({
-          text: "Jouer (⚠️ Pas de connexion internet)",
+          text: `Jouer à la ${onlineVersionConfig.version} <br /> (⚠️ Pas de connexion internet)`,
           onclick: this.start,
         });
         return;
@@ -106,13 +109,15 @@ class UpdateBigButtonAction {
       if (isInstalled && isServerConnected && upToDate)
         return changeMainButtonEvent({
           text: `Jouer à la v${onlineVersionConfig.version} ${
-            maintenance ? " <br/> (⚠️ Maintenance en cours)" : null
+            window.maintenance?.isInMaintenance
+              ? " <br> (⚠️ Maintenance en cours)"
+              : ""
           }`,
-          onclick: this.startGame,
+          onclick: this.start,
         });
 
       // Cas par défaut
-      changeMainButtonEvent({
+      return changeMainButtonEvent({
         text: "Erreur inconnue, contactez le support.",
         onclick: this.reload,
       });
@@ -181,8 +186,18 @@ class UpdateBigButtonAction {
 
   start = async () => {
     this.disabledMainButton();
-    await GameManager.play();
-    this.enableMainButton();
+    try {
+      let isOk = true;
+      if (isOk) isOk = await GameManager.play();
+
+      if (!isOk) throw new Error("Erreur lors du lancement du jeu !");
+      else showSnackbar("Le jeu a été lancé avec succès !");
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Erreur lors du lancement du jeu !", "error");
+    } finally {
+      this.enableMainButton();
+    }
   };
 
   upDate = async () => {
@@ -190,6 +205,7 @@ class UpdateBigButtonAction {
     try {
       let isOk = true;
       this.changeMainButtonEvent({ text: "Mise à jour...", onclick: null });
+      if (isOk) isOk = await ThunderstoreManager.uninstallModpackConfig();
 
       if (isOk) isOk = await ThunderstoreManager.downloadModpack(this.callback);
       if (isOk) isOk = await ThunderstoreManager.unzipModpack(this.callback);
@@ -207,7 +223,7 @@ class UpdateBigButtonAction {
       console.error(err);
       showSnackbar("Erreur lors de la mise à jour !", "error");
     } finally {
-      enableMainButton();
+      this.enableMainButton();
       await this.reload();
     }
   };

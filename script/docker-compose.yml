@@ -13,7 +13,7 @@ services:
       - backend-net
 
   backend-update-server:
-    image: btherin/valkream-update-server:latest
+    image: jeanchante/valkream-backend-update-server:latest
     container_name: backend-update-server
     restart: always
     ports:
@@ -21,8 +21,7 @@ services:
     volumes:
       - ./uploads:/app/uploads
     env_file:
-      - ./.env # Chemin relatif vers votre .env custom
-    # Ajoute ici d'autres variables d'environnement si besoin
+      - ./.env
     networks:
       - backend-net
 

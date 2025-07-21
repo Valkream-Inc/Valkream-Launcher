@@ -347,25 +347,70 @@ class ThunderstoreManager {
         const to_delete = actual_mods.filter((mod) => !new_mods.includes(mod));
         const to_add = new_mods.filter((mod) => !actual_mods.includes(mod));
 
-        await new Promise.all(
-          to_delete.map((mod) => {
-            if (fs.existsSync(path.join(this.BepInExPluginsDir, mod))) {
-              fs.rmSync(path.join(this.modsDir, mod), {
+        const to_preserve = (await VersionManager.getLocalVersionConfig())
+          .gameFolderToPreserve;
+
+        await Promise.all(
+          to_preserve.map((folder) => {
+            if (fs.existsSync(path.join(this.gameDir, folder))) {
+              fs.rmSync(path.join(this.gameRootDir, "preserved", folder), {
                 recursive: true,
               });
+              fs.mkdirSync(path.join(this.gameRootDir, "preserved", folder), {
+                recursive: true,
+              });
+              fse.moveSync(
+                path.join(this.gameDir, folder),
+                path.join(this.gameRootDir, "preserved", folder),
+                { overwrite: true, force: true }
+              );
             }
             return;
           })
         );
 
-        if (isOk)
-          isOk = await this.downloadModpack(callback, text_dowload, to_add);
-        if (isOk) isOk = await this.unzipModpack(callback, text_unzip);
+        await Promise.all(
+          to_delete.map((mod) => {
+            const modPath = path.join(this.modsDir, mod);
+            if (fs.existsSync(modPath)) {
+              fs.rmSync(modPath, { recursive: true });
+            }
+            return;
+          })
+        );
+
+        if (isOk) isOk = await this.dowloadMods(callback, text_dowload, to_add);
+        if (isOk) isOk = await this.unzipMods(callback, text_unzip);
+
+        await Promise.all(
+          to_preserve.map((folder) => {
+            if (fs.existsSync(path.join(this.gameRootDir, "preserved", folder)))
+              fse.moveSync(
+                path.join(this.gameRootDir, "preserved", folder),
+                path.join(this.gameDir, folder),
+                { overwrite: true, force: true }
+              );
+            return;
+          })
+        );
 
         if (!isOk) throw new Error("Erreur lors de l'update du modpack !");
       },
     });
   };
+
+  async getIsInstalled() {
+    return fs.existsSync(this.manifestPath);
+  }
+
+  async uninstallModpackConfig() {
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.BepInExConfigDir),
+      then: async () => {
+        fs.rmSync(this.BepInExConfigDir, { recursive: true });
+      },
+    });
+  }
 }
 
 const thunderstoreManager = new ThunderstoreManager();

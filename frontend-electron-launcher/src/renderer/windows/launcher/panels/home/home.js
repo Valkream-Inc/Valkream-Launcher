@@ -103,10 +103,14 @@ class Home {
       }
     };
 
+    let skip = 0;
     ipcRenderer.send("get-server-infos");
-    ipcRenderer.on("update-server-info", (event, infos) =>
-      setServerInfos(infos)
-    );
+    ipcRenderer.on("update-server-info", (event, infos) => {
+      setServerInfos(infos);
+      if (this.isMainButtonEnabled() && skip === 0) this.checkOnlineVersion();
+      if (skip > 5) skip = 0;
+      else skip++;
+    });
   };
 
   updateMaintenanceStatus = async () =>
@@ -158,27 +162,6 @@ class Home {
     );
   };
 
-  // startGame = async () => {
-  //   this.disabledMainButton();
-  //   LauncherManager.playGame();
-  //   this.enableMainButton();
-  // };
-
-  // updateGame = async () => {
-  //   const playInstallBtn = document.querySelector("#play-install-btn");
-  //   playInstallBtn.disabled = true;
-  //   try {
-  //     await LauncherManager.uninstallGame();
-  //     await this.installGame();
-  //   } catch (err) {
-  //     console.error(err);
-  //     showSnackbar("Erreur lors de la mise à jour du jeu !", 3000, "error");
-  //   } finally {
-  //     await this.checkOnlineVersion();
-  //     playInstallBtn.disabled = false;
-  //   }
-  // };
-
   changeMainButtonEvent = ({ text, onclick }) => {
     const playInstallBtn = document.querySelector("#play-install-btn");
     playInstallBtn.innerHTML = text;
@@ -191,6 +174,10 @@ class Home {
   enableMainButton = () => {
     const playInstallBtn = document.querySelector("#play-install-btn");
     playInstallBtn.disabled = false;
+  };
+  isMainButtonEnabled = () => {
+    const playInstallBtn = document.querySelector("#play-install-btn");
+    return !playInstallBtn.disabled;
   };
 }
 

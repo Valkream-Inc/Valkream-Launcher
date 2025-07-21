@@ -292,7 +292,9 @@ class GameManager {
   }
 
   async getIsInstalled() {
-    return fs.existsSync(this.gameDir) && fs.existsSync(this.gameExePath);
+    return (
+      fs.existsSync(this.gameDir) && fs.existsSync(this.gameExePath[platform()])
+    );
   }
 
   async uninstall() {
@@ -305,9 +307,9 @@ class GameManager {
     });
   }
 
-  play() {
-    return new Manager().handleError({
-      ensure: fs.existsSync(this.gameExePath),
+  async play() {
+    return await new Manager().handleError({
+      ensure: fs.existsSync(this.gameExePath[platform()]),
       then: () => {
         ipcRenderer.send("main-window-hide");
         const child = execFile(this.gameExePath[platform()], (err) => {

@@ -85,6 +85,10 @@ class VersionManager {
       },
     });
   }
+
+  async getIsInstalled() {
+    return fs.existsSync(this.gameVersionFilePath);
+  }
 }
 
 const versionManager = new VersionManager();
