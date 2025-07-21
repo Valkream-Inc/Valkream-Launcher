@@ -1,3 +1,10 @@
+/*
+*******************************************************************************
+*                                                                             *
+* Navigation (Menu de gauche)                                                 *
+*                                                                             *
+*******************************************************************************
+*/
 .nav-settings {
   position: fixed;
   top: 0;
@@ -58,6 +65,13 @@
   background: var(--element-color);
 }
 
+/*
+*******************************************************************************
+*                                                                             *
+* Conteneur principal des paramètres (panneau de droite)                      *
+*                                                                             *
+*******************************************************************************
+*/
 .container-settings {
   position: absolute;
   display: flex;
@@ -127,9 +141,13 @@
   justify-content: space-evenly;
 }
 
-/* ===================== */
-/* Toggle Switch (Interrupteur) */
-/* ===================== */
+/*
+*******************************************************************************
+*                                                                             *
+* Interrupteur (Toggle Switch)                                                *
+*                                                                             *
+*******************************************************************************
+*/
 .toggle-switch {
   position: relative;
   display: inline-block;
@@ -176,11 +194,13 @@
   transform: translateX(22px);
 }
 
-/* ===================== */
-/* Classes manquantes pour les paramètres */
-/* ===================== */
-
-/* Input pour le chemin Valheim */
+/*
+*******************************************************************************
+*                                                                             *
+* Champs de saisie et boutons pour le chemin Valheim                          *
+*                                                                             *
+*******************************************************************************
+*/
 .valheim-path-input-text {
   background: var(--background);
   border: 2px solid var(--element-color);
@@ -215,7 +235,13 @@
   background: #1565c0;
 }
 
-/* Boutons de fermeture */
+/*
+*******************************************************************************
+*                                                                             *
+* Boutons de fermeture                                                        *
+*                                                                             *
+*******************************************************************************
+*/
 .close-box {
   display: flex;
   flex-direction: column;
@@ -236,66 +262,4 @@
 .close-btn:hover {
   background: var(--element-color);
   color: var(--background);
-}
-
-/* Input pour le nombre de fichiers */
-.max-files {
-  background: var(--background);
-  border: 2px solid var(--element-color);
-  border-radius: 8px;
-  padding: 0.5rem;
-  color: var(--color);
-  font-size: 1rem;
-  width: 80px;
-  text-align: center;
-}
-
-.max-files-btn {
-  background: var(--secondary-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.2s;
-}
-
-.max-files-btn:hover {
-  background: #1565c0;
-}
-
-/* Boutons de thème */
-.theme-box {
-  display: flex;
-  gap: 1rem;
-}
-
-.theme-btn {
-  background: var(--background);
-  border: 2px solid var(--element-color);
-  border-radius: 8px;
-  padding: 1rem 2rem;
-  color: var(--color);
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s;
-  min-width: 100px;
-}
-
-.theme-btn:hover {
-  background: var(--element-color);
-  color: var(--background);
-}
-
-.theme-btn-clair {
-  border-color: #ffd700;
-}
-
-.theme-btn-sombre {
-  border-color: #4a4a4a;
-}
-
-.theme-btn-auto {
-  border-color: var(--secondary-color);
 }

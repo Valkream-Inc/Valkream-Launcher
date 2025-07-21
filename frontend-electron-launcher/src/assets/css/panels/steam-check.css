@@ -1,3 +1,10 @@
+/*
+*******************************************************************************
+*                                                                             *
+* Wrapper principal de la vérification Steam                                  *
+*                                                                             *
+*******************************************************************************
+*/
 .steam-check-wrapper {
   position: absolute;
   top: 0;
@@ -11,6 +18,13 @@
   z-index: 2;
 }
 
+/*
+*******************************************************************************
+*                                                                             *
+* Boîte principale de la vérification Steam                                   *
+*                                                                             *
+*******************************************************************************
+*/
 .steam-check-box {
   max-width: 420px;
   margin: 1cm auto;
@@ -31,6 +45,14 @@
   color: #4ec3ff;
   letter-spacing: 1px;
 }
+
+/*
+*******************************************************************************
+*                                                                             *
+* Statuts de vérification Steam                                               *
+*                                                                             *
+*******************************************************************************
+*/
 .steam-check-statuses {
   width: 100%;
   margin-bottom: 18px;
@@ -62,6 +84,14 @@
   background: #e21212cc;
   color: #fff;
 }
+
+/*
+*******************************************************************************
+*                                                                             *
+* Boutons d'action                                                            *
+*                                                                             *
+*******************************************************************************
+*/
 .choose-steam-folder-btn {
   margin: 18px 0 0 0;
   padding: 10px 22px;
@@ -76,22 +106,6 @@
 }
 .choose-steam-folder-btn:hover {
   background: #3baee7;
-}
-.steam-check-error {
-  color: #e21212;
-  margin-top: 18px;
-  font-weight: 600;
-  text-align: center;
-}
-.steam-check-solutions {
-  margin-top: 16px;
-  background: #1a1d22;
-  border-radius: 8px;
-  padding: 12px 16px;
-  color: #4ec3ff;
-  font-size: 1em;
-  text-align: left;
-  width: 100%;
 }
 .open-steam-btn {
   background-color: #1b2836;
@@ -110,4 +124,28 @@
 .open-steam-btn:focus {
   background-color: #171a21;
   outline: none;
+}
+
+/*
+*******************************************************************************
+*                                                                             *
+* Messages d'erreur et solutions                                              *
+*                                                                             *
+*******************************************************************************
+*/
+.steam-check-error {
+  color: #e21212;
+  margin-top: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+.steam-check-solutions {
+  margin-top: 16px;
+  background: #1a1d22;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #4ec3ff;
+  font-size: 1em;
+  text-align: left;
+  width: 100%;
 }
