@@ -1,4 +1,17 @@
 services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+    networks:
+      - backend-net
+
   backend-update-server:
     image: btherin/valkream-update-server:latest
     container_name: backend-update-server
@@ -10,6 +23,8 @@ services:
     env_file:
       - ./.env # Chemin relatif vers votre .env custom
     # Ajoute ici d'autres variables d'environnement si besoin
+    networks:
+      - backend-net
 
   watchtower:
     image: containrrr/watchtower
@@ -18,3 +33,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --cleanup --interval 60
+
+networks:
+  backend-net:
+    driver: bridge
