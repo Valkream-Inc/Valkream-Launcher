@@ -33,9 +33,9 @@ class UpdateBigButtonAction {
     this.changeMainButtonEvent = changeMainButtonEvent;
 
     try {
+      await VersionManager.updateOnlineVersionConfig();
       await GameManager.init();
       await ThunderstoreManager.init();
-      await VersionManager.updateOnlineVersionConfig();
 
       const isInternetConnected = await hasInternetConnection();
       const isServerConnected = await isServerReachable();
@@ -150,7 +150,6 @@ class UpdateBigButtonAction {
       // initialisation des sous-folders supprimés
       await GameManager.init();
       await ThunderstoreManager.init();
-      await VersionManager.updateOnlineVersionConfig();
 
       if (isSteamInstallation) {
         // await SteamManager.install();
