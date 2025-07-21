@@ -103,19 +103,18 @@ class Home {
       }
     };
 
-    let skip = 0;
     ipcRenderer.send("get-server-infos");
     ipcRenderer.on("update-server-info", (event, infos) => {
       setServerInfos(infos);
-      if (this.isMainButtonEnabled() && skip === 0) this.checkOnlineVersion();
-      if (skip > 5) skip = 0;
-      else skip++;
     });
   };
 
   updateMaintenanceStatus = async () =>
-    new MaintenanceManager((maintenance) => {
+    await new MaintenanceManager((maintenance) => {
       window.maintenance = maintenance;
+
+      // Si le bouton est actif, on vérifie l'action associée
+      if (this.isMainButtonEnabled()) this.checkOnlineVersion();
     }).init();
 
   showActualEvent = async () => {

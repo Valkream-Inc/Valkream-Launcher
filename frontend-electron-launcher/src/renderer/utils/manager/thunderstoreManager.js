@@ -5,7 +5,6 @@ const { ipcRenderer } = require("electron");
 
 const Manager = require("./manager.js");
 const VersionManager = require("./versionManager.js");
-const { isServerReachable } = require(window.PathsManager.getSharedUtils());
 
 class ThunderstoreManager {
   static id = "thunderstore-manager";
@@ -25,8 +24,7 @@ class ThunderstoreManager {
     this.manifestPath = path.join(this.appdataDir, "game", "modpack.json");
     this.newManifestPath = path.join(this.ModPackDir, "manifest.json");
 
-    const isServerConnected = await isServerReachable();
-    if (isServerConnected) {
+    if (window.isServerReachable) {
       this.modpackZipLink = await VersionManager.toURL(
         (
           await VersionManager.getOnlineVersionConfig()

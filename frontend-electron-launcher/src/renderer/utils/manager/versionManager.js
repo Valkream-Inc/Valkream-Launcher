@@ -26,7 +26,7 @@ class VersionManager {
 
   async updateOnlineVersionConfig() {
     return new Manager().handleError({
-      ensure: true,
+      ensure: window.isServerReachable,
       then: async () => {
         const yamlContent = (
           await axios.get(this.gameVersionFileLink)
