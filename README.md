@@ -7,11 +7,11 @@ Launcher et système de mise à jour pour le serveur Valheim Valkream.
 ## Table des matières
 
 - [Présentation](#présentation)
+- [Fonctionnalités](#fonctionnalités)
 - [Structure du projet](#structure-du-projet)
 - [Installation (Développement)](#installation-développement)
 - [Utilisation (Développement)](#utilisation-développement)
-- [Déploiement (Production/Test)](#déploiement-productiontest)
-- [Pour la prod copier le backend dans le serveur](#pour-la-prod-copier-le-backend-dans-le-serveur)
+- [Déploiement (Production)](#déploiement-production)
 - [Auteurs](#auteurs)
 
 ---
@@ -22,18 +22,51 @@ Ce projet comprend :
 
 - Un launcher Electron pour Valheim moddé
 - Un serveur backend de gestion des mises à jour
-- Un outil de build et de déploiement pour le jeu et le launcher
+
+---
+
+## Fonctionnalités
+
+### Frontend (Electron Launcher)
+
+- 🚀 **Téléchargement & mise à jour automatique** du launcher et du jeu (via HTTPS sécurisé)
+- 🆚 **Vérification de la version** locale et en ligne du jeu/modpack
+- 🧩 **Installation/Désinstallation** du jeu, des mods et du modpack Thunderstore
+- 🎉 **Gestion des événements spéciaux** (affichage dynamique dans l’interface)
+- 🖥️ **Affichage des infos serveur** (joueurs, statut, ping, etc.)
+- 🛡️ **Vérification d’intégrité** des plugins et configs (hash)
+- 🎮 **Détection & gestion de l’installation Steam**
+- 💬 **Notifications modernes** (snackbar, popup)
+- 🖱️ **Interface multi-plateforme** (Windows, Linux, Mac)
+- 🛑 **Mode maintenance** (affichage automatique si serveur en maintenance)
+- 🌐 **Liens directs réseaux sociaux** (Discord, site web, top serveurs)
+- 🔄 **Mise à jour automatique** du launcher via electron-updater
+
+### Backend (Node.js Update Server)
+
+- 🔒 **API REST sécurisée** (authentification par API Key & Token pour les opérations critiques)
+- 📦 **Téléchargement & upload** des versions du launcher, du jeu, des configs
+- ♻️ **Changement de version** (rollback possible)
+- 🎉 **Gestion des événements spéciaux** (modification via API)
+- 🗂️ **Archivage & gestion des anciennes versions**
+- 📝 **Logs d’activité** pour toutes les opérations critiques
+- 🛡️ **Protection DDoS** (rate limiting sur GET/POST)
+- 🐳 **Déploiement Docker** (production facile)
+- 🔐 **Reverse proxy nginx avec SSL** (HTTPS natif, certificats personnalisables)
+- 🗃️ **Isolation des fichiers sensibles** (certificats SSL, .env)
+- 📊 **Logs d’accès et d’erreur** pour audit et sécurité
+
+---
 
 ## Structure du projet
 
 - `frontend-electron-launcher/` : Le launcher Electron (interface utilisateur)
 - `backend-update-server/` : Serveur Node.js pour la gestion des mises à jour
-- `game-updater/` : Scripts de build et de déploiement du jeu
-- `shared function/` : Fonctions partagées entre les modules
+- `infra/` : Fichiers de configuration et de déploiement (Docker, nginx, etc.)
 
 ---
 
-> **Attention** : ⚠️ Certains fichiers et dossier sont masqués sous vscode. (ex: les dossiers `/node_modules`). Ces fichiers sont masqués via le fichier `.vscode/settings.json`
+> **⚠️ Attention** : Certains fichiers et dossier sont masqués sous vscode. (ex: les dossiers `/node_modules`). Ces fichiers sont masqués via le fichier `.vscode/settings.json`
 
 ## Installation (Développement)
 
@@ -44,7 +77,7 @@ Ce projet comprend :
 
 ### Installation des dépendances
 
-Executer une fois a la racine du projet :
+À la racine du projet :
 
 ```bash
 yarn install
@@ -68,102 +101,54 @@ cd frontend-electron-launcher
 yarn dev
 ```
 
-### Builder le jeu ou le launcher
-
-```bash
-# Pour builder le jeu
-#copier le dossier de configuration du jeu "Valheim Valkream Data" dans le dossier "./game-updater" puis:
-cd game-updater
-yarn run build
-
-# Pour builder le launcher
-cd ../frontend-electron-launcher
-yarn run build
-```
-
 ---
 
-## Déploiement (Production/Test)
+## Déploiement (Production)
 
-### Pousser une nouvelle version du jeu sur le serveur de test ou de prod
+Le déploiement en production se fait via **Docker Compose** et un reverse proxy **nginx** pour la gestion du SSL.
 
-```bash
-cd game-updater
-yarn run post
-```
+> **⚠️ Remarque :** En production, toutes les versions et fichiers uploadés sont stockés dans le dossier `infra/uploads`. Il est donc **crucial** de copier le dossier `infra` (et son contenu) dans un emplacement sécurisé et accessible avant le déploiement, afin de garantir la pérennité et la sécurité des données. **Ce dossier ne pourra et ne devra pas être supprimé sous aucun prétexte.**
 
-### Pousser une nouvelle version du launcher sur le serveur de test ou de prod
+### 1. Préparer la configuration du backend
 
-```bash
-cd frontend-electron-launcher
-yarn run post
-```
+- Placez votre fichier `.env` dans le dossier `infra/` pour configurer le backend.
+  - Exemple de variables à définir :
+    ```
+    PORT=3000
+    apiKey=VOTRE_API_KEY_COMPLEXE
+    apiToken=VOTRE_API_TOKEN_COMPLEXE
+    ```
+- Adaptez les clés API et tokens pour la sécurité.
 
-> **Remarque** : Les scripts `post` envoient le build compressé au serveur de mise à jour (backend). Assurez-vous que le backend est bien configuré et accessible. (voir prod plus bas)
+### 2. Configurer les certificats SSL
 
-### Changer la version du jeu ou su launcher
+- Placez vos certificats SSL dans le dossier `infra/nginx/certs/` :
+  - `fullchain.pem` : le certificat complet (généralement fourni par Let's Encrypt ou votre autorité de certification)
+  - `privkey.pem` : la clé privée associée
+- Ces fichiers seront utilisés par nginx, comme défini dans `infra/nginx/nginx.conf` :
+  ```
+  ssl_certificate /etc/nginx/certs/fullchain.pem;
+  ssl_certificate_key /etc/nginx/certs/privkey.pem;
+  ```
+- Si vous changez de certificat, remplacez simplement ces deux fichiers dans le dossier `certs/`.
 
-```bash
-# Pour changer la version du jeu
-cd game-updater
-yarn run change
+### 3. Lancer le déploiement
 
-# Pour changer la version du launcher
-cd ../frontend-electron-launcher
-yarn run change
-```
+- Depuis le dossier `infra/` :
+  ```bash
+  cd infra
+  docker-compose up -d
+  ```
+- Le backend sera alors accessible via HTTPS sur le port 3001 (ou celui défini dans la conf nginx).
+
+### 4. Accès sécurisé
+
+- L’accès au backend se fait via l’URL HTTPS de votre serveur, par exemple :  
+  `https://votre_domaine_ou_ip:3001`
+- Le reverse proxy nginx s’occupe de rediriger les requêtes vers le backend Node.js (port 3000 par défaut).
 
 ---
-
-### Changer l’événement du jeu
-
-```bash
-cd game-updater
-yarn run change-event
-```
-
-## pour la prod copier le backend dans le serveur
-
-### executer une fois a la racine du projet :
-
-```bash
-yarn install
-yarn run start
-```
-
-### modifier le .env
-
-mettez vos clés api dans le .env et modifiez le port si necessaire
-
-```bash
-PORT=3000
-apiKey=SECRET_API_KEY
-apiToken=SECRET_API_TOKEN
-```
-
-### en local
-
-#### modifier les clés api ./secured_config.js
-
-#### modifier l'url dans ./shared function/config.js et mettez isForProduction à true
-
-### executer les commandes suivantes pour initialiser la premiere mise à jour sur le serveur
-
-```bash
-#copier le dossier de configuration du jeu "Valheim Valkream Data" dans le dossier "./game-updater" puis :
-cd game-updater
-yarn run build
-yarn run post
-
-cd ../frontend-electron-launcher
-yarn run build
-yarn run post
-```
-
-ensuite telecharger le launcher depuis `http://votre_url/launcher/latest/Valkream-Launcher-win-x64.exe`
 
 ## Auteurs
 
-```bash
 - Valkream Team
-```
