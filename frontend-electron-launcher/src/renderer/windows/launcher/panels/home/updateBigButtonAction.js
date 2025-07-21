@@ -82,9 +82,8 @@ class UpdateBigButtonAction {
       // Cas 3 : Installé, pas internet
       if (isInstalled && !window.isServerReachable) {
         changeMainButtonEvent({
-          text: `Jouer à la ${
-            onlineVersionConfig.version
-          } <br /> (⚠️ Pas de connexion ${
+          text: `Jouer à la v${localVersionConfig.version} <br /> 
+          (⚠️ Pas de connexion ${
             isInternetConnected ? "au server" : "internet"
           }.)`,
           onclick: this.start,
@@ -121,7 +120,7 @@ class UpdateBigButtonAction {
       // Cas 6 : Installé, internet, à jour
       if (isInstalled && window.isServerReachable && upToDate)
         return changeMainButtonEvent({
-          text: `Jouer à la v${onlineVersionConfig.version} ${
+          text: `Jouer à la v${localVersionConfig.version} ${
             window.maintenance?.isInMaintenance
               ? " <br> (⚠️ Maintenance en cours.)"
               : ""
@@ -135,6 +134,7 @@ class UpdateBigButtonAction {
         onclick: this.reload,
       });
     } catch (err) {
+      console.error(err);
       showSnackbar("Erreur lors de la vérification de la version !", "error");
       changeMainButtonEvent({
         text: "Erreur lors de la vérification",
