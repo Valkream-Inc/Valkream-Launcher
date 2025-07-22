@@ -29,8 +29,6 @@ class Index {
     });
   }
 
-  isObfuscationEnabled = false;
-
   async Obfuscate() {
     if (fs.existsSync("./build")) fs.rmSync("./build", { recursive: true });
 
@@ -45,11 +43,7 @@ class Index {
         let code = fs.readFileSync(path, "utf8");
         code = code.replace(/src\//g, "build/");
         // ignore main process files that create some problems after being obsfuscate
-        if (
-          this.obf &&
-          !path.includes("src/main/") &&
-          this.isObfuscationEnabled
-        ) {
+        if (this.obf && !path.includes("src/main/")) {
           await new Promise((resolve) => {
             console.log(`Obfuscate ${path}`);
             let obf = JavaScriptObfuscator.obfuscate(code, {
@@ -99,12 +93,7 @@ class Index {
           ],
           win: {
             icon: "./build/assets/images/icon.ico",
-            target: [
-              {
-                target: "nsis",
-                arch: "x64",
-              },
-            ],
+            target: [{ target: "nsis", arch: ["x64", "arm64"] }],
           },
           nsis: {
             oneClick: true,
@@ -117,24 +106,13 @@ class Index {
             category: "public.app-category.games",
             identity: null,
             target: [
-              {
-                target: "dmg",
-                arch: "universal",
-              },
-              {
-                target: "zip",
-                arch: "universal",
-              },
+              { target: "dmg", arch: ["x64", "arm64"] },
+              { target: "zip", arch: ["x64", "arm64"] },
             ],
           },
           linux: {
             icon: "./build/assets/images/icon.png",
-            target: [
-              {
-                target: "AppImage",
-                arch: "x64",
-              },
-            ],
+            target: [{ target: "AppImage", arch: ["x64", "arm64"] }],
           },
         },
       })

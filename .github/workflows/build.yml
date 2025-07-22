@@ -3,100 +3,97 @@ name: Launcher Build
 on:
   push:
     branches: [main]
+    paths:
+      - "frontend-electron-launcher/**"
 
 jobs:
-  build-launcher:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-14, ubuntu-latest, windows-latest]
-
+  create-release:
+    runs-on: ubuntu-latest
     outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
       version: ${{ steps.get_version.outputs.version }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+
+      - name: Get version
+        id: get_version
+        run: echo "version=$(jq -r .version frontend-electron-launcher/package.json)" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: release ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: ${{ contains(steps.get_version.outputs.version, 'beta') || contains(steps.get_version.outputs.version, 'alpha') }}
+
+  build-launcher:
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-14, ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
           node-version: 22.x
 
-      - name: Install yarn
-        run: npm install -g yarn
-        working-directory: ./
+      - name: Set up Python (required for node-gyp in some cases)
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
 
       - name: Install dependencies
-        run: yarn install
-        working-directory: ./
-
-      - name: Build Electron app
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: yarn run build
+        run: npm install
         working-directory: ./frontend-electron-launcher
 
-      - name: Get version from package.json
-        shell: bash
-        id: get_version
-        run: |
-          version=$(jq -r .version ./frontend-electron-launcher/package.json)
-          echo "version=$version" >> $GITHUB_OUTPUT
+      - name: Build Electron launcher via custom script
+        run: npm run build
+        working-directory: ./frontend-electron-launcher
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: electron-build-${{ matrix.os }}
-          path: ./frontend-electron-launcher/dist/
-
-  create-release:
-    needs: build-launcher
+  download-global:
+    name: Combine & Upload All Artifacts
+    needs: [create-release, build-launcher]
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./dist
-
-      - name: List downloaded files (debug)
-        run: ls -R ./dist
-
-      - name: Find files to upload
-        id: filtered_files
+      - name: Download release assets
         run: |
-          files=$(find ./dist -type f \( \
-            -name "Valkream-Launcher-linux-x86_64.AppImage" -o \
-            -name "Valkream-Launcher-mac-universal.dmg" -o \
-            -name "Valkream-Launcher-mac-universal.dmg.blockmap" -o \
-            -name "Valkream-Launcher-mac-universal.zip" -o \
-            -name "Valkream-Launcher-mac-universal.zip.blockmap" -o \
-            -name "Valkream-Launcher-win-x64.exe" -o \
-            -name "Valkream-Launcher-win-x64.exe.blockmap" -o \
-            -name "Valkream-Launcher.exe" \
-          \))
+          gh release download ${{ needs.create-release.outputs.version }} \
+            --repo ${{ github.repository }} \
+            --dir ./release-assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
-          echo "Matched files:"
-          echo "$files"
+      - name: List downloaded files
+        run: ls -lh ./release-assets
 
-          # Format GitHub Actions : écrire dans le fichier de sortie
-          echo "files=$(echo "$files" | paste -sd "," -)" >> $GITHUB_OUTPUT
+      - name: Create combined zip without existing zips
+        run: |
+          cd release-assets
+          find . -type f -name '*.zip' -delete
+          zip -r ../combined-release.zip .
+        shell: bash
 
-      - name: Create Release
-        id: create_release
+      - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          with:
-          tag_name: ${{ needs.build-launcher.outputs.version }}
-          name: release ${{ needs.build-launcher.outputs.version }}
-          draft: false
-          prerelease: false
-          fail_on_unmatched_files: true
-          overwrite: true
-          files: ${{ steps.filtered_files.outputs.files }}
-          # files: ./dist/**/*
+          tag_name: ${{ needs.create-release.outputs.version }}
+          name: Release ${{ needs.create-release.outputs.version }}
+          files: |
+            ./combined-release.zip
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}

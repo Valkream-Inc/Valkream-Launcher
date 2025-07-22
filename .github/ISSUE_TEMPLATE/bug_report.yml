@@ -1,0 +1,96 @@
+name: 🐛  Signaler un bug
+description: Vous avez rencontré un bug? Signalez-le ici
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Un grand merci d'avance pour votre aide. Néanmoins, nous avons besoin d'un certain nombre d'informations, pour nous aider.
+  - type: checkboxes
+    attributes:
+      label: "Liste des vérifications à faire avant de valider l'ouverture du signalement de bug"
+      description: Assurez que vous avez complété ce qui suit, dans le cas contraire, votre rapport peut être refusé
+      options:
+        - label: J'ai réussi à reproduire le bug sur le Valkream Launcher (sans mes modifications)
+          required: true
+        - label: Mon code respecte la licence Creative Commons Zero v1.0 Universal
+          required: true
+        - label: Mon code respecte les conditions d'utilisation du Valkream Launcher
+          required: true
+        - label: J'arrive à reproduire le bug sur la dernière version du Valkream Launcher
+          required: true
+  - type: dropdown
+    attributes:
+      label: Système d'exploitation
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Architecture du système d'exploitation
+      options:
+        - x64
+        - arm64
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Version du système d'exploitation
+      placeholder: "Exemple: Windows 11 Professionnel 21H2 Build 22000.739"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Hash du commit sur lequel le bug est rencontré
+      placeholder: 84d7881b67ecf6088205eca6723bfb19bf2a5f0d
+  - type: textarea
+    attributes:
+      label: Comportement attendu
+      description: Une description de ce qui devrait se passer
+      placeholder: Le launcher devrait...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Comportement actuel
+      description: Une description de ce qui se passe avec le bug
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Instructions pour reproduire le bug
+      placeholder: |
+        1. Ouvrir le launcher
+        2. Aller dans le menu xyz
+        3. Cliquer sur abc
+        4. Observer
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Notes additionnelles
+      placeholder: Détails supplémentaires concernant le bug, tout ce qui pourrait être utile
+    validations:
+      required: false
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité
+      description: À quel point ce bguic est-il importante selon toi ?
+      options:
+        - Faible (agréable mais pas prioritaire)
+        - Moyenne (amélioration utile)
+        - Haute (impact important sur l’usage)
+        - Critique (bloque l’usage actuel)
+      default: 0
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Vérifications
+      options:
+        - label: J’ai bien vérifié qu’aucune issue similaire n’a déjà été ouverte
+          required: true

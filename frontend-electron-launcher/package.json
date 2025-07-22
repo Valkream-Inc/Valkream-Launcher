@@ -1,13 +1,13 @@
 {
   "name": "Valkream-Launcher",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Launcher Valheim moddé pour Valkream",
   "main": "src/app.js",
   "author": "Valkream Team",
   "scripts": {
     "start": "cross-env-shell NODE_ENV=dev electron .",
     "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
-    "build": "node ./build-script.js --obf=true --build=platform --icon=src/assets/images/icon.png"
+    "build": "node ./build-script.js --obf=false --build=platform --icon=src/assets/images/icon.png"
   },
   "license": "MIT",
   "nodemonConfig": {
@@ -35,11 +35,8 @@
     "jimp": "^0.22.12",
     "nodemon": "^3.1.2"
   },
-  "win": {
-    "target": "nsis"
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ton-compte/ton-repo.git"
+    "url": "git+https://github.com/Valkream-Inc/Valkream-Launcher.git"
   }
 }

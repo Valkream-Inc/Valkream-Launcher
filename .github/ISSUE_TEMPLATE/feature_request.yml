@@ -1,0 +1,61 @@
+name: 💡 Feature Request
+description: Propose une nouvelle fonctionnalité ou une amélioration du projet
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de proposer une idée d’amélioration ! 🙌  
+        Remplis ce formulaire pour que nous puissions bien comprendre et évaluer ta demande.
+  - type: input
+    id: summary
+    attributes:
+      label: Résumé de la fonctionnalité
+      description: Décris en une phrase ce que tu souhaites ajouter ou améliorer.
+      placeholder: "Ex. : Ajouter une option de démarrage automatique"
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Quel besoin ou problème cela résout-il ?
+      description: "Explique pourquoi cette fonctionnalité serait utile (ex. : problème récurrent, confort d'utilisation, limitation actuelle, etc.)."
+      placeholder: |
+        J’utilise souvent le launcher avec plusieurs serveurs. Pouvoir gérer plusieurs configurations faciliterait le lancement.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description détaillée
+      description: Donne autant de détails que nécessaire sur le fonctionnement attendu de la fonctionnalité.
+      placeholder: |
+        Il pourrait y avoir un menu déroulant dans l'interface pour choisir un profil de serveur. Chaque profil aurait ses propres mods et configurations.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives ou solutions temporaires
+      description: As-tu trouvé un autre moyen de contourner ce manque ? (optionnel)
+      placeholder: |
+        Pour l’instant, je duplique manuellement le dossier de configuration, mais c’est peu pratique.
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité
+      description: À quel point cette fonctionnalité est-elle importante selon toi ?
+      options:
+        - Faible (agréable mais pas prioritaire)
+        - Moyenne (amélioration utile)
+        - Haute (impact important sur l’usage)
+        - Critique (bloque l’usage actuel)
+      default: 1
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Vérifications
+      options:
+        - label: J’ai vérifié qu’aucune issue similaire n’a déjà été ouverte
+          required: true
