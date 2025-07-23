@@ -9,13 +9,13 @@ class SteamManager {
   static id = "steam-manager";
 
   constructor() {
-    this.init();
     this.db = new database();
   }
 
   async init() {
-    this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
-
+    this.appdataDir =
+      (await this.db.readData("configClient"))?.launcher_config
+        ?.customGamePath || path.join(await ipcRenderer.invoke("data-path"));
     this.gameDir = path.join(this.appdataDir, "game", "Valheim");
 
     for (const dir of [this.appdataDir, this.gameDir]) {

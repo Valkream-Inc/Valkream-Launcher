@@ -5,13 +5,20 @@ const yaml = require("yaml");
 const { ipcRenderer } = require("electron");
 
 const { baseUrl } = require(window.PathsManager.getConstants());
+const { database } = require(PathsManager.getSharedUtils());
 const Manager = require("./manager.js");
 
 class VersionManager {
   static id = "version-manager";
 
+  constructor() {
+    this.db = new database();
+  }
+
   async init() {
-    this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
+    this.appdataDir =
+      (await this.db.readData("configClient"))?.launcher_config
+        ?.customGamePath || path.join(await ipcRenderer.invoke("data-path"));
     this.serverGameRoot = path.join(baseUrl, "game/latest");
 
     this.gameVersionFileLink = path.join(this.serverGameRoot, "latest.yml");

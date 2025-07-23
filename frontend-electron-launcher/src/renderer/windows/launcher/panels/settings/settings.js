@@ -25,23 +25,8 @@ class Settings {
     this.clearCache();
     this.openGameFolder();
     this.openLauncherFolder();
-  }
-
-  changeIsMusicEnabled() {
-    const videoBackground = document.getElementById("background-video");
-    const musicToggle = document.querySelector(".video-music-toggle");
-
-    musicToggle.checked = !videoBackground.muted;
-    musicToggle.addEventListener("change", async (e) => {
-      let configData = await this.db.readData("configClient");
-      configData.launcher_config.musicEnabled = !e.target.checked;
-
-      await this.db.updateData("configClient", configData);
-      videoBackground.muted = !e.target.checked;
-      showSnackbar(
-        e.target.checked ? "Musique activée !" : "Musique désactivée !"
-      );
-    });
+    this.handleLauncherBehavior();
+    this.handleCustomGamePath();
   }
 
   buttonAction(btn, action, message, onSuccess = () => {}) {
@@ -57,6 +42,78 @@ class Settings {
       btn.disabled = false;
       message.base ? (btn.innerHTML = message.base) : () => {};
     });
+  }
+
+  changeIsMusicEnabled() {
+    const videoBackground = document.getElementById("background-video");
+    const musicToggle = document.querySelector(".video-music-toggle");
+
+    musicToggle.checked = !videoBackground.muted;
+    musicToggle.addEventListener("change", async (e) => {
+      try {
+        let configData = await this.db.readData("configClient");
+        configData.launcher_config.musicEnabled = !e.target.checked;
+
+        await this.db.updateData("configClient", configData);
+        videoBackground.muted = !e.target.checked;
+        showSnackbar(
+          e.target.checked ? "Musique activée !" : "Musique désactivée !"
+        );
+      } catch (err) {
+        console.error(err);
+        showSnackbar("Erreur lors de la sauvegarde !", "error");
+      }
+    });
+  }
+
+  async handleLauncherBehavior() {
+    const select = document.querySelector(".launcher-behavior-select");
+
+    const configData = await this.db.readData("configClient");
+    if (configData?.launcher_config?.launcherBehavior)
+      select.value = configData.launcher_config.launcherBehavior;
+
+    select.addEventListener("change", async (e) => {
+      try {
+        let configData = await this.db.readData("configClient");
+        configData.launcher_config.launcherBehavior = e.target.value;
+        await this.db.updateData("configClient", configData);
+        showSnackbar("Comportement du launcher sauvegardé !");
+      } catch (err) {
+        console.error(err);
+        showSnackbar("Erreur lors de la sauvegarde !", "error");
+      }
+    });
+  }
+
+  async handleCustomGamePath() {
+    const input = document.querySelector(".custom-game-path");
+
+    const configData = await this.db.readData("configClient");
+    if (configData?.launcher_config?.customGamePath)
+      input.value = configData.launcher_config.customGamePath;
+
+    return this.buttonAction(
+      document.querySelector("#choose-game-path-btn"),
+      async () => {
+        const result = await ipcRenderer.invoke("choose-folder");
+        input.value = result;
+        let configData = await this.db.readData("configClient");
+        configData.launcher_config.customGamePath = result;
+        await this.db.updateData("configClient", configData);
+        return true;
+      },
+      {
+        base: "Choisir...",
+        wait: "Choix en cours...",
+        success: "Chemin personnalisé sauvegardé !",
+        error: "Chemin personnalisé non sauvegardé !",
+      },
+      () =>
+        setTimeout(() => {
+          ipcRenderer.invoke("main-window-restart");
+        }, 2000)
+    );
   }
 
   uninstallGame() {

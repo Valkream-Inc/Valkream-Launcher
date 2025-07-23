@@ -68,11 +68,11 @@ class IpcHandlers {
       async (event) => await new ServerInfos().init(event)
     );
 
-    // Sélection dossier Steam
-    ipcMain.handle("choose-steam-folder", async () => {
+    // Sélection dossier
+    ipcMain.handle("choose-folder", async () => {
       const result = await dialog.showOpenDialog(MainWindow.getWindow(), {
         properties: ["openDirectory"],
-        title: "Choisissez le dossier Steam",
+        title: "Choisissez le dossier",
       });
       if (result.canceled || !result.filePaths.length) return null;
       return result.filePaths[0];

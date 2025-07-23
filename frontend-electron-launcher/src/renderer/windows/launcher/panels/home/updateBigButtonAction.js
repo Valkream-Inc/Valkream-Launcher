@@ -7,10 +7,7 @@ const {
   ThunderstoreManager,
   VersionManager,
 } = require(window.PathsManager.getUtils());
-const {
-  hasInternetConnection,
-  isServerReachable,
-} = require(window.PathsManager.getSharedUtils());
+const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
 const { isSteamInstallation } = require(window.PathsManager.getConstants());
 
 class UpdateBigButtonAction {
@@ -62,6 +59,13 @@ class UpdateBigButtonAction {
           onlineVersionConfig &&
           localVersionConfig.version === onlineVersionConfig.version;
       }
+
+      // Cas 0 : En cours de chargement
+      if (
+        window.isServerReachable === undefined ||
+        window.isServerReachable === null
+      )
+        return setTimeout(this.reload, 100);
 
       // Cas 1 : Pas installé et pas de connexion internet
       if (!isInstalled && !window.isServerReachable)

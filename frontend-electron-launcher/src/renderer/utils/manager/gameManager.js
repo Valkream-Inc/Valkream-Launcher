@@ -15,12 +15,13 @@ class GameManager {
   static id = "game-manager";
 
   constructor() {
-    this.init();
     this.db = new database();
   }
 
   async init() {
-    this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
+    this.appdataDir =
+      (await this.db.readData("configClient"))?.launcher_config
+        ?.customGamePath || path.join(await ipcRenderer.invoke("data-path"));
     this.serverGameRoot = path.join(baseUrl, "game/latest");
 
     if (window.isServerReachable) {
@@ -41,10 +42,9 @@ class GameManager {
         "game",
         "build-bepinex.zip"
       );
-
-      this.gameFolderToRemove = await VersionManager.getOnlineVersionConfig()
-        .gameFolderToRemove;
     }
+    this.gameFolderToRemove = await VersionManager.getLocalVersionConfig()
+      .gameFolderToRemove;
 
     this.gameRootDir = path.join(this.appdataDir, "game");
     this.gameDir = path.join(this.gameRootDir, "Valheim");
@@ -281,7 +281,7 @@ class GameManager {
     });
   }
 
-  async clean(gameFolderToRemove = this.gameFolderToRemove) {
+  async clean(gameFolderToRemove = this.gameFolderToRemove || []) {
     return await new Manager().handleError({
       ensure: fs.existsSync(this.gameDir) && gameFolderToRemove.length > 0,
       then: () => cleanGameFolder(this.gameDir, gameFolderToRemove),
@@ -307,14 +307,27 @@ class GameManager {
   async play() {
     return await new Manager().handleError({
       ensure: fs.existsSync(this.gameExePath[platform()]),
-      then: () => {
-        ipcRenderer.send("main-window-hide");
-        const child = execFile(this.gameExePath[platform()], (err) => {
-          throw new Error(err);
-        });
-        child.on("exit", () => {
-          ipcRenderer.send("main-window-show");
-        });
+      then: async () => {
+        // Lecture du paramètre launcherBehavior
+        const configData = await this.db.readData("configClient");
+        const behavior =
+          configData?.launcher_config?.launcherBehavior || "hide";
+
+        // Action avant le lancement du jeu
+        if (behavior === "nothing") {
+          await shell.openPath(this.gameExePath[platform()]);
+        } else if (behavior === "close") {
+          await shell.openPath(this.gameExePath[platform()]);
+          ipcRenderer.send("main-window-close");
+        } else if (behavior === "hide") {
+          ipcRenderer.send("main-window-hide");
+          const child = execFile(this.gameExePath[platform()], (err) => {
+            if (err) throw new Error(err);
+          });
+          child.on("exit", () => {
+            ipcRenderer.send("main-window-show");
+          });
+        }
       },
     });
   }

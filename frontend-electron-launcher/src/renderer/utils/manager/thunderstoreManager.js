@@ -4,13 +4,20 @@ const path = require("path");
 const { ipcRenderer } = require("electron");
 
 const Manager = require("./manager.js");
+const { database } = require(PathsManager.getSharedUtils());
 const VersionManager = require("./versionManager.js");
 
 class ThunderstoreManager {
   static id = "thunderstore-manager";
 
+  constructor() {
+    this.db = new database();
+  }
+
   async init() {
-    this.appdataDir = path.join(await ipcRenderer.invoke("data-path"));
+    this.appdataDir =
+      (await this.db.readData("configClient"))?.launcher_config
+        ?.customGamePath || path.join(await ipcRenderer.invoke("data-path"));
     this.gameRootDir = path.join(this.appdataDir, "game");
     this.gameDir = path.join(this.gameRootDir, "Valheim");
 

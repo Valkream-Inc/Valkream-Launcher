@@ -96,9 +96,10 @@ class Index {
             target: [{ target: "nsis", arch: ["x64", "arm64"] }],
           },
           nsis: {
-            oneClick: true,
-            allowToChangeInstallationDirectory: false,
+            oneClick: false,
+            allowToChangeInstallationDirectory: true,
             createDesktopShortcut: true,
+            createStartMenuShortcut: true,
             runAfterFinish: true,
           },
           mac: {

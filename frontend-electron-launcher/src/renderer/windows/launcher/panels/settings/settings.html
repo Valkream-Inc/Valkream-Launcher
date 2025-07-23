@@ -31,6 +31,33 @@
       </div>
     </div>
 
+    <div class="settings-elements-box">
+      <div class="setting-text">
+        Comportement du launcher au lancement du jeu :
+      </div>
+      <div class="settings-elements content-center">
+        <select class="launcher-behavior-select">
+          <option value="close">Fermer le launcher</option>
+          <option value="hide">Masquer le launcher</option>
+          <option value="nothing">Ne rien faire</option>
+        </select>
+      </div>
+    </div>
+    <div class="settings-elements-box">
+      <div class="setting-text">
+        Chemin personnalisé pour l'installation du jeu (AppPath) :
+      </div>
+      <div class="settings-elements content-center">
+        <input
+          type="text"
+          class="custom-game-path"
+          placeholder="Chemin du jeu..."
+          readonly
+        />
+        <button type="button" id="choose-game-path-btn">Choisir...</button>
+      </div>
+    </div>
+
     <div class="titre-tab warn">⚠️ Danger zone !</div>
     <div class="settings-elements-box warn">
       <div class="setting-text">

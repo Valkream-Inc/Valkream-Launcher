@@ -49,7 +49,7 @@ class SteamCheck {
 
     this.chooseSteamFolderBtn = document.getElementById("choose-steam-folder");
     this.chooseSteamFolderBtn.addEventListener("click", async () => {
-      const dir = await ipcRenderer.invoke("choose-steam-folder");
+      const dir = await ipcRenderer.invoke("choose-folder");
       if (dir) {
         if (!(await this.isValidSteamFolder(dir))) {
           this.displayInvalidSteamFolderError(dir);
