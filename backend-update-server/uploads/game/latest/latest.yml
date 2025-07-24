@@ -1,8 +1,8 @@
-version: 2.1.15
+version: 2.1.16
 buildDate: 2025-07-03T19:20:08.929Z
 
 modpack:
-  dowload_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.1.15/
+  dowload_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.1.16/
   admin_mods:
     - "JereKuusela-Infinity_Hammer-1.72.0"
     - "JereKuusela-Server_devcommands-1.97.0"
@@ -13,7 +13,10 @@ modpack:
     - /BepInEx/config/wackysDatabase/Cache
     - /BepInEx/config/Marketplace/SavedData
   gameFolderToPreserve:
-    - /BepInEx/config/valheim
+    - /BepInEx/plugins/JereKuusela-Infinity_Hammer-1.72.0/
+    - /BepInEx/plugins/JereKuusela-Server_devcommands-1.97.0/
+    - /BepInEx/plugins/JereKuusela-Upgrade_World-1.73.0/
+    - /BepInEx/plugins/JereKuusela-World_Edit_Commands-1.67.0/
   hash:
     config: 105517d181528eb09cc8c3360efaa275
     plugins: cfd5fcbfa9de15c716f52f7ce7f2d61e
