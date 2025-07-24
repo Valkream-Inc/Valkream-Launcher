@@ -40,6 +40,10 @@ class ThunderstoreManager {
       this.modpackZipPath = path.join(this.appdataDir, "game", "modpack.zip");
     }
 
+    this.modsAdmin = (
+      await VersionManager.getLocalVersionConfig()
+    ).modpack?.admin_mods;
+
     for (const dir of [
       this.appdataDir,
       this.gameDir,
@@ -176,15 +180,19 @@ class ThunderstoreManager {
   ) {
     return new Manager().handleError({
       ensure:
-        fs.existsSync(this.gameDir) && fs.existsSync(this.newManifestPath),
+        fs.existsSync(this.gameDir) &&
+        (fs.existsSync(this.newManifestPath) || customMods),
       then: async () => {
-        const manifest = JSON.parse(
-          fs.readFileSync(this.newManifestPath, "utf-8")
-        );
-        fse.moveSync(this.newManifestPath, this.manifestPath, {
-          overwrite: true,
-          force: true,
-        });
+        if (fs.existsSync(this.newManifestPath)) {
+          const manifest = JSON.parse(
+            fs.readFileSync(this.newManifestPath, "utf-8")
+          );
+
+          fse.moveSync(this.newManifestPath, this.manifestPath, {
+            overwrite: true,
+            force: true,
+          });
+        }
 
         const mods = customMods || manifest.dependencies || [];
 
@@ -352,28 +360,6 @@ class ThunderstoreManager {
         const to_delete = actual_mods.filter((mod) => !new_mods.includes(mod));
         const to_add = new_mods.filter((mod) => !actual_mods.includes(mod));
 
-        const to_preserve = (await VersionManager.getLocalVersionConfig())
-          .gameFolderToPreserve;
-
-        await Promise.all(
-          to_preserve.map((folder) => {
-            if (fs.existsSync(path.join(this.gameDir, folder))) {
-              fs.rmSync(path.join(this.gameRootDir, "preserved", folder), {
-                recursive: true,
-              });
-              fs.mkdirSync(path.join(this.gameRootDir, "preserved", folder), {
-                recursive: true,
-              });
-              fse.moveSync(
-                path.join(this.gameDir, folder),
-                path.join(this.gameRootDir, "preserved", folder),
-                { overwrite: true, force: true }
-              );
-            }
-            return;
-          })
-        );
-
         await Promise.all(
           to_delete.map((mod) => {
             const modPath = path.join(this.modsDir, mod);
@@ -386,18 +372,6 @@ class ThunderstoreManager {
 
         if (isOk) isOk = await this.dowloadMods(callback, text_dowload, to_add);
         if (isOk) isOk = await this.unzipMods(callback, text_unzip);
-
-        await Promise.all(
-          to_preserve.map((folder) => {
-            if (fs.existsSync(path.join(this.gameRootDir, "preserved", folder)))
-              fse.moveSync(
-                path.join(this.gameRootDir, "preserved", folder),
-                path.join(this.gameDir, folder),
-                { overwrite: true, force: true }
-              );
-            return;
-          })
-        );
 
         if (!isOk) throw new Error("Erreur lors de l'update du modpack !");
       },
@@ -416,6 +390,62 @@ class ThunderstoreManager {
       },
     });
   }
+
+  isAdminModsInstalled(mods = this.modsAdmin || []) {
+    if (!Array.isArray(mods) || mods.length === 0) return false;
+    const installedMods = fs.readdirSync(this.BepInExPluginsDir);
+    return mods.every((mod) => installedMods.includes(mod));
+  }
+
+  isAdminModsAvailable(mods = this.modsAdmin || []) {
+    if (!Array.isArray(mods) || mods.length === 0) return false;
+    return true;
+  }
+
+  unInstallAdminMods = async (mods = this.modsAdmin || []) => {
+    return new Manager().handleError({
+      ensure:
+        fs.existsSync(this.BepInExPluginsDir) && this.isAdminModsInstalled(),
+      then: async () => {
+        const installedMods = fs.readdirSync(this.BepInExPluginsDir);
+        // Ajout de la vérification :
+        if (!Array.isArray(mods)) mods = [];
+        const to_delete = mods.filter((mod) => installedMods.includes(mod));
+
+        await Promise.all(
+          to_delete.map((mod) => {
+            const modPath = path.join(this.BepInExPluginsDir, mod);
+            if (fs.existsSync(modPath)) {
+              fs.rmSync(modPath, { recursive: true });
+            }
+            return;
+          })
+        );
+      },
+    });
+  };
+
+  InstallAdminMods = async (
+    callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
+    text_dowload = "Téléchargement des mods Admin...",
+    text_unzip = "Décompression des mods Admin..."
+  ) => {
+    let isOk = true;
+
+    return await new Manager().handleError({
+      ensure:
+        fs.existsSync(this.BepInExPluginsDir) && this.modsAdmin?.length > 0,
+      then: async () => {
+        const mods = this.modsAdmin || [];
+        await this.unInstallAdminMods();
+
+        if (isOk) isOk = await this.dowloadMods(callback, text_dowload, mods);
+        if (isOk) isOk = await this.unzipMods(callback, text_unzip);
+
+        if (!isOk) throw new Error("Erreur lors de l'installation !");
+      },
+    });
+  };
 }
 
 const thunderstoreManager = new ThunderstoreManager();

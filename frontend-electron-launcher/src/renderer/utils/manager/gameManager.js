@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const fse = require("fs-extra");
 const { ipcRenderer, shell } = require("electron");
 const { cleanGameFolder } = require("valkream-function-lib");
 const { execFile } = require("child_process");
@@ -44,7 +45,9 @@ class GameManager {
       );
     }
     this.gameFolderToRemove = await VersionManager.getLocalVersionConfig()
-      .gameFolderToRemove;
+      .modpack?.gameFolderToRemove;
+    this.gameFolderToPreserve = await VersionManager.getLocalVersionConfig()
+      .modpack?.gameFolderToPreserve;
 
     this.gameRootDir = path.join(this.appdataDir, "game");
     this.gameDir = path.join(this.gameRootDir, "Valheim");
@@ -300,6 +303,58 @@ class GameManager {
       then: () => {
         fs.rmSync(this.gameRootDir, { recursive: true });
         fs.mkdirSync(this.gameRootDir, { recursive: true });
+      },
+    });
+  }
+
+  async preserveGameFolder(gameFolderToPreserve = this.gameFolderToPreserve) {
+    return await new Manager().handleError({
+      ensure:
+        fs.existsSync(path.join(this.gameDir, "BepInEx")) &&
+        gameFolderToPreserve.length > 0,
+      then: async () => {
+        if (path.join(this.gameRootDir, "preserved"))
+          fs.rmSync(path.join(this.gameRootDir, "preserved"), {
+            recursive: true,
+          });
+        fs.mkdirSync(this.gameRootDir, { recursive: true });
+
+        await Promise.all(
+          gameFolderToPreserve.map((folder) => {
+            if (!folder.startWith("BepInEx")) return;
+            if (folder.contains("..") || folder.contains("\\")) return;
+
+            const source = path.join(this.gameDir, folder);
+            const destination = path.join(
+              this.gameRootDir,
+              "preserved",
+              folder
+            );
+
+            if (fs.existsSync(source)) {
+              if (fs.existsSync(destination))
+                fs.rmSync(destination, { recursive: true });
+
+              fs.mkdirSync(destination, { recursive: true });
+              fs.copyFileSync(source, destination);
+            }
+            return;
+          })
+        );
+      },
+    });
+  }
+
+  async restoreGameFolder() {
+    return await new Manager().handleError({
+      ensure:
+        fs.existsSync(this.gameDir) &&
+        fs.existsSync(path.join(this.gameRootDir, "preserved")),
+      then: async () => {
+        fse.copy(path.join(this.gameRootDir, "preserved"), this.gameDir, {
+          overwrite: true,
+          recursive: true,
+        });
       },
     });
   }

@@ -7,10 +7,17 @@ const {
   ThunderstoreManager,
   VersionManager,
 } = require(window.PathsManager.getUtils());
-const { hasInternetConnection } = require(window.PathsManager.getSharedUtils());
+const {
+  hasInternetConnection,
+  database,
+} = require(window.PathsManager.getSharedUtils());
 const { isSteamInstallation } = require(window.PathsManager.getConstants());
 
 class UpdateBigButtonAction {
+  constructor() {
+    this.db = new database();
+  }
+
   callback = (text, downloadedBytes, totalBytes, percent, speed) => {
     this.changeMainButtonEvent({
       text: `${text}<br/>
@@ -34,12 +41,19 @@ class UpdateBigButtonAction {
       await GameManager.init();
       await ThunderstoreManager.init();
 
+      const configData = await this.db.readData("configClient");
+
       const isInternetConnected = await hasInternetConnection();
       const localVersionConfig = await VersionManager.getLocalVersionConfig();
       const isInstalled =
         (await GameManager.getIsInstalled()) &&
         (await ThunderstoreManager.getIsInstalled()) &&
         (await VersionManager.getIsInstalled());
+      const isAdminModsInstalled =
+        await ThunderstoreManager.isAdminModsInstalled();
+      const isAdminModsActive = configData?.launcher_config?.adminEnabled;
+      const isAdminModsAvailable =
+        await ThunderstoreManager.isAdminModsAvailable();
 
       let onlineVersionConfig = null;
       let upToDate = false;
@@ -63,11 +77,31 @@ class UpdateBigButtonAction {
       // Cas 0 : En cours de chargement
       if (
         window.isServerReachable === undefined ||
-        window.isServerReachable === null
+        window.isServerReachable === null ||
+        (window.isServerReachable &&
+          (window.maintenance === undefined || window.maintenance === null))
       )
         return setTimeout(this.reload, 100);
 
-      // Cas 1 : Pas installé et pas de connexion internet
+      // cas 1: Admin mods gestion
+      if (
+        isInternetConnected &&
+        isAdminModsActive &&
+        !isAdminModsInstalled &&
+        isAdminModsAvailable
+      ) {
+        await ThunderstoreManager.InstallAdminMods(this.callback);
+        return this.reload();
+      } else if (!isAdminModsActive && isAdminModsInstalled) {
+        this.changeMainButtonEvent({
+          text: "Désinstallation des mods admin...",
+          onclick: null,
+        });
+        await ThunderstoreManager.unInstallAdminMods();
+        return this.reload();
+      }
+
+      // Cas 2 : Pas installé et pas de connexion internet
       if (!isInstalled && !window.isServerReachable)
         return changeMainButtonEvent({
           text: `Installation Impossible <br/> (❌ Pas de connexion ${
@@ -76,14 +110,14 @@ class UpdateBigButtonAction {
           onclick: this.reload,
         });
 
-      // Cas 2 : Pas installé et internet OK
+      // Cas 3 : Pas installé et internet OK
       if (!isInstalled && window.isServerReachable)
         return changeMainButtonEvent({
           text: "Installer",
           onclick: this.install,
         });
 
-      // Cas 3 : Installé, pas internet
+      // Cas 4 : Installé, pas internet
       if (isInstalled && !window.isServerReachable) {
         changeMainButtonEvent({
           text: `Jouer à la v${localVersionConfig.version} <br /> 
@@ -95,7 +129,7 @@ class UpdateBigButtonAction {
         return;
       }
 
-      // Cas 4 : Installé, internet, pas à jour (majeur)
+      // Cas 5 : Installé, internet, pas à jour (majeur)
       if (
         isInstalled &&
         window.isServerReachable &&
@@ -108,7 +142,7 @@ class UpdateBigButtonAction {
         });
       }
 
-      // Cas 5 : Installé, internet, pas à jour (mineur)
+      // Cas 6 : Installé, internet, pas à jour (mineur)
       if (
         isInstalled &&
         window.isServerReachable &&
@@ -121,7 +155,7 @@ class UpdateBigButtonAction {
         });
       }
 
-      // Cas 6 : Installé, internet, à jour
+      // Cas 7 : Installé, internet, à jour
       if (isInstalled && window.isServerReachable && upToDate)
         return changeMainButtonEvent({
           text: `Jouer à la v${localVersionConfig.version} ${
@@ -221,6 +255,10 @@ class UpdateBigButtonAction {
     try {
       let isOk = true;
       this.changeMainButtonEvent({ text: "Mise à jour...", onclick: null });
+      if (isOk)
+        isOk = await GameManager.preserveGameFolder(
+          onlineVersionConfig.modpack.gameFolderToPreserve
+        );
       if (isOk) isOk = await ThunderstoreManager.uninstallModpackConfig();
 
       if (isOk) isOk = await ThunderstoreManager.downloadModpack(this.callback);
@@ -230,7 +268,12 @@ class UpdateBigButtonAction {
       if (isOk) isOk = await ThunderstoreManager.update(this.callback);
 
       this.changeMainButtonEvent({ text: "Verification...", onclick: null });
+      if (isOk)
+        isOk = await GameManager.clean(
+          onlineVersionConfig.modpack.gameFolderToRemove
+        );
       // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
+      if (isOk) isOk = await GameManager.restoreGameFolder();
       if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
 
       if (!isOk) throw new Error("Erreur lors de la mise à jour !");

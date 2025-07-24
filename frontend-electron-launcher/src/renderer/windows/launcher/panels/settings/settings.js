@@ -27,6 +27,7 @@ class Settings {
     this.openLauncherFolder();
     this.handleLauncherBehavior();
     this.handleCustomGamePath();
+    this.enabledAdmin();
   }
 
   buttonAction(btn, action, message, onSuccess = () => {}) {
@@ -101,6 +102,7 @@ class Settings {
         let configData = await this.db.readData("configClient");
         configData.launcher_config.customGamePath = result;
         await this.db.updateData("configClient", configData);
+        await GameManager.uninstall();
         return true;
       },
       {
@@ -114,6 +116,38 @@ class Settings {
           ipcRenderer.invoke("main-window-restart");
         }, 2000)
     );
+  }
+
+  async enabledAdmin() {
+    const adminToggle = document.querySelector(".enabled-admin");
+
+    const configData = await this.db.readData("configClient");
+    if (configData?.launcher_config?.adminEnabled)
+      adminToggle.checked = configData.launcher_config.adminEnabled;
+
+    adminToggle.addEventListener("change", async (e) => {
+      try {
+        let configData = await this.db.readData("configClient");
+        configData.launcher_config.adminEnabled = e.target.checked;
+        await this.db.updateData("configClient", configData);
+
+        showSnackbar(
+          e.target.checked
+            ? "Options admin activées !"
+            : "Options admin désactivées !"
+        );
+      } catch (err) {
+        console.error(err);
+        showSnackbar(
+          "Erreur lors de l'activation des options admin !",
+          "error"
+        );
+      } finally {
+        setTimeout(() => {
+          ipcRenderer.invoke("main-window-restart");
+        }, 2000);
+      }
+    });
   }
 
   uninstallGame() {
