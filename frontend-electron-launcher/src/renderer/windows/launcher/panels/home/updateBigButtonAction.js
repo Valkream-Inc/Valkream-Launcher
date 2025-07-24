@@ -151,7 +151,7 @@ class UpdateBigButtonAction {
       ) {
         return changeMainButtonEvent({
           text: "Mettre à jour",
-          onclick: this.upDate,
+          onclick: () => this.upDate(onlineVersionConfig),
         });
       }
 
@@ -250,14 +250,16 @@ class UpdateBigButtonAction {
     }
   };
 
-  upDate = async () => {
+  upDate = async (onlineVersionConfig) => {
     this.disabledMainButton();
     try {
       let isOk = true;
+      if (!onlineVersionConfig) isOk = false;
+
       this.changeMainButtonEvent({ text: "Mise à jour...", onclick: null });
       if (isOk)
         isOk = await GameManager.preserveGameFolder(
-          onlineVersionConfig.modpack.gameFolderToPreserve
+          onlineVersionConfig?.modpack?.gameFolderToPreserve
         );
       if (isOk) isOk = await ThunderstoreManager.uninstallModpackConfig();
 

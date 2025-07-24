@@ -9,6 +9,12 @@ class MaintenanceManager {
   }
 
   init = () => {
+    if (
+      window.isServerReachable === undefined ||
+      window.isServerReachable === null
+    )
+      return setTimeout(() => this.init(), 100);
+
     this.getMaintenance();
     this.interval = setInterval(this.getMaintenance, 5000);
   };

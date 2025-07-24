@@ -314,3 +314,154 @@
 #choose-game-path-btn:hover {
   background: #1565c0;
 }
+/*
+*******************************************************************************
+*                                                                             *
+* Style pour les boxs de mods                                                 *
+*                                                                             *
+*******************************************************************************
+*/
+.game-info-box {
+  display: flex;
+  flex-direction: column;
+  background-color: #038913;
+  color: var(--color);
+  gap: 16px;
+  width: 80%;
+  border-radius: 10px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 0.5cm;
+}
+.game-info-box.update-available {
+  background-color: #0077ff;
+}
+.game-info-box.not-uptodate {
+  background-color: #f44336;
+}
+.game-info-box.not-uptodate.update-available {
+  background-color: #ff7300;
+}
+.game-info-box.incomplete {
+  background-color: #8d0979;
+}
+
+.game-info-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.game-info-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+}
+
+.game-info-title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.game-info-description {
+  margin: 4px 0 0 0;
+  color: #ccc;
+}
+
+.game-version-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.game-version-table th,
+.game-version-table td {
+  padding: 8px;
+  text-align: left;
+}
+
+.game-version-table th {
+  border-bottom: 1px solid #444;
+}
+
+/* légende */
+.update-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--color);
+  background: var(--background);
+  width: 80%;
+  border-radius: 10px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1cm;
+}
+
+.update-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.update-color {
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  min-width: 16px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.update-color.available {
+  background-color: #0077ff;
+}
+
+.update-color.outdated {
+  background-color: #f44336;
+}
+
+.update-color.outdated-available {
+  background-color: #ff7300;
+}
+
+.update-color.incomplete {
+  background-color: #8d0979;
+}
+
+/* hash table */
+.hash-table-box {
+  background: var(--background);
+  width: 80%;
+  border-radius: 10px;
+  padding: 1.5rem 2rem;
+  margin: 0.5rem;
+}
+
+.hash-table-box h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.hash-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.hash-table th,
+.hash-table td {
+  padding: 8px;
+  border-bottom: 1px solid #444;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.hash-ok {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.hash-diff {
+  color: #f44336;
+  font-weight: bold;
+}

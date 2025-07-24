@@ -26,7 +26,7 @@ valheim:
     darwin: /game/latest/build-game-darwin.zip
 
 bepinex:
-  version: 5.4.19
+  version: 5.4.2202
   dowload_url:
     win32: /game/latest/BepInEx-5.4.2202.zip
     linux: /game/latest/BepInEx-5.4.2202.zip

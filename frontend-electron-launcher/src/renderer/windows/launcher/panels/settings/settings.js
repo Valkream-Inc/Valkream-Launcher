@@ -12,6 +12,7 @@ const {
 const { database } = require(window.PathsManager.getSharedUtils());
 const { ipcRenderer } = require("electron");
 
+const GameTab = require("./gameTab.js");
 class Settings {
   static id = "settings";
   async init() {
@@ -28,6 +29,11 @@ class Settings {
     this.handleLauncherBehavior();
     this.handleCustomGamePath();
     this.enabledAdmin();
+
+    this.gameTab = new GameTab();
+    document.querySelector("#game").addEventListener("click", () => {
+      this.gameTab.reload();
+    });
   }
 
   buttonAction(btn, action, message, onSuccess = () => {}) {

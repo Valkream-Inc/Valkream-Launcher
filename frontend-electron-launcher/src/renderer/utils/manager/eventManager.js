@@ -9,6 +9,12 @@ class EventManager {
   }
 
   init = () => {
+    if (
+      window.isServerReachable === undefined ||
+      window.isServerReachable === null
+    )
+      return setTimeout(() => this.init(), 100);
+
     this.getEvent();
     this.interval = setInterval(this.getEvent, 5000);
   };

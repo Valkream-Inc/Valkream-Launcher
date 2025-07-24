@@ -183,10 +183,9 @@ class ThunderstoreManager {
         fs.existsSync(this.gameDir) &&
         (fs.existsSync(this.newManifestPath) || customMods),
       then: async () => {
+        let manifest;
         if (fs.existsSync(this.newManifestPath)) {
-          const manifest = JSON.parse(
-            fs.readFileSync(this.newManifestPath, "utf-8")
-          );
+          manifest = JSON.parse(fs.readFileSync(this.newManifestPath, "utf-8"));
 
           fse.moveSync(this.newManifestPath, this.manifestPath, {
             overwrite: true,
@@ -362,7 +361,7 @@ class ThunderstoreManager {
 
         await Promise.all(
           to_delete.map((mod) => {
-            const modPath = path.join(this.modsDir, mod);
+            const modPath = path.join(this.BepInExPluginsDir, mod);
             if (fs.existsSync(modPath)) {
               fs.rmSync(modPath, { recursive: true });
             }
@@ -377,6 +376,15 @@ class ThunderstoreManager {
       },
     });
   };
+
+  async getInstalledMods() {
+    return new Manager().handleError({
+      ensure: fs.existsSync(this.BepInExPluginsDir),
+      then: async () => {
+        return fs.readdirSync(this.BepInExPluginsDir);
+      },
+    });
+  }
 
   async getIsInstalled() {
     return fs.existsSync(this.manifestPath);

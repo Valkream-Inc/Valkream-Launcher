@@ -57,6 +57,8 @@ class GameManager {
       darwin: path.join(this.gameDir, "Valheim"),
     };
 
+    this.preservedDir = path.join(this.gameRootDir, "preserved");
+
     for (const dir of [this.appdataDir, this.gameDir]) {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
@@ -311,25 +313,20 @@ class GameManager {
     return await new Manager().handleError({
       ensure:
         fs.existsSync(path.join(this.gameDir, "BepInEx")) &&
+        gameFolderToPreserve &&
         gameFolderToPreserve.length > 0,
       then: async () => {
-        if (path.join(this.gameRootDir, "preserved"))
-          fs.rmSync(path.join(this.gameRootDir, "preserved"), {
-            recursive: true,
-          });
-        fs.mkdirSync(this.gameRootDir, { recursive: true });
+        if (fs.existsSync(this.preservedDir))
+          fs.rmSync(this.preservedDir, { recursive: true });
+        fs.mkdirSync(this.preservedDir, { recursive: true });
 
         await Promise.all(
           gameFolderToPreserve.map((folder) => {
-            if (!folder.startWith("BepInEx")) return;
+            if (!folder.startsWith("BepInEx")) return;
             if (folder.contains("..") || folder.contains("\\")) return;
 
             const source = path.join(this.gameDir, folder);
-            const destination = path.join(
-              this.gameRootDir,
-              "preserved",
-              folder
-            );
+            const destination = path.join(this.preservedDir, folder);
 
             if (fs.existsSync(source)) {
               if (fs.existsSync(destination))
@@ -347,11 +344,9 @@ class GameManager {
 
   async restoreGameFolder() {
     return await new Manager().handleError({
-      ensure:
-        fs.existsSync(this.gameDir) &&
-        fs.existsSync(path.join(this.gameRootDir, "preserved")),
+      ensure: fs.existsSync(this.gameDir) && fs.existsSync(this.preservedDir),
       then: async () => {
-        fse.copy(path.join(this.gameRootDir, "preserved"), this.gameDir, {
+        fse.copy(this.preservedDir, this.gameDir, {
           overwrite: true,
           recursive: true,
         });
