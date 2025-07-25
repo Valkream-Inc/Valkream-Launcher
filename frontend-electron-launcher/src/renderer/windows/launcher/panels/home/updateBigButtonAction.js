@@ -16,6 +16,7 @@ const { isSteamInstallation } = require(window.PathsManager.getConstants());
 class UpdateBigButtonAction {
   constructor() {
     this.db = new database();
+    this.settings_button = document.querySelector(".settings-btn");
   }
 
   callback = (text, downloadedBytes, totalBytes, percent, speed) => {
@@ -90,15 +91,20 @@ class UpdateBigButtonAction {
         !isAdminModsInstalled &&
         isAdminModsAvailable
       ) {
+        this.disabledMainButton();
         await ThunderstoreManager.InstallAdminMods(this.callback);
-        return this.reload();
+        this.enableMainButton();
+        return await this.reload();
       } else if (!isAdminModsActive && isAdminModsInstalled) {
         this.changeMainButtonEvent({
           text: "Désinstallation des mods admin...",
           onclick: null,
         });
+        this.settings_button.disabled = true;
+        this.disabledMainButton();
         await ThunderstoreManager.unInstallAdminMods();
-        return this.reload();
+        this.enableMainButton();
+        return await this.reload();
       }
 
       // Cas 2 : Pas installé et pas de connexion internet

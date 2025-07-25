@@ -7,13 +7,6 @@ const axios = require("axios");
 
 class GameTab {
   constructor() {
-    this.hash = {
-      pluginLocalHash: "1234567890",
-      pluginOnlineHash: "1234567890",
-      configLocalHash: "123456790",
-      configOnlineHash: "1234567890",
-    };
-
     this._initAbortController = null;
     this._timeoutId = null;
   }
@@ -41,12 +34,15 @@ class GameTab {
     this.gameTabContainer.appendChild(this.createLegendBox());
 
     if (window.isServerReachable && !signal.aborted) {
-      await this.getModpackList((modInfo) => {
-        if (!signal.aborted) {
-          const box = this.createGameInfoBox(modInfo);
-          this.gameTabContainer.appendChild(box);
-        }
-      }, signal);
+      await Promise.all([
+        this.getModpackList((modInfo) => {
+          if (!signal.aborted) {
+            const box = this.createGameInfoBox(modInfo);
+            this.gameTabContainer.appendChild(box);
+          }
+        }, signal),
+        this.getHash(),
+      ]);
     }
 
     if (!signal.aborted) {
@@ -54,7 +50,7 @@ class GameTab {
     }
   }
 
-  reload() {
+  async reload() {
     if (this._initAbortController) {
       this._initAbortController.abort();
       this._initAbortController = null;
@@ -68,6 +64,15 @@ class GameTab {
     const container = document.querySelector("#game-tab");
     container.innerHTML = '<div class="titre-tab">Mods Infos</div>';
 
+    this.stats = {
+      total: 0,
+      processed: 0,
+      updatesAvailable: 0,
+      errors: 0,
+    };
+
+    this.legendStatsTable = null;
+
     this.init();
   }
 
@@ -79,14 +84,19 @@ class GameTab {
         }, ms);
       });
 
-    const onlineValkreamVersion = (
-      await VersionManager.getOnlineVersionConfig()
-    ).version;
+    const onlineValkreamInfo = await VersionManager.getOnlineVersionConfig();
+    const localValkreamInfo = await VersionManager.getLocalVersionConfig();
+
+    const onlineValkreamVersion = onlineValkreamInfo.version;
+    const localValkreamVersion = localValkreamInfo.version;
+    const onlineValkreamBepinexVersion = onlineValkreamInfo.bepinex.version;
+    const localValkreamBepinexVersion = localValkreamInfo.bepinex.version;
+    const adminMods = onlineValkreamInfo.modpack.admin_mods;
 
     const installedModsRaw = await ThunderstoreManager.getInstalledMods();
-    const installedMods = [
-      ...installedModsRaw.filter((mod) => !mod.endsWith(".dll")),
-    ].sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" }));
+    const installedMods = installedModsRaw.filter(
+      (mod) => !mod.endsWith(".dll")
+    );
 
     let onlineMods = [];
     try {
@@ -100,18 +110,38 @@ class GameTab {
       console.error("Erreur récupération des dépendances :", err);
     }
 
+    const getModId = (modName) => modName.split("-").slice(0, 2).join("-");
+    const getModVersion = (modName) => modName.split("-").slice(2).join("-");
+
     const allMods = [
       {
-        mod: `ValheimValkream-Valkream-${onlineValkreamVersion}`,
+        mod: `ValheimValkream-Valkream-${localValkreamVersion}`,
         installed: true,
+        type: "special",
+        onlineVersion: onlineValkreamVersion,
       },
       {
-        mod: `denikson-BepInExPack_Valheim-${
-          (await VersionManager.getLocalVersionConfig()).bepinex.version
-        }`,
+        mod: `denikson-BepInExPack_Valheim-${localValkreamBepinexVersion}`,
         installed: true,
+        type: "special",
+        onlineVersion: onlineValkreamBepinexVersion,
       },
-      ...installedMods.map((mod) => ({ mod, installed: true })),
+      ...installedMods.map((mod) => ({
+        mod,
+        installed: true,
+        type: adminMods.some((adminMod) => getModId(adminMod) === getModId(mod))
+          ? "admin"
+          : "normal",
+        onlineVersion: adminMods.some(
+          (adminMod) => getModId(adminMod) === getModId(mod)
+        )
+          ? getModVersion(
+              adminMods.find(
+                (adminMod) => getModId(adminMod) === getModId(mod)
+              ) || mod
+            )
+          : undefined,
+      })),
       ...onlineMods
         .filter(
           (mod) =>
@@ -119,10 +149,36 @@ class GameTab {
               m.startsWith(mod.split("-").slice(0, 2).join("-"))
             )
         )
-        .map((mod) => ({ mod, installed: false })),
-    ];
+        .map((mod) => ({
+          mod,
+          installed: false,
+          type: adminMods.some(
+            (adminMod) => getModId(adminMod) === getModId(mod)
+          )
+            ? "admin"
+            : "normal",
+          onlineVersion: adminMods.some(
+            (adminMod) => getModId(adminMod) === getModId(mod)
+          )
+            ? getModVersion(
+                adminMods.find(
+                  (adminMod) => getModId(adminMod) === getModId(mod)
+                ) || mod
+              )
+            : undefined,
+        })),
+    ].sort((a, b) => {
+      const typeOrder = { special: 0, admin: 1, normal: 2 };
+      const typeDiff = typeOrder[a.type] - typeOrder[b.type];
+      return typeDiff !== 0
+        ? typeDiff
+        : a.mod.localeCompare(b.mod, "fr", { sensitivity: "base" });
+    });
 
-    for (const [i, { mod, installed }] of allMods.entries()) {
+    for (const [
+      i,
+      { mod, installed, type, onlineVersion },
+    ] of allMods.entries()) {
       if (signal?.aborted) return;
       try {
         const [author, name, version] = mod.split("-");
@@ -138,8 +194,10 @@ class GameTab {
 
         const modInfo = {
           name: `${author} - ${name}`,
-          localVersion: installed ? version : "?",
-          onlineVersion: installed
+          localVersion: installed ? version : null,
+          onlineVersion: onlineVersion
+            ? onlineVersion
+            : installed
             ? onlineMods
                 .find((m) => m.startsWith(`${author}-${name}-`))
                 ?.split("-")[2]
@@ -147,11 +205,18 @@ class GameTab {
           LastBuild: latest?.version_number,
           description: latest?.description,
           icon: latest?.icon,
+          type,
+          installed,
         };
 
         if (typeof onModLoaded === "function") {
           onModLoaded(modInfo);
         }
+
+        if (modInfo.LastBuild !== modInfo.onlineVersion)
+          this.stats.updatesAvailable++;
+
+        if (modInfo.localVersion !== modInfo.onlineVersion) this.stats.errors++;
       } catch (err) {
         console.warn(`Erreur lors du chargement du mod ${mod} :`, err);
         if (typeof onModLoaded === "function") {
@@ -165,6 +230,10 @@ class GameTab {
             error: true,
           });
         }
+      } finally {
+        this.stats.total = allMods.length;
+        this.stats.processed++;
+        this.updateLegendStatsTable();
       }
     }
   };
@@ -173,15 +242,21 @@ class GameTab {
     const container = document.createElement("div");
     container.classList.add("game-info-box");
 
-    if (!gameData.localVersion || !gameData.onlineVersion) {
-      container.classList.add("incomplete");
-    } else {
-      if (gameData.localVersion !== gameData.onlineVersion)
-        container.classList.add("not-uptodate");
-      if (gameData.LastBuild !== gameData.onlineVersion)
-        container.classList.add("update-available");
-    }
+    const { type, localVersion, onlineVersion, LastBuild, installed } =
+      gameData;
 
+    // class
+    if (type === "admin") container.classList.add("admin");
+    else if (type === "special") container.classList.add("special");
+    else container.classList.add("normal");
+
+    if (localVersion !== onlineVersion) container.classList.add("outdated");
+    if (LastBuild !== onlineVersion)
+      container.classList.add("update-available");
+    if (!installed) container.classList.add("uninstalled");
+    if (!onlineVersion) container.classList.add("uninprod");
+
+    // content
     const topSection = document.createElement("div");
     topSection.classList.add("game-info-top");
 
@@ -245,23 +320,34 @@ class GameTab {
     legend.classList.add("update-legend");
 
     const items = [
+      { className: "special-ok", label: "Mods spéciaux installés" },
       {
-        className: "available",
-        label: "Mise à jour disponible pour le modpack",
+        className: "special-update-available",
+        label: "Mods spéciaux à mettre à jour dans le modpack",
+      },
+      { className: "admin-ok", label: "Mods admin installés" },
+      {
+        className: "admin-update-available",
+        label: "Mods admin à mettre à jour dans le modpack",
+      },
+      { className: "normal-ok", label: "Mods normaux installés" },
+      {
+        className: "normal-update-available",
+        label: "Mods normaux à mettre à jour dans le modpack",
       },
       {
-        className: "outdated",
+        className: "normal-outdated",
         label: "Version local inégale à la version du modpack",
       },
       {
-        className: "outdated-available",
+        className: "normal-outdated-and-update-available",
         label:
           "Version local inégale à la version du modpack et mise à jour disponible pour le modpack",
       },
+      { className: "uninstalled", label: "Mods non installés" },
       {
-        className: "incomplete",
-        label:
-          "Mods non présent dans le modpack mais installés,ou mods non installés mais présents dans le modpack (ex: les mods admin et BepInEx)",
+        className: "uninprod",
+        label: "Mods non présent dans le modpack mais installés",
       },
     ];
 
@@ -280,8 +366,32 @@ class GameTab {
       legend.appendChild(item);
     });
 
+    const statsTable = document.createElement("table");
+    statsTable.classList.add("legend-stats-table");
+    this.legendStatsTable = statsTable;
+
+    legend.appendChild(statsTable);
+
     return legend;
   }
+
+  getHash = async () => {
+    const LocalHash = await ThunderstoreManager.getHash();
+    const OnlineHash = (await VersionManager.getOnlineVersionConfig()).modpack
+      .hash;
+
+    const pluginLocalHash = LocalHash.plugins || "?";
+    const pluginOnlineHash = OnlineHash.plugins || "?";
+    const configLocalHash = LocalHash.config || "?";
+    const configOnlineHash = OnlineHash.config || "?";
+
+    return (this.hash = {
+      pluginLocalHash,
+      pluginOnlineHash,
+      configLocalHash,
+      configOnlineHash,
+    });
+  };
 
   createHashTableBox(hash) {
     const {
@@ -355,6 +465,19 @@ class GameTab {
     container.appendChild(table);
 
     return container;
+  }
+
+  updateLegendStatsTable() {
+    if (!this.legendStatsTable) return;
+
+    const { total, processed, updatesAvailable, errors } = this.stats;
+    const percent = total ? Math.round((processed / total) * 100) : 0;
+
+    this.legendStatsTable.innerHTML = `
+      <tr><td>Mods traités</td><td>${processed} / ${total} (${percent}%)</td></tr>
+      <tr><td>Mises à jour disponibles</td><td>${updatesAvailable}</td></tr>
+      <tr><td>Erreurs</td><td>${errors}</td></tr>
+    `;
   }
 }
 

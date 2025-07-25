@@ -168,11 +168,17 @@ class Home {
   };
   disabledMainButton = () => {
     const playInstallBtn = document.querySelector("#play-install-btn");
+    const settingsBtn = document.querySelector("#settings-btn");
+
     playInstallBtn.disabled = true;
+    settingsBtn.disabled = true;
   };
   enableMainButton = () => {
     const playInstallBtn = document.querySelector("#play-install-btn");
+    const settingsBtn = document.querySelector("#settings-btn");
+
     playInstallBtn.disabled = false;
+    settingsBtn.disabled = false;
   };
   isMainButtonEnabled = () => {
     const playInstallBtn = document.querySelector("#play-install-btn");

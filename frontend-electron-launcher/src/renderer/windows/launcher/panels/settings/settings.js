@@ -120,7 +120,7 @@ class Settings {
       () =>
         setTimeout(() => {
           ipcRenderer.invoke("main-window-restart");
-        }, 2000)
+        }, 1000)
     );
   }
 
@@ -151,7 +151,7 @@ class Settings {
       } finally {
         setTimeout(() => {
           ipcRenderer.invoke("main-window-restart");
-        }, 2000);
+        }, 1000);
       }
     });
   }
@@ -169,7 +169,7 @@ class Settings {
       () =>
         setTimeout(() => {
           ipcRenderer.invoke("main-window-restart");
-        }, 2000)
+        }, 1000)
     );
   }
 

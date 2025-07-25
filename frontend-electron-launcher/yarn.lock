@@ -3930,10 +3930,10 @@ validator@^13.9.0:
   resolved "https://registry.yarnpkg.com/validator/-/validator-13.15.15.tgz#246594be5671dc09daa35caec5689fcd18c6e7e4"
   integrity sha512-BgWVbCI72aIQy937xbawcs+hrVaN/CZ2UwutgaJ36hGqRrLNM+f5LUT/YPRbo8IV/ASeFzXszezV+y2+rq3l8A==
 
-valkream-function-lib@latest:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/valkream-function-lib/-/valkream-function-lib-1.0.6.tgz#2da4c228bab20e69b3e352f9ea52151104084c02"
-  integrity sha512-wdhQaNaKG+s3/07TupqB7Z2sknTiXz44dZkP5eV5VvQg/4P8ClHOUwHJytXhYfnREi5mhV0YXy7iRqnwZPvyGA==
+valkream-function-lib@1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/valkream-function-lib/-/valkream-function-lib-1.0.7.tgz#92218ab31bc91c691c6b56e06d4a744482115c6b"
+  integrity sha512-YxoT1Q/3YgBI5uXUyYsI3xcBd4ulKZ1BIXzYmC36XGKGMI98v44yXpd6xdD5AcCf1hcAM4EOEbhFYYvC1Kr7rw==
   dependencies:
     archiver "^7.0.1"
     axios "^1.10.0"
