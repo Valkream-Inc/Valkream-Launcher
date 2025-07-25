@@ -2,10 +2,12 @@ const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
 const { ipcRenderer } = require("electron");
+const { hashFolder } = require("valkream-function-lib");
 
 const Manager = require("./manager.js");
 const { database } = require(PathsManager.getSharedUtils());
 const VersionManager = require("./versionManager.js");
+const GameManager = require("./gameManager.js");
 
 class ThunderstoreManager {
   static id = "thunderstore-manager";
@@ -332,6 +334,26 @@ class ThunderstoreManager {
           configsHash !== this.getOnlineVersionConfig().hash.config
         )
           throw new Error("Plugins or configs are not up to date");
+      },
+    });
+  }
+
+  async getHash() {
+    return new Manager().handleError({
+      ensure:
+        fs.existsSync(this.BepInExPluginsDir) &&
+        fs.existsSync(this.BepInExConfigDir),
+      then: async () => {
+        await GameManager.preserveGameFolder();
+        await GameManager.clean();
+        const pluginsHash = await hashFolder(this.BepInExPluginsDir);
+        const configsHash = await hashFolder(this.BepInExConfigDir);
+        await GameManager.restoreGameFolder();
+
+        return {
+          plugins: pluginsHash,
+          config: configsHash,
+        };
       },
     });
   }

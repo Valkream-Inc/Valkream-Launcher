@@ -324,28 +324,68 @@
 .game-info-box {
   display: flex;
   flex-direction: column;
-  background-color: #038913;
-  color: var(--color);
   gap: 16px;
   width: 80%;
   border-radius: 10px;
   padding: 1.5rem 2rem;
   margin-bottom: 0.5cm;
 }
-.game-info-box.update-available {
-  background-color: #0077ff;
+
+.game-info-box.special,
+.game-info-box.special table {
+  background-color: #303f9f;
+  color: white;
 }
-.game-info-box.not-uptodate {
-  background-color: #f44336;
-}
-.game-info-box.not-uptodate.update-available {
-  background-color: #ff7300;
-}
-.game-info-box.incomplete {
-  background-color: #8d0979;
+.game-info-box.special.update-available,
+.game-info-box.special.update-available table {
+  background-color: #0288d1;
+  color: white;
 }
 
-.game-info-top {
+.game-info-box.admin,
+.game-info-box.admin table {
+  background-color: #9c27b0;
+  color: white;
+}
+.game-info-box.admin.update-available,
+.game-info-box.admin.update-available table {
+  background-color: #ce93d8;
+  color: black;
+}
+
+.game-info-box.normal,
+.game-info-box.normal table {
+  background-color: #038913;
+  color: white;
+}
+.game-info-box.normal.update-available,
+.game-info-box.normal.update-available table {
+  background-color: #ffb300;
+  color: black;
+}
+.game-info-box.normal.outdated,
+.game-info-box.normal.outdated table {
+  background-color: #f44336;
+  color: white;
+}
+.game-info-box.normal.outdated.update-available,
+.game-info-box.normal.outdated.update-available table {
+  background-color: #ff7300;
+  color: white;
+}
+
+.game-info-box.uninstalled,
+.game-info-box.uninstalled table {
+  background-color: #455a64 !important;
+  color: white !important;
+}
+.game-info-box.uninprod,
+.game-info-box.uninprod table {
+  background-color: #6d4c41 !important;
+  color: white !important;
+}
+
+.active-container-settings .game-info-top {
   display: flex;
   align-items: flex-start;
   gap: 16px;
@@ -364,7 +404,6 @@
 
 .game-info-description {
   margin: 4px 0 0 0;
-  color: #ccc;
 }
 
 .game-version-table {
@@ -412,26 +451,58 @@
   display: inline-block;
 }
 
-.update-color.available {
-  background-color: #0077ff;
+.update-color.special-ok {
+  background-color: #303f9f;
+}
+.update-color.special-update-available {
+  background-color: #0288d1;
 }
 
-.update-color.outdated {
+.update-color.admin-ok {
+  background-color: #9c27b0;
+}
+.update-color.admin-update-available {
+  background-color: #ce93d8;
+}
+
+.update-color.normal-ok {
+  background-color: #038913;
+}
+.update-color.normal-update-available {
+  background-color: #ffb300;
+}
+
+.update-color.normal-outdated {
   background-color: #f44336;
 }
-
-.update-color.outdated-available {
+.update-color.normal-outdated-and-update-available {
   background-color: #ff7300;
 }
 
-.update-color.incomplete {
-  background-color: #8d0979;
+.update-color.uninstalled {
+  background-color: #455a64;
+}
+.update-color.uninprod {
+  background-color: #6d4c41;
+}
+
+.legend-stats-table {
+  margin-top: 1rem;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.legend-stats-table td {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
 }
 
 /* hash table */
 .hash-table-box {
   background: var(--background);
   width: 80%;
+  overflow-x: auto;
+  min-height: 6cm;
   border-radius: 10px;
   padding: 1.5rem 2rem;
   margin: 0.5rem;
@@ -443,7 +514,6 @@
 }
 
 .hash-table {
-  width: 100%;
   border-collapse: collapse;
   margin-top: 8px;
 }
