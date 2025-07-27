@@ -8,6 +8,7 @@ const { platform } = require("os");
 
 const Manager = require("./manager.js");
 const VersionManager = require("./versionManager.js");
+const SteamManager = require("./steamManager.js");
 
 const { database } = require(window.PathsManager.getSharedUtils());
 const { baseUrl } = require(window.PathsManager.getConstants());
@@ -44,10 +45,12 @@ class GameManager {
         "build-bepinex.zip"
       );
     }
-    this.gameFolderToRemove = await VersionManager.getLocalVersionConfig()
-      .modpack?.gameFolderToRemove;
-    this.gameFolderToPreserve = await VersionManager.getLocalVersionConfig()
-      .modpack?.gameFolderToPreserve;
+    this.gameFolderToRemove = (
+      await VersionManager.getLocalVersionConfig()
+    ).modpack?.gameFolderToRemove;
+    this.gameFolderToPreserve = (
+      await VersionManager.getLocalVersionConfig()
+    ).modpack?.gameFolderToPreserve;
 
     this.gameRootDir = path.join(this.appdataDir, "game");
     this.gameDir = path.join(this.gameRootDir, "Valheim");
@@ -289,7 +292,22 @@ class GameManager {
   async clean(gameFolderToRemove = this.gameFolderToRemove || []) {
     return await new Manager().handleError({
       ensure: fs.existsSync(this.gameDir) && gameFolderToRemove.length > 0,
-      then: () => cleanGameFolder(this.gameDir, gameFolderToRemove),
+      then: () => {
+        const securedGameFolderToRemove = gameFolderToRemove.filter(
+          (folder) => {
+            const normalized = path.posix.normalize(folder);
+            const isAllowed =
+              normalized.startsWith("/BepInEx/plugins") ||
+              normalized.startsWith("/BepInEx/config");
+            const isSafe =
+              !normalized.includes("..") && !path.isAbsolute(folder);
+
+            return isAllowed && isSafe;
+          }
+        );
+
+        cleanGameFolder(this.gameDir, securedGameFolderToRemove);
+      },
     });
   }
 
@@ -312,7 +330,7 @@ class GameManager {
   async preserveGameFolder(gameFolderToPreserve = this.gameFolderToPreserve) {
     return await new Manager().handleError({
       ensure:
-        fs.existsSync(path.join(this.gameDir, "BepInEx")) &&
+        this.getIsInstalled() &&
         gameFolderToPreserve &&
         gameFolderToPreserve.length > 0,
       then: async () => {
@@ -322,18 +340,20 @@ class GameManager {
 
         await Promise.all(
           gameFolderToPreserve.map((folder) => {
-            if (!folder.startsWith("BepInEx")) return;
-            if (folder.contains("..") || folder.contains("\\")) return;
+            const normalized = path.posix.normalize(folder);
+            const isAllowed =
+              normalized.startsWith("/BepInEx/plugins") ||
+              normalized.startsWith("/BepInEx/config");
+            const isSafe =
+              !normalized.includes("..") && !path.isAbsolute(folder);
+
+            if (!isAllowed || !isSafe) return;
 
             const source = path.join(this.gameDir, folder);
             const destination = path.join(this.preservedDir, folder);
 
             if (fs.existsSync(source)) {
-              if (fs.existsSync(destination))
-                fs.rmSync(destination, { recursive: true });
-
-              fs.mkdirSync(destination, { recursive: true });
-              fs.copyFileSync(source, destination);
+              fse.moveSync(source, destination, { overwrite: true });
             }
             return;
           })
@@ -346,10 +366,11 @@ class GameManager {
     return await new Manager().handleError({
       ensure: fs.existsSync(this.gameDir) && fs.existsSync(this.preservedDir),
       then: async () => {
-        fse.copy(this.preservedDir, this.gameDir, {
+        fse.copySync(this.preservedDir, this.gameDir, {
           overwrite: true,
           recursive: true,
         });
+        fs.rmSync(this.preservedDir, { recursive: true });
       },
     });
   }
@@ -358,6 +379,8 @@ class GameManager {
     return await new Manager().handleError({
       ensure: fs.existsSync(this.gameExePath[platform()]),
       then: async () => {
+        await SteamManager.start();
+
         // Lecture du paramètre launcherBehavior
         const configData = await this.db.readData("configClient");
         const behavior =

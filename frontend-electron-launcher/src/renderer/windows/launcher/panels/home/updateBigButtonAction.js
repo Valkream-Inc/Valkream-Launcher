@@ -264,8 +264,8 @@ class UpdateBigButtonAction {
 
       this.changeMainButtonEvent({ text: "Mise à jour...", onclick: null });
       if (isOk)
-        isOk = await GameManager.preserveGameFolder(
-          onlineVersionConfig?.modpack?.gameFolderToPreserve
+        await GameManager.preserveGameFolder(
+          onlineVersionConfig?.modpack?.gameFolderToPreserve || []
         );
       if (isOk) isOk = await ThunderstoreManager.uninstallModpackConfig();
 
@@ -281,7 +281,7 @@ class UpdateBigButtonAction {
           onlineVersionConfig.modpack.gameFolderToRemove
         );
       // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
-      if (isOk) isOk = await GameManager.restoreGameFolder();
+      if (isOk) await GameManager.restoreGameFolder();
       if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
 
       if (!isOk) throw new Error("Erreur lors de la mise à jour !");

@@ -49,15 +49,12 @@ class GameTab {
     this.gameTabContainer.appendChild(this.createLegendBox());
 
     if (!signal.aborted) {
-      await Promise.all([
-        this.getModpackList((modInfo) => {
-          if (!signal.aborted) {
-            const box = this.createGameInfoBox(modInfo);
-            this.gameTabContainer.appendChild(box);
-          }
-        }, signal),
-        this.getHash(),
-      ]);
+      await this.getModpackList((modInfo) => {
+        if (signal.aborted) return;
+        const box = this.createGameInfoBox(modInfo);
+        this.gameTabContainer.appendChild(box);
+      }, signal);
+      await this.getHash();
     }
 
     if (!signal.aborted) {

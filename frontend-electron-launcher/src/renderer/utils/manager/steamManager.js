@@ -43,6 +43,13 @@ class SteamManager {
       then: async () => shell.openExternal("steam://rungameid/892970"),
     });
   }
+
+  async start() {
+    return new Manager().handleError({
+      ensure: true,
+      then: async () => shell.openExternal("steam://store/892970"),
+    });
+  }
 }
 
 const steamManager = new SteamManager();

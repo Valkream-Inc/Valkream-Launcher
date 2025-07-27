@@ -346,8 +346,16 @@ class ThunderstoreManager {
       then: async () => {
         await GameManager.preserveGameFolder();
         await GameManager.clean();
-        const pluginsHash = await hashFolder(this.BepInExPluginsDir);
-        const configsHash = await hashFolder(this.BepInExConfigDir);
+        const pluginsHash = await hashFolder(
+          this.BepInExPluginsDir,
+          "sha256",
+          10
+        );
+        const configsHash = await hashFolder(
+          this.BepInExConfigDir,
+          "sha256",
+          10
+        );
         await GameManager.restoreGameFolder();
 
         return {
@@ -376,7 +384,9 @@ class ThunderstoreManager {
           fs.readFileSync(this.manifestPath, "utf-8")
         );
 
-        const actual_mods = ActualManifest.dependencies || [];
+        const actual_mods = (await this.getInstalledMods()).filter(
+          (mod) => !mod.endsWith(".dll")
+        );
         const new_mods = NewManifest.dependencies || [];
         const to_delete = actual_mods.filter((mod) => !new_mods.includes(mod));
         const to_add = new_mods.filter((mod) => !actual_mods.includes(mod));
