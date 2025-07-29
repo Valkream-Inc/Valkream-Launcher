@@ -8,18 +8,30 @@ class Config extends Models {
   constructor(props) {
     super(props);
     this.configDir = props.configDir;
-    this.event = props.event;
+    this.data = props.data;
   }
 
   static async changeEvent(props) {
-    const { configDir, event, user } = props;
+    const { configDir, data, user } = props;
     try {
-      await fse.writeJson(path.join(configDir, "event.json"), event, {
+      await fse.writeJson(path.join(configDir, "event.json"), data, {
         spaces: 2,
       });
       return { msg: "Event changée avec succès" };
     } catch (err) {
       throw new ServerError(err, user, "change_event");
+    }
+  }
+
+  static async changeMaintenance(props) {
+    const { configDir, data, user } = props;
+    try {
+      await fse.writeJson(path.join(configDir, "maintenance.json"), data, {
+        spaces: 2,
+      });
+      return { msg: "Maintenance changée avec succès" };
+    } catch (err) {
+      throw new ServerError(err, user, "change_maintenance");
     }
   }
 }

@@ -13,6 +13,13 @@ module.exports = (app) => {
       LockHandler("config", "critical")(config.config_change_event)
     )
   );
+  router.post(
+    "/config/change-maintenance/",
+    Auth.ensureIsAuthorized,
+    ErrorHandler.Async(
+      LockHandler("config", "critical")(config.config_change_maintenance)
+    )
+  );
 
   app.use(router);
 };

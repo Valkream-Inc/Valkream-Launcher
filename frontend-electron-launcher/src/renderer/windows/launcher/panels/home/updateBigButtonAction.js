@@ -244,6 +244,7 @@ class UpdateBigButtonAction {
     this.disabledMainButton();
     try {
       let isOk = true;
+      if (isOk) isOk = await SteamManager.start();
       if (isOk) isOk = await GameManager.play();
 
       if (!isOk) throw new Error("Erreur lors du lancement du jeu !");
@@ -263,9 +264,9 @@ class UpdateBigButtonAction {
       if (!onlineVersionConfig) isOk = false;
 
       this.changeMainButtonEvent({ text: "Mise à jour...", onclick: null });
-      if (isOk)
-        await GameManager.preserveGameFolder(
-          onlineVersionConfig?.modpack?.gameFolderToPreserve || []
+      if (isOk && onlineVersionConfig?.modpack?.gameFolderToPreserve)
+        isOk = await GameManager.preserveGameFolder(
+          onlineVersionConfig?.modpack?.gameFolderToPreserve
         );
       if (isOk) isOk = await ThunderstoreManager.uninstallModpackConfig();
 
@@ -276,12 +277,13 @@ class UpdateBigButtonAction {
       if (isOk) isOk = await ThunderstoreManager.update(this.callback);
 
       this.changeMainButtonEvent({ text: "Verification...", onclick: null });
-      if (isOk)
+      if (isOk && onlineVersionConfig?.modpack?.gameFolderToRemove)
         isOk = await GameManager.clean(
-          onlineVersionConfig.modpack.gameFolderToRemove
+          onlineVersionConfig?.modpack?.gameFolderToRemove
         );
       // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
-      if (isOk) await GameManager.restoreGameFolder();
+      if (isOk && onlineVersionConfig?.modpack?.gameFolderToPreserve)
+        isOk = await GameManager.restoreGameFolder();
       if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
 
       if (!isOk) throw new Error("Erreur lors de la mise à jour !");
