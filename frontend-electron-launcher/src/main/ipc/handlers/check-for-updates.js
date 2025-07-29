@@ -7,6 +7,7 @@ const { autoUpdater } = require("electron-updater");
 const PathManager = require("../../../shared/utils/pathsManager.js");
 const { hasInternetConnection } = require(PathManager.getSharedUtils());
 const { baseUrl } = require(PathManager.getConstants());
+const { formatBytes } = require("valkream-function-lib");
 
 class CheckForUpdates {
   constructor(event) {
@@ -21,23 +22,32 @@ class CheckForUpdates {
         "❌ Pas de connexion internet. Impossible de vérifier les mises à jour."
       );
 
-    //config
-    autoUpdater.allowDowngrade = true; // Autoriser le downgrade
+    // Config autoUpdater
+    autoUpdater.allowDowngrade = true;
     autoUpdater.setFeedURL({
       provider: "generic",
       url: `${baseUrl}/launcher/latest/`,
     });
     autoUpdater.autoDownload = false;
 
-    //listeners
+    // Clean listeners
     autoUpdater.removeAllListeners();
+
+    // Gestion des événements
     autoUpdater.on("error", (err) => this.onError(err));
     autoUpdater.on("update-not-available", () =>
       this.onMsg("🟢 Aucune mise à jour.", true)
     );
 
-    autoUpdater.on("update-available", async (info) => {
+    autoUpdater.on("update-available", async () => {
       this.onMsg("🔄 Mise à jour disponible...");
+
+      // Écoute de la progression
+      autoUpdater.on("download-progress", (progress) => {
+        const percent = progress.percent.toFixed(1);
+        const speed = formatBytes(progress.bytesPerSecond) + "/s";
+        this.onMsg(`⬇️ (${percent}% à ${speed})`);
+      });
 
       try {
         await autoUpdater.downloadUpdate();
