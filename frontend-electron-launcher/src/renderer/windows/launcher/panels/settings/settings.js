@@ -29,6 +29,7 @@ class Settings {
     this.handleLauncherBehavior();
     this.handleCustomGamePath();
     this.enabledAdmin();
+    this.toggleLaunchSteam();
 
     this.gameTab = new GameTab();
     document.querySelector("#game").addEventListener("click", () => {
@@ -152,6 +153,34 @@ class Settings {
         setTimeout(() => {
           ipcRenderer.invoke("main-window-restart");
         }, 1000);
+      }
+    });
+  }
+
+  async toggleLaunchSteam() {
+    const steamToggle = document.querySelector(".launch-steam-toggle");
+
+    const configData = await this.db.readData("configClient");
+    if (configData?.launcher_config?.launchSteam)
+      steamToggle.checked = configData.launcher_config.launchSteam;
+
+    steamToggle.addEventListener("change", async (e) => {
+      try {
+        let configData = await this.db.readData("configClient");
+        configData.launcher_config.launchSteam = e.target.checked;
+        await this.db.updateData("configClient", configData);
+
+        showSnackbar(
+          e.target.checked
+            ? "Steam sera lancé avec le jeu."
+            : "Steam ne sera pas lancé au démarrage du jeu."
+        );
+      } catch (err) {
+        console.error(err);
+        showSnackbar(
+          "Erreur lors de la modification de l'option Steam !",
+          "error"
+        );
       }
     });
   }

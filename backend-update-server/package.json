@@ -1,6 +1,6 @@
 {
   "name": "web-update-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "./src/server.js",
   "author": "Valkream Team",
   "license": "MIT",

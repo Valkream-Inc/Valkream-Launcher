@@ -57,7 +57,7 @@ class Home {
             "<span style='color:#4ec3ff;'>Bienvenue sur le serveur Valkream</span>",
           content: `
             Lorsque vous êtes en jeu, soyez connecté sur le serveur Mumble et dans le canal « Vocal en jeu » du serveur Discord Valkream.<br><br>
-            Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous rejoindre sur notre serveur Discord)`,
+            Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous joindre sur notre serveur Discord)`,
           color: "white",
           background: true,
           options: true,
@@ -73,7 +73,7 @@ class Home {
       const serverPlayersText = document.querySelector("#server-players");
 
       const isOnline = infos.status === "server online";
-      serverInfosText.innerHTML = window.maintenance?.isInMaintenance
+      serverInfosText.innerHTML = window.maintenance?.enabled
         ? "🔵 En Maintenance"
         : isOnline
         ? "🟢 En ligne"
@@ -83,16 +83,25 @@ class Home {
         ? `${infos.players.online}/${infos.players.max}`
         : "--/--";
 
-      if (window.maintenance?.isInMaintenance) {
+      if (window.maintenance?.enabled) {
+        if (
+          typeof window.maintenance?.description !== "string" ||
+          /<[^>]*>/.test(window.maintenance?.description)
+        )
+          throw new Error("La description ne doit pas contenir de HTML.");
+
         const maintenancePopup = new Popup();
         serverInfosBox.onclick = () =>
           maintenancePopup.openPopup({
             title: "Maintenance",
-            content:
-              window.maintenance?.maintanceHTML +
-              `<br><br>La maintenance prendra fin le ${new Date(
-                window.maintenance?.maintenanceEndDate
-              ).toLocaleString()} si tout se passe bien.`,
+            content: `${(window.maintenance?.description || "").replace(
+              "\n",
+              "<br>"
+            )}
+              <br><br>
+              <span style='color:yellow;'>La maintenance prendra fin le ${new Date(
+                window.maintenance?.end_date
+              ).toLocaleString()} si tout se passe bien.</span>`,
             bottomContent: "Bonne Attente !",
             background: true,
             color: "white",
@@ -132,9 +141,15 @@ class Home {
         // Crée un élément de lien qui déclenchera openExternalPath
         const linkId = "external-event-link";
 
+        if (
+          typeof event.description !== "string" ||
+          /<[^>]*>/.test(event.description)
+        )
+          throw new Error("La description ne doit pas contenir de HTML.");
+
         eventPopup.openPopup({
           title: `<span style='color:#4ec3ff;'>${event.name}</span>`,
-          content: event.description,
+          content: (event.description || "").replace("\n", "<br>"),
           bottomContent: "Voir sur le site Web",
           bottomId: linkId,
           color: "white",

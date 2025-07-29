@@ -165,7 +165,7 @@ class UpdateBigButtonAction {
       if (isInstalled && window.isServerReachable && upToDate)
         return changeMainButtonEvent({
           text: `Jouer à la v${localVersionConfig.version} ${
-            window.maintenance?.isInMaintenance
+            window.maintenance?.enabled
               ? " <br> (⚠️ Maintenance en cours.)"
               : ""
           }`,
@@ -241,9 +241,13 @@ class UpdateBigButtonAction {
   };
 
   start = async () => {
+    const configData = await this.db.readData("configClient");
+
     this.disabledMainButton();
     try {
       let isOk = true;
+      if (isOk && configData?.launcher_config?.launchSteam)
+        isOk = await SteamManager.open();
       if (isOk) isOk = await GameManager.play();
 
       if (!isOk) throw new Error("Erreur lors du lancement du jeu !");
@@ -263,9 +267,9 @@ class UpdateBigButtonAction {
       if (!onlineVersionConfig) isOk = false;
 
       this.changeMainButtonEvent({ text: "Mise à jour...", onclick: null });
-      if (isOk)
-        await GameManager.preserveGameFolder(
-          onlineVersionConfig?.modpack?.gameFolderToPreserve || []
+      if (isOk && onlineVersionConfig?.modpack?.gameFolderToPreserve)
+        isOk = await GameManager.preserveGameFolder(
+          onlineVersionConfig?.modpack?.gameFolderToPreserve
         );
       if (isOk) isOk = await ThunderstoreManager.uninstallModpackConfig();
 
@@ -276,12 +280,13 @@ class UpdateBigButtonAction {
       if (isOk) isOk = await ThunderstoreManager.update(this.callback);
 
       this.changeMainButtonEvent({ text: "Verification...", onclick: null });
-      if (isOk)
+      if (isOk && onlineVersionConfig?.modpack?.gameFolderToRemove)
         isOk = await GameManager.clean(
-          onlineVersionConfig.modpack.gameFolderToRemove
+          onlineVersionConfig?.modpack?.gameFolderToRemove
         );
       // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
-      if (isOk) await GameManager.restoreGameFolder();
+      if (isOk && onlineVersionConfig?.modpack?.gameFolderToPreserve)
+        isOk = await GameManager.restoreGameFolder();
       if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
 
       if (!isOk) throw new Error("Erreur lors de la mise à jour !");

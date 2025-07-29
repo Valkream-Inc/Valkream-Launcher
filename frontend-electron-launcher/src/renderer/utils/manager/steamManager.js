@@ -44,7 +44,7 @@ class SteamManager {
     });
   }
 
-  async start() {
+  async open() {
     return new Manager().handleError({
       ensure: true,
       then: async () => shell.openExternal("steam://store/892970"),

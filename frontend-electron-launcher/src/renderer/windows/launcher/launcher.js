@@ -71,7 +71,7 @@ class Launcher {
     let configData = await this.db.readData("configClient");
     if (!configData) {
       await this.db.createData("configClient", {
-        launcher_config: { musicEnabled: true },
+        launcher_config: { musicEnabled: true, launchSteam: true },
       });
     }
   }

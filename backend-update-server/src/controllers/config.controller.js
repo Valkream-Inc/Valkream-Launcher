@@ -11,11 +11,32 @@ exports.config_change_event = async (req, res) => {
   const data = await Config.changeEvent(
     new Config({
       configDir: paths.configUploadDir,
-      event: req.body.event,
+      data: req.body.event,
       user: req.ip,
     })
   );
 
   log(req.ip, "change_event", data.msg);
+  res.status(200).send(data);
+};
+
+exports.config_change_maintenance = async (req, res) => {
+  if (!req.body.maintenance)
+    throw new ClientError(
+      "error_empty_info",
+      400,
+      req.ip,
+      "change_maintenance"
+    );
+
+  const data = await Config.changeMaintenance(
+    new Config({
+      configDir: paths.configUploadDir,
+      data: req.body.maintenance,
+      user: req.ip,
+    })
+  );
+
+  log(req.ip, "change_maintenance", data.msg);
   res.status(200).send(data);
 };

@@ -379,8 +379,6 @@ class GameManager {
     return await new Manager().handleError({
       ensure: fs.existsSync(this.gameExePath[platform()]),
       then: async () => {
-        await SteamManager.start();
-
         // Lecture du paramètre launcherBehavior
         const configData = await this.db.readData("configClient");
         const behavior =

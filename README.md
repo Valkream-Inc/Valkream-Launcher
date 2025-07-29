@@ -41,6 +41,7 @@ Ce projet comprend :
 - 🛑 **Mode maintenance** (affichage automatique si serveur en maintenance)
 - 🌐 **Liens directs réseaux sociaux** (Discord, site web, top serveurs)
 - 🔄 **Mise à jour automatique** du launcher via electron-updater
+- 🎮 **Ouverture de steam** quand le jeu est lancé
 
 ### Backend (Node.js Update Server)
 
@@ -62,7 +63,7 @@ Ce projet comprend :
 
 - `frontend-electron-launcher/` : Le launcher Electron (interface utilisateur)
 - `backend-update-server/` : Serveur Node.js pour la gestion des mises à jour
-- `infra/` : Fichiers de configuration et de déploiement (Docker, nginx, etc.)
+- `infra/` : Exemple de fichiers de configuration et de déploiement (Docker, nginx, etc.)
 
 ---
 
