@@ -21,9 +21,13 @@ modpack:
     - /BepInEx/cache
     - /BepInEx/config/wackysDatabase/Cache
     - /BepInEx/config/Marketplace/SavedData
+    - /BepInEx/plugins/Valheim.DisplayBepInExInfo.dll
   gameFolderToPreserve:
     # fichier et dossiers à conserver lors de la mise à jour
     # les dossiers doivent commencer par /BepInEx/plugins ou /BepInEx/config
+    - /BepInEx/config/Azumatt.MinimalUI.cfg
+    - /BepInEx/config/WackyMole.EpicMMOSystemUI.cfg
+    - /BepInEx/config/shudnal.ExtraSlots.cfg
   hash:
     # hash du dossier /BepInEx/plugins et /BepInEx/config
     # les gameFolderToPreserve et gameFolderToRemove ne sont pas pris en compte dans le hash
