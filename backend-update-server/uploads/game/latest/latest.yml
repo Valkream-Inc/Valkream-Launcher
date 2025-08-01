@@ -5,24 +5,29 @@ modpack:
   dowload_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.1.16/
   admin_mods:
     # mods admin à installer avec l'option admin du launcher
-    # les mods doivent être présents dans le dossier /BepInEx/plugins
+    # les mods seront présents dans le dossier /BepInEx/plugins
     - "JereKuusela-Infinity_Hammer-1.72.0"
     - "JereKuusela-Server_devcommands-1.97.0"
     - "JereKuusela-Upgrade_World-1.73.0"
     - "JereKuusela-World_Edit_Commands-1.67.0"
+  boostfps_mods:
+    # mods pour booster les FPS à installer avec l'option boost FPS du launcher
+    # les mods seront présents dans le dossier /BepInEx/plugins
+    - "castix-ValheimFPSBoost-1.0.0"
+    - "vaffle1-FPSPlus-1.1.3"
   gameFolderToRemove:
     # fichiers et dossiers à supprimer lors de la mise à jour
     # les dossiers doivent commencer par /BepInEx/plugins ou /BepInEx/config
     - /BepInEx/cache
     - /BepInEx/config/wackysDatabase/Cache
     - /BepInEx/config/Marketplace/SavedData
+    - /BepInEx/plugins/Valheim.DisplayBepInExInfo.dll
   gameFolderToPreserve:
     # fichier et dossiers à conserver lors de la mise à jour
     # les dossiers doivent commencer par /BepInEx/plugins ou /BepInEx/config
-    - /BepInEx/plugins/JereKuusela-Infinity_Hammer-1.72.0/
-    - /BepInEx/plugins/JereKuusela-Server_devcommands-1.97.0/
-    - /BepInEx/plugins/JereKuusela-Upgrade_World-1.73.0/
-    - /BepInEx/plugins/JereKuusela-World_Edit_Commands-1.67.0/
+    - /BepInEx/config/Azumatt.MinimalUI.cfg
+    - /BepInEx/config/WackyMole.EpicMMOSystemUI.cfg
+    - /BepInEx/config/shudnal.ExtraSlots.cfg
   hash:
     # hash du dossier /BepInEx/plugins et /BepInEx/config
     # les gameFolderToPreserve et gameFolderToRemove ne sont pas pris en compte dans le hash

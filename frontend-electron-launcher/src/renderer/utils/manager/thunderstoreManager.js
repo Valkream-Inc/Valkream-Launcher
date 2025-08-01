@@ -42,10 +42,6 @@ class ThunderstoreManager {
       this.modpackZipPath = path.join(this.appdataDir, "game", "modpack.zip");
     }
 
-    this.modsAdmin = (
-      await VersionManager.getLocalVersionConfig()
-    ).modpack?.admin_mods;
-
     for (const dir of [
       this.appdataDir,
       this.gameDir,
@@ -431,21 +427,22 @@ class ThunderstoreManager {
     });
   }
 
-  isAdminModsInstalled(mods = this.modsAdmin || []) {
+  isCustomModsInstalled(mods = []) {
     if (!Array.isArray(mods) || mods.length === 0) return false;
     const installedMods = fs.readdirSync(this.BepInExPluginsDir);
     return mods.every((mod) => installedMods.includes(mod));
   }
 
-  isAdminModsAvailable(mods = this.modsAdmin || []) {
+  isCustomModsAvailable(mods = []) {
     if (!Array.isArray(mods) || mods.length === 0) return false;
     return true;
   }
 
-  unInstallAdminMods = async (mods = this.modsAdmin || []) => {
+  unInstallCustomMods = async (mods = []) => {
     return new Manager().handleError({
       ensure:
-        fs.existsSync(this.BepInExPluginsDir) && this.isAdminModsInstalled(),
+        fs.existsSync(this.BepInExPluginsDir) &&
+        this.isCustomModsInstalled(mods),
       then: async () => {
         const installedMods = fs.readdirSync(this.BepInExPluginsDir);
         // Ajout de la vérification :
@@ -465,19 +462,20 @@ class ThunderstoreManager {
     });
   };
 
-  InstallAdminMods = async (
+  InstallCustomMods = async (
+    mods = [],
     callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
-    text_dowload = "Téléchargement des mods Admin...",
-    text_unzip = "Décompression des mods Admin..."
+    text_dowload = "Téléchargement des mods Custom...",
+    text_unzip = "Décompression des mods Custom..."
   ) => {
     let isOk = true;
 
     return await new Manager().handleError({
       ensure:
-        fs.existsSync(this.BepInExPluginsDir) && this.modsAdmin?.length > 0,
+        fs.existsSync(this.BepInExPluginsDir) &&
+        this.isCustomModsAvailable(mods),
       then: async () => {
-        const mods = this.modsAdmin || [];
-        await this.unInstallAdminMods();
+        await this.unInstallCustomMods(mods);
 
         if (isOk) isOk = await this.dowloadMods(callback, text_dowload, mods);
         if (isOk) isOk = await this.unzipMods(callback, text_unzip);

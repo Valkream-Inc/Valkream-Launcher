@@ -2,11 +2,14 @@ const {
   ThunderstoreManager,
   VersionManager,
 } = require(window.PathsManager.getUtils());
+const { database } = require(window.PathsManager.getSharedUtils());
 
 const axios = require("axios");
 
 class GameTab {
   constructor() {
+    this.db = new database();
+
     this._initAbortController = null;
     this._timeoutId = null;
 
@@ -57,12 +60,12 @@ class GameTab {
       await this.getHash();
     }
 
-    if (!signal.aborted) {
+    if (!signal.aborted && !window.isMainProcessRunning) {
       this.gameTabContainer.appendChild(this.createHashTableBox(this.hash));
     }
   }
 
-  async reload() {
+  stop() {
     if (this._initAbortController) {
       this._initAbortController.abort();
       this._initAbortController = null;
@@ -72,6 +75,12 @@ class GameTab {
       clearTimeout(this._timeoutId);
       this._timeoutId = null;
     }
+
+    return;
+  }
+
+  async reload() {
+    this.stop();
 
     const container = document.querySelector("#game-tab");
     container.innerHTML = '<div class="titre-tab">Mods Infos</div>';
@@ -120,6 +129,12 @@ class GameTab {
         `https://thunderstore.io/api/experimental/package/ValheimValkream/Valkream/${onlineValkreamVersion}/`
       );
       onlineMods = res.data?.dependencies || [];
+
+      const configData = await this.db.readData("configClient");
+      if (configData?.launcher_config?.boostfpsEnabled) {
+        const boostfpsMods = onlineValkreamInfo?.modpack?.boostfps_mods || [];
+        onlineMods.push(...boostfpsMods);
+      }
     } catch (err) {
       console.error("Erreur récupération des dépendances :", err);
     }
