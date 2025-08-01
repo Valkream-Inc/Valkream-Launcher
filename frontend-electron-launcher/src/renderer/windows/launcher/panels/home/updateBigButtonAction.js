@@ -6,6 +6,7 @@ const {
   SteamManager,
   ThunderstoreManager,
   VersionManager,
+  Popup,
 } = require(window.PathsManager.getUtils());
 const {
   hasInternetConnection,
@@ -33,6 +34,9 @@ class UpdateBigButtonAction {
     enableMainButton = () => {},
     changeMainButtonEvent = ({ text, onclick }) => {}
   ) => {
+    // init the update button function
+    window.updateMainButton = this.reload;
+
     this.disabledMainButton = disabledMainButton;
     this.enableMainButton = enableMainButton;
     this.changeMainButtonEvent = changeMainButtonEvent;
@@ -50,11 +54,20 @@ class UpdateBigButtonAction {
         (await GameManager.getIsInstalled()) &&
         (await ThunderstoreManager.getIsInstalled()) &&
         (await VersionManager.getIsInstalled());
+
+      const admin_mods = localVersionConfig?.modpack?.admin_mods;
       const isAdminModsInstalled =
-        await ThunderstoreManager.isAdminModsInstalled();
+        await ThunderstoreManager.isCustomModsInstalled(admin_mods);
       const isAdminModsActive = configData?.launcher_config?.adminEnabled;
       const isAdminModsAvailable =
-        await ThunderstoreManager.isAdminModsAvailable();
+        await ThunderstoreManager.isCustomModsAvailable(admin_mods);
+
+      const boostfps_mods = localVersionConfig?.modpack?.boostfps_mods;
+      const isBoostfpsModsInstalled =
+        await ThunderstoreManager.isCustomModsInstalled(boostfps_mods);
+      const isBoostfpsModsActive = configData?.launcher_config?.boostfpsEnabled;
+      const isBoostfpsModsAvailable =
+        await ThunderstoreManager.isCustomModsAvailable(boostfps_mods);
 
       let onlineVersionConfig = null;
       let upToDate = false;
@@ -84,25 +97,58 @@ class UpdateBigButtonAction {
       )
         return setTimeout(this.reload, 100);
 
-      // cas 1: Admin mods gestion
+      // cas 1.1: Admin mods gestion
       if (
+        isInstalled &&
         isInternetConnected &&
         isAdminModsActive &&
         !isAdminModsInstalled &&
         isAdminModsAvailable
       ) {
         this.disabledMainButton();
-        await ThunderstoreManager.InstallAdminMods(this.callback);
+        await ThunderstoreManager.InstallCustomMods(admin_mods, this.callback);
         this.enableMainButton();
+
         return await this.reload();
-      } else if (!isAdminModsActive && isAdminModsInstalled) {
+      } else if (isInstalled && !isAdminModsActive && isAdminModsInstalled) {
         this.changeMainButtonEvent({
           text: "Désinstallation des mods admin...",
           onclick: null,
         });
         this.settings_button.disabled = true;
         this.disabledMainButton();
-        await ThunderstoreManager.unInstallAdminMods();
+        await ThunderstoreManager.unInstallCustomMods(admin_mods);
+        this.enableMainButton();
+        return await this.reload();
+      }
+      // cas 1.2: BoostFPS mods gestion
+      if (
+        isInstalled &&
+        isInternetConnected &&
+        isBoostfpsModsActive &&
+        !isBoostfpsModsInstalled &&
+        isBoostfpsModsAvailable
+      ) {
+        this.disabledMainButton();
+        await ThunderstoreManager.InstallCustomMods(
+          boostfps_mods,
+          this.callback
+        );
+        this.enableMainButton();
+
+        return await this.reload();
+      } else if (
+        isInstalled &&
+        !isBoostfpsModsActive &&
+        isBoostfpsModsInstalled
+      ) {
+        this.changeMainButtonEvent({
+          text: "Désinstallation des mods pour booster les FPS...",
+          onclick: null,
+        });
+        this.settings_button.disabled = true;
+        this.disabledMainButton();
+        await ThunderstoreManager.unInstallCustomMods(boostfps_mods);
         this.enableMainButton();
         return await this.reload();
       }
@@ -162,15 +208,16 @@ class UpdateBigButtonAction {
       }
 
       // Cas 7 : Installé, internet, à jour
-      if (isInstalled && window.isServerReachable && upToDate)
+      if (isInstalled && window.isServerReachable && upToDate) {
+        const isMaintenanceEnabled = window.maintenance?.enabled;
+
         return changeMainButtonEvent({
-          text: `Jouer à la v${localVersionConfig.version} ${
-            window.maintenance?.enabled
-              ? " <br> (⚠️ Maintenance en cours.)"
-              : ""
-          }`,
+          text: `Jouer à la v${localVersionConfig.version} 
+          ${isMaintenanceEnabled ? " <br> (⚠️ Maintenance en cours.)" : ""}
+          ${isAdminModsActive ? " <br> (⚠️ Mods Admin activés.)" : ""}`,
           onclick: this.start,
         });
+      }
 
       // Cas par défaut
       return changeMainButtonEvent({
@@ -190,7 +237,7 @@ class UpdateBigButtonAction {
   };
 
   reload = async () => {
-    await new UpdateBigButtonAction().init(
+    return await new UpdateBigButtonAction().init(
       this.disabledMainButton,
       this.enableMainButton,
       this.changeMainButtonEvent
@@ -198,6 +245,42 @@ class UpdateBigButtonAction {
   };
 
   install = async () => {
+    if (!window.isUserAlertedAboutInstall) {
+      const configData = await this.db.readData("configClient");
+      const isCustomGamePathSpecified =
+        configData?.launcher_config?.customGamePath;
+
+      window.isUserAlertedAboutInstall = true;
+      const alertPopup = new Popup();
+      return alertPopup.openPopup({
+        title: "<span style='color:#4ec3ff;'>Installation du launcher</span>",
+        content: isCustomGamePathSpecified
+          ? `⚠️ Vous avez choisi un chemin d’installation personnalisé. Vous pouvez le modifier à tout moment dans les paramètres.
+            <br>
+            Cela entraînera cependant une réinstallation complète du jeu.
+            <br>
+            <br>
+            <span style='color: orange;'>
+              <b>
+                ⚠️ La désinstallation du launcher doit UNIQUEMENT s’effectuer via le bouton prévu à cet effet, tout en bas dans les paramètres.
+              </b>
+            </span>`
+          : `Bienvenue sur Valkream.
+            <br>
+            Vous pouvez choisir où installer le jeu dans les paramètres (bouton en bas à droite).
+            <br>
+            <br>
+            <span style='color: orange;'>
+              <b>
+                ⚠️ La désinstallation du launcher doit UNIQUEMENT s’effectuer via le bouton prévu à cet effet, tout en bas dans les paramètres.
+              </b>
+            </span>`,
+        color: "white",
+        background: true,
+        options: true,
+      });
+    }
+
     this.disabledMainButton();
     try {
       let isOk = true;

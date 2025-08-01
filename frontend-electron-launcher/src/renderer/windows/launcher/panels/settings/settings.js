@@ -30,6 +30,7 @@ class Settings {
     this.handleCustomGamePath();
     this.enabledAdmin();
     this.toggleLaunchSteam();
+    this.enabledBoostFPS();
 
     this.gameTab = new GameTab();
     document.querySelector("#game").addEventListener("click", () => {
@@ -118,10 +119,9 @@ class Settings {
         success: "Chemin personnalisé sauvegardé !",
         error: "Chemin personnalisé non sauvegardé !",
       },
-      () =>
-        setTimeout(() => {
-          ipcRenderer.invoke("main-window-restart");
-        }, 1000)
+      async () => {
+        if (window.updateMainButton) await window.updateMainButton();
+      }
     );
   }
 
@@ -138,6 +138,7 @@ class Settings {
         configData.launcher_config.adminEnabled = e.target.checked;
         await this.db.updateData("configClient", configData);
 
+        if (window.updateMainButton) await window.updateMainButton();
         showSnackbar(
           e.target.checked
             ? "Options admin activées !"
@@ -145,14 +146,11 @@ class Settings {
         );
       } catch (err) {
         console.error(err);
+        if (window.updateMainButton) await window.updateMainButton();
         showSnackbar(
           "Erreur lors de l'activation des options admin !",
           "error"
         );
-      } finally {
-        setTimeout(() => {
-          ipcRenderer.invoke("main-window-restart");
-        }, 1000);
       }
     });
   }
@@ -185,6 +183,36 @@ class Settings {
     });
   }
 
+  async enabledBoostFPS() {
+    const boostfpsToggle = document.querySelector(".enabled-boostfps");
+
+    const configData = await this.db.readData("configClient");
+    if (configData?.launcher_config?.boostfpsEnabled)
+      boostfpsToggle.checked = configData.launcher_config.boostfpsEnabled;
+
+    boostfpsToggle.addEventListener("change", async (e) => {
+      try {
+        let configData = await this.db.readData("configClient");
+        configData.launcher_config.boostfpsEnabled = e.target.checked;
+        await this.db.updateData("configClient", configData);
+
+        if (window.updateMainButton) await window.updateMainButton();
+        showSnackbar(
+          e.target.checked
+            ? "Options pour booster les FPS activées !"
+            : "Options pour booster les FPS désactivées !"
+        );
+      } catch (err) {
+        console.error(err);
+        if (window.updateMainButton) await window.updateMainButton();
+        showSnackbar(
+          "Erreur lors de l'activation des options pour booster les FPS !",
+          "error"
+        );
+      }
+    });
+  }
+
   uninstallGame() {
     return this.buttonAction(
       document.querySelector("#uninstall-game"),
@@ -195,10 +223,9 @@ class Settings {
         success: "Application supprimée !",
         error: "Application non installé !",
       },
-      () =>
-        setTimeout(() => {
-          ipcRenderer.invoke("main-window-restart");
-        }, 1000)
+      async () => {
+        if (window.updateMainButton) await window.updateMainButton();
+      }
     );
   }
 
@@ -280,6 +307,8 @@ class Settings {
         if (id == "save") {
           return changePanel("home");
         }
+
+        if (id !== "game") this.gameTab.stop();
 
         if (activeSettingsBTN)
           activeSettingsBTN.classList.toggle("active-settings-BTN");

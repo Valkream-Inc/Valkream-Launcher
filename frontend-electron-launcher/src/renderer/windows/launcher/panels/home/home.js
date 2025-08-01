@@ -24,7 +24,7 @@ class Home {
       .addEventListener("click", (e) => changePanel("settings"));
     this.tipsEvent();
     this.showActualEvent();
-    this.checkOnlineVersion();
+    this.updateMainButton();
     this.showServerInfo();
     this.updateMaintenanceStatus();
   }
@@ -57,7 +57,13 @@ class Home {
             "<span style='color:#4ec3ff;'>Bienvenue sur le serveur Valkream</span>",
           content: `
             Lorsque vous êtes en jeu, soyez connecté sur le serveur Mumble et dans le canal « Vocal en jeu » du serveur Discord Valkream.<br><br>
-            Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous joindre sur notre serveur Discord)`,
+            Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous joindre sur notre serveur Discord)<br><br>
+            <span style='color: orange;'>
+              <b>
+                ⚠️ La désinstallation du launcher doit UNIQUEMENT s’effectuer via le bouton prévu à cet effet, tout en bas dans les paramètres.
+              </b>
+            </span>
+            `,
           color: "white",
           background: true,
           options: true,
@@ -123,7 +129,7 @@ class Home {
       window.maintenance = maintenance;
 
       // Si le bouton est actif, on vérifie l'action associée
-      if (this.isMainButtonEnabled()) this.checkOnlineVersion();
+      if (this.isMainButtonEnabled()) this.updateMainButton();
     }).init();
 
   showActualEvent = async () => {
@@ -168,7 +174,7 @@ class Home {
     event.init();
   };
 
-  checkOnlineVersion = async () => {
+  updateMainButton = async () => {
     new UpdateBigButtonAction().init(
       this.disabledMainButton,
       this.enableMainButton,
@@ -187,6 +193,7 @@ class Home {
 
     playInstallBtn.disabled = true;
     settingsBtn.disabled = true;
+    window.isMainProcessRunning = true;
   };
   enableMainButton = () => {
     const playInstallBtn = document.querySelector("#play-install-btn");
@@ -194,6 +201,7 @@ class Home {
 
     playInstallBtn.disabled = false;
     settingsBtn.disabled = false;
+    window.isMainProcessRunning = false;
   };
   isMainButtonEnabled = () => {
     const playInstallBtn = document.querySelector("#play-install-btn");

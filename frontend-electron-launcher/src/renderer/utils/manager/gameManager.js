@@ -48,9 +48,20 @@ class GameManager {
     this.gameFolderToRemove = (
       await VersionManager.getLocalVersionConfig()
     ).modpack?.gameFolderToRemove;
-    this.gameFolderToPreserve = (
-      await VersionManager.getLocalVersionConfig()
-    ).modpack?.gameFolderToPreserve;
+
+    this.configGameFolderToPreserve =
+      (await VersionManager.getLocalVersionConfig()).modpack
+        ?.gameFolderToPreserve || [];
+    this.modsAdmin =
+      (await VersionManager.getLocalVersionConfig()).modpack?.admin_mods || [];
+    this.modsBoostFPS =
+      (await VersionManager.getLocalVersionConfig()).modpack?.boostfps_mods ||
+      [];
+    this.gameFolderToPreserve = [
+      ...this.configGameFolderToPreserve,
+      ...this.modsAdmin.map((mod) => `/BepInEx/plugins/${mod}/`),
+      ...this.modsBoostFPS.map((mod) => `/BepInEx/plugins/${mod}/`),
+    ];
 
     this.gameRootDir = path.join(this.appdataDir, "game");
     this.gameDir = path.join(this.gameRootDir, "Valheim");
@@ -297,10 +308,10 @@ class GameManager {
           (folder) => {
             const normalized = path.posix.normalize(folder);
             const isAllowed =
-              normalized.startsWith("/BepInEx/plugins") ||
-              normalized.startsWith("/BepInEx/config");
-            const isSafe =
-              !normalized.includes("..") && !path.isAbsolute(folder);
+              normalized.startsWith("/BepInEx/cache") ||
+              normalized.startsWith("/BepInEx/plugins/") ||
+              normalized.startsWith("/BepInEx/config/");
+            const isSafe = !normalized.includes("..");
 
             return isAllowed && isSafe;
           }
@@ -342,10 +353,9 @@ class GameManager {
           gameFolderToPreserve.map((folder) => {
             const normalized = path.posix.normalize(folder);
             const isAllowed =
-              normalized.startsWith("/BepInEx/plugins") ||
-              normalized.startsWith("/BepInEx/config");
-            const isSafe =
-              !normalized.includes("..") && !path.isAbsolute(folder);
+              normalized.startsWith("/BepInEx/plugins/") ||
+              normalized.startsWith("/BepInEx/config/");
+            const isSafe = !normalized.includes("..");
 
             if (!isAllowed || !isSafe) return;
 
