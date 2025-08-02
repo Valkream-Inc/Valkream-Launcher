@@ -8,7 +8,7 @@ const { showSnackbar } = require("./snackbar.js");
 const { changePanel } = require("./changePanel.js");
 
 const Popup = require("./popup.js");
-
+const isFolderOk = require("./isFolderOk.js");
 // manager
 const Manager = require("./manager/manager.js");
 const EventManager = require("./manager/eventManager.js");
@@ -24,6 +24,7 @@ module.exports = {
   changePanel,
   showSnackbar,
   Popup,
+  isFolderOk,
   // manager
   Manager,
   EventManager,

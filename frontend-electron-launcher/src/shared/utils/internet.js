@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const dns = require("dns");
 const { baseUrl } = require("../constants/constants");
 const axios = require("axios");
@@ -25,7 +30,7 @@ function hasInternetConnection(hostname = "google.com") {
  */
 async function isServerReachable(url = baseUrl) {
   try {
-    await axios.get(url, { timeout: 3000 });
+    await axios.get(url, { timeout: 1000 });
     return true;
   } catch (error) {
     return false;

@@ -1,0 +1,244 @@
+/*******************************************************************************
+ *                                                                             *
+ * Header Logo                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.header-logo {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.logo-image {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.logo-text {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * social server                                                               *
+ *                                                                             *
+ ******************************************************************************/
+
+.social-tab {
+  position: absolute;
+  display: flex;
+  top: 50vh;
+  transform: translateY(-50%);
+  right: 32px;
+  max-height: 10cm;
+  margin-bottom: 1rem;
+}
+
+.social-block {
+  display: flex;
+  background: var(--background-transparent);
+  width: 90px;
+  height: 90px;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  font-size: 2rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease-in-out;
+}
+
+.social-block:hover .icon-social {
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}
+.social-block:hover {
+  background: var(--secondary-color);
+}
+
+.social-block .icon-social {
+  pointer-events: none;
+  background-repeat: no-repeat;
+  height: 55%;
+  width: 55%;
+  filter: var(--svg-color);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * bottom actions                                                              *
+ *                                                                             *
+ ******************************************************************************/
+
+.bottom-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  z-index: 20;
+}
+
+.play-btn {
+  background: var(--secondary-color);
+  color: var(--color);
+  border: none;
+  border-radius: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0.8rem 3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.play-btn:hover {
+  background: var(--third-color);
+  transform: scale(1.05);
+}
+
+.bottom-actions .settings-btn {
+  width: 3.2rem;
+  height: 3.2rem;
+  font-size: 2.2rem;
+  color: var(--element-color);
+  background: var(--background-transparent);
+  border: none;
+  border-radius: 10px;
+  margin-left: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+.bottom-actions .settings-btn:hover {
+  background: var(--secondary-color);
+  transform: scale(1.1);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * server stats                                                                *
+ *                                                                             *
+ ******************************************************************************/
+.server-infos-container {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+#server-players {
+  font-size: 24px;
+  text-align: center;
+  align-self: center;
+}
+.server-infos {
+  text-align: center;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * button tips                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+.tips-bottom-left {
+  position: fixed;
+  left: 32px;
+  bottom: 32px;
+  z-index: 30;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tips-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
+  transition: filter 0.2s;
+}
+
+.tips-bottom-left:hover .tips-icon {
+  filter: brightness(1.2) drop-shadow(0 0 6px #ffd60088);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * container d'événement                                                       *
+ *                                                                             *
+ ******************************************************************************/
+.event-container {
+  display: flex;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-transparent);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem 2rem;
+  width: 50vw;
+  min-height: 120px;
+  position: absolute;
+  top: 36px;
+  left: calc((100vw - 140px) / 4 + 140px);
+  transition: background 0.2s, transform 0.2s;
+  gap: 1.5rem;
+}
+
+.event-container:hover {
+  background: var(--secondary-color);
+  transform: scale(1.05);
+}
+
+.event-image {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.event-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 90px;
+  padding: 0;
+}
+
+.event-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color);
+  margin: 0;
+  text-align: center;
+}
+
+.event-date {
+  font-size: 1.2rem;
+  position: relative;
+  color: var(--color);
+  margin-top: 10px;
+  text-align: center;
+  text-decoration: bold;
+}

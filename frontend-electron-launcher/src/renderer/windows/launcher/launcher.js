@@ -13,7 +13,13 @@ const SteamCheck = require("./panels/steam-check/steam-check.js");
 
 // import modules
 const { changePanel } = require(PathsManager.getUtils());
-const { database, isServerReachable } = require(PathsManager.getSharedUtils());
+const {
+  database,
+  isServerReachable,
+  logger,
+} = require(PathsManager.getSharedUtils());
+
+window.logger = logger;
 
 // libs
 const { ipcRenderer } = require("electron");
@@ -67,7 +73,7 @@ class Launcher {
   }
 
   async initConfigClient() {
-    console.log("Initializing Config Client...");
+    window.logger.log(`Initializing the Client Config`);
     let configData = await this.db.readData("configClient");
     if (!configData) {
       await this.db.createData("configClient", {
@@ -79,7 +85,7 @@ class Launcher {
   async createPanels(...panels) {
     let panelsElem = document.querySelector(".panels");
     for (let panel of panels) {
-      console.log(`Initializing ${panel.name} Panel...`);
+      window.logger.info(`Initializing ${panel.name} Panel...`);
       let div = document.createElement("div");
       div.classList.add("panel", "content-scroll", panel.id);
       div.innerHTML = fs.readFileSync(
@@ -102,7 +108,7 @@ class Launcher {
     };
 
     getIsServerReachable();
-    setInterval(getIsServerReachable, 1000);
+    setInterval(getIsServerReachable, 5000);
   }
 }
 

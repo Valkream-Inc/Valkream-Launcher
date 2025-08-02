@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const { PathsManager } = require("../../../shared/utils/shared-utils");
 
 const { Server } = require("@fabricio-191/valve-server-query");
@@ -17,10 +22,10 @@ class ServerInfo {
     try {
       const server = await Server(serverInfos);
       return server;
-    } catch(err) {
+    } catch (err) {
       return null;
     }
-  }
+  };
 
   getServerInfo = async () => {
     try {

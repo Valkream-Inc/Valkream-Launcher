@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const { formatBytes } = require("valkream-function-lib");
 
 const {
@@ -154,7 +159,7 @@ class UpdateBigButtonAction {
       }
 
       // Cas 2 : Pas installé et pas de connexion internet
-      if (!isInstalled && !window.isServerReachable)
+      if (!isInstalled && (!window.isServerReachable || !isInternetConnected))
         return changeMainButtonEvent({
           text: `Installation Impossible <br/> (❌ Pas de connexion ${
             isInternetConnected ? "au server" : "internet"
@@ -163,14 +168,14 @@ class UpdateBigButtonAction {
         });
 
       // Cas 3 : Pas installé et internet OK
-      if (!isInstalled && window.isServerReachable)
+      if (!isInstalled && window.isServerReachable && isInternetConnected)
         return changeMainButtonEvent({
           text: "Installer",
           onclick: this.install,
         });
 
       // Cas 4 : Installé, pas internet
-      if (isInstalled && !window.isServerReachable) {
+      if (isInstalled && (!window.isServerReachable || !isInternetConnected)) {
         changeMainButtonEvent({
           text: `Jouer à la v${localVersionConfig.version} <br /> 
           (⚠️ Pas de connexion ${
@@ -185,6 +190,7 @@ class UpdateBigButtonAction {
       if (
         isInstalled &&
         window.isServerReachable &&
+        isInternetConnected &&
         !upToDate &&
         isMajorUpdate
       ) {
@@ -198,6 +204,7 @@ class UpdateBigButtonAction {
       if (
         isInstalled &&
         window.isServerReachable &&
+        isInternetConnected &&
         !upToDate &&
         !isMajorUpdate
       ) {
@@ -208,7 +215,12 @@ class UpdateBigButtonAction {
       }
 
       // Cas 7 : Installé, internet, à jour
-      if (isInstalled && window.isServerReachable && upToDate) {
+      if (
+        isInstalled &&
+        window.isServerReachable &&
+        isInternetConnected &&
+        upToDate
+      ) {
         const isMaintenanceEnabled = window.maintenance?.enabled;
 
         return changeMainButtonEvent({

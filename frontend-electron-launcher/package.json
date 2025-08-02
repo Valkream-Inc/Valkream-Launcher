@@ -1,6 +1,6 @@
 {
   "name": "Valkream-Launcher",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Launcher Valheim moddé pour Valkream",
   "main": "src/app.js",
   "author": "Valkream Team",
@@ -20,6 +20,7 @@
     "electron-updater": "^6.1.8",
     "form-data": "^4.0.3",
     "fs": "^0.0.1-security",
+    "fs-extra": "^11.3.0",
     "node-bdd": "^2.0.4",
     "node-fetch": "^2.7.0",
     "path": "^0.12.7",

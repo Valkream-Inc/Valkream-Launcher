@@ -27,6 +27,8 @@ class Home {
     this.updateMainButton();
     this.showServerInfo();
     this.updateMaintenanceStatus();
+
+    setInterval(this.updateMainButton, 5000);
   }
 
   updateCopyright = () => {
@@ -127,9 +129,6 @@ class Home {
   updateMaintenanceStatus = async () =>
     await new MaintenanceManager((maintenance) => {
       window.maintenance = maintenance;
-
-      // Si le bouton est actif, on vérifie l'action associée
-      if (this.isMainButtonEnabled()) this.updateMainButton();
     }).init();
 
   showActualEvent = async () => {
@@ -156,7 +155,7 @@ class Home {
         eventPopup.openPopup({
           title: `<span style='color:#4ec3ff;'>${event.name}</span>`,
           content: (event.description || "").replace("\n", "<br>"),
-          bottomContent: "Voir sur le site Web",
+          bottomContent: event.link ? "Voir sur le site Web" : null,
           bottomId: linkId,
           color: "white",
           background: true,
@@ -165,6 +164,8 @@ class Home {
 
         // Attendre que le popup soit ouvert puis ajouter le gestionnaire de clic
         setTimeout(() => {
+          if (!event.link) return;
+
           const linkElement = document.getElementById(linkId);
           if (linkElement)
             linkElement.onclick = () => shell.openExternal(event.link);
@@ -175,11 +176,12 @@ class Home {
   };
 
   updateMainButton = async () => {
-    new UpdateBigButtonAction().init(
-      this.disabledMainButton,
-      this.enableMainButton,
-      this.changeMainButtonEvent
-    );
+    if (this.isMainButtonEnabled())
+      return new UpdateBigButtonAction().init(
+        this.disabledMainButton,
+        this.enableMainButton,
+        this.changeMainButtonEvent
+      );
   };
 
   changeMainButtonEvent = ({ text, onclick }) => {

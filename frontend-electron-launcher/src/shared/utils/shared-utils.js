@@ -1,6 +1,11 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const database = require("./database");
 const { hasInternetConnection, isServerReachable } = require("./internet");
-const Logger = require("./logger");
+const logger = require("./logger");
 const pkg = require("../../../package.json");
 
 // managers
@@ -10,7 +15,7 @@ module.exports = {
   database,
   hasInternetConnection,
   isServerReachable,
-  Logger,
+  logger,
   PathsManager,
   pkg,
 };

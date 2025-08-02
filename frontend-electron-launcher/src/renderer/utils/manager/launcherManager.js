@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const { execFile } = require("child_process");
 const { ipcRenderer, shell } = require("electron");
 const fs = require("fs");

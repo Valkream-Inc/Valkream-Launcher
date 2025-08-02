@@ -5,6 +5,7 @@
 
 const axios = require("axios");
 const { downloadZip } = require("valkream-function-lib");
+const { pLimit, throttle } = require("../../utils/main-utils");
 
 class DowloadMultiplefiles {
   async init(event, files, id) {
@@ -12,59 +13,62 @@ class DowloadMultiplefiles {
     this.files = files;
     this.id = id;
 
-    // files: tableau [{ path, destPath }]
     const totalSizes = new Array(this.files.length).fill(0);
     const downloaded = new Array(this.files.length).fill(0);
-    const speeds = new Array(this.files.length).fill(0);
     let totalGlobal = 0;
     let downloadedGlobal = 0;
-    let speedGlobal = 0;
 
-    // 1. Préparation : récupérer les tailles
+    const startTime = Date.now();
+
+    // 🔸 Étape 1 : Calcul des tailles totales de tous les fichiers
     await Promise.all(
       this.files.map(async (file, index) => {
-        const head = await axios.head(file.url);
-        const size = parseInt(head.headers["content-length"], 10);
-        totalSizes[index] = size;
-        totalGlobal += size;
+        try {
+          const head = await axios.head(file.url);
+          const size = parseInt(head.headers["content-length"], 10);
+          totalSizes[index] = size;
+          totalGlobal += size;
+        } catch (err) {
+          console.warn(
+            `Erreur récupération taille de ${file.url}: ${err.message}`
+          );
+        }
       })
     );
 
-    // 2. Lancement des téléchargements en parallèle
-    const downloads = this.files.map((file, index) => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          await downloadZip(
-            file.url,
-            file.destPath,
-            (downloadedBytes, totalBytes, pourcentageDuFichier, speed) => {
-              downloaded[index] = downloadedBytes;
-              speeds[index] = speed;
-              downloadedGlobal = downloaded.reduce((a, b) => a + b, 0);
-              speedGlobal = speeds.reduce((a, b) => a + b, 0);
-              const percent = Math.round(
-                (downloadedGlobal / totalGlobal) * 100
-              );
+    // 🔸 Étape 2 : Fonction de mise à jour de la progression
+    const sendProgressThrottled = throttle(() => {
+      if (totalGlobal === 0) return;
+      const percent = Math.round((downloadedGlobal / totalGlobal) * 100);
+      const elapsedSec = (Date.now() - startTime) / 1000;
+      const speedGlobal = elapsedSec > 0 ? downloadedGlobal / elapsedSec : 0;
 
-              this.event.sender.send(`download-multi-progress-${this.id}`, {
-                percent,
-                downloadedBytes: downloadedGlobal,
-                totalBytes: totalGlobal,
-                speed: speedGlobal,
-              });
-            }
-          );
-          resolve();
-        } catch (err) {
-          reject(err);
-        }
+      this.event.sender.send(`download-multi-progress-${this.id}`, {
+        percent,
+        downloadedBytes: downloadedGlobal,
+        totalBytes: totalGlobal,
+        speed: speedGlobal,
       });
-    });
+    }, 100); // max 10x par seconde
 
-    // 3. Attente de tous les téléchargements
+    // 🔸 Étape 3 : Limitation de la parallélisation
+    const limit = pLimit(3); // max 3 téléchargements en parallèle
+
+    // 🔸 Étape 4 : Lancer les téléchargement avec suivi
+    const downloads = this.files.map((file, index) =>
+      limit(async () => {
+        await downloadZip(file.url, file.destPath, (downloadedBytes) => {
+          downloaded[index] = downloadedBytes;
+          downloadedGlobal = downloaded.reduce((a, b) => a + b, 0);
+          sendProgressThrottled();
+        });
+      })
+    );
+
+    // 🔸 Étape 5 : Attendre la fin
     await Promise.all(downloads);
-    await this.event.sender.send(`download-multi-finished-${this.id}`);
-    return;
+
+    this.event.sender.send(`download-multi-finished-${this.id}`);
   }
 }
 

@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const { ipcMain, app, dialog } = require("electron");
 const path = require("path");
 const dev = process.env.NODE_ENV === "dev" || process.env.DEV_TOOL === "open";

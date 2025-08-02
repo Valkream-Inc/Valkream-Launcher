@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const path = require("path");
 const fs = require("fs");
 const fse = require("fs-extra");
@@ -8,7 +13,7 @@ const { platform } = require("os");
 
 const Manager = require("./manager.js");
 const VersionManager = require("./versionManager.js");
-const SteamManager = require("./steamManager.js");
+const isFolderOk = require("../isFolderOk.js");
 
 const { database } = require(window.PathsManager.getSharedUtils());
 const { baseUrl } = require(window.PathsManager.getConstants());
@@ -304,17 +309,15 @@ class GameManager {
     return await new Manager().handleError({
       ensure: fs.existsSync(this.gameDir) && gameFolderToRemove.length > 0,
       then: () => {
-        const securedGameFolderToRemove = gameFolderToRemove.filter(
-          (folder) => {
-            const normalized = path.posix.normalize(folder);
-            const isAllowed =
-              normalized.startsWith("/BepInEx/cache") ||
-              normalized.startsWith("/BepInEx/plugins/") ||
-              normalized.startsWith("/BepInEx/config/");
-            const isSafe = !normalized.includes("..");
-
-            return isAllowed && isSafe;
-          }
+        const securedGameFolderToRemove = gameFolderToRemove.filter((folder) =>
+          isFolderOk(
+            this.gameDir,
+            folder,
+            (relativePath) =>
+              relativePath === "BepInEx/cache" ||
+              relativePath.startsWith("BepInEx/plugins/") ||
+              relativePath.startsWith("BepInEx/config/")
+          )
         );
 
         cleanGameFolder(this.gameDir, securedGameFolderToRemove);
@@ -349,23 +352,24 @@ class GameManager {
           fs.rmSync(this.preservedDir, { recursive: true });
         fs.mkdirSync(this.preservedDir, { recursive: true });
 
+        const foldersToMove = gameFolderToPreserve.filter((folder) =>
+          isFolderOk(
+            this.gameDir,
+            folder,
+            (relativePath) =>
+              relativePath.startsWith("BepInEx/plugins/") ||
+              relativePath.startsWith("BepInEx/config/")
+          )
+        );
+
         await Promise.all(
-          gameFolderToPreserve.map((folder) => {
-            const normalized = path.posix.normalize(folder);
-            const isAllowed =
-              normalized.startsWith("/BepInEx/plugins/") ||
-              normalized.startsWith("/BepInEx/config/");
-            const isSafe = !normalized.includes("..");
-
-            if (!isAllowed || !isSafe) return;
-
+          foldersToMove.map(async (folder) => {
             const source = path.join(this.gameDir, folder);
             const destination = path.join(this.preservedDir, folder);
 
             if (fs.existsSync(source)) {
-              fse.moveSync(source, destination, { overwrite: true });
+              await fse.move(source, destination, { overwrite: true });
             }
-            return;
           })
         );
       },

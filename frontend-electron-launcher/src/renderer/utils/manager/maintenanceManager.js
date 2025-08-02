@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const axios = require("axios");
 
 const { baseUrl } = require(window.PathsManager.getConstants());

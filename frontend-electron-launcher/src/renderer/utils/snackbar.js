@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 function showSnackbar(message, type = "success", duration = 3000) {
   const snackbarContainer = document.querySelector("#snackbar-container");
   if (!snackbarContainer) return;

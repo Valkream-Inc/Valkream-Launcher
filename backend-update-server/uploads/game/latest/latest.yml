@@ -21,7 +21,6 @@ modpack:
     - /BepInEx/cache
     - /BepInEx/config/wackysDatabase/Cache
     - /BepInEx/config/Marketplace/SavedData
-    - /BepInEx/plugins/Valheim.DisplayBepInExInfo.dll
   gameFolderToPreserve:
     # fichier et dossiers à conserver lors de la mise à jour
     # les dossiers doivent commencer par /BepInEx/plugins ou /BepInEx/config
