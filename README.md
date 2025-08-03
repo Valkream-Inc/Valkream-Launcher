@@ -57,6 +57,8 @@ Ce projet comprend :
 - 🗃️ **Isolation des fichiers sensibles** (certificats SSL, .env)
 - 📊 **Logs d’accès et d’erreur** pour audit et sécurité
 
+> **⚠️ Attention** : A l'heure actuel l'installation via steam et l'installation cross-platforme ne fonctionne pas (seul le téléchargement via un server et pour windows fonctionne)
+
 ---
 
 ## Structure du projet
