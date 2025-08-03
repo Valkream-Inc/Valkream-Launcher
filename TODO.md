@@ -6,6 +6,7 @@
 - [ ] ( ) mettre en place l'option de doc (en beta)
 - [ ] (+) mettre en place l'installation steam
 - [ ] (++) mettre en place la verification des plugins et configs via Hash
+- [ ]  (+++) mettre a jour la doc
 
 ## Backend
 
