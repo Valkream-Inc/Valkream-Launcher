@@ -398,6 +398,9 @@ class GameManager {
         const behavior =
           configData?.launcher_config?.launcherBehavior || "hide";
 
+        // video
+        const videoBackground = document.getElementById("background-video");
+
         // Action avant le lancement du jeu
         if (behavior === "nothing") {
           await shell.openPath(this.gameExePath[platform()]);
@@ -406,13 +409,24 @@ class GameManager {
           ipcRenderer.send("main-window-close");
         } else if (behavior === "hide") {
           ipcRenderer.send("main-window-hide");
+          videoBackground.pause();
           const child = execFile(this.gameExePath[platform()], (err) => {
             if (err) throw new Error(err);
           });
           child.on("exit", () => {
             ipcRenderer.send("main-window-show");
+            videoBackground.play();
           });
         }
+      },
+    });
+  }
+
+  async moveGameFolder(destinationDir) {
+    return await new Manager().handleError({
+      ensure: fs.existsSync(destinationDir),
+      then: async () => {
+        fse.moveSync(this.gameRootDir, destinationDir, { overwrite: true });
       },
     });
   }

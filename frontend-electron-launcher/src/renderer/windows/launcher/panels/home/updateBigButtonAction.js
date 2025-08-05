@@ -267,7 +267,10 @@ class UpdateBigButtonAction {
       return alertPopup.openPopup({
         title: "<span style='color:#4ec3ff;'>Installation du launcher</span>",
         content: isCustomGamePathSpecified
-          ? `⚠️ Vous avez choisi un chemin d’installation personnalisé. Vous pouvez le modifier à tout moment dans les paramètres.
+          ? `Bienvenue sur Valkream.
+            <br>
+            Bienvenu sur Valkream.
+            Une installation antérieur à été détecté, un chemin d'installation personnalisé est déjà configuré. Vous pouvez le changer dans les paramètres du lancher.
             <br>
             Cela entraînera cependant une réinstallation complète du jeu.
             <br>
@@ -279,7 +282,7 @@ class UpdateBigButtonAction {
             </span>`
           : `Bienvenue sur Valkream.
             <br>
-            Vous pouvez choisir où installer le jeu dans les paramètres (bouton en bas à droite).
+            Vous pouvez spécifier un chemin d'installation personnalisé via les paramètres de launcher.
             <br>
             <br>
             <span style='color: orange;'>
@@ -380,8 +383,7 @@ class UpdateBigButtonAction {
           onlineVersionConfig?.modpack?.gameFolderToRemove
         );
       // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
-      if (isOk && onlineVersionConfig?.modpack?.gameFolderToPreserve)
-        isOk = await GameManager.restoreGameFolder();
+      if (isOk) isOk = await GameManager.restoreGameFolder();
       if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
 
       if (!isOk) throw new Error("Erreur lors de la mise à jour !");

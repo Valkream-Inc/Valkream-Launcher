@@ -11,12 +11,15 @@ const {
   EventManager,
   MaintenanceManager,
   LauncherManager,
+  GameManager,
 } = require(window.PathsManager.getUtils());
 
 const UpdateBigButtonAction = require("./updateBigButtonAction");
 class Home {
   static id = "home";
   async init() {
+    await GameManager.restoreGameFolder();
+
     this.socialLick();
     this.updateCopyright();
     document

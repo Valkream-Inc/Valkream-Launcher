@@ -8,6 +8,7 @@ const {
   showSnackbar,
   LauncherManager,
   GameManager,
+  Manager,
 } = require(window.PathsManager.getUtils());
 const { database } = require(window.PathsManager.getSharedUtils());
 const { ipcRenderer } = require("electron");
@@ -31,6 +32,7 @@ class Settings {
     this.enabledAdmin();
     this.toggleLaunchSteam();
     this.enabledBoostFPS();
+    this.openDevTools();
 
     this.gameTab = new GameTab();
     document.querySelector("#game").addEventListener("click", () => {
@@ -284,13 +286,38 @@ class Settings {
     );
   }
 
+  openDevTools() {
+    return this.buttonAction(
+      document.querySelector("#open-devTools"),
+      async () =>
+        new Manager().handleError({
+          ensure: true,
+          then: async () => {
+            return await ipcRenderer.send("main-window-open-devTools");
+          },
+        }),
+      {
+        base: "Ouvrir le debug",
+        wait: "Ouverture du debug...",
+        success: "Debug ouvert !",
+        error: "Debug non ouvert !",
+      }
+    );
+  }
+
   activeDevTab() {
     const devBtn = document.querySelector("#dev");
+    const adminBox = document.querySelector("#admin-box");
+    const gameBtn = document.querySelector("#game");
+
     const toggleDevBtn = document.querySelector(".enabled-dev");
-    toggleDevBtn.checked = devBtn.style.display === "block";
+    toggleDevBtn.checked = false;
 
     toggleDevBtn.addEventListener("change", async (e) => {
-      devBtn.style.display = e.target.checked ? "block" : "none";
+      const style = e.target.checked ? "block" : "none";
+      devBtn.style.display = style;
+      adminBox.style.display = style;
+      gameBtn.style.display = style;
     });
   }
 

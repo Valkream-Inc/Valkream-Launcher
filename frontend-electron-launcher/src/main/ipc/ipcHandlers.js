@@ -39,6 +39,9 @@ class IpcHandlers {
         MainWindow.getWindow().maximize();
       }
     });
+    ipcMain.on("main-window-open-devTools", () =>
+      MainWindow.getWindow().webContents.openDevTools(/*{ mode: "detach" }*/)
+    );
 
     // general
     ipcMain.handle("data-path", () =>
