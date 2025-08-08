@@ -1,6 +1,6 @@
 {
   "name": "Valkream-Launcher",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Launcher Valheim moddé pour Valkream",
   "main": "src/app.js",
   "author": "Valkream Team",

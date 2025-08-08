@@ -47,6 +47,7 @@ class UpdateBigButtonAction {
     this.changeMainButtonEvent = changeMainButtonEvent;
 
     try {
+      await VersionManager.init();
       await VersionManager.updateOnlineVersionConfig();
       await GameManager.init();
       await ThunderstoreManager.init();
