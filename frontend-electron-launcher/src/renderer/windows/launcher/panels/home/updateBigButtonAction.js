@@ -47,6 +47,7 @@ class UpdateBigButtonAction {
     this.changeMainButtonEvent = changeMainButtonEvent;
 
     try {
+      await VersionManager.init();
       await VersionManager.updateOnlineVersionConfig();
       await GameManager.init();
       await ThunderstoreManager.init();
@@ -346,6 +347,7 @@ class UpdateBigButtonAction {
       let isOk = true;
       if (isOk && configData?.launcher_config?.launchSteam)
         isOk = await SteamManager.open();
+      if (isOk) isOk = await GameManager.restoreGameFolder();
       if (isOk) isOk = await GameManager.play();
 
       if (!isOk) throw new Error("Erreur lors du lancement du jeu !");
