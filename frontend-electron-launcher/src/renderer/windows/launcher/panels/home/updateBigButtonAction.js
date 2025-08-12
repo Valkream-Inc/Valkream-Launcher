@@ -211,7 +211,7 @@ class UpdateBigButtonAction {
       ) {
         return changeMainButtonEvent({
           text: "Mettre à jour",
-          onclick: () => this.upDate(onlineVersionConfig),
+          onclick: () => this.upDate(onlineVersionConfig, localVersionConfig),
         });
       }
 
@@ -360,7 +360,7 @@ class UpdateBigButtonAction {
     }
   };
 
-  upDate = async (onlineVersionConfig) => {
+  upDate = async (onlineVersionConfig, localVersionConfig) => {
     this.disabledMainButton();
     try {
       let isOk = true;
