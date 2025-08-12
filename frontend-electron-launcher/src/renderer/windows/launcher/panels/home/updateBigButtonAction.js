@@ -374,8 +374,10 @@ class UpdateBigButtonAction {
       if (isOk) isOk = await ThunderstoreManager.uninstallModpackConfig();
 
       if (
+        !localVersionConfig?.modpack?.version ||
+        !onlineVersionConfig?.modpack?.version ||
         localVersionConfig?.modpack?.version !==
-        onlineVersionConfig?.modpack?.version
+          onlineVersionConfig?.modpack?.version
       ) {
         if (isOk)
           isOk = await ThunderstoreManager.downloadModpack(this.callback);

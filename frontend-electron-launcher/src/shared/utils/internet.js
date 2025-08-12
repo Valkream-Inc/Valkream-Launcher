@@ -30,7 +30,7 @@ function hasInternetConnection(hostname = "google.com") {
  */
 async function isServerReachable(url = baseUrl) {
   try {
-    await axios.get(url, { timeout: 1000 });
+    await axios.get(url, { timeout: 3000 });
     return true;
   } catch (error) {
     return false;
