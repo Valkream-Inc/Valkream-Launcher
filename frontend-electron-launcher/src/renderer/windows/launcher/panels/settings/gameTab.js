@@ -113,8 +113,8 @@ class GameTab {
     const onlineValkreamInfo = await VersionManager.getOnlineVersionConfig();
     const localValkreamInfo = await VersionManager.getLocalVersionConfig();
 
-    const onlineValkreamVersion = onlineValkreamInfo?.version || "";
-    const localValkreamVersion = localValkreamInfo?.version || "";
+    const onlineValkreamVersion = onlineValkreamInfo?.modpack?.version || "";
+    const localValkreamVersion = localValkreamInfo?.modpack?.version || "";
     const onlineValkreamBepinexVersion =
       onlineValkreamInfo?.bepinex?.version || "";
     const localValkreamBepinexVersion =

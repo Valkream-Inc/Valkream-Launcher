@@ -1,5 +1,5 @@
 {
-  "name": "Valkream-Launcher",
+  "name": "Valkream-Launcher"
   "version": "1.2.3-beta",
   "description": "Launcher Valheim moddé pour Valkream",
   "main": "src/app.js",

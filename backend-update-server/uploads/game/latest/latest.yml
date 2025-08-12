@@ -2,6 +2,7 @@ version: 2.1.16
 buildDate: 2025-07-03T19:20:08.929Z
 
 modpack:
+  version: 2.1.16
   dowload_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.1.16/
   admin_mods:
     # mods admin à installer avec l'option admin du launcher
