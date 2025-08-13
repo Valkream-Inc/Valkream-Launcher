@@ -33,6 +33,7 @@ class Settings {
     this.toggleLaunchSteam();
     this.enabledBoostFPS();
     this.openDevTools();
+    this.enabledBeta();
 
     this.gameTab = new GameTab();
     document.querySelector("#game").addEventListener("click", () => {
@@ -303,6 +304,33 @@ class Settings {
         error: "Debug non ouvert !",
       }
     );
+  }
+
+  async enabledBeta() {
+    const betaToggle = document.querySelector(".enabled-beta");
+
+    const configData = await this.db.readData("configClient");
+    if (configData?.launcher_config?.betaEnabled)
+      betaToggle.checked = configData.launcher_config.betaEnabled;
+
+    betaToggle.addEventListener("change", async (e) => {
+      try {
+        let configData = await this.db.readData("configClient");
+        configData.launcher_config.betaEnabled = e.target.checked;
+        await this.db.updateData("configClient", configData);
+
+        if (window.updateMainButton) await window.updateMainButton();
+        showSnackbar(
+          e.target.checked
+            ? "Tests beta activées !"
+            : "Tests beta désactivées !"
+        );
+      } catch (err) {
+        console.error(err);
+        if (window.updateMainButton) await window.updateMainButton();
+        showSnackbar("Erreur lors de l'activation des tests beta !", "error");
+      }
+    });
   }
 
   activeDevTab() {

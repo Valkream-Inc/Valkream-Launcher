@@ -348,6 +348,7 @@ class UpdateBigButtonAction {
       if (isOk && configData?.launcher_config?.launchSteam)
         isOk = await SteamManager.open();
       if (isOk) await GameManager.restoreGameFolder();
+      if (isOk) await GameManager.clean();
       if (isOk) isOk = await GameManager.play();
 
       if (!isOk) throw new Error("Erreur lors du lancement du jeu !");

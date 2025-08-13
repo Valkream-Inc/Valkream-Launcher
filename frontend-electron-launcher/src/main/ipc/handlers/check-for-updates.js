@@ -5,7 +5,7 @@
 
 const { autoUpdater } = require("electron-updater");
 const PathManager = require("../../../shared/utils/pathsManager.js");
-const { hasInternetConnection } = require(PathManager.getSharedUtils());
+const { isServerReachable, database } = require(PathManager.getSharedUtils());
 const { baseUrl } = require(PathManager.getConstants());
 const { formatBytes } = require("valkream-function-lib");
 
@@ -13,15 +13,24 @@ class CheckForUpdates {
   constructor(event) {
     this.event = event;
     this.timeout = 1000;
+    this.db = new database(true);
   }
 
   async init() {
-    if (!(await hasInternetConnection())) {
+    const isBeta = (await this.db.readData("configClient"))?.launcher_config
+      ?.betaEnabled;
+
+    if (isBeta)
+      return this.onMsg(
+        "⚠️ Les tests beta sont activés. La mise à jour est désactivée.",
+        true
+      );
+
+    if (!(await isServerReachable()))
       return this.onError(
         "no_internet",
-        "❌ Pas de connexion internet. Impossible de vérifier les mises à jour."
+        "❌ Pas de connexion au serveur. Impossible de vérifier les mises à jour."
       );
-    }
 
     this.configureUpdater();
     this.attachListeners();

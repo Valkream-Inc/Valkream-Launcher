@@ -14,7 +14,6 @@ const ServerInfos = require("./handlers/server-info.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
-const { cwd } = require("process");
 
 class IpcHandlers {
   init() {

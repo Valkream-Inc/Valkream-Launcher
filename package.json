@@ -1,5 +1,6 @@
 {
-  "name": "Updater-Saver-Game-Launcher-Valkream",
+  "name": "Launcher-Valkream-Infra",
+  "description": "Launcher Valheim moddé pour Valkream et server de mise à jour",
   "private": true,
   "workspaces": [
     "./backend-update-server",

@@ -26,7 +26,13 @@ class VersionManager {
         ?.customGamePath || path.join(await ipcRenderer.invoke("data-path"));
     this.serverGameRoot = path.join(baseUrl, "game/latest");
 
-    this.gameVersionFileLink = path.join(this.serverGameRoot, "latest.yml");
+    const isBeta = (await this.db.readData("configClient"))?.launcher_config
+      ?.betaEnabled;
+
+    this.gameVersionFileLink = path.join(
+      this.serverGameRoot,
+      `latest${isBeta ? ".beta" : ""}.yml`
+    );
     this.gameVersionFilePath = path.join(this.appdataDir, "game", "latest.yml");
 
     for (const dir of [this.appdataDir]) {

@@ -11,6 +11,7 @@ Launcher et système de mise à jour pour le serveur Valheim Valkream.
 - [Structure du projet](#structure-du-projet)
 - [Installation (Développement)](#installation-développement)
 - [Utilisation (Développement)](#utilisation-développement)
+- [Test (Production)](#test-production)
 - [Déploiement (Production)](#déploiement-production)
 - [Auteurs](#auteurs)
 
@@ -103,6 +104,21 @@ yarn run start # ou yarn run dev
 cd frontend-electron-launcher
 yarn dev
 ```
+
+---
+
+## Test (Production)
+
+1. Pusher les modifications sur la main github
+2. Attendre la fin du workflow de build
+3. activer l'option de test beta dans le launcher sur le pc de test (settings -> dev -> beta)
+4. puis télécharger l'installer depuis github
+5. mettre a jour le launcher sur le PC de test (via l'installer)
+6. Lancer le launcher
+7. Vérifier que le launcher fonctionne
+8. Désactiver l'option de test beta dans le launcher (settings -> dev -> beta)
+9. Lancer le launcher (pour verifier que le beta est désactivé et que le launcher se met à jour)
+10. Installer la mise à jour sur le serveur si tout est ok (voire la procédure dans le dossier de doc)
 
 ---
 
