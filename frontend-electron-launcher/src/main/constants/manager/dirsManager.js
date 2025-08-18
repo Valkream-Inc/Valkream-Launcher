@@ -4,39 +4,32 @@
  */
 
 const path = require("path");
-const fs = require("fs");
-const { platform } = require("os");
-
 const { app } = require("electron");
-const dev = process.env.NODE_ENV === "dev";
 
-const { database } = require(window.PathsManager.getSharedUtils());
+const { newDir } = require("../../utils/index.js");
+const { isDev } = require("../../utils/index.js");
 
-// managers
-class FileManager {
-  constructor() {
-    this.db = new database();
-  }
+const SettingsManager = require("../../ipc/handlers/manager/settingsManager");
 
+class DirsManager {
   defaultRootPath = async () =>
     await newDir({
       win32: path.join(
-        dev ? app.getAppPath() : app.getPath("appData"),
+        isDev ? app.getAppPath() : app.getPath("appData"),
         ".valkream-launcher-data"
       ),
       linux: path.join(
-        dev ? app.getAppPath() : app.getPath("appData"),
+        isDev ? app.getAppPath() : app.getPath("appData"),
         ".valkream-launcher-data"
       ),
       darwin: path.join(
-        dev ? app.getAppPath() : app.getPath("appData"),
+        isDev ? app.getAppPath() : app.getPath("appData"),
         ".valkream-launcher-data"
       ),
     });
 
   rootPath = async () => {
-    const settings = (await this.db.readData("configClient"))?.launcher_config
-      ?.customGamePath;
+    const settings = new SettingsManager().getSetting("customGamePath");
 
     return await newDir({
       win32: settings || this.defaultRootPath(),
@@ -74,4 +67,4 @@ class FileManager {
     });
 }
 
-module.exports = FileManager;
+module.exports = DirsManager;

@@ -8,7 +8,9 @@ const throttle = require("./throttle");
 const newDir = require("./newDir");
 const isFolderPathSecured = require("./isFolderOk");
 const { hasInternetConnection, isServerReachable } = require("./internet");
-const database = require("./database");
+const Database = require("./database");
+const dowloadMultiplefiles = require("./download-multiple-files");
+const unZipMultipleFiles = require("./unzip-multiple-zips");
 
 module.exports = {
   pLimit,
@@ -17,5 +19,7 @@ module.exports = {
   isFolderPathSecured,
   hasInternetConnection,
   isServerReachable,
-  database,
+  Database,
+  dowloadMultiplefiles,
+  unZipMultipleFiles,
 };

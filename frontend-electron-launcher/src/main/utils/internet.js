@@ -4,7 +4,7 @@
  */
 
 const dns = require("dns");
-const { baseUrl } = require("../constants/constants");
+const { baseUrl } = require("../constants");
 const axios = require("axios");
 
 /**

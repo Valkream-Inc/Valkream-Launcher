@@ -5,87 +5,82 @@
 
 const { NodeBDD, DataType } = require("node-bdd");
 const nodedatabase = new NodeBDD();
-const { ipcRenderer, app } = require("electron");
 const path = require("path");
 
-let dev = process.env.NODE_ENV === "dev";
+const { isDev } = require("../constants");
+const DirsManager = require("../ipc/handlers/manager/dirsManager.js");
 
-class database {
-  constructor(isMain = false) {
-    this.isMain = isMain;
-  }
-
+class Database {
   async dataPath() {
-    if (!this.isMain) return await ipcRenderer.invoke("data-path");
-    else
-      return path.join(
-        dev ? app.getAppPath() : app.getPath("appData"),
-        ".valkream-launcher-data"
-      );
+    const dirsManager = new DirsManager();
+    return await dirsManager.defaultRootPath();
   }
 
-  async creatDatabase(tableName, tableConfig) {
-    return await nodedatabase.intilize({
+  async createDatabase(tableName, tableConfig) {
+    return await nodedatabase.initialize({
       databaseName: "Databases",
-      fileType: dev ? "sqlite" : "db",
-      tableName: tableName,
+      fileType: isDev ? "sqlite" : "db",
+      tableName,
       path: path.join(await this.dataPath(), "databases"),
       tableColumns: tableConfig,
     });
   }
 
   async getDatabase(tableName) {
-    return await this.creatDatabase(tableName, {
-      json_data: DataType.TEXT.TEXT,
+    return await this.createDatabase(tableName, {
+      json_data: DataType.TEXT, // Corrigé
     });
   }
 
   async createData(tableName, data) {
-    let table = await this.getDatabase(tableName);
-    data = await nodedatabase.createData(table, {
+    const table = await this.getDatabase(tableName);
+    let row = await nodedatabase.createData(table, {
       json_data: JSON.stringify(data),
     });
-    let id = data.id;
-    data = JSON.parse(data.json_data);
-    data.ID = id;
-    return data;
+
+    return {
+      ...JSON.parse(row.json_data),
+      ID: row.id,
+    };
   }
 
   async readData(tableName, key = 1) {
-    let table = await this.getDatabase(tableName);
-    let data = await nodedatabase.getDataById(table, key);
-    if (data) {
-      let id = data.id;
-      data = JSON.parse(data.json_data);
-      data.ID = id;
-    }
-    return data ? data : undefined;
+    const table = await this.getDatabase(tableName);
+    const row = await nodedatabase.getDataById(table, key);
+
+    if (!row) return undefined;
+
+    return {
+      ...JSON.parse(row.json_data),
+      ID: row.id,
+    };
   }
 
   async readAllData(tableName) {
-    let table = await this.getDatabase(tableName);
-    let data = await nodedatabase.getAllData(table);
-    return data.map((info) => {
-      let id = info.id;
-      info = JSON.parse(info.json_data);
-      info.ID = id;
-      return info;
-    });
+    const table = await this.getDatabase(tableName);
+    const rows = await nodedatabase.getAllData(table);
+
+    return rows.map((row) => ({
+      ...JSON.parse(row.json_data),
+      ID: row.id,
+    }));
   }
 
   async updateData(tableName, data, key = 1) {
-    let table = await this.getDatabase(tableName);
+    const table = await this.getDatabase(tableName);
     await nodedatabase.updateData(
       table,
       { json_data: JSON.stringify(data) },
       key
     );
+
+    return this.readData(tableName, key); // on retourne la donnée mise à jour
   }
 
   async deleteData(tableName, key = 1) {
-    let table = await this.getDatabase(tableName);
-    await nodedatabase.deleteData(table, key);
+    const table = await this.getDatabase(tableName);
+    return await nodedatabase.deleteData(table, key);
   }
 }
 
-module.exports = database;
+module.exports = Database;
