@@ -6,7 +6,7 @@
 const fs = require("fs");
 const { unZip } = require("valkream-function-lib");
 
-const pLimit = require("./pLimit");
+const pLimit = require("./p-limit");
 const throttle = require("./throttle");
 
 const unZipMultipleFiles = async (

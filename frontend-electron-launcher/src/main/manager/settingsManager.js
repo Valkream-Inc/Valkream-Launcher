@@ -3,7 +3,7 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { Database } = require("../../../utils");
+const { Database } = require("../utils");
 
 class SettingsManager {
   constructor() {
@@ -39,4 +39,5 @@ class SettingsManager {
   }
 }
 
-module.exports = SettingsManager;
+const settingsManager = new SettingsManager();
+module.exports = settingsManager;

@@ -10,7 +10,7 @@ const dev = process.env.NODE_ENV === "dev" || process.env.DEV_TOOL === "open";
 const CheckForUpdates = require("./handlers/check-for-updates.js");
 const DowloadMultiplefiles = require("./handlers/download-multiple-zips.js");
 const MultipleUnzip = require("./handlers/multiple-unzip.js");
-const ServerInfos = require("./handlers/server-info.js");
+const CheckInfos = require("./handlers/check-infos.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
@@ -69,11 +69,10 @@ class IpcHandlers {
       async (event, zips, id) => await new MultipleUnzip().init(event, zips, id)
     );
 
-    // server infos
-    ipcMain.on(
-      "get-server-infos",
-      async (event) => await new ServerInfos().init(event)
-    );
+    // infos
+    ipcMain.handle("check-infos", async () => await CheckInfos.init());
+    ipcMain.on("get-infos", async () => await CheckInfos.getInfos());
+    ipcMain.on("stop-check-infos", () => CheckInfos.stop());
 
     // Sélection dossier
     ipcMain.handle("choose-folder", async () => {

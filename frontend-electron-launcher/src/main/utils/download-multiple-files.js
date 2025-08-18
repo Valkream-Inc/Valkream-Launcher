@@ -6,7 +6,7 @@
 const axios = require("axios");
 const { downloadZip } = require("valkream-function-lib");
 
-const pLimit = require("./pLimit");
+const pLimit = require("./p-limit");
 const throttle = require("./throttle");
 
 const dowloadMultiplefiles = async (

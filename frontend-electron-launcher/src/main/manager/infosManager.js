@@ -5,7 +5,9 @@
 
 const axios = require("axios");
 const dns = require("dns");
+
 const { baseUrl, serverInfos } = require("../../../constants");
+const LinksManager = require("./linksManager");
 
 class InfosManager {
   getIsInternetConnected = async (hostname = "google.com") => {
@@ -31,7 +33,7 @@ class InfosManager {
 
   getEvent = async () => {
     try {
-      const res = await axios.get(`${baseUrl}/config/event.json`);
+      const res = await axios.get(new LinksManager().eventUrl());
       return res.data;
     } catch (err) {
       console.error("Error getting Event:", err.message);
@@ -41,7 +43,7 @@ class InfosManager {
 
   getMaintenance = async () => {
     try {
-      const res = await axios.get(`${baseUrl}/config/maintenance.json`);
+      const res = await axios.get(new LinksManager().maintenanceUrl());
       return res.data;
     } catch (err) {
       console.error("Error getting Maintenance:", err.message);
@@ -66,4 +68,5 @@ class InfosManager {
   };
 }
 
-module.exports = InfosManager;
+const infosManager = new InfosManager();
+module.exports = infosManager;

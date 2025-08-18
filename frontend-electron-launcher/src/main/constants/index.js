@@ -8,6 +8,7 @@ const serverInfos = require("./serverInfos");
 const isSteamInstallation = require("./steamInstallation");
 const refreshTimeout = require("./refreshTimeout");
 const isDev = require("./isDev");
+const pkg = require("./pkg");
 
 module.exports = {
   baseUrl,
@@ -15,4 +16,5 @@ module.exports = {
   isSteamInstallation,
   refreshTimeout,
   isDev,
+  pkg,
 };
