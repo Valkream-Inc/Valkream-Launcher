@@ -43,13 +43,6 @@ class IpcHandlers {
     );
 
     // general
-    ipcMain.handle("data-path", () =>
-      path.join(
-        dev ? app.getAppPath() : app.getPath("appData"),
-        ".valkream-launcher-data"
-      )
-    );
-    ipcMain.handle("get-installation-path", () => process.cwd());
     ipcMain.on("check-for-updates", (event) =>
       new CheckForUpdates(event).init()
     );
@@ -57,17 +50,6 @@ class IpcHandlers {
       app.quit();
       app.exit(0);
     });
-
-    // zips
-    ipcMain.handle(
-      "download-multiple-files",
-      async (event, files, id) =>
-        await new DowloadMultiplefiles().init(event, files, id)
-    );
-    ipcMain.handle(
-      "multiple-unzip",
-      async (event, zips, id) => await new MultipleUnzip().init(event, zips, id)
-    );
 
     // infos
     ipcMain.handle("check-infos", async () => await CheckInfos.init());

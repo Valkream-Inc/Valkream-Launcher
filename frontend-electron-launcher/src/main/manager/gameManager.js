@@ -210,7 +210,7 @@ class GameManager {
     fs.rmSync(this.preservedDir, { recursive: true });
   }
 
-  async play() {
+  async play(videoBackground) {
     // Lecture du paramètre launcherBehavior
     const behavior = SettingsManager.getSetting("launcherBehavior");
 
@@ -222,11 +222,13 @@ class GameManager {
       LauncherManager.close();
     } else if (behavior === "hide") {
       LauncherManager.hide();
+      videoBackground.pause();
       const child = execFile(this.gameExePath, (err) => {
         if (err) throw new Error(err);
       });
       child.on("exit", () => {
         LauncherManager.show();
+        videoBackground.play();
       });
     }
   }

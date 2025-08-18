@@ -1,0 +1,412 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
+const { formatBytes } = require("valkream-function-lib");
+
+const {
+  showSnackbar,
+  GameManager,
+  SteamManager,
+  ThunderstoreManager,
+  VersionManager,
+  Popup,
+} = require(window.PathsManager.getUtils());
+const {
+  hasInternetConnection,
+  database,
+} = require(window.PathsManager.getSharedUtils());
+const { isSteamInstallation } = require(window.PathsManager.getConstants());
+
+class UpdateBigButtonAction {
+  constructor() {
+    this.db = new database();
+    this.settings_button = document.querySelector(".settings-btn");
+  }
+
+  callback = (text, downloadedBytes, totalBytes, percent, speed) => {
+    this.changeMainButtonEvent({
+      text: `${text}<br/>
+    (${percent}%)
+    (${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)})
+    à ${formatBytes(speed)}/s`,
+    });
+  };
+
+  init = async (
+    disabledMainButton = () => {},
+    enableMainButton = () => {},
+    changeMainButtonEvent = ({ text, onclick }) => {}
+  ) => {
+    // init the update button function
+    window.updateMainButton = this.reload;
+
+    this.disabledMainButton = disabledMainButton;
+    this.enableMainButton = enableMainButton;
+    this.changeMainButtonEvent = changeMainButtonEvent;
+
+    try {
+      await VersionManager.init();
+      await VersionManager.updateOnlineVersionConfig();
+      await GameManager.init();
+      await ThunderstoreManager.init();
+
+      const configData = await this.db.readData("configClient");
+
+      const isInternetConnected = await hasInternetConnection();
+      const localVersionConfig = await VersionManager.getLocalVersionConfig();
+      const isInstalled =
+        (await GameManager.getIsInstalled()) &&
+        (await ThunderstoreManager.getIsInstalled()) &&
+        (await VersionManager.getIsInstalled());
+
+      const admin_mods = localVersionConfig?.modpack?.admin_mods;
+      const isAdminModsInstalled =
+        await ThunderstoreManager.isCustomModsInstalled(admin_mods);
+      const isAdminModsActive = configData?.launcher_config?.adminEnabled;
+      const isAdminModsAvailable =
+        await ThunderstoreManager.isCustomModsAvailable(admin_mods);
+
+      const boostfps_mods = localVersionConfig?.modpack?.boostfps_mods;
+      const isBoostfpsModsInstalled =
+        await ThunderstoreManager.isCustomModsInstalled(boostfps_mods);
+      const isBoostfpsModsActive = configData?.launcher_config?.boostfpsEnabled;
+      const isBoostfpsModsAvailable =
+        await ThunderstoreManager.isCustomModsAvailable(boostfps_mods);
+
+      let onlineVersionConfig = null;
+      let upToDate = false;
+      let isMajorUpdate = false;
+
+      if (window.isServerReachable) {
+        onlineVersionConfig = await VersionManager.getOnlineVersionConfig();
+
+        const [majorLocal] = (localVersionConfig.version || "0.0.0").split(".");
+        const [majorOnline] = (onlineVersionConfig.version || "0.0.0").split(
+          "."
+        );
+        isMajorUpdate = majorLocal !== majorOnline;
+
+        upToDate =
+          localVersionConfig &&
+          onlineVersionConfig &&
+          localVersionConfig.version === onlineVersionConfig.version;
+      }
+
+      // Cas 0 : En cours de chargement
+      if (
+        window.isServerReachable === undefined ||
+        window.isServerReachable === null ||
+        (window.isServerReachable &&
+          (window.maintenance === undefined || window.maintenance === null))
+      )
+        return setTimeout(this.reload, 100);
+
+      // cas 1.1: Admin mods gestion
+      if (
+        isInstalled &&
+        isInternetConnected &&
+        isAdminModsActive &&
+        !isAdminModsInstalled &&
+        isAdminModsAvailable
+      ) {
+        this.disabledMainButton();
+        await ThunderstoreManager.InstallCustomMods(admin_mods, this.callback);
+        this.enableMainButton();
+
+        return await this.reload();
+      } else if (isInstalled && !isAdminModsActive && isAdminModsInstalled) {
+        this.changeMainButtonEvent({
+          text: "Désinstallation des mods admin...",
+          onclick: null,
+        });
+        this.settings_button.disabled = true;
+        this.disabledMainButton();
+        await ThunderstoreManager.unInstallCustomMods(admin_mods);
+        this.enableMainButton();
+        return await this.reload();
+      }
+      // cas 1.2: BoostFPS mods gestion
+      if (
+        isInstalled &&
+        isInternetConnected &&
+        isBoostfpsModsActive &&
+        !isBoostfpsModsInstalled &&
+        isBoostfpsModsAvailable
+      ) {
+        this.disabledMainButton();
+        await ThunderstoreManager.InstallCustomMods(
+          boostfps_mods,
+          this.callback
+        );
+        this.enableMainButton();
+
+        return await this.reload();
+      } else if (
+        isInstalled &&
+        !isBoostfpsModsActive &&
+        isBoostfpsModsInstalled
+      ) {
+        this.changeMainButtonEvent({
+          text: "Désinstallation des mods pour booster les FPS...",
+          onclick: null,
+        });
+        this.settings_button.disabled = true;
+        this.disabledMainButton();
+        await ThunderstoreManager.unInstallCustomMods(boostfps_mods);
+        this.enableMainButton();
+        return await this.reload();
+      }
+
+      // Cas 2 : Pas installé et pas de connexion internet
+      if (!isInstalled && (!window.isServerReachable || !isInternetConnected))
+        return changeMainButtonEvent({
+          text: `Installation Impossible <br/> (❌ Pas de connexion ${
+            isInternetConnected ? "au server" : "internet"
+          }.)`,
+          onclick: this.reload,
+        });
+
+      // Cas 3 : Pas installé et internet OK
+      if (!isInstalled && window.isServerReachable && isInternetConnected)
+        return changeMainButtonEvent({
+          text: "Installer",
+          onclick: this.install,
+        });
+
+      // Cas 4 : Installé, pas internet
+      if (isInstalled && (!window.isServerReachable || !isInternetConnected)) {
+        changeMainButtonEvent({
+          text: `Jouer à la v${localVersionConfig.version} <br /> 
+          (⚠️ Pas de connexion ${
+            isInternetConnected ? "au server" : "internet"
+          }.)`,
+          onclick: this.start,
+        });
+        return;
+      }
+
+      // Cas 5 : Installé, internet, pas à jour (majeur)
+      if (
+        isInstalled &&
+        window.isServerReachable &&
+        isInternetConnected &&
+        !upToDate &&
+        isMajorUpdate
+      ) {
+        return changeMainButtonEvent({
+          text: "Réinstaller <br/>(⚠️ Nouvelle version majeure.)",
+          onclick: this.install,
+        });
+      }
+
+      // Cas 6 : Installé, internet, pas à jour (mineur)
+      if (
+        isInstalled &&
+        window.isServerReachable &&
+        isInternetConnected &&
+        !upToDate &&
+        !isMajorUpdate
+      ) {
+        return changeMainButtonEvent({
+          text: "Mettre à jour",
+          onclick: () => this.upDate(onlineVersionConfig, localVersionConfig),
+        });
+      }
+
+      // Cas 7 : Installé, internet, à jour
+      if (
+        isInstalled &&
+        window.isServerReachable &&
+        isInternetConnected &&
+        upToDate
+      ) {
+        const isMaintenanceEnabled = window.maintenance?.enabled;
+
+        return changeMainButtonEvent({
+          text: `Jouer à la v${localVersionConfig.version} 
+          ${isMaintenanceEnabled ? " <br> (⚠️ Maintenance en cours.)" : ""}
+          ${isAdminModsActive ? " <br> (⚠️ Mods Admin activés.)" : ""}`,
+          onclick: this.start,
+        });
+      }
+
+      // Cas par défaut
+      return changeMainButtonEvent({
+        text: "Erreur inconnue, contactez le support.",
+        onclick: this.reload,
+      });
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Erreur lors de la vérification de la version !", "error");
+      changeMainButtonEvent({
+        text: "Erreur lors de la vérification",
+        onclick: this.reload,
+      });
+    } finally {
+      enableMainButton();
+    }
+  };
+
+  reload = async () => {
+    return await new UpdateBigButtonAction().init(
+      this.disabledMainButton,
+      this.enableMainButton,
+      this.changeMainButtonEvent
+    );
+  };
+
+  install = async () => {
+    if (!window.isUserAlertedAboutInstall) {
+      const configData = await this.db.readData("configClient");
+      const isCustomGamePathSpecified =
+        configData?.launcher_config?.customGamePath;
+
+      window.isUserAlertedAboutInstall = true;
+      const alertPopup = new Popup();
+      return alertPopup.openPopup({
+        title: "<span style='color:#4ec3ff;'>Installation du launcher</span>",
+        content: isCustomGamePathSpecified
+          ? `Bienvenue sur Valkream.
+            <br>
+            Bienvenu sur Valkream.
+            Une installation antérieur à été détecté, un chemin d'installation personnalisé est déjà configuré. Vous pouvez le changer dans les paramètres du lancher.
+            <br>
+            Cela entraînera cependant une réinstallation complète du jeu.
+            <br>
+            <br>
+            <span style='color: orange;'>
+              <b>
+                ⚠️ La désinstallation du launcher doit UNIQUEMENT s’effectuer via le bouton prévu à cet effet, tout en bas dans les paramètres.
+              </b>
+            </span>`
+          : `Bienvenue sur Valkream.
+            <br>
+            Vous pouvez spécifier un chemin d'installation personnalisé via les paramètres de launcher.
+            <br>
+            <br>
+            <span style='color: orange;'>
+              <b>
+                ⚠️ La désinstallation du launcher doit UNIQUEMENT s’effectuer via le bouton prévu à cet effet, tout en bas dans les paramètres.
+              </b>
+            </span>`,
+        color: "white",
+        background: true,
+        options: true,
+      });
+    }
+
+    this.disabledMainButton();
+    try {
+      let isOk = true;
+      this.changeMainButtonEvent({ text: "Installation...", onclick: null });
+      if (isOk) isOk = await GameManager.uninstall();
+
+      // initialisation des sous-folders supprimés
+      await GameManager.init();
+      await ThunderstoreManager.init();
+
+      if (isSteamInstallation) {
+        // await SteamManager.install();
+        // await GameManager.installBepInEx(callback);
+      } else {
+        if (isOk) isOk = await GameManager.dowload(this.callback);
+        if (isOk) isOk = await GameManager.unzip(this.callback);
+      }
+
+      if (isOk) isOk = await GameManager.dowloadBepInEx(this.callback);
+      if (isOk) isOk = await GameManager.unzipBepInEx(this.callback);
+
+      if (isOk) isOk = await ThunderstoreManager.downloadModpack(this.callback);
+      if (isOk) isOk = await ThunderstoreManager.unzipModpack(this.callback);
+
+      if (isOk) isOk = await ThunderstoreManager.dowloadMods(this.callback);
+      if (isOk) isOk = await ThunderstoreManager.unzipMods(this.callback);
+
+      this.changeMainButtonEvent({ text: "Verification...", onclick: null });
+      // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
+      if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
+
+      if (!isOk) throw new Error("Erreur lors de l'installation !");
+      else showSnackbar("La dernière version a été installée avec succès !");
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Erreur lors de l'installation !", "error");
+    } finally {
+      this.enableMainButton();
+      await this.reload();
+    }
+  };
+
+  start = async () => {
+    const configData = await this.db.readData("configClient");
+
+    this.disabledMainButton();
+    try {
+      let isOk = true;
+      if (isOk && configData?.launcher_config?.launchSteam)
+        isOk = await SteamManager.open();
+      if (isOk) await GameManager.restoreGameFolder();
+      if (isOk) await GameManager.clean();
+      if (isOk) isOk = await GameManager.play();
+
+      if (!isOk) throw new Error("Erreur lors du lancement du jeu !");
+      else showSnackbar("Le jeu a été lancé avec succès !");
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Erreur lors du lancement du jeu !", "error");
+    } finally {
+      this.enableMainButton();
+    }
+  };
+
+  upDate = async (onlineVersionConfig, localVersionConfig) => {
+    this.disabledMainButton();
+    try {
+      let isOk = true;
+      if (!onlineVersionConfig) isOk = false;
+
+      this.changeMainButtonEvent({ text: "Mise à jour...", onclick: null });
+      if (isOk && onlineVersionConfig?.modpack?.gameFolderToPreserve)
+        isOk = await GameManager.preserveGameFolder(
+          onlineVersionConfig?.modpack?.gameFolderToPreserve
+        );
+      if (isOk) isOk = await ThunderstoreManager.uninstallModpackConfig();
+
+      if (
+        !localVersionConfig?.modpack?.version ||
+        !onlineVersionConfig?.modpack?.version ||
+        localVersionConfig?.modpack?.version !==
+          onlineVersionConfig?.modpack?.version
+      ) {
+        if (isOk)
+          isOk = await ThunderstoreManager.downloadModpack(this.callback);
+        if (isOk) isOk = await ThunderstoreManager.unzipModpack(this.callback);
+      }
+
+      this.changeMainButtonEvent({ text: "Préparation...", onclick: null });
+      if (isOk) isOk = await ThunderstoreManager.update(this.callback);
+
+      this.changeMainButtonEvent({ text: "Verification...", onclick: null });
+      if (isOk && onlineVersionConfig?.modpack?.gameFolderToRemove)
+        isOk = await GameManager.clean(
+          onlineVersionConfig?.modpack?.gameFolderToRemove
+        );
+      // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
+      if (isOk) await GameManager.restoreGameFolder();
+      if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
+
+      if (!isOk) throw new Error("Erreur lors de la mise à jour !");
+      else showSnackbar("La dernière version a été installée avec succès !");
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Erreur lors de la mise à jour !", "error");
+    } finally {
+      this.enableMainButton();
+      await this.reload();
+    }
+  };
+}
+
+module.exports = UpdateBigButtonAction;
