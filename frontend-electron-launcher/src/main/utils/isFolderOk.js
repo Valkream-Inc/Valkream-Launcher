@@ -5,26 +5,26 @@
 
 const path = require("path");
 
-const isFolderOk = (
-  basePath,
+const isFolderPathSecured = (
   folderToCheck,
-  autorizedSubFolder = (relativePath) => {}
+  autorizedRootPath,
+  isAnAutorizedSubFolder = (relativePath) => {}
 ) => {
   const sanitizedFolder =
     folderToCheck.startsWith("/") || folderToCheck.startsWith("\\")
       ? folderToCheck.slice(1)
       : folderToCheck;
 
-  const fullPath = path.resolve(basePath, sanitizedFolder); // Chemin absolu final
-  const relativePath = path.relative(basePath, fullPath);
+  const fullPath = path.resolve(autorizedRootPath, sanitizedFolder); // Chemin absolu final
+  const relativePath = path.relative(autorizedRootPath, fullPath);
   const normalizedRelativePath = path.posix.normalize(
     relativePath.replace(/\\/g, "/")
   );
 
-  const isSafe = fullPath.startsWith(basePath);
-  const isAutorized = autorizedSubFolder(normalizedRelativePath);
+  const isSafe = fullPath.startsWith(autorizedRootPath);
+  const isAutorized = isAnAutorizedSubFolder(normalizedRelativePath);
 
   return isSafe && isAutorized;
 };
 
-module.exports = isFolderOk;
+module.exports = isFolderPathSecured;

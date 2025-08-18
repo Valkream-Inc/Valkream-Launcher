@@ -3,41 +3,40 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { PathsManager } = require("../../../shared/utils/shared-utils");
-
 const { Server } = require("@fabricio-191/valve-server-query");
-const { serverInfos } = require(PathsManager.getConstants());
+const { serverInfos, refreshTimeout } = require("../../constants/constants");
 
-class ServerInfo {
-  async init(event) {
-    this.event = event;
+class ServerManager {
+  async init(callback = async () => {}) {
+    this.callback = callback;
     this.server = await this.setServer();
-    this.interval = null;
 
     this.getServerInfo();
-    this.interval = setInterval(this.getServerInfo, 1000);
+    this.interval = setInterval(this.getServerInfo, refreshTimeout);
   }
 
   setServer = async () => {
     try {
-      const server = await Server(serverInfos);
-      return server;
+      return (this.server = await Server(serverInfos));
     } catch (err) {
-      return null;
+      console.error("Error setting server:", err.message);
     }
   };
 
   getServerInfo = async () => {
     try {
-      if (!this.server) this.server = await this.setServer();
+      if (!this.server) await this.setServer();
       let res = await this.server.getInfo();
-      await this.event.reply("update-server-info", {
+
+      await this.callback({
         status: "server online",
         players: res.players,
         ping: this.server.lastPing,
       });
     } catch (err) {
-      await this.event.reply("update-server-info", {
+      console.error("Error getting server info:", err.message);
+
+      await this.callback({
         status: "server offline",
       });
     }
@@ -48,4 +47,4 @@ class ServerInfo {
   };
 }
 
-module.exports = ServerInfo;
+module.exports = ServerManager;

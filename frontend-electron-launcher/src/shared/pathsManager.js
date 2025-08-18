@@ -8,7 +8,7 @@ const path = require("path");
 class PathsManager {
   constructor() {
     // __dirname pointe sur le dossier contenant ce fichier, même dans l'asar
-    this.srcDir = path.resolve(__dirname, "../../");
+    this.srcDir = path.resolve(__dirname, "../");
   }
 
   getAbsolutePath(...segments) {
@@ -37,14 +37,6 @@ class PathsManager {
 
   getUtils() {
     return this.getRendererPath("utils", "utils-render.js");
-  }
-
-  getConstants() {
-    return this.getSharedPath("constants", "constants.js");
-  }
-
-  getSharedUtils() {
-    return this.getSharedPath("utils", "shared-utils.js");
   }
 }
 

@@ -10,6 +10,7 @@ let console_debug = console.debug;
 let console_error = console.error;
 
 const pkg = require("../../../package.json");
+
 class Logger {
   static name = pkg.name;
   static color = "#2df705";
