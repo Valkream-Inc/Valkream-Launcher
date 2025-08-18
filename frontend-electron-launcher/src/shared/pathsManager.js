@@ -11,24 +11,12 @@ class PathsManager {
     this.srcDir = path.resolve(__dirname, "../");
   }
 
-  getAbsolutePath(...segments) {
-    return path.join(this.srcDir, "../", ...segments);
-  }
-
   getSrcPath(...segments) {
     return path.join(this.srcDir, ...segments);
   }
 
-  getSharedPath(...segments) {
-    return this.getSrcPath("shared", ...segments);
-  }
-
   getRendererPath(...segments) {
     return this.getSrcPath("renderer", ...segments);
-  }
-
-  getMainPath(...segments) {
-    return this.getSrcPath("main", ...segments);
   }
 
   getAssetsPath(...segments) {
@@ -36,7 +24,7 @@ class PathsManager {
   }
 
   getUtils() {
-    return this.getRendererPath("utils", "utils-render.js");
+    return this.getRendererPath("utils", "index.js");
   }
 }
 

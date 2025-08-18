@@ -4,11 +4,11 @@
  */
 
 const { autoUpdater } = require("electron-updater");
-const PathManager = require("../../../shared/utils/pathsManager.js");
-const { isServerReachable, database } = require(PathManager.getSharedUtils());
-const { baseUrl } = require(PathManager.getConstants());
 const { formatBytes } = require("valkream-function-lib");
 
+const { baseUrl } = require("../../constants");
+const { SettingsManager } = require("../../manager");
+const CheckInfos = require("./check-infos");
 class CheckForUpdates {
   constructor(event) {
     this.event = event;
@@ -17,8 +17,7 @@ class CheckForUpdates {
   }
 
   async init() {
-    const isBeta = (await this.db.readData("configClient"))?.launcher_config
-      ?.betaEnabled;
+    const isBeta = await SettingsManager.getSetting("betaEnabled");
 
     if (isBeta)
       return this.onMsg(
@@ -26,7 +25,7 @@ class CheckForUpdates {
         true
       );
 
-    if (!(await isServerReachable()))
+    if (!(await CheckInfos.getInfos()).isServerReachable)
       return this.onError(
         "no_internet",
         "❌ Pas de connexion au serveur. Impossible de vérifier les mises à jour."

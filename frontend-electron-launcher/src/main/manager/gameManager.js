@@ -16,13 +16,12 @@ const VersionManager = require("./versionManager.js");
 const LinksManager = require("./linksManager.js");
 const FilesManager = require("./filesManager.js");
 const DirsManager = require("./dirsManager.js");
-const isFolderOk = require("../isFolderOk.js");
+
 const SettingsManager = require("./settingsManager.js");
 const LauncherManager = require("./launcherManager.js");
 
 const CheckInfos = require("../ipc/handlers/check-infos.js");
-const dowloadMultiplefiles = require("../utils/download-multiple-files.js");
-const isFolderPathSecured = require("../utils/is-folder-path-secured.js");
+const { isFolderPathSecured, dowloadMultiplefiles } = require("../utils");
 
 class GameManager {
   async init() {

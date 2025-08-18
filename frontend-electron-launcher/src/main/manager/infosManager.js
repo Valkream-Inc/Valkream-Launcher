@@ -6,7 +6,7 @@
 const axios = require("axios");
 const dns = require("dns");
 
-const { baseUrl, serverInfos } = require("../../../constants");
+const { baseUrl, serverInfos } = require("../constants");
 const LinksManager = require("./linksManager");
 
 class InfosManager {

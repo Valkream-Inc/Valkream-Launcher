@@ -8,12 +8,11 @@ const nodedatabase = new NodeBDD();
 const path = require("path");
 
 const { isDev } = require("../constants");
-const DirsManager = require("../ipc/handlers/manager/dirsManager.js");
+const DirsManager = require("../manager/dirsManager.js");
 
 class Database {
   async dataPath() {
-    const dirsManager = new DirsManager();
-    return await dirsManager.defaultRootPath();
+    return await DirsManager.defaultRootPath();
   }
 
   async createDatabase(tableName, tableConfig) {

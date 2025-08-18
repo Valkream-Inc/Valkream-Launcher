@@ -4,16 +4,13 @@
  */
 
 const { ipcMain, app, dialog } = require("electron");
-const path = require("path");
-const dev = process.env.NODE_ENV === "dev" || process.env.DEV_TOOL === "open";
 
 const CheckForUpdates = require("./handlers/check-for-updates.js");
-const DowloadMultiplefiles = require("./handlers/download-multiple-zips.js");
-const MultipleUnzip = require("./handlers/multiple-unzip.js");
 const CheckInfos = require("./handlers/check-infos.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
+const { SettingsManager } = require("../manager/index.js");
 
 class IpcHandlers {
   init() {
@@ -82,6 +79,15 @@ class IpcHandlers {
     ipcMain.handle("get-installation-statut", async () => {
       return await new InstallationStatut().get();
     });
+    ipcMain.handle(
+      "get-settings",
+      async (event, setting) => await SettingsManager.getSetting(setting)
+    );
+    ipcMain.handle(
+      "set-settings",
+      async (event, setting, value) =>
+        await SettingsManager.setSetting(setting, value)
+    );
 
     // Sélection dossier
     ipcMain.handle("choose-folder", async () => {

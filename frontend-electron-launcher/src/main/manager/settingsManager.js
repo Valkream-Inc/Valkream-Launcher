@@ -8,14 +8,17 @@ const { Database } = require("../utils");
 class SettingsManager {
   constructor() {
     this.db = new Database();
-    this.settings = [
-      "customGamePath",
-      "launcherBehavior",
-      "betaEnabled",
-      "steamInstallation",
-      "refreshTimeout",
-      "isDev",
-    ];
+    this.settings = ["musicEnabled", "launchSteam"];
+  }
+
+  async init() {
+    let configData = await this.db.readData("configClient");
+    if (!configData) {
+      await this.db.createData("configClient", {
+        musicEnabled: true,
+        launchSteam: true,
+      });
+    }
   }
 
   async getSetting(setting) {
@@ -40,4 +43,5 @@ class SettingsManager {
 }
 
 const settingsManager = new SettingsManager();
+settingsManager.init();
 module.exports = settingsManager;

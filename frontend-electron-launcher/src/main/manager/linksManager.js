@@ -9,17 +9,12 @@ const SettingsManager = require("./settingsManager");
 const { toValidUrl } = require("../utils");
 
 class LinksManager {
-  constructor() {
-    this.VersionManager = VersionManager;
-    this.SettingsManager = new SettingsManager();
-  }
-
   maintenanceUrl = () => `${baseUrl}/config/maintenance.json`;
 
   eventUrl = () => `${baseUrl}/config/event.json`;
 
   gameVersionUrl = async () => {
-    const isBeta = await this.SettingsManager.getSetting("betaEnabled");
+    const isBeta = await SettingsManager.getSetting("betaEnabled");
     return `${baseUrl}/game/latest/latest${isBeta ? ".beta" : ""}.yml`;
   };
 
