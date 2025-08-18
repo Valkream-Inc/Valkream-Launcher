@@ -17,5 +17,4 @@ class Reload {
 }
 
 const reloadManager = new Reload();
-reloadManager.init();
 module.exports = reloadManager;

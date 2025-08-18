@@ -3,12 +3,10 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-"use strict";
-const { app, BrowserWindow, Menu } = require("electron");
+const { BrowserWindow, Menu } = require("electron");
 const path = require("path");
-const { PathsManager } = require("../../shared/utils/shared-utils.js");
 
-let dev = process.env.DEV_TOOL === "open";
+const { isDev } = require("../constants");
 let updateWindow = undefined;
 
 function getWindow() {
@@ -28,7 +26,7 @@ function createWindow() {
     width: 512,
     height: 288,
     resizable: false,
-    icon: PathsManager.getAssetsPath("/images/icon.png"),
+    icon: path.join(__dirname, "../../assets/images/icon.png"),
     frame: false,
     show: false,
     webPreferences: {
@@ -40,11 +38,11 @@ function createWindow() {
   Menu.setApplicationMenu(null);
   updateWindow.setMenuBarVisibility(false);
   updateWindow.loadFile(
-    PathsManager.getRendererPath("/windows/updater/updater.html")
+    path.join(__dirname, "../../renderer/windows/update/update.html")
   );
   updateWindow.once("ready-to-show", () => {
     if (updateWindow) {
-      if (dev) updateWindow.webContents.openDevTools({ mode: "detach" });
+      if (isDev) updateWindow.webContents.openDevTools({ mode: "detach" });
       updateWindow.show();
     }
   });

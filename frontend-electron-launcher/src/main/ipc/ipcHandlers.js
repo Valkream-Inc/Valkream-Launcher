@@ -43,7 +43,7 @@ class IpcHandlers {
     );
 
     // general
-    ipcMain.on("check-for-updates", (event) =>
+    ipcMain.handle("check-for-updates", (event) =>
       new CheckForUpdates(event).init()
     );
     ipcMain.on("app-quit", () => {
@@ -55,6 +55,33 @@ class IpcHandlers {
     ipcMain.handle("check-infos", async () => await CheckInfos.init());
     ipcMain.on("get-infos", async () => await CheckInfos.getInfos());
     ipcMain.on("stop-check-infos", () => CheckInfos.stop());
+
+    // installation
+    ipcMain.handle(
+      "install",
+      async (event, date) => await new Install().init(event, date)
+    );
+    ipcMain.handle(
+      "update",
+      async (event, date) => await new Update().init(event, date)
+    );
+    ipcMain.handle(
+      "start",
+      async (event, videoBackground) => await new Start().init(videoBackground)
+    );
+    ipcMain.handle(
+      "custom-mods-install",
+      async (event, date, mods) =>
+        await new CustomMods().install(event, date, mods)
+    );
+    ipcMain.handle(
+      "custom-mods-uninstall",
+      async (event, mods) => await new CustomMods().uninstall(mods)
+    );
+    ipcMain.handle("reload", async () => await new Reload().init());
+    ipcMain.handle("get-installation-statut", async () => {
+      return await new InstallationStatut().get();
+    });
 
     // Sélection dossier
     ipcMain.handle("choose-folder", async () => {

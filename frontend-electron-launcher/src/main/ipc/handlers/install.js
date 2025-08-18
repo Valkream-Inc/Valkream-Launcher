@@ -41,5 +41,4 @@ class Install {
 }
 
 const installManager = new Install();
-installManager.init();
 module.exports = installManager;

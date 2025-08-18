@@ -47,4 +47,5 @@ class Update {
   }
 }
 
-module.exports = Update;
+const update = new Update();
+module.exports = update;

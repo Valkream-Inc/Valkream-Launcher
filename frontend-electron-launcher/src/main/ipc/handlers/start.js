@@ -12,5 +12,4 @@ class Start {
 }
 
 const startManager = new Start();
-startManager.init();
 module.exports = startManager;
