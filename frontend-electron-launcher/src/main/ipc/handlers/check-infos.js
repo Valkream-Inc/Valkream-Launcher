@@ -2,7 +2,7 @@
  * @author Valkream Team
  * @license MIT - https://opensource.org/licenses/MIT
  */
-const { InfosManager } = require("../../manager");
+const InfosManager = require("../../manager/infosManager");
 const { refreshTimeout } = require("../../constants");
 
 class CheckInfos {

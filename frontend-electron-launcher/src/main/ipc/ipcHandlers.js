@@ -10,7 +10,7 @@ const CheckInfos = require("./handlers/check-infos.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
-const { SettingsManager } = require("../manager/index.js");
+const SettingsManager = require("../manager/settingsManager");
 
 class IpcHandlers {
   init() {

@@ -6,10 +6,8 @@
 const path = require("path");
 const { app } = require("electron");
 
-const { newDir } = require("../utils/index.js");
-const { isDev } = require("../utils/index.js");
-
-const SettingsManager = require("./settingsManager.js");
+const newDir = require("../utils/new-dir.js");
+const { isDev } = require("../constants");
 
 class DirsManager {
   launcherRootPath = async () => process.cwd();
@@ -31,6 +29,7 @@ class DirsManager {
     });
 
   rootPath = async () => {
+    const SettingsManager = require("./settingsManager.js");
     const settings = new SettingsManager().getSetting("customGamePath");
 
     return await newDir({

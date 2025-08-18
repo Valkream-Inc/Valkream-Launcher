@@ -1,10 +1,8 @@
-const {
-  GameManager,
-  ThunderstoreManager,
-  VersionManager,
-  LauncherManager,
-  SteamManager,
-} = require("../../manager");
+const GameManager = require("../../manager/gameManager");
+const ThunderstoreManager = require("../../manager/thunderstoreManager");
+const VersionManager = require("../../manager/versionManager");
+const LauncherManager = require("../../manager/launcherManager");
+const SteamManager = require("../../manager/steamManager");
 
 class Reload {
   async init() {

@@ -7,7 +7,7 @@ const { autoUpdater } = require("electron-updater");
 const { formatBytes } = require("valkream-function-lib");
 
 const { baseUrl } = require("../../constants");
-const { SettingsManager } = require("../../manager");
+const SettingsManager = require("../../manager/settingsManager");
 const CheckInfos = require("./check-infos");
 class CheckForUpdates {
   constructor(event) {

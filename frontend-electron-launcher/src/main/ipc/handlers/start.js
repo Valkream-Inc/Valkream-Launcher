@@ -1,4 +1,6 @@
-const { SettingsManager, SteamManager, GameManager } = require("../../manager");
+const SettingsManager = require("../../manager/settingsManager");
+const SteamManager = require("../../manager/steamManager");
+const GameManager = require("../../manager/gameManager");
 
 class Start {
   async init(videoBackground) {

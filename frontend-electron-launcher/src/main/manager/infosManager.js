@@ -5,6 +5,7 @@
 
 const axios = require("axios");
 const dns = require("dns");
+const { Server } = require("@fabricio-191/valve-server-query");
 
 const { baseUrl, serverInfos } = require("../constants");
 const LinksManager = require("./linksManager");

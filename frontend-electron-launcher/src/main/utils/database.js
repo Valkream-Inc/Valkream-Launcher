@@ -16,7 +16,7 @@ class Database {
   }
 
   async createDatabase(tableName, tableConfig) {
-    return await nodedatabase.initialize({
+    return await nodedatabase.intilize({
       databaseName: "Databases",
       fileType: isDev ? "sqlite" : "db",
       tableName,

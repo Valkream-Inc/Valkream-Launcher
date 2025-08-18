@@ -3,7 +3,7 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { Database } = require("../utils");
+const Database = require("../utils/database.js");
 
 class SettingsManager {
   constructor() {

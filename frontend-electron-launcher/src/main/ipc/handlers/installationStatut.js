@@ -1,9 +1,8 @@
-const {
-  SettingsManager,
-  GameManager,
-  ThunderstoreManager,
-  VersionManager,
-} = require("../../manager");
+const SettingsManager = require("../../manager/settingsManager");
+const GameManager = require("../../manager/gameManager");
+const ThunderstoreManager = require("../../manager/thunderstoreManager");
+const VersionManager = require("../../manager/versionManager");
+
 const CheckInfos = require("./check-infos");
 
 class InstallationStatut {

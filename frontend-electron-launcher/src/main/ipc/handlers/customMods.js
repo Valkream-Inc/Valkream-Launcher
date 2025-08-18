@@ -1,4 +1,4 @@
-const { ThunderstoreManager } = require("../../manager");
+const ThunderstoreManager = require("../../manager/thunderstoreManager");
 
 class CustomMods {
   async install(event, date, mods) {
