@@ -20,11 +20,16 @@ window.logger = Logger;
 const { ipcRenderer } = require("electron");
 const fs = require("fs");
 
+const Home = require("./panels/home/home.js");
+// const Settings = require("./panels/settings/settings.js");
+// const SteamCheck = require("./panels/steam-check/steam-check.js");
+
 class Launcher {
   async init() {
     this.initFrame();
     await this.applyMusicSetting();
-    this.createPanels();
+    // this.createPanels(Home, Settings, SteamCheck);
+    this.createPanels(Home);
     this.startLauncher();
   }
 

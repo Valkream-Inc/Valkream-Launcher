@@ -3,14 +3,7 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const {
-  changePanel,
-  showSnackbar,
-  LauncherManager,
-  GameManager,
-  Manager,
-} = require(window.PathsManager.getUtils());
-const { database } = require(window.PathsManager.getSharedUtils());
+const { changePanel, showSnackbar } = require(window.PathsManager.getUtils());
 const { ipcRenderer } = require("electron");
 
 const GameTab = require("./gameTab.js");

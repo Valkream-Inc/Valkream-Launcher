@@ -5,16 +5,9 @@
 
 const { shell, ipcRenderer } = require("electron");
 
-const {
-  changePanel,
-  Popup,
-  EventManager,
-  MaintenanceManager,
-  LauncherManager,
-  GameManager,
-} = require(window.PathsManager.getUtils());
+const { changePanel, Popup } = require(window.PathsManager.getUtils());
 
-const UpdateBigButtonAction = require("./updateBigButtonAction");
+// const UpdateBigButtonAction = require("./updateBigButtonAction");
 class Home {
   static id = "home";
   async init() {
@@ -34,9 +27,10 @@ class Home {
     setInterval(this.updateMainButton, 5000);
   }
 
-  updateCopyright = () => {
+  updateCopyright = async () => {
     const versionEl = document.getElementById("version");
-    if (versionEl) versionEl.textContent = LauncherManager.getVersion();
+    if (versionEl)
+      versionEl.textContent = await ipcRenderer.invoke("get-version");
   };
 
   socialLick = () => {
@@ -179,12 +173,12 @@ class Home {
   };
 
   updateMainButton = async () => {
-    if (this.isMainButtonEnabled())
-      return new UpdateBigButtonAction().init(
-        this.disabledMainButton,
-        this.enableMainButton,
-        this.changeMainButtonEvent
-      );
+    // if (this.isMainButtonEnabled())
+    // return new UpdateBigButtonAction().init(
+    //   this.disabledMainButton,
+    //   this.enableMainButton,
+    //   this.changeMainButtonEvent
+    // );
   };
 
   changeMainButtonEvent = ({ text, onclick }) => {
