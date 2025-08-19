@@ -14,19 +14,47 @@ class Home {
     await ipcRenderer.invoke("init");
     this.checkInfos();
 
-    this.socialLick();
     this.updateCopyright();
+    this.socialLick();
+    this.tipsEvent();
+
     document
       .querySelector(".settings-btn")
-      .addEventListener("click", (e) => changePanel("settings"));
-    this.tipsEvent();
-    this.showActualEvent();
-    this.updateMainButton();
-    this.showServerInfo();
-    this.updateMaintenanceStatus();
-
-    setInterval(this.updateMainButton, 5000);
+      .addEventListener("click", () => changePanel("settings"));
   }
+
+  checkInfos = async () => {
+    window.info = window.info || {};
+    const process = new Date().getTime();
+    await ipcRenderer.invoke("check-infos", process);
+
+    ipcRenderer.on(`update-infos-${process}`, (event, info) => {
+      if (info.maintenance !== window.info.maintenance) {
+        window.info.maintenance = info.maintenance;
+        this.updateServerInfo();
+      }
+
+      if (info.event !== window.info.event) {
+        window.info.event = info.event;
+        this.updateActualEvent();
+      }
+
+      if (info.serverInfos !== window.info.serverInfos) {
+        window.info.serverInfos = info.serverInfos;
+        this.updateServerInfo();
+      }
+
+      if (info.isInternetConnected !== window.info.isInternetConnected) {
+        window.info.isInternetConnected = info.isInternetConnected;
+        // this.updateInternetStatus();
+      }
+
+      if (info.isServerReachable !== window.info.isServerReachable) {
+        window.info.isServerReachable = info.isServerReachable;
+        // this.updateServerStatus();
+      }
+    });
+  };
 
   updateCopyright = async () => {
     const versionEl = document.getElementById("version");
@@ -47,24 +75,13 @@ class Home {
     });
   };
 
-  checkInfos = async () => {
-    const process = new Date().getTime();
-    await ipcRenderer.invoke("check-infos", process);
-
-    ipcRenderer.on(`update-infos-${process}`, (event, info) => {
-      window.info = info;
-      console.log(info);
-    });
-  };
-
   tipsEvent = () => {
     document
       .querySelector(".tips-bottom-left")
       .addEventListener("click", () => {
         const tipsPopup = new Popup();
         tipsPopup.openPopup({
-          title:
-            "<span style='color:#4ec3ff;'>Bienvenue sur le serveur Valkream</span>",
+          title: "Bienvenue sur le serveur Valkream",
           content: `
             Lorsque vous êtes en jeu, soyez connecté sur le serveur Mumble et dans le canal « Vocal en jeu » du serveur Discord Valkream.<br><br>
             Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous joindre sur notre serveur Discord)<br><br>
@@ -74,113 +91,91 @@ class Home {
               </b>
             </span>
             `,
-          color: "white",
-          background: true,
-          options: true,
         });
       });
   };
 
-  showServerInfo = async () => {
-    const setServerInfos = (infos) => {
-      const serverInfosBox = document.querySelector(".server-infos-container");
-      const serverInfosText = document.querySelector("#server-infos");
-      const serverPingText = document.querySelector("#server-ping");
-      const serverPlayersText = document.querySelector("#server-players");
+  updateServerInfo = () => {
+    const infos = window.info?.serverInfos;
 
-      const isOnline = infos.status === "server online";
-      serverInfosText.innerHTML = window.maintenance?.enabled
-        ? "🔵 En Maintenance"
-        : isOnline
-        ? "🟢 En ligne"
-        : "🔴 Hors ligne";
-      serverPingText.innerHTML = isOnline ? `(${infos.ping} ms)` : "";
-      serverPlayersText.innerHTML = isOnline
-        ? `${infos.players.online}/${infos.players.max}`
-        : "--/--";
+    const serverInfosBox = document.querySelector(".server-infos-container");
+    const serverInfosText = document.querySelector("#server-infos");
+    const serverPingText = document.querySelector("#server-ping");
+    const serverPlayersText = document.querySelector("#server-players");
 
-      if (window.maintenance?.enabled) {
-        if (
-          typeof window.maintenance?.description !== "string" ||
-          /<[^>]*>/.test(window.maintenance?.description)
-        )
-          throw new Error("La description ne doit pas contenir de HTML.");
+    const isOnline = infos?.status === "server online";
+    serverInfosText.innerHTML = window.info?.maintenance?.enabled
+      ? "🔵 En Maintenance"
+      : isOnline
+      ? "🟢 En ligne"
+      : "🔴 Hors ligne";
+    serverPingText.innerHTML = isOnline ? `(${infos.ping} ms)` : "";
+    serverPlayersText.innerHTML = isOnline
+      ? `${infos.players.online}/${infos.players.max}`
+      : "--/--";
 
-        const maintenancePopup = new Popup();
-        serverInfosBox.onclick = () =>
-          maintenancePopup.openPopup({
-            title: "Maintenance",
-            content: `${(window.maintenance?.description || "").replace(
-              "\n",
-              "<br>"
-            )}
+    // maintenance
+    if (window.info?.maintenance?.enabled) {
+      if (/<[^>]*>/.test(window.info?.maintenance?.description))
+        throw new Error("Invalid HTML Insert.");
+
+      const maintenancePopup = new Popup();
+
+      serverInfosBox.onclick = () =>
+        maintenancePopup.openPopup({
+          title: "Maintenance",
+          content: `${(window.info?.maintenance?.description || "").replace(
+            "\n",
+            "<br>"
+          )}
               <br><br>
               <span style='color:yellow;'>La maintenance prendra fin le ${new Date(
-                window.maintenance?.end_date
+                window.info?.maintenance?.end_date
               ).toLocaleString()} si tout se passe bien.</span>`,
-            bottomContent: "Bonne Attente !",
-            background: true,
-            color: "white",
-            options: true,
-          });
-      } else {
-        serverInfosBox.onclick = () => {};
-      }
-    };
-
-    ipcRenderer.send("get-server-infos");
-    ipcRenderer.on("update-server-info", (event, infos) => {
-      setServerInfos(infos);
-    });
+          bottomContent: "Bonne Attente !",
+        });
+    } else {
+      serverInfosBox.onclick = () => {};
+    }
   };
 
-  updateMaintenanceStatus = async () =>
-    await new MaintenanceManager((maintenance) => {
-      window.maintenance = maintenance;
-    }).init();
+  updateActualEvent = () => {
+    const event = window.info?.event;
 
-  showActualEvent = async () => {
+    document.querySelector(".event-container").style = event?.enabled
+      ? ""
+      : "display: none";
+    if (!event) return;
+
+    document.querySelector(".event-title").textContent = event.name;
+    document.querySelector(".event-date").textContent = new Date(
+      event.date
+    ).toLocaleString();
+    document.querySelector(".event-image").src = event.image;
+
     const eventPopup = new Popup();
-    const event = new EventManager((event) => {
-      document.querySelector(".event-title").textContent = event.name;
-      document.querySelector(".event-date").textContent = new Date(
-        event.date
-      ).toLocaleString();
-      document.querySelector(".event-image").src = event.image;
-      document.querySelector(".event-container").style = event.enabled
-        ? ""
-        : "display: none";
-      document.querySelector(".event-container").onclick = () => {
-        // Crée un élément de lien qui déclenchera openExternalPath
-        const linkId = "external-event-link";
 
-        if (
-          typeof event.description !== "string" ||
-          /<[^>]*>/.test(event.description)
-        )
-          throw new Error("La description ne doit pas contenir de HTML.");
+    document.querySelector(".event-container").onclick = () => {
+      if (/<[^>]*>/.test(event.description))
+        throw new Error("Invalid HTML Insert.");
 
-        eventPopup.openPopup({
-          title: `<span style='color:#4ec3ff;'>${event.name}</span>`,
-          content: (event.description || "").replace("\n", "<br>"),
-          bottomContent: event.link ? "Voir sur le site Web" : null,
-          bottomId: linkId,
-          color: "white",
-          background: true,
-          options: true,
-        });
+      // Crée un élément de lien qui déclenchera openExternalPath
+      const linkId = "external-event-link";
 
-        // Attendre que le popup soit ouvert puis ajouter le gestionnaire de clic
-        setTimeout(() => {
-          if (!event.link) return;
-
-          const linkElement = document.getElementById(linkId);
-          if (linkElement)
-            linkElement.onclick = () => shell.openExternal(event.link);
-        }, 50);
-      };
-    });
-    event.init();
+      eventPopup.openPopup({
+        title: event.name,
+        content: (event.description || "").replace("\n", "<br>"),
+        bottomContent: event.link ? "Voir sur le site Web" : null,
+        bottomId: linkId,
+      });
+      // Attendre que le popup soit ouvert puis ajouter le gestionnaire de clic
+      setTimeout(() => {
+        if (!event.link) return;
+        const linkElement = document.getElementById(linkId);
+        if (linkElement)
+          linkElement.onclick = () => shell.openExternal(event.link);
+      }, 50);
+    };
   };
 
   updateMainButton = async () => {

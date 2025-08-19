@@ -83,7 +83,7 @@ class Launcher {
   }
 
   async startLauncher() {
-    changePanel("steam-check");
+    changePanel("home");
   }
 }
 
