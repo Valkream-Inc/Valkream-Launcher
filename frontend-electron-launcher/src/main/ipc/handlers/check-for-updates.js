@@ -10,13 +10,13 @@ const { baseUrl } = require("../../constants");
 const SettingsManager = require("../../manager/settingsManager");
 const InfosManager = require("../../manager/infosManager");
 class CheckForUpdates {
-  constructor(event) {
-    this.event = event;
+  constructor() {
     this.timeout = 1000;
-    this.db = new database(true);
   }
 
-  async init() {
+  async init(event) {
+    this.event = event;
+
     const isBeta = await SettingsManager.getSetting("betaEnabled");
 
     if (isBeta)

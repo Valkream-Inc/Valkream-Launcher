@@ -4,10 +4,9 @@
  */
 
 const { shell, ipcRenderer } = require("electron");
-
 const { changePanel, Popup } = require(window.PathsManager.getUtils());
 
-// const UpdateBigButtonAction = require("./updateBigButtonAction");
+const UpdateBigButtonAction = require("./updateBigButtonAction");
 class Home {
   static id = "home";
   async init() {
@@ -28,7 +27,7 @@ class Home {
     const process = new Date().getTime();
     await ipcRenderer.invoke("check-infos", process);
 
-    ipcRenderer.on(`update-infos-${process}`, (event, info) => {
+    ipcRenderer.on(`update-infos-${process}`, async (event, info) => {
       if (info.maintenance !== window.info.maintenance) {
         window.info.maintenance = info.maintenance;
         this.updateServerInfo();
@@ -44,15 +43,7 @@ class Home {
         this.updateServerInfo();
       }
 
-      if (info.isInternetConnected !== window.info.isInternetConnected) {
-        window.info.isInternetConnected = info.isInternetConnected;
-        // this.updateInternetStatus();
-      }
-
-      if (info.isServerReachable !== window.info.isServerReachable) {
-        window.info.isServerReachable = info.isServerReachable;
-        // this.updateServerStatus();
-      }
+      await this.updateMainButton();
     });
   };
 
@@ -179,12 +170,12 @@ class Home {
   };
 
   updateMainButton = async () => {
-    // if (this.isMainButtonEnabled())
-    // return new UpdateBigButtonAction().init(
-    //   this.disabledMainButton,
-    //   this.enableMainButton,
-    //   this.changeMainButtonEvent
-    // );
+    if (this.isMainButtonEnabled())
+      return new UpdateBigButtonAction().init(
+        this.disabledMainButton,
+        this.enableMainButton,
+        this.changeMainButtonEvent
+      );
   };
 
   changeMainButtonEvent = ({ text, onclick }) => {

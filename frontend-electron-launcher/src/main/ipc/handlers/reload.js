@@ -11,6 +11,7 @@ class Reload {
     await VersionManager.init();
     await LauncherManager.init();
     await SteamManager.init();
+    return true;
   }
 }
 

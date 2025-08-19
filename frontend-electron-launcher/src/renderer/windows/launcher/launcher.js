@@ -18,7 +18,6 @@ window.logger = Logger;
 
 // libs
 const { ipcRenderer } = require("electron");
-const fs = require("fs");
 
 const Home = require("./panels/home/home.js");
 // const Settings = require("./panels/settings/settings.js");
@@ -29,7 +28,7 @@ class Launcher {
     this.initFrame();
     await this.applyMusicSetting();
     // this.createPanels(Home, Settings, SteamCheck);
-    this.createPanels(Home);
+    await this.createPanels(Home);
     this.startLauncher();
   }
 
@@ -68,15 +67,25 @@ class Launcher {
   }
 
   async createPanels(...panels) {
-    let panelsElem = document.querySelector(".panels");
-    for (let panel of panels) {
+    const panelsElem = document.querySelector(".panels");
+
+    // Préparer toutes les promesses de chargement
+    const htmlPromises = panels.map((panel) =>
+      fetch(`panels/${panel.id}/${panel.id}.html`)
+        .then((res) => res.text())
+        .then((html) => ({ panel, html }))
+    );
+
+    // Attendre tous les fetchs en parallèle
+    const loadedPanels = await Promise.all(htmlPromises);
+
+    for (const { panel, html } of loadedPanels) {
       window.logger.info(`Initializing ${panel.name} Panel...`);
-      let div = document.createElement("div");
+
+      const div = document.createElement("div");
       div.classList.add("panel", "content-scroll", panel.id);
-      div.innerHTML = fs.readFileSync(
-        `${__dirname}/panels/${panel.id}/${panel.id}.html`,
-        "utf8"
-      );
+      div.innerHTML = html;
+
       panelsElem.appendChild(div);
       new panel().init(this.config);
     }

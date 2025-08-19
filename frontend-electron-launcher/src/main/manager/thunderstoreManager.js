@@ -22,8 +22,8 @@ class ThunderstoreManager {
     this.BepInExConfigDir = await DirsManager.bepInExConfigPath();
     this.BepInExPluginsDir = await DirsManager.bepInExPluginsPath();
 
-    this.ModPackDir = await DirsManager.dowloadModPackPath();
-    this.modsDir = await DirsManager.dowloadModsPath();
+    this.ModPackDir = await DirsManager.downloadModPackPath();
+    this.modsDir = await DirsManager.downloadModsPath();
 
     this.extractManifestPath = await FilesManager.extractManifestPath();
     this.installedManifestPath = await FilesManager.installedManifestPath();

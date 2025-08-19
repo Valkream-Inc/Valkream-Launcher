@@ -3,11 +3,25 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { ipcRenderer } = require("electron");
 const { formatBytes } = require("valkream-function-lib");
-const { showSnackbar, Popup } = require(window.PathsManager.getUtils());
+
+const {
+  showSnackbar,
+  GameManager,
+  SteamManager,
+  ThunderstoreManager,
+  VersionManager,
+  Popup,
+} = require(window.PathsManager.getUtils());
+const {
+  hasInternetConnection,
+  database,
+} = require(window.PathsManager.getSharedUtils());
+const { isSteamInstallation } = require(window.PathsManager.getConstants());
+
 class UpdateBigButtonAction {
   constructor() {
+    this.db = new database();
     this.settings_button = document.querySelector(".settings-btn");
   }
 
@@ -33,34 +47,59 @@ class UpdateBigButtonAction {
     this.changeMainButtonEvent = changeMainButtonEvent;
 
     try {
-      await ipcRenderer.invoke("reload");
+      await VersionManager.init();
+      await VersionManager.updateOnlineVersionConfig();
+      await GameManager.init();
+      await ThunderstoreManager.init();
 
-      const getInstallationStatut = await ipcRenderer.invoke(
-        "get-installation-statut"
-      );
+      const configData = await this.db.readData("configClient");
 
-      const {
-        isInternetConnected,
-        isServerReachable,
-        isInstalled,
-        isUpToDate,
-        isMajorUpdate,
-        isAdminModsActive,
-        isAdminModsInstalled,
-        isAdminModsAvailable,
-        isBoostfpsModsActive,
-        isBoostfpsModsInstalled,
-        isBoostfpsModsAvailable,
-      } = getInstallationStatut;
+      const isInternetConnected = await hasInternetConnection();
+      const localVersionConfig = await VersionManager.getLocalVersionConfig();
+      const isInstalled =
+        (await GameManager.getIsInstalled()) &&
+        (await ThunderstoreManager.getIsInstalled()) &&
+        (await VersionManager.getIsInstalled());
 
-      console.log(getInstallationStatut);
+      const admin_mods = localVersionConfig?.modpack?.admin_mods;
+      const isAdminModsInstalled =
+        await ThunderstoreManager.isCustomModsInstalled(admin_mods);
+      const isAdminModsActive = configData?.launcher_config?.adminEnabled;
+      const isAdminModsAvailable =
+        await ThunderstoreManager.isCustomModsAvailable(admin_mods);
+
+      const boostfps_mods = localVersionConfig?.modpack?.boostfps_mods;
+      const isBoostfpsModsInstalled =
+        await ThunderstoreManager.isCustomModsInstalled(boostfps_mods);
+      const isBoostfpsModsActive = configData?.launcher_config?.boostfpsEnabled;
+      const isBoostfpsModsAvailable =
+        await ThunderstoreManager.isCustomModsAvailable(boostfps_mods);
+
+      let onlineVersionConfig = null;
+      let upToDate = false;
+      let isMajorUpdate = false;
+
+      if (window.isServerReachable) {
+        onlineVersionConfig = await VersionManager.getOnlineVersionConfig();
+
+        const [majorLocal] = (localVersionConfig.version || "0.0.0").split(".");
+        const [majorOnline] = (onlineVersionConfig.version || "0.0.0").split(
+          "."
+        );
+        isMajorUpdate = majorLocal !== majorOnline;
+
+        upToDate =
+          localVersionConfig &&
+          onlineVersionConfig &&
+          localVersionConfig.version === onlineVersionConfig.version;
+      }
 
       // Cas 0 : En cours de chargement
       if (
-        isServerReachable === undefined ||
-        isServerReachable === null ||
-        window.info?.maintenance === undefined ||
-        window.info?.maintenance === null
+        window.isServerReachable === undefined ||
+        window.isServerReachable === null ||
+        (window.isServerReachable &&
+          (window.maintenance === undefined || window.maintenance === null))
       )
         return setTimeout(this.reload, 100);
 
@@ -121,7 +160,7 @@ class UpdateBigButtonAction {
       }
 
       // Cas 2 : Pas installé et pas de connexion internet
-      if (!isInstalled && (!isServerReachable || !isInternetConnected))
+      if (!isInstalled && (!window.isServerReachable || !isInternetConnected))
         return changeMainButtonEvent({
           text: `Installation Impossible <br/> (❌ Pas de connexion ${
             isInternetConnected ? "au server" : "internet"
@@ -130,14 +169,14 @@ class UpdateBigButtonAction {
         });
 
       // Cas 3 : Pas installé et internet OK
-      if (!isInstalled && isServerReachable && isInternetConnected)
+      if (!isInstalled && window.isServerReachable && isInternetConnected)
         return changeMainButtonEvent({
           text: "Installer",
           onclick: this.install,
         });
 
       // Cas 4 : Installé, pas internet
-      if (isInstalled && (!isServerReachable || !isInternetConnected)) {
+      if (isInstalled && (!window.isServerReachable || !isInternetConnected)) {
         changeMainButtonEvent({
           text: `Jouer à la v${localVersionConfig.version} <br /> 
           (⚠️ Pas de connexion ${
@@ -151,9 +190,9 @@ class UpdateBigButtonAction {
       // Cas 5 : Installé, internet, pas à jour (majeur)
       if (
         isInstalled &&
-        isServerReachable &&
+        window.isServerReachable &&
         isInternetConnected &&
-        !isUpToDate &&
+        !upToDate &&
         isMajorUpdate
       ) {
         return changeMainButtonEvent({
@@ -165,9 +204,9 @@ class UpdateBigButtonAction {
       // Cas 6 : Installé, internet, pas à jour (mineur)
       if (
         isInstalled &&
-        isServerReachable &&
+        window.isServerReachable &&
         isInternetConnected &&
-        !isUpToDate &&
+        !upToDate &&
         !isMajorUpdate
       ) {
         return changeMainButtonEvent({
@@ -179,9 +218,9 @@ class UpdateBigButtonAction {
       // Cas 7 : Installé, internet, à jour
       if (
         isInstalled &&
-        isServerReachable &&
+        window.isServerReachable &&
         isInternetConnected &&
-        isUpToDate
+        upToDate
       ) {
         const isMaintenanceEnabled = window.maintenance?.enabled;
 
@@ -211,7 +250,7 @@ class UpdateBigButtonAction {
   };
 
   reload = async () => {
-    return await this.init(
+    return await new UpdateBigButtonAction().init(
       this.disabledMainButton,
       this.enableMainButton,
       this.changeMainButtonEvent

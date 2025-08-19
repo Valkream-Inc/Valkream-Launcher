@@ -13,6 +13,8 @@ class SettingsManager {
       "launchSteam",
       "betaEnabled",
       "customGamePath",
+      "boostfpsEnabled",
+      "adminEnabled",
     ];
   }
 

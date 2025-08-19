@@ -27,37 +27,40 @@ class InstallationStatut {
     const isInstalled = gameInstalled && thunderInstalled && versionInstalled;
 
     // --- 3. Gestion des mods ---
-    function checkCustomMods(mods, settingKey) {
-      const active = SettingsManager.getSetting(settingKey);
+    const checkCustomMods = async (mods, settingKey) => {
+      const [active] = await Promise.all([
+        SettingsManager.getSetting(settingKey),
+      ]);
+
       const installed = ThunderstoreManager.isCustomModsInstalled(mods);
       const available = ThunderstoreManager.isCustomModsAvailable(mods);
+
       return {
         active,
         installed,
         available,
-        mods: active && installed ? mods ?? [] : [],
       };
-    }
+    };
+
+    const [adminModsResult, boostfpsModsResult] = await Promise.all([
+      checkCustomMods(localVersionConfig?.modpack?.admin_mods, "adminEnabled"),
+      checkCustomMods(
+        localVersionConfig?.modpack?.boostfps_mods,
+        "boostfpsEnabled"
+      ),
+    ]);
 
     const {
       active: isAdminModsActive,
       installed: isAdminModsInstalled,
       available: isAdminModsAvailable,
-      mods: adminMods,
-    } = checkCustomMods(
-      localVersionConfig?.modpack?.admin_mods,
-      "adminEnabled"
-    );
+    } = adminModsResult;
 
     const {
       active: isBoostfpsModsActive,
       installed: isBoostfpsModsInstalled,
       available: isBoostfpsModsAvailable,
-      mods: boostfpsMods,
-    } = checkCustomMods(
-      localVersionConfig?.modpack?.boostfps_mods,
-      "boostfpsEnabled"
-    );
+    } = boostfpsModsResult;
 
     // --- 4. Vérification des versions ---
     let onlineVersionConfig = null;
@@ -74,9 +77,8 @@ class InstallationStatut {
       isMajorUpdate = majorLocal !== majorOnline;
 
       isUpToDate =
-        localVersionConfig?.version &&
-        onlineVersionConfig?.version &&
-        localVersionConfig.version === onlineVersionConfig.version;
+        !!localVersionConfig?.version &&
+        localVersionConfig.version === onlineVersionConfig?.version;
     }
 
     // --- 5. Résultats ---
@@ -84,16 +86,17 @@ class InstallationStatut {
       isInternetConnected,
       isServerReachable,
       isInstalled,
+      isUpToDate,
+      isMajorUpdate,
+
+      // Résultats des mods
       isAdminModsActive,
       isAdminModsInstalled,
       isAdminModsAvailable,
-      adminMods,
+
       isBoostfpsModsActive,
       isBoostfpsModsInstalled,
       isBoostfpsModsAvailable,
-      boostfpsMods,
-      isUpToDate,
-      isMajorUpdate,
     };
   };
 }

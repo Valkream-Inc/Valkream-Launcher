@@ -7,12 +7,19 @@ const { ipcMain, app, dialog } = require("electron");
 
 const CheckForUpdates = require("./handlers/check-for-updates.js");
 const CheckInfos = require("./handlers/check-infos.js");
+const Install = require("./handlers/install.js");
+const Update = require("./handlers/update.js");
+const Start = require("./handlers/start.js");
+const CustomMods = require("./handlers/custom-mods.js");
+const Reload = require("./handlers/reload.js");
+const InstallationStatut = require("./handlers/installation-statut.js");
 
-const MainWindow = require("../windows/mainWindow.js");
-const UpdateWindow = require("../windows/updateWindow.js");
 const SettingsManager = require("../manager/settingsManager");
 const LauncherManager = require("../manager/launcherManager");
 const GameManager = require("../manager/gameManager");
+
+const MainWindow = require("../windows/mainWindow.js");
+const UpdateWindow = require("../windows/updateWindow.js");
 
 class IpcHandlers {
   init() {
@@ -42,8 +49,8 @@ class IpcHandlers {
     );
 
     // general
-    ipcMain.handle("check-for-updates", (event) =>
-      new CheckForUpdates(event).init()
+    ipcMain.on("check-for-updates", (event) =>
+      new CheckForUpdates().init(event)
     );
     ipcMain.on("app-quit", () => {
       app.quit();
@@ -55,11 +62,9 @@ class IpcHandlers {
       await CheckInfos.init(event.sender, processId);
       return true;
     });
-
     ipcMain.handle("get-infos", async () => {
       return await CheckInfos.getInfos();
     });
-
     ipcMain.on("stop-check-infos", () => {
       CheckInfos.stop();
     });
@@ -86,9 +91,9 @@ class IpcHandlers {
       "custom-mods-uninstall",
       async (event, mods) => await new CustomMods().uninstall(mods)
     );
-    ipcMain.handle("reload", async () => await new Reload().init());
+    ipcMain.handle("reload", async () => await Reload.init());
     ipcMain.handle("get-installation-statut", async () => {
-      return await new InstallationStatut().get();
+      return await InstallationStatut.get();
     });
     ipcMain.handle(
       "get-settings",
