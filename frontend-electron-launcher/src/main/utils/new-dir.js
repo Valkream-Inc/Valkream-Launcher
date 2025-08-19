@@ -6,21 +6,18 @@
 const fs = require("fs");
 const { platform } = require("os");
 
-const newDir = async (valueForAllPlatforms) => {
-  const createFolderIfNotExists = async (path) => {
-    try {
-      if (!fs.existsSync(path)) {
-        fs.mkdirSync(path, { recursive: true });
-      }
-    } catch (err) {
-      console.error("Erreur lors de la création du dossier:", err.message);
-    } finally {
-      return path;
-    }
-  };
+const newDir = (valueForAllPlatforms) => {
+  const dirPath = valueForAllPlatforms[platform()];
 
-  const path = await createFolderIfNotExists(valueForAllPlatforms[platform()]);
-  return path;
+  try {
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+  } catch (err) {
+    console.error("Erreur lors de la création du dossier:", err.message);
+  }
+
+  return dirPath; // toujours un string
 };
 
 module.exports = newDir;

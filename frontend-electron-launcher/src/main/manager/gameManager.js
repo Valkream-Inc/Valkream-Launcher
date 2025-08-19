@@ -34,25 +34,30 @@ class GameManager {
       this.bepInExZipPath = await FilesManager.bepInExZipPath();
     }
 
-    // 🔸 Étape 2 : Configuration des dossiers à supprimer
-    this.gameFolderToRemove = (
-      await VersionManager.getLocalVersionConfig()
-    ).modpack?.gameFolderToRemove;
+    if (VersionManager.getIsInstalled()) {
+      // 🔸 Étape 2 : Configuration des dossiers à supprimer
+      this.gameFolderToRemove = (
+        await VersionManager.getLocalVersionConfig()
+      ).modpack?.gameFolderToRemove;
 
-    // 🔸 Étape 3 : Configuration des dossiers à conserver
-    this.configGameFolderToPreserve =
-      (await VersionManager.getLocalVersionConfig()).modpack
-        ?.gameFolderToPreserve || [];
-    this.modsAdmin =
-      (await VersionManager.getLocalVersionConfig()).modpack?.admin_mods || [];
-    this.modsBoostFPS =
-      (await VersionManager.getLocalVersionConfig()).modpack?.boostfps_mods ||
-      [];
-    this.gameFolderToPreserve = [
-      ...this.configGameFolderToPreserve,
-      ...this.modsAdmin.map((mod) => `/BepInEx/plugins/${mod}/`),
-      ...this.modsBoostFPS.map((mod) => `/BepInEx/plugins/${mod}/`),
-    ];
+      // 🔸 Étape 3 : Configuration des dossiers à conserver
+      this.configGameFolderToPreserve =
+        (await VersionManager.getLocalVersionConfig()).modpack
+          ?.gameFolderToPreserve || [];
+      this.modsAdmin =
+        (await VersionManager.getLocalVersionConfig()).modpack?.admin_mods ||
+        [];
+      this.modsBoostFPS =
+        (await VersionManager.getLocalVersionConfig()).modpack?.boostfps_mods ||
+        [];
+      this.gameFolderToPreserve = [
+        ...this.configGameFolderToPreserve,
+        ...this.modsAdmin.map((mod) => `/BepInEx/plugins/${mod}/`),
+        ...this.modsBoostFPS.map((mod) => `/BepInEx/plugins/${mod}/`),
+      ];
+
+      await this.restoreGameFolder();
+    }
 
     // 🔸 Étape 4 : Configuration des dossiers
     this.gameRootDir = await DirsManager.gameRootPath();

@@ -34,7 +34,7 @@ class InfosManager {
 
   getEvent = async () => {
     try {
-      const res = await axios.get(new LinksManager().eventUrl());
+      const res = await axios.get(LinksManager.eventUrl());
       return res.data;
     } catch (err) {
       console.error("Error getting Event:", err.message);
@@ -44,7 +44,7 @@ class InfosManager {
 
   getMaintenance = async () => {
     try {
-      const res = await axios.get(new LinksManager().maintenanceUrl());
+      const res = await axios.get(LinksManager.maintenanceUrl());
       return res.data;
     } catch (err) {
       console.error("Error getting Maintenance:", err.message);

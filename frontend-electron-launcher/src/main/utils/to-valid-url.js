@@ -1,3 +1,5 @@
+const { baseUrl } = require("../constants");
+
 const toValidUrl = (url) => {
   if (typeof url !== "string") throw new Error("URL must be a string");
   if (url.startsWith("http://") || url.startsWith("https://")) {

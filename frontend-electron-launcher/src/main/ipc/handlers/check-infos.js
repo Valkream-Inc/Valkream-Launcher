@@ -8,15 +8,24 @@ const { refreshTimeout } = require("../../constants");
 class CheckInfos {
   constructor() {
     this.interval = null;
+    this.sender = null;
+    this.processId = null;
   }
 
-  async init() {
-    this.updateInfos();
+  async init(sender, processId) {
+    this.sender = sender;
+    this.processId = processId;
+
+    await this.updateInfos(); // premier update direct
     this.interval = setInterval(this.updateInfos, refreshTimeout);
   }
 
   updateInfos = async () => {
     this.infos = await this.checkInfos();
+
+    if (this.sender && this.processId) {
+      this.sender.send(`update-infos-${this.processId}`, this.infos);
+    }
   };
 
   checkInfos = async () => {
@@ -50,10 +59,12 @@ class CheckInfos {
   };
 
   stop = () => {
-    if (this.interval) clearInterval(this.interval);
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
   };
 }
 
 const checkInfos = new CheckInfos();
-checkInfos.init();
 module.exports = checkInfos;

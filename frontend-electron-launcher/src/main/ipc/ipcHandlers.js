@@ -12,6 +12,7 @@ const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
 const SettingsManager = require("../manager/settingsManager");
 const LauncherManager = require("../manager/launcherManager");
+const GameManager = require("../manager/gameManager");
 
 class IpcHandlers {
   init() {
@@ -50,9 +51,18 @@ class IpcHandlers {
     });
 
     // infos
-    ipcMain.handle("check-infos", async () => await CheckInfos.init());
-    ipcMain.on("get-infos", async () => await CheckInfos.getInfos());
-    ipcMain.on("stop-check-infos", () => CheckInfos.stop());
+    ipcMain.handle("check-infos", async (event, processId) => {
+      await CheckInfos.init(event.sender, processId);
+      return true;
+    });
+
+    ipcMain.handle("get-infos", async () => {
+      return await CheckInfos.getInfos();
+    });
+
+    ipcMain.on("stop-check-infos", () => {
+      CheckInfos.stop();
+    });
 
     // installation
     ipcMain.handle(
@@ -93,6 +103,7 @@ class IpcHandlers {
       "get-version",
       async () => await LauncherManager.getVersion()
     );
+    ipcMain.handle("init", async () => await GameManager.init());
 
     // Sélection dossier
     ipcMain.handle("choose-folder", async () => {

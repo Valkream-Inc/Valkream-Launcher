@@ -8,7 +8,7 @@ const { formatBytes } = require("valkream-function-lib");
 
 const { baseUrl } = require("../../constants");
 const SettingsManager = require("../../manager/settingsManager");
-const CheckInfos = require("./check-infos");
+const InfosManager = require("../../manager/infosManager");
 class CheckForUpdates {
   constructor(event) {
     this.event = event;
@@ -25,7 +25,7 @@ class CheckForUpdates {
         true
       );
 
-    if (!(await CheckInfos.getInfos()).isServerReachable)
+    if (!(await InfosManager.getIsServerReachable()))
       return this.onError(
         "no_internet",
         "❌ Pas de connexion au serveur. Impossible de vérifier les mises à jour."

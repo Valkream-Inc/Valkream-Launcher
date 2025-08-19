@@ -8,7 +8,12 @@ const Database = require("../utils/database.js");
 class SettingsManager {
   constructor() {
     this.db = new Database();
-    this.settings = ["musicEnabled", "launchSteam"];
+    this.settings = [
+      "musicEnabled",
+      "launchSteam",
+      "betaEnabled",
+      "customGamePath",
+    ];
   }
 
   async init() {

@@ -5,6 +5,7 @@
 
 const { baseUrl } = require("../constants");
 const { toValidUrl } = require("../utils");
+const { platform } = require("os");
 
 class LinksManager {
   maintenanceUrl = () => `${baseUrl}/config/maintenance.json`;

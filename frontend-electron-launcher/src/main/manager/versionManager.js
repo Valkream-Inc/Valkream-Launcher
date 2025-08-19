@@ -34,6 +34,8 @@ class VersionManager {
   }
 
   async getLocalVersionConfig() {
+    if (!fs.existsSync(this.gameVersionFilePath)) return null;
+
     const yamlContent = fs
       .readFileSync(this.gameVersionFilePath, "utf8")
       .trim();
@@ -53,7 +55,7 @@ class VersionManager {
     fs.writeFileSync(this.gameVersionFilePath, yaml.stringify(dataToWrite));
   }
 
-  async getIsInstalled() {
+  getIsInstalled() {
     return fs.existsSync(this.gameVersionFilePath);
   }
 }

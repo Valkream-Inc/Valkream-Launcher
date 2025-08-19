@@ -11,7 +11,8 @@ const { changePanel, Popup } = require(window.PathsManager.getUtils());
 class Home {
   static id = "home";
   async init() {
-    await GameManager.restoreGameFolder();
+    await ipcRenderer.invoke("init");
+    this.checkInfos();
 
     this.socialLick();
     this.updateCopyright();
@@ -43,6 +44,16 @@ class Home {
           shell.openExternal(url);
         });
       }
+    });
+  };
+
+  checkInfos = async () => {
+    const process = new Date().getTime();
+    await ipcRenderer.invoke("check-infos", process);
+
+    ipcRenderer.on(`update-infos-${process}`, (event, info) => {
+      window.info = info;
+      console.log(info);
     });
   };
 
