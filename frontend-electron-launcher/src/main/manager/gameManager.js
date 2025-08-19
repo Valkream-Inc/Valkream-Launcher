@@ -21,7 +21,11 @@ const SettingsManager = require("./settingsManager.js");
 const LauncherManager = require("./launcherManager.js");
 
 const CheckInfos = require("../ipc/handlers/check-infos.js");
-const { isFolderPathSecured, dowloadMultiplefiles } = require("../utils");
+const {
+  isFolderPathSecured,
+  dowloadMultiplefiles,
+  unZipMultipleFiles,
+} = require("../utils");
 
 class GameManager {
   async init() {

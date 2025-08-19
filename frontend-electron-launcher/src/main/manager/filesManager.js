@@ -49,7 +49,7 @@ class FilesManager {
   };
 
   extractManifestPath = async () => {
-    const modPackDir = await this.dirsManager.downloadModsPath();
+    const modPackDir = await this.dirsManager.downloadModPackPath();
     return path.join(modPackDir, "manifest.json");
   };
 

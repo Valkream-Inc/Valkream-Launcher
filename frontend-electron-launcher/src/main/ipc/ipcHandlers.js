@@ -69,10 +69,29 @@ class IpcHandlers {
       CheckInfos.stop();
     });
 
-    // installation
+    // settings
     ipcMain.handle(
+      "get-settings",
+      async (event, setting) => await SettingsManager.getSetting(setting)
+    );
+    ipcMain.handle(
+      "set-settings",
+      async (event, setting, value) =>
+        await SettingsManager.setSetting(setting, value)
+    );
+
+    // utils
+    ipcMain.handle("get-version", () => LauncherManager.getVersion());
+    ipcMain.handle("init", async () => await GameManager.init());
+    ipcMain.handle("reload", async () => await Reload.init());
+    ipcMain.handle("get-installation-statut", async () => {
+      return await InstallationStatut.get();
+    });
+
+    // installation
+    ipcMain.on(
       "install",
-      async (event, date) => await new Install().init(event, date)
+      async (event, date) => await Install.init(event, date)
     );
     ipcMain.handle(
       "update",
@@ -91,24 +110,6 @@ class IpcHandlers {
       "custom-mods-uninstall",
       async (event, mods) => await new CustomMods().uninstall(mods)
     );
-    ipcMain.handle("reload", async () => await Reload.init());
-    ipcMain.handle("get-installation-statut", async () => {
-      return await InstallationStatut.get();
-    });
-    ipcMain.handle(
-      "get-settings",
-      async (event, setting) => await SettingsManager.getSetting(setting)
-    );
-    ipcMain.handle(
-      "set-settings",
-      async (event, setting, value) =>
-        await SettingsManager.setSetting(setting, value)
-    );
-    ipcMain.handle(
-      "get-version",
-      async () => await LauncherManager.getVersion()
-    );
-    ipcMain.handle("init", async () => await GameManager.init());
 
     // Sélection dossier
     ipcMain.handle("choose-folder", async () => {

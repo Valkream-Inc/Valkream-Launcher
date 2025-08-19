@@ -53,8 +53,6 @@ class UpdateBigButtonAction {
         isBoostfpsModsAvailable,
       } = getInstallationStatut;
 
-      console.log(getInstallationStatut);
-
       // Cas 0 : En cours de chargement
       if (
         isServerReachable === undefined ||
@@ -220,14 +218,15 @@ class UpdateBigButtonAction {
 
   install = async () => {
     if (!window.isUserAlertedAboutInstall) {
-      const configData = await this.db.readData("configClient");
-      const isCustomGamePathSpecified =
-        configData?.launcher_config?.customGamePath;
+      const isCustomGamePathSpecified = await ipcRenderer.invoke(
+        "get-settings",
+        "customGamePath"
+      );
 
       window.isUserAlertedAboutInstall = true;
       const alertPopup = new Popup();
       return alertPopup.openPopup({
-        title: "<span style='color:#4ec3ff;'>Installation du launcher</span>",
+        title: "Installation du launcher",
         content: isCustomGamePathSpecified
           ? `Bienvenue sur Valkream.
             <br>
@@ -252,48 +251,42 @@ class UpdateBigButtonAction {
                 ⚠️ La désinstallation du launcher doit UNIQUEMENT s’effectuer via le bouton prévu à cet effet, tout en bas dans les paramètres.
               </b>
             </span>`,
-        color: "white",
-        background: true,
-        options: true,
+        onExit: async () => {
+          await this.install();
+        },
       });
     }
 
     this.disabledMainButton();
+    const process = Date.now();
+    const progressChannel = `progress-${process}`;
+    const errorChannel = `error-${process}`;
+    const doneChannel = `done-${process}`;
+
     try {
-      let isOk = true;
-      this.changeMainButtonEvent({ text: "Installation...", onclick: null });
-      if (isOk) isOk = await GameManager.uninstall();
+      await new Promise((resolve, reject) => {
+        ipcRenderer.once(doneChannel, resolve);
+        ipcRenderer.once(errorChannel, (e, errMsg) =>
+          reject(new Error(errMsg))
+        );
 
-      // initialisation des sous-folders supprimés
-      await GameManager.init();
-      await ThunderstoreManager.init();
+        ipcRenderer.on(progressChannel, (event, data) => {
+          this.callback(
+            data.text,
+            data.processedBytes,
+            data.totalBytes,
+            data.percent,
+            data.speed
+          );
+        });
 
-      if (isSteamInstallation) {
-        // await SteamManager.install();
-        // await GameManager.installBepInEx(callback);
-      } else {
-        if (isOk) isOk = await GameManager.dowload(this.callback);
-        if (isOk) isOk = await GameManager.unzip(this.callback);
-      }
+        ipcRenderer.send("install", process);
+      });
 
-      if (isOk) isOk = await GameManager.dowloadBepInEx(this.callback);
-      if (isOk) isOk = await GameManager.unzipBepInEx(this.callback);
-
-      if (isOk) isOk = await ThunderstoreManager.downloadModpack(this.callback);
-      if (isOk) isOk = await ThunderstoreManager.unzipModpack(this.callback);
-
-      if (isOk) isOk = await ThunderstoreManager.dowloadMods(this.callback);
-      if (isOk) isOk = await ThunderstoreManager.unzipMods(this.callback);
-
-      this.changeMainButtonEvent({ text: "Verification...", onclick: null });
-      // if (isOk) await ThunderstoreManager.ckeckPluginsAndConfig();
-      if (isOk) isOk = await VersionManager.updateLocalVersionConfig();
-
-      if (!isOk) throw new Error("Erreur lors de l'installation !");
-      else showSnackbar("La dernière version a été installée avec succès !");
+      showSnackbar("✅ Installation terminée", "success");
     } catch (err) {
       console.error(err);
-      showSnackbar("Erreur lors de l'installation !", "error");
+      showSnackbar("❌ Erreur lors de l'installation", "error");
     } finally {
       this.enableMainButton();
       await this.reload();

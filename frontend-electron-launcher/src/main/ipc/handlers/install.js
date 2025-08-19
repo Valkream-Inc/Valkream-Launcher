@@ -17,25 +17,32 @@ class Install {
       });
     };
 
-    await GameManager.uninstall();
-    await Reload.init(); // initialisation des sous-folders supprimés
+    try {
+      await GameManager.uninstall();
+      await Reload.init(); // initialisation des sous-folders supprimés
 
-    if (!isSteamInstallation) {
-      await GameManager.dowload(callback);
-      await GameManager.unzip(callback);
-    } // installation steam a implémenter...
+      if (!isSteamInstallation) {
+        await GameManager.dowload(callback);
+        await GameManager.unzip(callback);
+      } // installation steam a implémenter...
 
-    await GameManager.dowloadBepInEx(this.callback);
-    await GameManager.unzipBepInEx(this.callback);
+      await GameManager.dowloadBepInEx(callback);
+      await GameManager.unzipBepInEx(callback);
 
-    await ThunderstoreManager.downloadModpack(this.callback);
-    await ThunderstoreManager.unzipModpack(this.callback);
+      await ThunderstoreManager.downloadModpack(callback);
+      await ThunderstoreManager.unzipModpack(callback);
 
-    await ThunderstoreManager.dowloadMods(this.callback);
-    await ThunderstoreManager.unzipMods(this.callback);
+      await ThunderstoreManager.dowloadMods(callback);
+      await ThunderstoreManager.unzipMods(callback);
 
-    await VersionManager.updateLocalVersionConfig();
-    await Reload.init();
+      await VersionManager.updateLocalVersionConfig();
+      await Reload.init();
+    } catch (err) {
+      console.error(err);
+      event.reply(`error-${date}`, err.message);
+    } finally {
+      event.reply(`done-${date}`);
+    }
   }
 }
 
