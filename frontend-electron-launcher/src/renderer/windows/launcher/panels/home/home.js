@@ -9,6 +9,7 @@ const { changePanel, Popup } = require(window.PathsManager.getUtils());
 const UpdateBigButtonAction = require("./updateBigButtonAction");
 class Home {
   static id = "home";
+
   async init() {
     await ipcRenderer.invoke("init");
     this.checkInfos();

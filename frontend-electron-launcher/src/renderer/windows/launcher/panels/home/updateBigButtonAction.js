@@ -35,8 +35,6 @@ class UpdateBigButtonAction {
         "get-installation-statut"
       );
 
-      console.log(getInstallationStatut);
-
       const {
         isInternetConnected,
         isServerReachable,
@@ -279,10 +277,10 @@ class UpdateBigButtonAction {
         ipcRenderer.send("install", process);
       });
 
-      showSnackbar("✅ Installation terminée", "success");
+      showSnackbar("Installation terminée", "success");
     } catch (err) {
       console.error(err);
-      showSnackbar("❌ Erreur lors de l'installation", "error");
+      showSnackbar("Erreur lors de l'installation", "error");
     } finally {
       this.enableMainButton();
       await this.reload();

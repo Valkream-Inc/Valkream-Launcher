@@ -8,45 +8,41 @@ const Database = require("../utils/database.js");
 class SettingsManager {
   constructor() {
     this.db = new Database();
-    this.settings = [
-      "musicEnabled",
-      "launchSteam",
-      "betaEnabled",
-      "customGamePath",
-      "boostfpsEnabled",
-      "adminEnabled",
-      "launcherBehavior",
-    ];
+    this.defaultSettings = {
+      musicEnabled: true,
+      launchSteam: true,
+      betaEnabled: false,
+      customGamePath: null,
+      boostfpsEnabled: false,
+      adminEnabled: false,
+      launcherBehavior: "close",
+    };
   }
 
   async init() {
     let configData = await this.db.readData("configClient");
     if (!configData) {
-      await this.db.createData("configClient", {
-        musicEnabled: true,
-        launchSteam: true,
-      });
+      await this.db.createData("configClient", this.defaultSettings);
     }
   }
 
   async getSetting(setting) {
-    if (!this.settings.includes(setting)) {
+    if (this.defaultSettings[setting] === undefined)
       throw new Error(`Setting "${setting}" does not exist.`);
-    }
 
     const config = await this.db.readData("configClient");
     return config ? config[setting] : undefined;
   }
 
   async setSetting(setting, value) {
-    if (!this.settings.includes(setting)) {
+    if (this.defaultSettings[setting] === undefined)
       throw new Error(`Setting "${setting}" does not exist.`);
-    }
 
     const config = (await this.db.readData("configClient")) || {};
     config[setting] = value;
 
-    return await this.db.updateData("configClient", config);
+    await this.db.updateData("configClient", config);
+    return true;
   }
 }
 

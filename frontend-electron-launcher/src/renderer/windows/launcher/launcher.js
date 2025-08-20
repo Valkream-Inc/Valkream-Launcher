@@ -7,45 +7,22 @@ const PathsManager = require("../../../shared/pathsManager.js");
 window.PathsManager = PathsManager;
 
 // import panel
-// const Home = require("./panels/home/home.js");
-// const Settings = require("./panels/settings/settings.js");
+const Home = require("./panels/home/home.js");
+const Settings = require("./panels/settings/settings.js");
 // const SteamCheck = require("./panels/steam-check/steam-check.js");
 
 // import modules
 const { changePanel, Logger } = require(PathsManager.getUtils());
 
-window.logger = Logger;
-
 // libs
 const { ipcRenderer } = require("electron");
-
-const Home = require("./panels/home/home.js");
-// const Settings = require("./panels/settings/settings.js");
-// const SteamCheck = require("./panels/steam-check/steam-check.js");
 
 class Launcher {
   async init() {
     this.initFrame();
-    await this.applyMusicSetting();
     // this.createPanels(Home, Settings, SteamCheck);
-    await this.createPanels(Home);
+    await this.createPanels(Home, Settings);
     this.startLauncher();
-  }
-
-  async applyMusicSetting() {
-    try {
-      const videoElement = document.getElementById("background-video");
-      const musicEnabled = await ipcRenderer.invoke(
-        "get-settings",
-        "musicEnabled"
-      );
-      videoElement.muted = musicEnabled;
-    } catch (error) {
-      console.error(
-        "Erreur lors de l'application du paramètre musique:",
-        error
-      );
-    }
   }
 
   initFrame() {
@@ -80,7 +57,7 @@ class Launcher {
     const loadedPanels = await Promise.all(htmlPromises);
 
     for (const { panel, html } of loadedPanels) {
-      window.logger.info(`Initializing ${panel.name} Panel...`);
+      Logger.info(`Initializing ${panel.name} Panel...`);
 
       const div = document.createElement("div");
       div.classList.add("panel", "content-scroll", panel.id);

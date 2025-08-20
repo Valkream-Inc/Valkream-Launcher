@@ -6,15 +6,15 @@
 const { changePanel, showSnackbar } = require(window.PathsManager.getUtils());
 const { ipcRenderer } = require("electron");
 
-const GameTab = require("./gameTab.js");
+// const GameTab = require("./gameTab.js");
 class Settings {
   static id = "settings";
   async init() {
-    this.db = new database();
+    // this.db = new database();
     this.navBTN();
     this.activeDevTab();
 
-    this.changeIsMusicEnabled();
+    await this.changeIsMusicEnabled();
     this.uninstallGame();
     this.uninstallLauncher();
     this.clearCache();
@@ -28,67 +28,127 @@ class Settings {
     this.openDevTools();
     this.enabledBeta();
 
-    this.gameTab = new GameTab();
-    document.querySelector("#game").addEventListener("click", () => {
-      this.gameTab.reload();
-    });
+    // this.gameTab = new GameTab();
+    // document.querySelector("#game").addEventListener("click", () => {
+    //   this.gameTab.reload();
+    // });
   }
 
-  buttonAction(btn, action, message, onSuccess = () => {}) {
+  buttonAction(btn, action = async () => {}, message, onSuccess) {
     btn.addEventListener("click", async () => {
       btn.disabled = true;
-      message.wait ? (btn.innerHTML = message.wait) : () => {};
-      if (await action()) {
+      if (message.wait && message.base) btn.innerHTML = message.wait;
+
+      try {
+        await action();
         showSnackbar(message.success || "Sucessfully saved !");
-        onSuccess();
-      } else {
+        if (onSuccess) await onSuccess();
+      } catch (err) {
+        console.error(err);
         showSnackbar(message.error || "Error while saving !", "error");
+      } finally {
+        btn.disabled = false;
+        if (message.base) btn.innerHTML = message.base;
+        return;
       }
-      btn.disabled = false;
-      message.base ? (btn.innerHTML = message.base) : () => {};
     });
   }
 
-  changeIsMusicEnabled() {
-    const videoBackground = document.getElementById("background-video");
-    const musicToggle = document.querySelector(".video-music-toggle");
+  toggleAction(toggle, action = async () => {}, message, onSuccess) {
+    toggle.addEventListener("change", async (e) => {
+      toggle.disabled = true;
 
-    musicToggle.checked = !videoBackground.muted;
-    musicToggle.addEventListener("change", async (e) => {
       try {
-        let configData = await this.db.readData("configClient");
-        configData.launcher_config.musicEnabled = !e.target.checked;
-
-        await this.db.updateData("configClient", configData);
-        videoBackground.muted = !e.target.checked;
-        showSnackbar(
-          e.target.checked ? "Musique activée !" : "Musique désactivée !"
-        );
+        await action(e.target.checked);
+        showSnackbar(message?.success || "Sucessfully saved !");
+        if (onSuccess) await onSuccess();
       } catch (err) {
         console.error(err);
-        showSnackbar("Erreur lors de la sauvegarde !", "error");
+        showSnackbar(message?.error || "Error while saving !", "error");
+      } finally {
+        toggle.disabled = false;
+        return;
       }
     });
+  }
+
+  selectAction(select, action = async () => {}, message, onSuccess) {
+    select.addEventListener("change", async (e) => {
+      select.disabled = true;
+
+      try {
+        await action(e.target.value);
+        showSnackbar(message?.success || "Sucessfully saved !");
+        if (onSuccess) await onSuccess();
+      } catch (err) {
+        console.error(err);
+        showSnackbar(message?.error || "Error while saving !", "error");
+      } finally {
+        select.disabled = false;
+        return;
+      }
+    });
+  }
+
+  async changeIsMusicEnabled() {
+    // elements
+    const BackgroundVideo = document.getElementById("background-video");
+    const musicToggle = document.querySelector(".video-music-toggle");
+
+    // init
+    const musicEnabled = await ipcRenderer.invoke(
+      "get-settings",
+      "musicEnabled"
+    );
+    BackgroundVideo.muted = !musicEnabled;
+    musicToggle.checked = musicEnabled;
+
+    // listeners
+    this.toggleAction(
+      musicToggle,
+      async (value) => {
+        await ipcRenderer.invoke("set-settings", "musicEnabled", value);
+        BackgroundVideo.muted = !value;
+        return;
+      },
+      {
+        success: "Comportement de la musique sauvegardé !",
+        error: "Erreur lors de la sauvegarde du comportement de la musique !",
+      }
+    );
+
+    // end
+    return;
   }
 
   async handleLauncherBehavior() {
-    const select = document.querySelector(".launcher-behavior-select");
+    // elements
+    const selectLauncherBehavior = document.querySelector(
+      ".launcher-behavior-select"
+    );
 
-    const configData = await this.db.readData("configClient");
-    if (configData?.launcher_config?.launcherBehavior)
-      select.value = configData.launcher_config.launcherBehavior;
+    // init
+    const launcherBehavior = await ipcRenderer.invoke(
+      "get-settings",
+      "launcherBehavior"
+    );
+    selectLauncherBehavior.value = launcherBehavior;
 
-    select.addEventListener("change", async (e) => {
-      try {
-        let configData = await this.db.readData("configClient");
-        configData.launcher_config.launcherBehavior = e.target.value;
-        await this.db.updateData("configClient", configData);
-        showSnackbar("Comportement du launcher sauvegardé !");
-      } catch (err) {
-        console.error(err);
-        showSnackbar("Erreur lors de la sauvegarde !", "error");
+    // listeners
+    this.selectAction(
+      selectLauncherBehavior,
+      async (value) => {
+        console.log(value);
+        await ipcRenderer.invoke("set-settings", "launcherBehavior", value);
+      },
+      {
+        success: "Comportement du launcher sauvegardé !",
+        error: "Erreur lors de la sauvegarde du comportement du launcher !",
       }
-    });
+    );
+
+    // end
+    return;
   }
 
   async handleCustomGamePath() {
@@ -281,22 +341,33 @@ class Settings {
   }
 
   openDevTools() {
-    return this.buttonAction(
-      document.querySelector("#open-devTools"),
-      async () =>
-        new Manager().handleError({
-          ensure: true,
-          then: async () => {
-            return await ipcRenderer.send("main-window-open-devTools");
-          },
-        }),
-      {
+    const devToolsBtn = document.querySelector("#open-devTools");
+
+    const messages = {
+      base: {
         base: "Ouvrir le debug",
         wait: "Ouverture du debug...",
         success: "Debug ouvert !",
         error: "Debug non ouvert !",
-      }
+      },
+    };
+
+    return this.buttonAction(
+      devToolsBtn,
+      async () => {
+        ipcRenderer.send("main-window-open-devTools");
+        return;
+      },
+      messages
     );
+    // return this.buttonAction(devToolsBtn, async () =>
+    //   new Manager().handleError({
+    //     ensure: true,
+    //     then: async () => {
+    //       return await ipcRenderer.send("main-window-open-devTools");
+    //     },
+    //   })
+    // );
   }
 
   async enabledBeta() {
@@ -356,7 +427,7 @@ class Settings {
           return changePanel("home");
         }
 
-        if (id !== "game") this.gameTab.stop();
+        // if (id !== "game") this.gameTab.stop();
 
         if (activeSettingsBTN)
           activeSettingsBTN.classList.toggle("active-settings-BTN");
