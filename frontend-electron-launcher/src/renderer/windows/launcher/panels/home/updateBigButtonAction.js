@@ -7,10 +7,6 @@ const { ipcRenderer } = require("electron");
 const { formatBytes } = require("valkream-function-lib");
 const { showSnackbar, Popup } = require(window.PathsManager.getUtils());
 class UpdateBigButtonAction {
-  constructor() {
-    this.settings_button = document.querySelector(".settings-btn");
-  }
-
   callback = (text, downloadedBytes, totalBytes, percent, speed) => {
     this.changeMainButtonEvent({
       text: `${text}<br/>
@@ -38,6 +34,8 @@ class UpdateBigButtonAction {
       const getInstallationStatut = await ipcRenderer.invoke(
         "get-installation-statut"
       );
+
+      console.log(getInstallationStatut);
 
       const {
         isInternetConnected,
@@ -71,7 +69,7 @@ class UpdateBigButtonAction {
         isAdminModsAvailable
       ) {
         this.disabledMainButton();
-        await ThunderstoreManager.InstallCustomMods(admin_mods, this.callback);
+        // await ThunderstoreManager.InstallCustomMods(admin_mods, this.callback);
         this.enableMainButton();
 
         return await this.reload();
@@ -80,9 +78,8 @@ class UpdateBigButtonAction {
           text: "Désinstallation des mods admin...",
           onclick: null,
         });
-        this.settings_button.disabled = true;
         this.disabledMainButton();
-        await ThunderstoreManager.unInstallCustomMods(admin_mods);
+        // await ThunderstoreManager.unInstallCustomMods(admin_mods);
         this.enableMainButton();
         return await this.reload();
       }
@@ -95,10 +92,10 @@ class UpdateBigButtonAction {
         isBoostfpsModsAvailable
       ) {
         this.disabledMainButton();
-        await ThunderstoreManager.InstallCustomMods(
-          boostfps_mods,
-          this.callback
-        );
+        // await ThunderstoreManager.InstallCustomMods(
+        //   boostfps_mods,
+        //   this.callback
+        // );
         this.enableMainButton();
 
         return await this.reload();
@@ -111,9 +108,8 @@ class UpdateBigButtonAction {
           text: "Désinstallation des mods pour booster les FPS...",
           onclick: null,
         });
-        this.settings_button.disabled = true;
         this.disabledMainButton();
-        await ThunderstoreManager.unInstallCustomMods(boostfps_mods);
+        // await ThunderstoreManager.unInstallCustomMods(boostfps_mods);
         this.enableMainButton();
         return await this.reload();
       }
@@ -137,10 +133,10 @@ class UpdateBigButtonAction {
       // Cas 4 : Installé, pas internet
       if (isInstalled && (!isServerReachable || !isInternetConnected)) {
         changeMainButtonEvent({
-          text: `Jouer à la v${localVersionConfig.version} <br /> 
-          (⚠️ Pas de connexion ${
-            isInternetConnected ? "au server" : "internet"
-          }.)`,
+          text: `Jouer à la v${await ipcRenderer.invoke("get-version:game")}
+           <br /> (⚠️ Pas de connexion ${
+             isInternetConnected ? "au server" : "internet"
+           }.)`,
           onclick: this.start,
         });
         return;
@@ -184,7 +180,7 @@ class UpdateBigButtonAction {
         const isMaintenanceEnabled = window.maintenance?.enabled;
 
         return changeMainButtonEvent({
-          text: `Jouer à la v${localVersionConfig.version} 
+          text: `Jouer à la v${await ipcRenderer.invoke("get-version:game")} 
           ${isMaintenanceEnabled ? " <br> (⚠️ Maintenance en cours.)" : ""}
           ${isAdminModsActive ? " <br> (⚠️ Mods Admin activés.)" : ""}`,
           onclick: this.start,
@@ -294,19 +290,21 @@ class UpdateBigButtonAction {
   };
 
   start = async () => {
-    const configData = await this.db.readData("configClient");
+    const videoBackground = document.querySelector("#background-video");
 
     this.disabledMainButton();
     try {
-      let isOk = true;
-      if (isOk && configData?.launcher_config?.launchSteam)
-        isOk = await SteamManager.open();
-      if (isOk) await GameManager.restoreGameFolder();
-      if (isOk) await GameManager.clean();
-      if (isOk) isOk = await GameManager.play();
+      const behavior = await ipcRenderer.invoke("start");
+      if (behavior === "hide" && videoBackground) {
+        videoBackground.pause();
 
-      if (!isOk) throw new Error("Erreur lors du lancement du jeu !");
-      else showSnackbar("Le jeu a été lancé avec succès !");
+        // Quand le main t’informe que le jeu est terminé, on reprend
+        ipcRenderer.once("game-exit", () => {
+          videoBackground.play();
+        });
+      }
+
+      showSnackbar("Le jeu a été lancé avec succès !");
     } catch (err) {
       console.error(err);
       showSnackbar("Erreur lors du lancement du jeu !", "error");

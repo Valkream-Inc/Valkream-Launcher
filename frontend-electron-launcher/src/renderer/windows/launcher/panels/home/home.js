@@ -50,7 +50,7 @@ class Home {
   updateCopyright = async () => {
     const versionEl = document.getElementById("version");
     if (versionEl)
-      versionEl.textContent = await ipcRenderer.invoke("get-version");
+      versionEl.textContent = await ipcRenderer.invoke("get-version:launcher");
   };
 
   socialLick = () => {

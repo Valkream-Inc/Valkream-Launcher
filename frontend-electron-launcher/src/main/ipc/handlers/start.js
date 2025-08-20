@@ -3,13 +3,18 @@ const SteamManager = require("../../manager/steamManager");
 const GameManager = require("../../manager/gameManager");
 
 class Start {
-  async init(videoBackground) {
-    const launchSteam = SettingsManager.getSetting("launchSteam");
+  async init(event) {
+    const launchSteam = await SettingsManager.getSetting("launchSteam");
+
+    const onExit = async () => {
+      event.sender.send("game-exit");
+    };
 
     if (launchSteam) await SteamManager.open();
     await GameManager.restoreGameFolder();
     await GameManager.clean();
-    await GameManager.play(videoBackground);
+    await GameManager.play(onExit);
+    return await SettingsManager.getSetting("launcherBehavior");
   }
 }
 

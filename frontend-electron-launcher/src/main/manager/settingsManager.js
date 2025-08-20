@@ -15,6 +15,7 @@ class SettingsManager {
       "customGamePath",
       "boostfpsEnabled",
       "adminEnabled",
+      "launcherBehavior",
     ];
   }
 

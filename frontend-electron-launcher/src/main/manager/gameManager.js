@@ -59,8 +59,6 @@ class GameManager {
         ...this.modsAdmin.map((mod) => `/BepInEx/plugins/${mod}/`),
         ...this.modsBoostFPS.map((mod) => `/BepInEx/plugins/${mod}/`),
       ];
-
-      await this.restoreGameFolder();
     }
 
     // 🔸 Étape 4 : Configuration des dossiers
@@ -68,6 +66,8 @@ class GameManager {
     this.gameDir = await DirsManager.gamePath();
     this.gameExePath = await FilesManager.gameExePath();
     this.preservedDir = await DirsManager.gamePreservedPath();
+
+    await this.restoreGameFolder();
   }
 
   async dowload(
@@ -173,9 +173,7 @@ class GameManager {
   }
 
   async getIsInstalled() {
-    return (
-      fs.existsSync(this.gameDir) && fs.existsSync(this.gameExePath[platform()])
-    );
+    return fs.existsSync(this.gameDir) && fs.existsSync(this.gameExePath);
   }
 
   async uninstall() {
@@ -211,6 +209,8 @@ class GameManager {
   }
 
   async restoreGameFolder() {
+    if (!fs.existsSync(this.preservedDir)) return;
+
     fse.copySync(this.preservedDir, this.gameDir, {
       overwrite: true,
       recursive: true,
@@ -218,9 +218,9 @@ class GameManager {
     fs.rmSync(this.preservedDir, { recursive: true });
   }
 
-  async play(videoBackground) {
+  async play(onExit = () => {}) {
     // Lecture du paramètre launcherBehavior
-    const behavior = SettingsManager.getSetting("launcherBehavior");
+    const behavior = await SettingsManager.getSetting("launcherBehavior");
 
     // Action avant le lancement du jeu
     if (behavior === "nothing") {
@@ -230,14 +230,16 @@ class GameManager {
       LauncherManager.close();
     } else if (behavior === "hide") {
       LauncherManager.hide();
-      videoBackground.pause();
       const child = execFile(this.gameExePath, (err) => {
         if (err) throw new Error(err);
       });
       child.on("exit", () => {
         LauncherManager.show();
-        videoBackground.play();
+        onExit();
       });
+    } else {
+      await shell.openPath(this.gameExePath);
+      LauncherManager.close();
     }
   }
 }

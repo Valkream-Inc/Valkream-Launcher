@@ -17,6 +17,7 @@ const InstallationStatut = require("./handlers/installation-statut.js");
 const SettingsManager = require("../manager/settingsManager");
 const LauncherManager = require("../manager/launcherManager");
 const GameManager = require("../manager/gameManager");
+const VersionManager = require("../manager/versionManager.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
@@ -81,7 +82,11 @@ class IpcHandlers {
     );
 
     // utils
-    ipcMain.handle("get-version", () => LauncherManager.getVersion());
+    ipcMain.handle("get-version:launcher", () => LauncherManager.getVersion());
+    ipcMain.handle(
+      "get-version:game",
+      async () => (await VersionManager.getLocalVersionConfig()).version
+    );
     ipcMain.handle("init", async () => await GameManager.init());
     ipcMain.handle("reload", async () => await Reload.init());
     ipcMain.handle("get-installation-statut", async () => {
@@ -97,10 +102,7 @@ class IpcHandlers {
       "update",
       async (event, date) => await new Update().init(event, date)
     );
-    ipcMain.handle(
-      "start",
-      async (event, videoBackground) => await new Start().init(videoBackground)
-    );
+    ipcMain.handle("start", async (event) => await Start.init(event));
     ipcMain.handle(
       "custom-mods-install",
       async (event, date, mods) =>
