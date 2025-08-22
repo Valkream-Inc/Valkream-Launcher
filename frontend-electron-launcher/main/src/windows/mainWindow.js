@@ -3,7 +3,7 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { BrowserWindow, Menu } = require("electron");
+const { BrowserWindow, Menu, ipcMain } = require("electron");
 const path = require("path");
 
 const rendererPath = path.join(__dirname, "../../src/renderer");
@@ -30,12 +30,13 @@ function createWindow() {
     minWidth: 980,
     minHeight: 552,
     resizable: true,
-    icon: path.join(rendererPath, "public/icon/icon.png"),
+    icon: path.join(rendererPath, "public/images/icon/icon.png"),
     frame: false,
     show: false,
     webPreferences: {
-      contextIsolation: false,
-      nodeIntegration: true,
+      preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
     },
   });
 
@@ -49,6 +50,20 @@ function createWindow() {
       if (isDev) mainWindow.webContents.openDevTools(/*{ mode: "detach" }*/);
       mainWindow.show();
     }
+  });
+
+  // NEW: Handle the request for the window's maximization state
+  ipcMain.handle("get-is-maximized", () => {
+    return mainWindow.isMaximized();
+  });
+
+  // NEW: Send events to the renderer when the window state changes
+  mainWindow.on("maximize", () => {
+    mainWindow.webContents.send("on-maximize");
+  });
+
+  mainWindow.on("unmaximize", () => {
+    mainWindow.webContents.send("on-unmaximize");
   });
 }
 

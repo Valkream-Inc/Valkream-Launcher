@@ -1,9 +1,10 @@
 @import "theme.css";
+@import "font.css";
 
-@import "./utils/font.css";
-@import "./utils/microtip.css";
-@import "./utils/popup.css";
-@import "./utils/snackbar.css";
+/* general */
+* {
+  outline: none;
+}
 
 body {
   margin: 0;
@@ -19,21 +20,17 @@ img {
   user-select: none;
 }
 
-* {
-  outline: none;
+button {
+  font-size: 0.5cm;
 }
 
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
+/* Scrollable content */
 .content-scroll {
   overflow-y: auto;
   overflow-x: hidden;
 }
 
+/* Scrollbar */
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -52,8 +49,4 @@ input::-webkit-inner-spin-button {
 
 *::-webkit-scrollbar-corner {
   background: var(--background);
-}
-
-button {
-  font-size: 0.5cm;
 }

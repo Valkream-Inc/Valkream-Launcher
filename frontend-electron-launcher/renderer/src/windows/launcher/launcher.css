@@ -1,9 +1,3 @@
-@import "../../index.css";
-
-@import "./panels/home.css";
-@import "./panels/settings.css";
-@import "./panels/steam-check.css";
-
 .dragbar {
   position: fixed;
   top: 0px;
