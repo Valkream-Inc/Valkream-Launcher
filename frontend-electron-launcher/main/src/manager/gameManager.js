@@ -25,7 +25,7 @@ const {
   isFolderPathSecured,
   dowloadMultiplefiles,
   unZipMultipleFiles,
-} = require("../utils");
+} = require("../utils/index.js");
 
 class GameManager {
   async init() {

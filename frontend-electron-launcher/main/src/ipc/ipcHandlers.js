@@ -14,9 +14,9 @@ const CustomMods = require("./handlers/custom-mods.js");
 const Reload = require("./handlers/reload.js");
 const InstallationStatut = require("./handlers/installation-statut.js");
 
-const SettingsManager = require("../manager/settingsManager");
-const LauncherManager = require("../manager/launcherManager");
-const GameManager = require("../manager/gameManager");
+const SettingsManager = require("../manager/settingsManager.js");
+const LauncherManager = require("../manager/launcherManager.js");
+const GameManager = require("../manager/gameManager.js");
 const VersionManager = require("../manager/versionManager.js");
 
 const MainWindow = require("../windows/mainWindow.js");

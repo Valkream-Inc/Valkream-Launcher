@@ -5,9 +5,9 @@
 
 const { app, session } = require("electron");
 
-const UpdateWindow = require("./main/windows/updateWindow.js");
-const MainWindow = require("./main/windows/mainWindow.js");
-const IpcHandlers = require("./main/ipc/ipcHandlers.js");
+const UpdateWindow = require("./src/windows/updateWindow.js");
+const MainWindow = require("./src/windows/mainWindow.js");
+const IpcHandlers = require("./src/ipc/ipcHandlers.js");
 
 let dev = process.env.NODE_ENV === "dev";
 

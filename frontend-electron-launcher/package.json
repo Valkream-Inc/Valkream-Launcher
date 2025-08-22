@@ -1,40 +1,73 @@
 {
   "name": "Valkream-Launcher",
-  "version": "1.2.9-alpha",
+  "version": "2.0.0",
   "description": "Launcher Valheim moddé pour Valkream",
-  "main": "src/app.js",
   "author": "Valkream Team",
   "scripts": {
-    "start": "cross-env-shell NODE_ENV=dev electron .",
-    "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
-    "build": "node ./build-script.js --obf=false --build=platform --icon=src/assets/images/icon.png"
+    "start": "concurrently \"npm run start:react\" \"npm run start:electron\"",
+    "start:react": "cross-env BROWSER=none craco start",
+    "start:electron": "cross-env NODE_ENV=dev electron ./main/app.js",
+    "dev": "concurrently \"npm run dev:react\" \"npm run dev:electron\"",
+    "dev:react": "npm run start:react",
+    "dev:electron": "wait-on http://localhost:3000 && nodemon --exec npm run start:electron",
+    "build": "npm run build:react && npm run build:electron",
+    "build:react": "craco build",
+    "build:electron": "node ./build-script.js --obf=false --build=platform --icon=src/assets/images/icon.png"
   },
   "license": "MIT",
   "nodemonConfig": {
-    "ext": "js,html,css",
-    "ignore": "**/test"
+    "ext": "js,json",
+    "ignore": "**/src/renderer/**"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@fabricio-191/valve-server-query": "^4.1.9",
+    "@mui/icons-material": "^7.3.1",
+    "@mui/material": "^7.3.1",
     "axios": "^1.10.0",
     "electron-updater": "^6.1.8",
-    "form-data": "^4.0.3",
     "fs": "^0.0.1-security",
     "fs-extra": "^11.3.0",
     "node-bdd": "^2.0.4",
     "node-fetch": "^2.7.0",
     "path": "^0.12.7",
-    "png2icons": "^2.0.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.8.1",
+    "react-scripts": "^5.0.1",
     "valkream-function-lib": "1.0.7",
     "yaml": "^2.2.2"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
+    "@craco/craco": "^7.1.0",
+    "concurrently": "^9.2.0",
+    "cross-env": "^10.0.0",
     "electron": "30.5.1",
     "electron-builder": "^26.0.12",
     "javascript-obfuscator": "^4.1.0",
     "jimp": "^0.22.12",
-    "nodemon": "^3.1.2"
+    "nodemon": "^3.1.2",
+    "png2icons": "^2.0.1",
+    "wait-on": "^8.0.4"
   },
   "repository": {
     "type": "git",

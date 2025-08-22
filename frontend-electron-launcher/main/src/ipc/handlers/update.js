@@ -1,6 +1,6 @@
-const GameManager = require("../../manager/gameManager");
-const ThunderstoreManager = require("../../manager/thunderstoreManager");
-const VersionManager = require("../../manager/versionManager");
+const GameManager = require("../../manager/gameManager.js");
+const ThunderstoreManager = require("../../manager/thunderstoreManager.js");
+const VersionManager = require("../../manager/versionManager.js");
 
 const Reload = require("./reload.js");
 

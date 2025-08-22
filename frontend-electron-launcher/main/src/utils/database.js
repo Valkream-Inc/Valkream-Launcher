@@ -7,7 +7,7 @@ const { NodeBDD, DataType } = require("node-bdd");
 const nodedatabase = new NodeBDD();
 const path = require("path");
 
-const { isDev } = require("../constants");
+const { isDev } = require("../constants/index.js");
 const DirsManager = require("../manager/dirsManager.js");
 
 class Database {

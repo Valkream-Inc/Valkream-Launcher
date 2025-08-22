@@ -1,8 +1,8 @@
-const VersionManager = require("../../manager/versionManager");
-const ThunderstoreManager = require("../../manager/thunderstoreManager");
-const GameManager = require("../../manager/gameManager");
+const VersionManager = require("../../manager/versionManager.js");
+const ThunderstoreManager = require("../../manager/thunderstoreManager.js");
+const GameManager = require("../../manager/gameManager.js");
 
-const { isSteamInstallation } = require("../../constants");
+const { isSteamInstallation } = require("../../constants/index.js");
 const Reload = require("./reload.js");
 
 class Install {

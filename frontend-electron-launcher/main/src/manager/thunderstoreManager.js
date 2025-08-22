@@ -14,7 +14,10 @@ const FilesManager = require("./filesManager.js");
 const LinksManager = require("./linksManager.js");
 const checkInfos = require("../ipc/handlers/check-infos.js");
 
-const { dowloadMultiplefiles, unZipMultipleFiles } = require("../utils");
+const {
+  dowloadMultiplefiles,
+  unZipMultipleFiles,
+} = require("../utils/index.js");
 
 class ThunderstoreManager {
   async init() {

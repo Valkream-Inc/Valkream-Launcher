@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 const MainWindow = require("../windows/mainWindow.js");
 
-const { pkg } = require("../constants");
+const { pkg } = require("../constants/index.js");
 const DirsManager = require("./dirsManager.js");
 const FilesManager = require("./filesManager.js");
 
