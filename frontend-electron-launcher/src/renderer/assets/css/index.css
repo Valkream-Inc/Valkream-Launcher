@@ -1,9 +1,5 @@
 @import "theme.css";
-
-@import "./utils/font.css";
-@import "./utils/microtip.css";
-@import "./utils/popup.css";
-@import "./utils/snackbar.css";
+@import "font.css";
 
 body {
   margin: 0;

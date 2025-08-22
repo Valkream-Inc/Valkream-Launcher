@@ -26,7 +26,7 @@ function createWindow() {
     width: 512,
     height: 288,
     resizable: false,
-    icon: path.join(__dirname, "../../assets/images/icon.png"),
+    icon: path.join(__dirname, "../../shared/images/icon.png"),
     frame: false,
     show: false,
     webPreferences: {

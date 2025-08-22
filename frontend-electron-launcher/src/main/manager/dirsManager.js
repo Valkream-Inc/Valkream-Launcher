@@ -2,7 +2,7 @@ const path = require("path");
 const { app } = require("electron");
 
 const newDir = require("../utils/new-dir.js");
-const { isDev } = require("../constants");
+const { isDev } = require("../constants/index.js");
 
 class DirsManager {
   launcherRootPath = () => process.cwd();

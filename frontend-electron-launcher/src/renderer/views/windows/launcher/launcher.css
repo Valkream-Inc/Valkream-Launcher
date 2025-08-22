@@ -1,9 +1,3 @@
-@import "../../index.css";
-
-@import "./panels/home.css";
-@import "./panels/settings.css";
-@import "./panels/steam-check.css";
-
 .dragbar {
   position: fixed;
   top: 0px;
@@ -55,17 +49,21 @@
 
 .panel {
   position: absolute;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   opacity: 0;
-  z-index: 0;
   pointer-events: none;
+  transition: opacity 0.5s ease;
 }
 
 .panel.active {
   opacity: 1;
+  pointer-events: all; /* seul l’actif est cliquable */
   z-index: 1;
-  pointer-events: all;
+}
+
+.panel.fade-out {
+  opacity: 0;
+  pointer-events: none;
 }
 
 #background-video {

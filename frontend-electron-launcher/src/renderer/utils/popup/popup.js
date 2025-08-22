@@ -3,8 +3,16 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
+const injectHTML = require("../inject-html");
+const injectCSS = require("../inject-css");
+
 class Popup {
   constructor() {
+    // Injecte le HTML et le CSS
+    injectCSS("popup-css", require("./popup.css"));
+    injectHTML("popup-container", require("./popup.html"));
+
+    // Maintenant que le DOM contient les éléments, on peut les récupérer
     this.popup = document.querySelector(".popup");
     this.popupTab = document.querySelector(".popup-tab");
     this.popupTitle = document.querySelector(".popup-title");

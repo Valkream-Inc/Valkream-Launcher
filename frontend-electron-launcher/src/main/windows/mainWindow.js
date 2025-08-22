@@ -5,6 +5,7 @@
 
 const { BrowserWindow, Menu } = require("electron");
 const path = require("path");
+require("ejs-electron");
 
 const { pkg, isDev } = require("../constants");
 let mainWindow = undefined;
@@ -28,19 +29,20 @@ function createWindow() {
     minWidth: 980,
     minHeight: 552,
     resizable: true,
-    icon: path.join(__dirname, "../../assets/images/icon.png"),
+    icon: path.join(__dirname, "../../shared/images/icon.png"),
     frame: false,
     show: false,
     webPreferences: {
       contextIsolation: false,
       nodeIntegration: true,
     },
+    pre,
   });
 
   Menu.setApplicationMenu(null);
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadFile(
-    path.join(__dirname, "../../renderer/windows/launcher/launcher.html")
+    path.join(__dirname, "../../renderer/views/windows/launcher/launcher.ejs")
   );
   mainWindow.once("ready-to-show", () => {
     if (mainWindow) {

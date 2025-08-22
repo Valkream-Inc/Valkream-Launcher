@@ -4,11 +4,11 @@
  */
 
 // utils
-const { showSnackbar } = require("./snackbar.js");
-const { changePanel } = require("./changePanel.js");
+const { showSnackbar } = require("./snackbar/snackbar.js");
+const { changePanel } = require("./change-panel/change-panel.js");
 
-const Popup = require("./popup.js");
-const Logger = require("./logger.js");
+const Popup = require("./popup/popup.js");
+const Logger = require("./logger/logger.js");
 
 module.exports = {
   changePanel,

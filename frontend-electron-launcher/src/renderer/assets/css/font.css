@@ -28,14 +28,14 @@
 
 @font-face {
   font-family: "Icons";
-  src: url("../../fonts/Icons.woff2") format("woff2");
+  src: url("../fonts/Icons.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Social-icons";
-  src: url("../../fonts/social-icons.woff2") format("woff2");
+  src: url("../fonts/social-icons.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
 }
@@ -78,20 +78,20 @@
 
 /* link icons */
 .icon-discord {
-  background-image: url("../../images/svgs/link/discord.svg");
+  background-image: url("../images/svgs/link/discord.svg");
   background-size: contain;
 }
 .icon-web {
-  background-image: url("../../images/svgs/link/web.svg");
+  background-image: url("../images/svgs/link/web.svg");
   background-size: contain;
 }
 .icon-topserver {
-  background-image: url("../../images/svgs/link/topserver.svg");
+  background-image: url("../images/svgs/link/topserver.svg");
   background-size: contain;
 }
 
 /* other icons */
 .icon-light {
-  background-image: url("../../images/svgs/light.svg");
+  background-image: url("../images/svgs/light.svg");
   background-size: contain;
 }

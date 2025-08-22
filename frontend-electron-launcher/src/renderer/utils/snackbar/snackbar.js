@@ -2,8 +2,13 @@
  * @author Valkream Team
  * @license MIT - https://opensource.org/licenses/MIT
  */
+const InsertCss = require("../inject-css");
+const InsertHtml = require("../inject-html");
 
 function showSnackbar(message, type = "success", duration = 3000) {
+  InsertCss("snackbar-css", require("./snackbar.css"));
+  InsertHtml("snackbar-container", require("./snackbar.html"));
+
   const snackbarContainer = document.querySelector("#snackbar-container");
   if (!snackbarContainer) return;
 

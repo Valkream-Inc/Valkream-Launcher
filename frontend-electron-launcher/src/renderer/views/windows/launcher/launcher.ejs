@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <!-- Meta -->
+    <%- include('../../base/header.base.ejs') %>
+
+    <!-- CSS -->
+    <!-- <link rel="stylesheet" href="../../../assets/css/index.css" />
+    <link rel="stylesheet" href="./launcher.css" /> -->
+  </head>
+  <body>
+    <video id="background-video" autoplay loop playsinline>
+      <source src="../../../assets/videos/background.mp4" type="video/mp4" />
+    </video>
+    <video id="background-video" autoplay loop playsinline>
+      <source
+        src="file://<%= path.join(__dirname, '../../../assets/videos/background.mp4') %>"
+        type="video/mp4"
+      />
+    </video>
+
+    <div class="dragbar"></div>
+    <div class="frame">
+      <div id="minimize" class="button-frame icon-minimize"></div>
+      <div id="maximize" class="button-frame icon-maximize"></div>
+      <div id="close" class="button-frame icon-close"></div>
+    </div>
+
+    <!-- Panels -->
+    <!-- % include( "./panels/home/home.ejs") %> -->
+
+    <!-- <script src="./launcher.js" type="module"></script> -->
+  </body>
+</html>

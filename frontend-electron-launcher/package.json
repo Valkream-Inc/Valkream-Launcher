@@ -11,12 +11,14 @@
   },
   "license": "MIT",
   "nodemonConfig": {
-    "ext": "js,html,css",
+    "ext": "js,html,css,ejs",
     "ignore": "**/test"
   },
   "dependencies": {
     "@fabricio-191/valve-server-query": "^4.1.9",
     "axios": "^1.10.0",
+    "concurrently": "^9.2.0",
+    "ejs-electron": "^3.0.0",
     "electron-updater": "^6.1.8",
     "form-data": "^4.0.3",
     "fs": "^0.0.1-security",
