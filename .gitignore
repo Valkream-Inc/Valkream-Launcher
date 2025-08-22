@@ -5,6 +5,6 @@
 **/dist/
 
 /backend-update-server/uploads/launcher
-/frontend-electron-launcher/.valkream-launcher-data
+/frontend-electron-launcher/main/.valkream-launcher-data
 backend-update-server/uploads/game/latest/build-game-win32.zip
 backend-update-server/uploads/game/latest/BepInEx-5.4.2202.zip
