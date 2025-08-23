@@ -9,10 +9,10 @@ const UpdateWindow = require("./src/windows/updateWindow.js");
 const MainWindow = require("./src/windows/mainWindow.js");
 const IpcHandlers = require("./src/ipc/ipcHandlers.js");
 
-let dev = process.env.NODE_ENV === "dev";
+const isDev = process.env.NODE_ENV === "dev";
 
 if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
-if (!app.requestSingleInstanceLock()) app.quit();
+if (!app.requestSingleInstanceLock() && !isDev) app.quit();
 else {
   app.whenReady().then(async () => {
     // Vider le cache Chromium au démarrage
@@ -46,7 +46,7 @@ else {
     ipcHandlers.init();
 
     // Démarrage de la fenêtre principale
-    if (dev) return MainWindow.createWindow();
+    if (isDev) return MainWindow.createWindow();
     else UpdateWindow.createWindow();
   });
 }
@@ -61,7 +61,7 @@ app.on("window-all-closed", () => {
 // macOS : recrée une fenêtre si aucune fenêtre n'est ouverte lors du clic sur l'icône du dock
 app.on("activate", () => {
   if (!MainWindow.isWindowOpen()) {
-    if (dev) MainWindow.createWindow();
+    if (isDev) MainWindow.createWindow();
     else UpdateWindow.createWindow();
   }
 });

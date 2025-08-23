@@ -1,0 +1,95 @@
+/*******************************************************************************
+ *                                                                             *
+ * button tips                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+.button-tips {
+  position: fixed;
+  left: 32px;
+  bottom: 32px;
+  z-index: 30;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-tips-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
+  transition: filter 0.3s ease-in-out;
+}
+
+.button-tips:hover .button-tips-icon {
+  filter: brightness(1.5) drop-shadow(0 0 25px #ffd600);
+  transform: scale(1.1);
+}
+
+.button-tips:active .button-tips-icon {
+  filter: brightness(1) drop-shadow(0 0 6px #ffd600);
+  transform: scale(0.9);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * bottom actions                                                              *
+ *                                                                             *
+ ******************************************************************************/
+
+.bottom-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  z-index: 20;
+}
+
+.play-btn {
+  background: var(--secondary-color) !important;
+  color: var(--color) !important;
+  border-radius: 10px !important;
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+  padding: 0.8rem 3rem !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  cursor: pointer !important;
+  transition: background 0.2s, transform 0.2s !important;
+}
+.play-btn:hover {
+  background: var(--third-color);
+  transform: scale(1.05);
+}
+
+.icon-play {
+  font-size: 2em !important;
+  margin-right: 20px !important;
+}
+
+.bottom-actions .settings-btn {
+  width: 3.2rem;
+  height: 3.2rem;
+  min-width: 0;
+  font-size: 2.2rem;
+  color: var(--element-color);
+  background: var(--background-transparent);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+  padding: 0;
+}
+.bottom-actions .settings-btn:hover {
+  background: var(--secondary-color);
+  transform: scale(1.1);
+}

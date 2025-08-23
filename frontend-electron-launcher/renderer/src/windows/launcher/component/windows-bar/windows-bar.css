@@ -8,7 +8,7 @@
   z-index: 11;
 }
 
-.frame {
+.windows-bar {
   background: transparent;
   position: fixed;
   top: 0px;
@@ -17,7 +17,7 @@
   -webkit-app-region: no-drag;
 }
 
-.button-frame {
+.button-windows-bar {
   position: relative;
   display: table-cell;
   width: 30px;
@@ -26,8 +26,7 @@
   color: black;
   cursor: pointer;
 }
-
-.button-frame:before {
+.button-windows-bar:before {
   position: absolute;
   top: 6px;
   left: 8px;
@@ -37,50 +36,29 @@
   color: #f8f9f9;
 }
 
+/* Icons */
+.icon-close:before {
+  font-family: "Icons";
+  content: "\e90e";
+}
+.icon-minimize:before {
+  font-family: "Icons";
+  content: "\e90b";
+}
+.icon-maximize:before {
+  font-family: "Icons";
+  content: "\e90c";
+}
+.icon-restore-down:before {
+  font-family: "Icons";
+  content: "\e90d";
+}
+
 .icon-close:hover {
   background: #e21212;
 }
-
 .icon-minimize:hover,
 .icon-restore-down:hover,
 .icon-maximize:hover {
   background-color: #0000009d;
-}
-
-.panel {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.panel.active {
-  opacity: 1;
-  z-index: 1;
-  pointer-events: all;
-}
-
-#background-video {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -1;
-  pointer-events: none;
-}
-
-.copyright-version {
-  position: fixed;
-  right: 20px;
-  bottom: 10px;
-  font-size: 0.95em;
-  color: var(--color);
-  z-index: 100;
-  user-select: none;
-  pointer-events: none;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }

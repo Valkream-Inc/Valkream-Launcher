@@ -9,12 +9,10 @@ class CheckInfos {
   constructor() {
     this.interval = null;
     this.sender = null;
-    this.processId = null;
   }
 
-  async init(sender, processId) {
+  async init(sender) {
     this.sender = sender;
-    this.processId = processId;
 
     await this.updateInfos(); // premier update direct
     this.interval = setInterval(this.updateInfos, refreshTimeout);
@@ -23,8 +21,8 @@ class CheckInfos {
   updateInfos = async () => {
     this.infos = await this.checkInfos();
 
-    if (this.sender && this.processId) {
-      this.sender.send(`update-infos-${this.processId}`, this.infos);
+    if (this.sender) {
+      this.sender.send(`update-infos`, this.infos);
     }
   };
 

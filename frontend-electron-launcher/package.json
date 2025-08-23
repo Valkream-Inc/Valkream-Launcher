@@ -49,6 +49,7 @@
     "fs-extra": "^11.3.0",
     "node-bdd": "^2.0.4",
     "node-fetch": "^2.7.0",
+    "notistack": "^3.0.2",
     "path": "^0.12.7",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

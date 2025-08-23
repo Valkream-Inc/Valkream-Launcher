@@ -1,8 +1,8 @@
-// src/index.js
-
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./src/App"; // Importe le composant App que nous avons créé
+import { SnackbarProvider } from "notistack";
+
+import App from "./src/App";
 
 // Crée la racine de l'application React.
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -11,6 +11,12 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 // Le "StrictMode" est un outil pour détecter les problèmes potentiels dans l'application.
 root.render(
   <React.StrictMode>
-    <App />
+    <SnackbarProvider
+      maxSnack={3}
+      autoHideDuration={3000}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+    >
+      <App />
+    </SnackbarProvider>
   </React.StrictMode>
 );

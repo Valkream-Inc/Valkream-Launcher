@@ -59,8 +59,8 @@ class IpcHandlers {
     });
 
     // infos
-    ipcMain.handle("check-infos", async (event, processId) => {
-      await CheckInfos.init(event.sender, processId);
+    ipcMain.handle("check-infos", async (event) => {
+      await CheckInfos.init(event.sender);
       return true;
     });
     ipcMain.handle("get-infos", async () => {
