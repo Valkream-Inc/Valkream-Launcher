@@ -11,7 +11,7 @@ function DiscordIcon(props) {
 function WebIcon(props) {
   return (
     <SvgIcon {...props}>
-      <g id="style=linear" clip-path="url(#clip0_1_1825)">
+      <g id="style=linear" clipPath="url(#clip0_1_1825)">
         <g id="web">
           <path
             id="vector"
