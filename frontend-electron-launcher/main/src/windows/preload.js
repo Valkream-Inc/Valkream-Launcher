@@ -10,9 +10,6 @@
  */
 const { contextBridge, ipcRenderer } = require("electron");
 
-// lauch chech infos process before init
-ipcRenderer.invoke("check-infos");
-
 // Expose these window control functions to the renderer process (your React app).
 // They will be available in the renderer as `window.electron_API.close()`, `window.electron_API.minimize()`, etc.
 contextBridge.exposeInMainWorld("electron_API", {
@@ -38,4 +35,7 @@ contextBridge.exposeInMainWorld("electron_API", {
   checkInfos: () => ipcRenderer.invoke("check-infos"),
   onUpdateInfos: (callback) =>
     ipcRenderer.on("update-infos", (event, ...args) => callback(...args)),
+
+  getInstallationStatut: () => ipcRenderer.invoke("get-installation-statut"),
+  openLink: (url) => ipcRenderer.invoke("open-link", url),
 });

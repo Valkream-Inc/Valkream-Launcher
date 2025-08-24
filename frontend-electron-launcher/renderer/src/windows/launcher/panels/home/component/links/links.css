@@ -1,0 +1,40 @@
+.links {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top: 50vh;
+  transform: translateY(-50%);
+  right: 32px;
+  max-height: 10cm;
+  margin-bottom: 1rem;
+}
+
+.link {
+  display: flex;
+  background: var(--background-transparent) !important;
+  width: 90px;
+  height: 90px;
+  margin-bottom: 1rem !important;
+  border-radius: 10px !important;
+  font-size: 2rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease-in-out;
+}
+
+.link:hover .icon-social {
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}
+.link:hover {
+  background: var(--secondary-color) !important;
+}
+
+.link svg {
+  pointer-events: none;
+  background-repeat: no-repeat;
+  height: 55%;
+  width: 55%;
+  filter: var(--svg-color);
+}

@@ -4,7 +4,7 @@
   bottom: 10px;
   font-size: 0.95em;
   color: var(--color);
-  z-index: 100;
+  z-index: 13;
   user-select: none;
   pointer-events: none;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);

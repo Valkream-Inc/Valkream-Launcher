@@ -3,7 +3,7 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { ipcMain, app, dialog } = require("electron");
+const { ipcMain, app, dialog, shell } = require("electron");
 
 const CheckForUpdates = require("./handlers/check-for-updates.js");
 const CheckInfos = require("./handlers/check-infos.js");
@@ -21,6 +21,7 @@ const VersionManager = require("../manager/versionManager.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
+const { ip } = require("../constants/serverInfos.js");
 
 class IpcHandlers {
   init() {
@@ -91,6 +92,9 @@ class IpcHandlers {
     ipcMain.handle("reload", async () => await Reload.init());
     ipcMain.handle("get-installation-statut", async () => {
       return await InstallationStatut.get();
+    });
+    ipcMain.handle("open-link", async (event, url) => {
+      await shell.openExternal(url);
     });
 
     // installation

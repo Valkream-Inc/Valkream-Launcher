@@ -1,41 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "./server-info.css";
 
+import { useServerStatus } from "../../../../context/server-status.context.jsx";
+
 function ServerInfo() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  const [event, setEvent] = useState(null);
-  const [maintenance, setMaintenance] = useState(null);
-  const [serverInfos, setServerInfos] = useState(null);
-  const [isInternetConnected, setIsInternetConnected] = useState(false);
-  const [isServerReachable, setIsServerReachable] = useState(false);
-
-  useEffect(() => {
-    const chechInfos = async () => {
-      if (
-        window.electron_API &&
-        window.electron_API.onUpdateInfos &&
-        window.electron_API.checkInfos
-      ) {
-        // await window.electron_API.checkInfos();
-        const handleUpdate = (infos) => {
-          setEvent(infos.event || null);
-          setMaintenance(infos.maintenance || null);
-          setServerInfos(infos.serverInfos);
-          setIsInternetConnected(infos.isInternetConnected);
-          setIsServerReachable(infos.isServerReachable);
-          console.log(infos);
-          setIsLoading(false);
-        };
-        const cleanup = window.electron_API.onUpdateInfos(handleUpdate);
-        return () => {
-          cleanup();
-        };
-      }
-    };
-
-    chechInfos();
-  }, []);
+  const { isLoading, serverInfos, maintenance } = useServerStatus();
 
   // Determine the display based on the state
   const statusText = isLoading

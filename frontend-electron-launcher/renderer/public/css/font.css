@@ -53,17 +53,3 @@
   line-height: 1em;
   -webkit-font-smoothing: antialiased;
 }
-
-/* link icons */
-.icon-discord {
-  background-image: url("../images/svgs/link/discord.svg");
-  background-size: contain;
-}
-.icon-web {
-  background-image: url("../images/svgs/link/web.svg");
-  background-size: contain;
-}
-.icon-topserver {
-  background-image: url("../images/svgs/link/topserver.svg");
-  background-size: contain;
-}

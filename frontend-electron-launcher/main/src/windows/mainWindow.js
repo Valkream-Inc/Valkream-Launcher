@@ -43,7 +43,7 @@ function createWindow() {
   Menu.setApplicationMenu(null);
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadURL(
-    isDev ? "http://localhost:3000" : `file://${rendererPath}/dist/index.html`
+    isDev ? "http://localhost:8080" : `file://${rendererPath}/dist/index.html`
   );
   mainWindow.once("ready-to-show", () => {
     if (mainWindow) {

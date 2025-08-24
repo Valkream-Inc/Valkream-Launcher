@@ -2,6 +2,7 @@ import React from "react";
 
 import { PanelsProvider } from "./context/panels.context.jsx";
 import { VideoBackgroundProvider } from "./context/video-background.context.jsx";
+import { ServerStatusProvider } from "./context/server-status.context.jsx";
 
 import WindowsBar from "./component/windows-bar/windows-bar.jsx";
 import VideoBackground from "./component/video-background/video-background.jsx";
@@ -21,20 +22,22 @@ function Launcher() {
   return (
     <>
       <WindowsBar />
-      <VideoBackgroundProvider>
-        <VideoBackground />
+      <ServerStatusProvider>
+        <VideoBackgroundProvider>
+          <VideoBackground />
 
-        {/* Panels */}
-        <PanelsProvider>
-          <Panel id="home">
-            <Home />
-          </Panel>
-          <Panel id="panel1">Panel1</Panel>
-          <Panel id="panel2">Panel2</Panel>
-          <Panel id="panel3">Panel3</Panel>
-        </PanelsProvider>
-      </VideoBackgroundProvider>
-      <Copyright />
+          {/* Panels */}
+          <PanelsProvider>
+            <Panel id="home">
+              <Home />
+            </Panel>
+            <Panel id="panel1">Panel1</Panel>
+            <Panel id="panel2">Panel2</Panel>
+            <Panel id="panel3">Panel3</Panel>
+          </PanelsProvider>
+        </VideoBackgroundProvider>
+        <Copyright />
+      </ServerStatusProvider>
     </>
   );
 }

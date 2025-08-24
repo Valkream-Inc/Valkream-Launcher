@@ -28,6 +28,7 @@ class InfosManager {
       await axios.get(url, { timeout: 3000 });
       return true;
     } catch (error) {
+      console.error("Error checking server reachability:", error.message);
       return false;
     }
   };
