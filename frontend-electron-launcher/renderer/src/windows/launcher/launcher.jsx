@@ -31,6 +31,7 @@ function Launcher() {
             <Panel id="home">
               <Home />
             </Panel>
+            <Panel id="alert">Alert</Panel>
             <Panel id="panel1">Panel1</Panel>
             <Panel id="panel2">Panel2</Panel>
             <Panel id="panel3">Panel3</Panel>

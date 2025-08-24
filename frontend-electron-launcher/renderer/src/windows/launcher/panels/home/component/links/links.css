@@ -23,8 +23,8 @@
   transition: background 0.2s ease-in-out;
 }
 
-.link:hover .icon-social {
-  transform: scale(1.1);
+.link:hover {
+  transform: scale(1.2);
   transition: transform 0.2s ease-in-out;
 }
 .link:hover {
