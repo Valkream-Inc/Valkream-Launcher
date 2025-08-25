@@ -38,4 +38,5 @@ contextBridge.exposeInMainWorld("electron_API", {
 
   getInstallationStatut: () => ipcRenderer.invoke("get-installation-statut"),
   openLink: (url) => ipcRenderer.invoke("open-link", url),
+  reload: () => ipcRenderer.invoke("reload"),
 });

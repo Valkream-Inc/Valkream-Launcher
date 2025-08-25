@@ -6,6 +6,7 @@
 const { ipcRenderer } = require("electron");
 const { formatBytes } = require("valkream-function-lib");
 const { showSnackbar, Popup } = require(window.PathsManager.getUtils());
+
 class UpdateBigButtonAction {
   callback = (text, downloadedBytes, totalBytes, percent, speed) => {
     this.changeMainButtonEvent({

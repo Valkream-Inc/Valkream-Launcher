@@ -49,9 +49,21 @@ export const ServerStatusProvider = ({ children }) => {
   }, []);
 
   const getInstallationStatut = async () => {
+    if (
+      !window.electron_API ||
+      !window.electron_API.reload ||
+      !window.electron_API.getInstallationStatut
+    )
+      throw console.warn(
+        "L'API Electron n'est pas disponible. Vérification des infos impossible."
+      );
+
+    await window.electron_API.reload();
     const statut = await window.electron_API.getInstallationStatut();
     setInstallationStatut(statut || null);
     setLoadingState((prevState) => ({ ...prevState, statusLoaded: true }));
+
+    return installationStatut;
   };
 
   const contextValue = {
@@ -61,7 +73,6 @@ export const ServerStatusProvider = ({ children }) => {
     serverInfos,
     isInternetConnected,
     isServerReachable,
-    installationStatut,
     getInstallationStatut,
   };
 
