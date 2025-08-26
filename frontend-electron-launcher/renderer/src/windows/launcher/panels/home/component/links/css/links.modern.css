@@ -1,4 +1,4 @@
-.links {
+.modern-theme .links {
   position: absolute;
   display: flex;
   flex-direction: column;
@@ -9,7 +9,7 @@
   margin-bottom: 1rem;
 }
 
-.link {
+.modern-theme .link {
   display: flex;
   background: var(--background-transparent) !important;
   width: 90px;
@@ -23,15 +23,15 @@
   transition: background 0.2s ease-in-out;
 }
 
-.link:hover {
+.modern-theme .link:hover {
   transform: scale(1.2);
   transition: transform 0.2s ease-in-out;
 }
-.link:hover {
+.modern-theme .link:hover {
   background: var(--secondary-color) !important;
 }
 
-.link svg {
+.modern-theme .link svg {
   pointer-events: none;
   background-repeat: no-repeat;
   height: 55%;

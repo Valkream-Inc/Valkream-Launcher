@@ -1,0 +1,59 @@
+.futuristic-theme .links {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top: 50vh;
+  transform: translateY(-50%);
+  right: 32px;
+  max-height: 10cm;
+  margin-bottom: 1rem;
+  gap: 1.2rem;
+}
+
+.futuristic-theme .link {
+  display: flex;
+  width: 90px;
+  height: 90px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+
+  /* cadre futuriste */
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.8),
+    rgba(15, 15, 15, 0.95)
+  );
+  border-radius: 10px !important;
+  border: 2px solid var(--secondary-color);
+
+  /* glow futuristic */
+  box-shadow: 0 0 10px var(--secondary-color), 0 0 25px var(--secondary-color);
+  transition: all 0.25s ease-in-out;
+}
+
+.futuristic-theme .link:hover {
+  transform: scale(1.15) rotate(2deg);
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color),
+    rgba(0, 0, 0, 0.9)
+  );
+  box-shadow: 0 0 20px var(--secondary-color), 0 0 50px var(--secondary-color);
+}
+
+.futuristic-theme .link svg {
+  pointer-events: none;
+  height: 55%;
+  width: 55%;
+
+  /* effet néon sur l’icône */
+  filter: drop-shadow(0 0 5px var(--secondary-color))
+    drop-shadow(0 0 10px var(--secondary-color));
+  transition: filter 0.25s ease-in-out;
+}
+
+.futuristic-theme .link:hover svg {
+  filter: drop-shadow(0 0 10px var(--secondary-color))
+    drop-shadow(0 0 20px var(--secondary-color));
+}

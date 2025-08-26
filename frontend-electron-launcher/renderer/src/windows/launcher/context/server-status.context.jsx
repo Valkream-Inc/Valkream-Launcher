@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import Loader from "../component/loader/loader";
 
 const ServerStatusContext = createContext(undefined);
@@ -17,8 +23,32 @@ export const ServerStatusProvider = ({ children }) => {
   const [isServerReachable, setIsServerReachable] = useState(false);
   const [installationStatut, setInstallationStatut] = useState(null);
 
-  // A single isLoading boolean derived from the loadingState flags
   const isLoading = !(loadingState.infosLoaded && loadingState.statusLoaded);
+
+  const getInstallationStatut = useCallback(async () => {
+    if (!window.electron_API || !window.electron_API.getInstallationStatut)
+      return console.warn(
+        "L'API Electron n'est pas disponible. Vérification des infos impossible."
+      );
+
+    try {
+      const statut = await window.electron_API.getInstallationStatut();
+      setInstallationStatut(statut || null);
+      setIsInternetConnected(statut?.isInternetConnected || false);
+      setIsServerReachable(statut?.isServerReachable || false);
+      setLoadingState((prevState) => ({ ...prevState, statusLoaded: true }));
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération du statut d'installation :",
+        error
+      );
+      setIsInternetConnected(false);
+      setIsServerReachable(false);
+      setLoadingState((prevState) => ({ ...prevState, statusLoaded: true }));
+    }
+
+    return installationStatut;
+  }, [installationStatut]);
 
   useEffect(() => {
     if (
@@ -27,44 +57,32 @@ export const ServerStatusProvider = ({ children }) => {
       window.electron_API.checkInfos &&
       window.electron_API.getInstallationStatut
     ) {
+      // Utilisation de useCallback pour s'assurer que handleUpdate est stable
       const handleUpdate = (infos) => {
         setEvent(infos.event || null);
         setMaintenance(infos.maintenance || null);
         setServerInfos(infos.serverInfos || null);
-        setIsInternetConnected(infos.isInternetConnected || false);
-        setIsServerReachable(infos.isServerReachable || false);
         setLoadingState((prevState) => ({ ...prevState, infosLoaded: true }));
       };
 
+      // ✅ Ajout unique du listener
       window.electron_API.onUpdateInfos(handleUpdate);
-      window.electron_API.checkInfos();
 
+      // Check initial
+      window.electron_API.checkInfos();
       getInstallationStatut();
+
+      // Cleanup pour éviter les fuites
+      return () => {
+        window.electron_API.removeUpdateInfos(handleUpdate);
+      };
     } else {
       console.warn(
         "L'API Electron n'est pas disponible. Vérification des infos impossible."
       );
       setLoadingState({ infosLoaded: true, statusLoaded: true });
     }
-  }, []);
-
-  const getInstallationStatut = async () => {
-    if (
-      !window.electron_API ||
-      !window.electron_API.reload ||
-      !window.electron_API.getInstallationStatut
-    )
-      throw console.warn(
-        "L'API Electron n'est pas disponible. Vérification des infos impossible."
-      );
-
-    await window.electron_API.reload();
-    const statut = await window.electron_API.getInstallationStatut();
-    setInstallationStatut(statut || null);
-    setLoadingState((prevState) => ({ ...prevState, statusLoaded: true }));
-
-    return installationStatut;
-  };
+  }, [getInstallationStatut]);
 
   const contextValue = {
     isLoading,

@@ -1,5 +1,6 @@
 import React from "react";
-import "./links.css";
+import "./css/links.css";
+
 import { DiscordIcon, WebIcon, TopServerIcon } from "./svgs.jsx";
 import { ButtonBase } from "@mui/material";
 

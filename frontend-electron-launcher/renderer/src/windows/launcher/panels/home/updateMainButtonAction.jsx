@@ -13,7 +13,12 @@ const formatBytes = (bytes) => {
  * Headless component to update the main button dynamically based on server status.
  */
 function UpdateMainButtonAction({ changeMainButtonAction }) {
-  const { getInstallationStatut, maintenance } = useServerStatus();
+  const {
+    getInstallationStatut,
+    maintenance,
+    isServerReachable,
+    isInternetConnected,
+  } = useServerStatus();
 
   const disabledMainButton = useCallback(() => {
     changeMainButtonAction({ isDisabled: true });
@@ -45,8 +50,6 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
         if (!status) return;
 
         const {
-          isInternetConnected,
-          isServerReachable,
           isInstalled,
           isUpToDate,
           isMajorUpdate,

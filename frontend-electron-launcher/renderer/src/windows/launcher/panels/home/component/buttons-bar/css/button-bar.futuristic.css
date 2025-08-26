@@ -1,0 +1,95 @@
+/*******************************************************************************
+ *                                                                             *
+ * button tips                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+.futuristic-theme .button-tips {
+  position: fixed;
+  left: 32px;
+  bottom: 32px;
+  z-index: 9;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.futuristic-theme .button-tips-icon {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
+  transition: filter 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.futuristic-theme .button-tips:hover .button-tips-icon {
+  filter: brightness(1.5) drop-shadow(0 0 20px #00fff7)
+    drop-shadow(0 0 40px #ff00f7);
+  transform: scale(1.15);
+}
+
+.futuristic-theme .button-tips:active .button-tips-icon {
+  filter: brightness(1) drop-shadow(0 0 5px #00fff7)
+    drop-shadow(0 0 10px #ff00f7);
+  transform: scale(0.95);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * bottom actions                                                              *
+ *                                                                             *
+ ******************************************************************************/
+.futuristic-theme .bottom-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  z-index: 8;
+}
+
+.futuristic-theme .play-btn {
+  background: #0066ff; /* bleu foncé */
+  color: #0f0f0f;
+  border-radius: 12px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0.8rem 3rem;
+  box-shadow: 0 0 10px #0066ff, 0 0 25px #ff00f7 inset;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.futuristic-theme .play-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px #0066ff, 0 0 40px #ff00f7 inset;
+}
+
+.futuristic-theme .icon-play {
+  font-size: 2em;
+  margin-right: 20px;
+}
+
+.futuristic-theme .bottom-actions .settings-btn {
+  width: 3.2rem;
+  height: 3.2rem;
+  font-size: 2.2rem;
+  color: #00fff7;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.futuristic-theme .bottom-actions .settings-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px #00fff7, 0 0 25px #ff00f7 inset;
+}

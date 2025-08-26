@@ -27,24 +27,13 @@ class CheckInfos {
   };
 
   checkInfos = async () => {
-    const [isInternetConnected, isServerReachable, serverInfos] =
-      await Promise.all([
-        InfosManager.getIsInternetConnected(),
-        InfosManager.getIsServerReachable(),
-        InfosManager.getServerInfos(),
-      ]);
-
-    if (!isServerReachable)
-      return { isInternetConnected, isServerReachable, serverInfos };
-
-    const [event, maintenance] = await Promise.all([
+    const [serverInfos, event, maintenance] = await Promise.all([
+      InfosManager.getServerInfos(),
       InfosManager.getEvent(),
       InfosManager.getMaintenance(),
     ]);
 
     return {
-      isInternetConnected,
-      isServerReachable,
       serverInfos,
       event,
       maintenance,

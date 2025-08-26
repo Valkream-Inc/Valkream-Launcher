@@ -1,0 +1,63 @@
+.futuristic-theme .server-infos-container {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  text-shadow: 0 0 8px #ff00ff, 0 0 16px #ff00ff, 0 0 24px #ff00ff;
+  transition: transform 0.3s ease, text-shadow 0.3s ease;
+}
+
+.futuristic-theme .server-infos-container:hover {
+  transform: scale(1.08);
+  text-shadow: 0 0 12px #ff00ff, 0 0 24px #ff00ff, 0 0 36px #ff00ff;
+}
+
+.futuristic-theme .header-logo {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+}
+
+.futuristic-theme .logo-image {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 6px;
+  box-shadow: 0 0 12px #ff00ff, 0 0 24px #ff00ff inset;
+  transition: box-shadow 0.3s ease;
+}
+
+.futuristic-theme .logo-image:hover {
+  box-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff inset;
+}
+
+.futuristic-theme .logo-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0ff;
+  font-family: "Orbitron", sans-serif;
+  text-shadow: 0 0 8px #ff00ff, 0 0 16px #ff00ff, 0 0 24px #ff00ff;
+}
+
+.futuristic-theme .server-players {
+  font-size: 1.5rem;
+  text-align: center;
+  color: #0ff;
+  text-shadow: 0 0 6px #ff00ff, 0 0 12px #ff00ff;
+  margin-top: 0.5rem;
+}
+
+.futuristic-theme .server-infos {
+  text-align: center;
+  color: #0ff;
+  text-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff;
+  font-family: "Orbitron", sans-serif;
+}
+
+.futuristic-theme .server-ping {
+  color: #0ff;
+  text-shadow: 0 0 6px #ff00ff, 0 0 12px #ff00ff;
+}

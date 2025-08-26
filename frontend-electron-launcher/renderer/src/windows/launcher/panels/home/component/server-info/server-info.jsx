@@ -1,5 +1,5 @@
 import React from "react";
-import "./server-info.css";
+import "./css/server-info.css";
 
 import { useServerStatus } from "../../../../context/server-status.context.jsx";
 
@@ -9,13 +9,13 @@ function ServerInfo() {
   // Determine the display based on the state
   const statusText = isLoading
     ? "--/--"
-    : serverInfos.status === "server online"
+    : serverInfos?.status === "server online"
     ? `${serverInfos.players.online}/${serverInfos.players.max}`
     : "--/--";
 
   const pingText = isLoading
     ? ""
-    : serverInfos.status === "server online"
+    : serverInfos?.status === "server online"
     ? `(${serverInfos.ping} ms)`
     : "(...)";
 

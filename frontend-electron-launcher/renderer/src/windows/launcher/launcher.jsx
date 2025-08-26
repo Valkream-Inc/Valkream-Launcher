@@ -3,6 +3,7 @@ import React from "react";
 import { PanelsProvider } from "./context/panels.context.jsx";
 import { VideoBackgroundProvider } from "./context/video-background.context.jsx";
 import { ServerStatusProvider } from "./context/server-status.context.jsx";
+import { ThemeProvider } from "./context/theme.context.jsx";
 
 import WindowsBar from "./component/windows-bar/windows-bar.jsx";
 import VideoBackground from "./component/video-background/video-background.jsx";
@@ -21,24 +22,29 @@ import Home from "./panels/home/home.jsx";
 function Launcher() {
   return (
     <>
-      <WindowsBar />
-      <ServerStatusProvider>
-        <VideoBackgroundProvider>
-          <VideoBackground />
+      <ThemeProvider>
+        {/* Windows Bar */}
+        <WindowsBar />
+        <ServerStatusProvider>
+          <VideoBackgroundProvider>
+            {/* Video Background */}
+            <VideoBackground />
 
-          {/* Panels */}
-          <PanelsProvider>
-            <Panel id="home">
-              <Home />
-            </Panel>
-            <Panel id="alert">Alert</Panel>
-            <Panel id="panel1">Panel1</Panel>
-            <Panel id="panel2">Panel2</Panel>
-            <Panel id="panel3">Panel3</Panel>
-          </PanelsProvider>
-        </VideoBackgroundProvider>
-        <Copyright />
-      </ServerStatusProvider>
+            {/* Panels */}
+            <PanelsProvider>
+              <Panel id="home">
+                <Home />
+              </Panel>
+              <Panel id="alert">Alert</Panel>
+              <Panel id="panel1">Panel1</Panel>
+              <Panel id="panel2">Panel2</Panel>
+              <Panel id="panel3">Panel3</Panel>
+            </PanelsProvider>
+          </VideoBackgroundProvider>
+          {/* Copyright */}
+          <Copyright />
+        </ServerStatusProvider>
+      </ThemeProvider>
     </>
   );
 }

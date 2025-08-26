@@ -1,5 +1,5 @@
 import React from "react";
-import "./button-bar.css";
+import "./css/button-bar.css";
 
 import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
 import SettingsIcon from "@mui/icons-material/Settings";

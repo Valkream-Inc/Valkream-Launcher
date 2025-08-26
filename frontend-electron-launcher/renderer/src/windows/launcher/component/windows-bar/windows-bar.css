@@ -5,7 +5,7 @@
   width: 100%;
   height: 26px;
   -webkit-app-region: drag;
-  z-index: 12;
+  z-index: 2000;
 }
 
 .windows-bar {
@@ -13,7 +13,7 @@
   position: fixed;
   top: 0px;
   right: 0px;
-  z-index: 12;
+  z-index: 2000;
   -webkit-app-region: no-drag;
 }
 

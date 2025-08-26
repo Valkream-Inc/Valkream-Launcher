@@ -21,7 +21,6 @@ const VersionManager = require("../manager/versionManager.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
-const { ip } = require("../constants/serverInfos.js");
 
 class IpcHandlers {
   init() {
