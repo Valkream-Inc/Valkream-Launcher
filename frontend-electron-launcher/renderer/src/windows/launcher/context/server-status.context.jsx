@@ -48,7 +48,8 @@ export const ServerStatusProvider = ({ children }) => {
     }
 
     return installationStatut;
-  }, [installationStatut]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (

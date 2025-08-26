@@ -35,8 +35,7 @@ contextBridge.exposeInMainWorld("electron_API", {
   checkInfos: () => ipcRenderer.invoke("check-infos"),
   onUpdateInfos: (callback) =>
     ipcRenderer.on("update-infos", (event, ...args) => callback(...args)),
-  removeUpdateInfos: (callback) =>
-    ipcRenderer.removeListener("update-infos", callback),
+  removeUpdateInfos: (callback) => ipcRenderer.off("update-infos", callback),
 
   getInstallationStatut: () => ipcRenderer.invoke("get-installation-statut"),
   openLink: (url) => ipcRenderer.invoke("open-link", url),
