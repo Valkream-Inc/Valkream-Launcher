@@ -30,7 +30,10 @@ export const NavSettings = ({
 
   const handleToogleSpecialOptionClick = (e) => {
     // ctrl + shift click pour rendre les options spéciaux visibles
-    if (e.ctrlKey && e.shiftKey) onToogleSpecialOption();
+    if (e.ctrlKey && e.shiftKey) {
+      onToogleSpecialOption();
+      if (activeTab === "dev") setActiveTab("general");
+    }
   };
 
   const handleClick = (id) => {

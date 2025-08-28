@@ -4,10 +4,15 @@ import {
   NavSettings,
 } from "./component/nav-settings/nav-settings.jsx";
 import SettingsTab from "./component/settings-tab/settings-tab.jsx";
-import { SettingsBox } from "./component/settings-box/settings-box.jsx";
 import { SettingsTitle } from "./component/settings-tittle/settings-title.jsx";
 
 import ToggleMusic from "./settings-list/toggle-music.jsx";
+import ToggleDev from "./settings-list/toggle-dev.jsx";
+import ToggleBeta from "./settings-list/toggle-beta.jsx";
+import ToggleLaunchSteam from "./settings-list/toggle-launch-steam.jsx";
+import ToggleBoostFPS from "./settings-list/toggle-boostfps.jsx";
+import ToggleAdmin from "./settings-list/toggle-admin.jsx";
+import SelectLauncherTheme from "./settings-list/select-launcher-theme.jsx";
 
 function Settings() {
   const [activeTab, setActiveTab] = useState("general");
@@ -43,27 +48,42 @@ function Settings() {
         />
         <NavButton id="game" label="Game" active={false} onClick={() => {}} />
         <NavButton id="mods" label="Mods" active={false} onClick={() => {}} />
-        <NavButton id="dev" label="Dev" active={false} onClick={() => {}} />
+        {isSpecialOptionVisible && isDevActive && (
+          <NavButton id="dev" label="Dev" active={false} onClick={() => {}} />
+        )}
       </NavSettings>
 
       {/* Tabs */}
       <SettingsTab id="general" activeTab={activeTab}>
         <SettingsTitle warn={false}>General</SettingsTitle>
-        <SettingsBox warn={false}>General</SettingsBox>
+        {isSpecialOptionVisible && (
+          <ToggleDev devActive={isDevActive} setDevActive={setIsDevActive} />
+        )}
       </SettingsTab>
+
       <SettingsTab id="launcher" activeTab={activeTab}>
         <SettingsTitle warn={false}>Launcher</SettingsTitle>
         <ToggleMusic />
+        {isSpecialOptionVisible && <SelectLauncherTheme />}
       </SettingsTab>
+
       <SettingsTab id="game" activeTab={activeTab}>
-        Game
+        <SettingsTitle warn={false}>Game</SettingsTitle>
+        <ToggleLaunchSteam />
+        <ToggleBoostFPS />
+        {isSpecialOptionVisible && <ToggleAdmin />}
       </SettingsTab>
+
       <SettingsTab id="mods" activeTab={activeTab}>
-        Mods
+        <SettingsTitle warn={false}>Mods</SettingsTitle>
       </SettingsTab>
-      <SettingsTab id="dev" activeTab={activeTab}>
-        Dev
-      </SettingsTab>
+
+      {isSpecialOptionVisible && isDevActive && (
+        <SettingsTab id="dev" activeTab={activeTab}>
+          <SettingsTitle warn={true}>Dev / Debug</SettingsTitle>
+          <ToggleBeta />
+        </SettingsTab>
+      )}
     </>
   );
 }

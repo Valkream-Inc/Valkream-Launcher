@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./copyright.css";
 
+import { usePanels } from "../../context/panels.context";
+
 function Copyright() {
   const [versionLauncher, setVersionLauncher] = useState("");
+  const { activePanel } = usePanels();
 
   useEffect(() => {
     // Only access the Electron API after the component has mounted
@@ -11,7 +14,16 @@ function Copyright() {
     }
   }, []); // The empty dependency array ensures this effect runs only once
 
-  return <div className="copyright">© Valkream 2025 - v{versionLauncher}</div>;
+  return (
+    <div
+      className="copyright"
+      style={{
+        display: activePanel === "settings" ? "none" : "block",
+      }}
+    >
+      © Valkream 2025 - v{versionLauncher}
+    </div>
+  );
 }
 
 export default Copyright;

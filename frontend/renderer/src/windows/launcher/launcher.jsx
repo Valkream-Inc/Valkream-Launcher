@@ -13,26 +13,19 @@ import Panel from "./component/panel/panel.jsx";
 import Home from "./panels/home/home.jsx";
 import Settings from "./panels/settings/settings.jsx";
 
-// function PanelButton() {
-//   const { changePanel } = usePanels();
-//   return (
-//     <button onClick={() => changePanel("panel2")}>Change to Panel 2</button>
-//   );
-// }
-
 function Launcher() {
   return (
     <>
       {/* Windows Bar */}
       <WindowsBar />
       <ServerStatusProvider>
-        <VideoBackgroundProvider>
-          {/* Video Background */}
-          <VideoBackground />
+        <PanelsProvider>
+          <VideoBackgroundProvider>
+            {/* Video Background */}
+            <VideoBackground />
 
-          {/* Panels */}
-          <ThemeProvider>
-            <PanelsProvider>
+            {/* Panels */}
+            <ThemeProvider>
               <Panel id="home">
                 <Home />
               </Panel>
@@ -43,11 +36,11 @@ function Launcher() {
               <Panel id="panel1">Panel1</Panel>
               <Panel id="panel2">Panel2</Panel>
               <Panel id="panel3">Panel3</Panel>
-            </PanelsProvider>
-          </ThemeProvider>
-        </VideoBackgroundProvider>
-        {/* Copyright */}
-        <Copyright />
+            </ThemeProvider>
+          </VideoBackgroundProvider>
+          {/* Copyright */}
+          <Copyright />
+        </PanelsProvider>
       </ServerStatusProvider>
     </>
   );

@@ -1,0 +1,17 @@
+.select-root {
+  background-color: var(--background);
+  color: var(--color) !important;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  width: 100%;
+}
+
+.select-item {
+  background-color: var(--background) !important;
+  color: var(--color) !important;
+}
+
+.select-item:hover {
+  background-color: var(--secondary-color) !important;
+  color: var(--color) !important;
+}

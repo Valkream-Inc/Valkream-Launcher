@@ -34,10 +34,8 @@ function ToggleMusic() {
 
   return (
     <SettingsBox warn={false} text="La musique vous gêne ? Désactivez-la ici.">
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <Switch onChange={handleChange} checked={checked} />
-        <span>Activer la musique de la vidéo</span>
-      </div>
+      <Switch onChange={handleChange} checked={checked} />
+      <span>Activer la musique de la vidéo</span>
     </SettingsBox>
   );
 }

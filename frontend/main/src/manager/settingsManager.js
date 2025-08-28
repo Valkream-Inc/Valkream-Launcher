@@ -16,6 +16,7 @@ class SettingsManager {
       boostfpsEnabled: false,
       adminEnabled: false,
       launcherBehavior: "close",
+      launcherTheme: "modern",
     };
   }
 
