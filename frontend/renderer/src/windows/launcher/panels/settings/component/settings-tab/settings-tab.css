@@ -1,0 +1,11 @@
+.settings-tab {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(80% - 2px);
+  max-width: calc(100% - 7cm - 2px);
+  height: 100vh;
+}

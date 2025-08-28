@@ -11,16 +11,12 @@ const { isDev } = require("../constants/index.js");
 const DirsManager = require("../manager/dirsManager.js");
 
 class Database {
-  async dataPath() {
-    return await DirsManager.defaultRootPath();
-  }
-
   async createDatabase(tableName, tableConfig) {
     return await nodedatabase.intilize({
       databaseName: "Databases",
       fileType: isDev ? "sqlite" : "db",
       tableName,
-      path: path.join(await this.dataPath(), "databases"),
+      path: path.join(DirsManager.defaultRootPath(), "databases"),
       tableColumns: tableConfig,
     });
   }

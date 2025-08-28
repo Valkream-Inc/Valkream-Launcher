@@ -66,7 +66,7 @@ function Home() {
       <ServerInfo />
       <Links />
       <ButtonsBar
-        onSettingsClick={() => changePanel("alert")}
+        onSettingsClick={() => changePanel("settings")}
         onTipsClick={() => setIsTipsOpen(true)}
         onPlayClick={() => mainButtonAction.onclick()}
         playIcon={mainButtonAction.isReadyToPlay}

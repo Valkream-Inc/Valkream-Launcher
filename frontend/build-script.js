@@ -107,6 +107,7 @@ class Index {
             createStartMenuShortcut: true,
             runAfterFinish: true,
             deleteAppDataOnUninstall: false,
+            removeDefaultUninstallWelcomePage: true,
           },
           mac: {
             icon: "./build/assets/images/icon.icns",

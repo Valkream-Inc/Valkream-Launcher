@@ -11,6 +11,7 @@ import Copyright from "./component/copyright/copyright.jsx";
 import Panel from "./component/panel/panel.jsx";
 
 import Home from "./panels/home/home.jsx";
+import Settings from "./panels/settings/settings.jsx";
 
 // function PanelButton() {
 //   const { changePanel } = usePanels();
@@ -34,6 +35,9 @@ function Launcher() {
             <PanelsProvider>
               <Panel id="home">
                 <Home />
+              </Panel>
+              <Panel id="settings">
+                <Settings />
               </Panel>
               <Panel id="alert">Alert</Panel>
               <Panel id="panel1">Panel1</Panel>

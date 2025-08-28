@@ -7,19 +7,20 @@ const { isDev } = require("../constants");
 class DirsManager {
   launcherRootPath = () => process.cwd();
 
-  defaultRootPath = async () => {
-    const basePath = isDev ? app.getAppPath() : app.getPath("appData");
+  defaultRootPath = () => {
+    const basePath = isDev ? this.launcherRootPath() : app.getPath("userData");
+
     return newDir({
-      win32: path.join(basePath, ".valkream-launcher-data"),
-      linux: path.join(basePath, ".valkream-launcher-data"),
-      darwin: path.join(basePath, ".valkream-launcher-data"),
+      win32: path.join(basePath, "data"),
+      linux: path.join(basePath, "data"),
+      darwin: path.join(basePath, "data"),
     });
   };
 
   rootPath = async () => {
     const SettingsManager = require("./settingsManager.js");
     const settings = await SettingsManager.getSetting("customGamePath");
-    const defaultPath = await this.defaultRootPath();
+    const defaultPath = this.defaultRootPath();
 
     return newDir({
       win32: settings || defaultPath,

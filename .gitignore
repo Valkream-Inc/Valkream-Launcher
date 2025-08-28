@@ -4,9 +4,6 @@
 **/temp/
 **/dist/
 
-
-frontend/main/.valkream-launcher-data
-
 backend/uploads/launcher
-backend/uploads/game/latest/build-game-win32.zip
-backend/uploads/game/latest/BepInEx-5.4.2202.zip
+backend/uploads/game/latest/build-game-*.zip
+backend/uploads/game/latest/BepInEx-*.zip

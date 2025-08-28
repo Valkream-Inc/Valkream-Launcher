@@ -4,7 +4,7 @@ export const ThemeContext = createContext();
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState("futuristic");
+  const [theme, setTheme] = useState("modern");
 
   const changeTheme = (value) => {
     const themes = ["old", "modern", "futuristic"];

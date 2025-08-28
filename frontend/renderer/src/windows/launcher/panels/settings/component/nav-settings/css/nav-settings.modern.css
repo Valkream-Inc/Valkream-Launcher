@@ -1,0 +1,103 @@
+.modern-theme .nav-settings {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20%;
+  min-width: 7cm;
+  height: 100%;
+  max-height: 100%;
+  background: var(--background);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border-right: 2px solid var(--color);
+  padding-top: 0.5cm;
+  padding-bottom: 0.5cm;
+}
+
+.modern-theme .nav-settings .menu-header {
+  width: 80%;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: var(--color, #fff);
+  letter-spacing: 1px;
+  font-size: 0.7cm;
+}
+
+.modern-theme .nav-box {
+  flex-grow: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.modern-theme .nav-box div {
+  transition: all 0.2s ease-in-out;
+  padding: 0.8rem 1rem;
+  width: 80%;
+  text-align: center;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  color: var(--color, #e0e0e0);
+  background: var(--background-element, #2a2a3e);
+  cursor: pointer;
+  border: 1px solid var(--element-color, #555);
+}
+
+.modern-theme .nav-box div:hover {
+  background: var(--secondary-background, #3a3a55);
+  color: var(--secondary-color, #fff);
+  transform: scale(1.03);
+}
+
+.modern-theme .nav-box div:active {
+  background: var(--active-background, #4a4a6a);
+  transform: scale(0.97);
+}
+
+.modern-theme .nav-settings-btn#save {
+  border: solid 2px var(--secondary-color, #00aaff);
+  background: var(--secondary-color, #00aaff);
+  color: var(--color, #fff);
+  text-align: center;
+  font-weight: 500;
+  margin-top: auto; /* toujours en bas */
+  width: 70%;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 1cm;
+}
+
+.modern-theme .nav-settings-btn#save:hover {
+  background: var(--hover-save-bg, #0077aa);
+  border-color: var(--hover-save-bg, #0077aa);
+}
+
+.modern-theme .nav-settings-btn {
+  font-size: 1rem;
+  border: 1px solid var(--element-color, #555);
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  width: 80%;
+  text-align: center;
+  margin: 0.5rem 0;
+  cursor: pointer;
+  background: var(--background-element, #2a2a3e);
+  color: var(--color, #e0e0e0);
+  transition: all 0.2s ease-in-out;
+}
+
+.modern-theme .nav-settings-btn:hover {
+  background: var(--secondary-background, #3a3a55);
+  color: var(--secondary-color, #fff);
+  transform: scale(1.03);
+}
+
+.modern-theme .active-settings-BTN {
+  background: var(--element-color, #00aaff);
+  color: var(--color, #fff);
+  border-color: var(--element-color, #00aaff);
+}

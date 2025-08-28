@@ -189,6 +189,8 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
     changeMainButtonAction,
     disabledMainButton,
     enableMainButton,
+    isInternetConnected,
+    isServerReachable,
   ]);
 
   return null;
