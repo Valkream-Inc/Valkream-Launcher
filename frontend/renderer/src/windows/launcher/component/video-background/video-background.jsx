@@ -5,7 +5,7 @@ import { useVideoBackground } from "../../context/video-background.context.jsx";
 import { useServerStatus } from "../../context/server-status.context.jsx";
 
 function VideoBackground() {
-  const { videoRef } = useVideoBackground();
+  const { VideoBackgroundRef } = useVideoBackground();
   const { isLoading } = useServerStatus();
 
   if (isLoading) return null;
@@ -13,7 +13,7 @@ function VideoBackground() {
   return (
     <video
       className="video-background"
-      ref={videoRef}
+      ref={VideoBackgroundRef}
       autoPlay
       loop
       playsInline

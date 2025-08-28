@@ -23,15 +23,15 @@ import Settings from "./panels/settings/settings.jsx";
 function Launcher() {
   return (
     <>
-      <ThemeProvider>
-        {/* Windows Bar */}
-        <WindowsBar />
-        <ServerStatusProvider>
-          <VideoBackgroundProvider>
-            {/* Video Background */}
-            <VideoBackground />
+      {/* Windows Bar */}
+      <WindowsBar />
+      <ServerStatusProvider>
+        <VideoBackgroundProvider>
+          {/* Video Background */}
+          <VideoBackground />
 
-            {/* Panels */}
+          {/* Panels */}
+          <ThemeProvider>
             <PanelsProvider>
               <Panel id="home">
                 <Home />
@@ -44,11 +44,11 @@ function Launcher() {
               <Panel id="panel2">Panel2</Panel>
               <Panel id="panel3">Panel3</Panel>
             </PanelsProvider>
-          </VideoBackgroundProvider>
-          {/* Copyright */}
-          <Copyright />
-        </ServerStatusProvider>
-      </ThemeProvider>
+          </ThemeProvider>
+        </VideoBackgroundProvider>
+        {/* Copyright */}
+        <Copyright />
+      </ServerStatusProvider>
     </>
   );
 }

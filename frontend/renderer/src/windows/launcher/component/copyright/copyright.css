@@ -3,7 +3,7 @@
   right: 20px;
   bottom: 10px;
   font-size: 0.95em;
-  color: var(--color);
+  color: white;
   z-index: 13;
   user-select: none;
   pointer-events: none;

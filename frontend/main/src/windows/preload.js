@@ -40,4 +40,6 @@ contextBridge.exposeInMainWorld("electron_API", {
   getInstallationStatut: () => ipcRenderer.invoke("get-installation-statut"),
   openLink: (url) => ipcRenderer.invoke("open-link", url),
   reload: () => ipcRenderer.invoke("reload"),
+  getSettings: (key) => ipcRenderer.invoke("get-settings", key),
+  setSettings: (key, value) => ipcRenderer.invoke("set-settings", key, value),
 });

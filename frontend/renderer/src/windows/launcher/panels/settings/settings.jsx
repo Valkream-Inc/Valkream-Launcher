@@ -7,6 +7,8 @@ import SettingsTab from "./component/settings-tab/settings-tab.jsx";
 import { SettingsBox } from "./component/settings-box/settings-box.jsx";
 import { SettingsTitle } from "./component/settings-tittle/settings-title.jsx";
 
+import ToggleMusic from "./settings-list/toggle-music.jsx";
+
 function Settings() {
   const [activeTab, setActiveTab] = useState("general");
   const [isSpecialOptionVisible, setIsSpecialOptionVisible] = useState(false);
@@ -50,7 +52,8 @@ function Settings() {
         <SettingsBox warn={false}>General</SettingsBox>
       </SettingsTab>
       <SettingsTab id="launcher" activeTab={activeTab}>
-        Launcher
+        <SettingsTitle warn={false}>Launcher</SettingsTitle>
+        <ToggleMusic />
       </SettingsTab>
       <SettingsTab id="game" activeTab={activeTab}>
         Game

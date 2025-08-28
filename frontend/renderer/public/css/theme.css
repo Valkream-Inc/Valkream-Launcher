@@ -13,15 +13,15 @@
   --background-transparent: #2c2c2ccc;
   --shadow: rgba(25, 25, 25, 0.7);
   --secondary-color: #1976d2;
-  --third-color: #1565c0;
+  --third-color: #00ddff;
 }
 
 /* ========================= FUTURISTIC NEON THEME ========================= */
 .futuristic-theme {
   --color: #00ffff;
   --background: #0b0b0f;
-  --background-element: rgba(0, 255, 255, 0.5);
-  --background-transparent: rgba(255, 0, 255, 0.5);
+  --background-element: rgb(23, 155, 155);
+  --background-transparent: rgba(255, 0, 255, 0.7);
   --shadow: rgba(0, 255, 255, 0.3);
   --secondary-color: #ff00ff;
   --third-color: #00ff00;

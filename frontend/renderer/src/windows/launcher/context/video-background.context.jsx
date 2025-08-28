@@ -8,33 +8,34 @@ export const VideoBackgroundProvider = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
-  const play = () => {
-    if (VideoBackgroundRef.current) {
+  const checkRef = (callback = () => {}) => {
+    if (VideoBackgroundRef.current) callback();
+    else requestAnimationFrame(() => checkRef(callback));
+  };
+
+  const play = () =>
+    checkRef(() => {
       VideoBackgroundRef.current.play();
       setIsPlaying(true);
-    }
-  };
+    });
 
-  const pause = () => {
-    if (VideoBackgroundRef.current) {
+  const pause = () =>
+    checkRef(() => {
       VideoBackgroundRef.current.pause();
       setIsPlaying(false);
-    }
-  };
+    });
 
-  const mute = () => {
-    if (VideoBackgroundRef.current) {
+  const mute = () =>
+    checkRef(() => {
       VideoBackgroundRef.current.muted = true;
       setIsMuted(true);
-    }
-  };
+    });
 
-  const unmute = () => {
-    if (VideoBackgroundRef.current) {
+  const unmute = () =>
+    checkRef(() => {
       VideoBackgroundRef.current.muted = false;
       setIsMuted(false);
-    }
-  };
+    });
 
   const contextValue = {
     VideoBackgroundRef,
