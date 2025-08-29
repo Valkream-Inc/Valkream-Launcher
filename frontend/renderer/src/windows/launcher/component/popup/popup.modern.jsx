@@ -78,6 +78,7 @@ export default function ModernPopup({
       keepMounted
       maxWidth="sm"
       fullWidth
+      className="modern-theme"
       PaperProps={{
         sx: {
           background: "rgba(255,255,255,0.08)",

@@ -423,6 +423,7 @@ export default function FuturisticPopup({
             textAlign="center"
             color="#e0e0e0"
             component="div"
+            className="futuristic-theme"
             sx={{
               mt: 2,
               mb: 2,

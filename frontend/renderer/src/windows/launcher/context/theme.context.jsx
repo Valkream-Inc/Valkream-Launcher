@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 
 export const ThemeContext = createContext();
 export const useTheme = () => useContext(ThemeContext);
@@ -12,6 +12,18 @@ export const ThemeProvider = ({ children }) => {
 
     setTheme(value);
   };
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const launcherTheme = await window.electron_API.getSettings(
+        "launcherTheme"
+      );
+      if (launcherTheme && launcherTheme !== theme) changeTheme(launcherTheme);
+    };
+
+    loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, changeTheme }}>

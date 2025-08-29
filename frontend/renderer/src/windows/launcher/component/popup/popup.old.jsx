@@ -165,6 +165,7 @@ export default function OldPopup({
         <DialogContent sx={{ overflow: "visible", p: 0 }}>
           <Typography
             variant="body1"
+            className="old-theme"
             sx={{
               margin: "1rem 0",
               fontSize: "1.2rem",
