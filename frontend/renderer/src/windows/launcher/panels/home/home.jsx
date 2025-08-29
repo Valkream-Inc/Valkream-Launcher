@@ -17,14 +17,6 @@ const TipsMessage = () => (
     Les informations et actualités sont disponibles sur la page Web et sur le
     serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous joindre
     sur notre serveur Discord)
-    <br />
-    <br />
-    <span style={{ color: "orange" }}>
-      <b>
-        ⚠️ La désinstallation du launcher doit UNIQUEMENT s’effectuer via le
-        bouton prévu à cet effet, tout en bas dans les paramètres.
-      </b>
-    </span>
   </>
 );
 

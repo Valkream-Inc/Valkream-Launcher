@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 
-import { SettingsBox } from "../component/settings-box/settings-box.jsx";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
 import {
   SelectSettings,
   SelectItemSettings,
 } from "../component/select-settings/select-settings.jsx";
+import { enqueueSnackbar } from "notistack";
 
 function SelectLauncherBehavior() {
   const [selected, setSelected] = useState("close");
@@ -23,8 +24,12 @@ function SelectLauncherBehavior() {
 
   const handleChange = async (event) => {
     const value = event.target.value;
+    if (value === selected) return;
     setSelected(value);
     await window.electron_API.setSettings("launcherBehavior", value);
+    enqueueSnackbar("Comportement du launcher sauvegardé !", {
+      variant: "info",
+    });
   };
 
   return (

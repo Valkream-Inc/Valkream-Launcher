@@ -9,54 +9,36 @@ const { platform } = require("os");
 const DirsManager = require("./dirsManager.js");
 
 class FilesManager {
-  constructor() {
-    this.dirsManager = DirsManager;
-  }
+  uninstallerPath = () =>
+    path.join(
+      DirsManager.launcherRootPath(),
+      "Uninstall Valkream-Launcher.exe"
+    );
 
-  uninstallerPath = async () => {
-    const launcherRootPath = await this.dirsManager.launcherRootPath();
-    path.join(launcherRootPath, "Uninstall Valkream-Launcher.exe");
-  };
+  gameZipPath = () => path.join(DirsManager.gameRootPath(), "game.zip");
 
-  gameZipPath = async () => {
-    const gameRootPath = await this.dirsManager.gameRootPath();
-    return path.join(gameRootPath, "game.zip");
-  };
+  bepInExZipPath = () => path.join(DirsManager.gameRootPath(), "bepinex.zip");
 
-  bepInExZipPath = async () => {
-    const gameRootPath = await this.dirsManager.gameRootPath();
-    return path.join(gameRootPath, "bepinex.zip");
-  };
+  modpackZipPath = () => path.join(DirsManager.gameRootPath(), "modpack.zip");
 
-  modpackZipPath = async () => {
-    const gameRootPath = await this.dirsManager.gameRootPath();
-    return path.join(gameRootPath, "modpack.zip");
-  };
-
-  gameExePath = async () => {
+  gameExePath = () => {
     const valueForAllPlatforms = {
-      win32: path.join(await this.dirsManager.gamePath(), "Valheim.exe"),
-      linux: path.join(await this.dirsManager.gamePath(), "Valheim"),
-      darwin: path.join(await this.dirsManager.gamePath(), "Valheim"),
+      win32: path.join(DirsManager.gamePath(), "Valheim.exe"),
+      linux: path.join(DirsManager.gamePath(), "Valheim"),
+      darwin: path.join(DirsManager.gamePath(), "Valheim"),
     };
 
     return valueForAllPlatforms[platform()];
   };
 
-  gameVersionFilePath = async () => {
-    const gameRootPath = await this.dirsManager.gameRootPath();
-    return path.join(gameRootPath, "latest.yml");
-  };
+  gameVersionFilePath = () =>
+    path.join(DirsManager.gameRootPath(), "latest.yml");
 
-  extractManifestPath = async () => {
-    const modPackDir = await this.dirsManager.downloadModPackPath();
-    return path.join(modPackDir, "manifest.json");
-  };
+  extractManifestPath = () =>
+    path.join(DirsManager.downloadModPackPath(), "manifest.json");
 
-  installedManifestPath = async () => {
-    const gameRootPath = await this.dirsManager.gameRootPath();
-    return path.join(gameRootPath, "manifest.json");
-  };
+  installedManifestPath = () =>
+    path.join(DirsManager.gameRootPath(), "manifest.json");
 }
 
 const filesManager = new FilesManager();

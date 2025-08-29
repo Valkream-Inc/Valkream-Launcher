@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
 
-import { SettingsBox } from "../component/settings-box/settings-box.jsx";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
+import { enqueueSnackbar } from "notistack";
 
 function ToggleLaunchSteam() {
   const [checked, setChecked] = useState(false);
@@ -18,8 +19,15 @@ function ToggleLaunchSteam() {
 
   const handleChange = async (event) => {
     const enabled = event.target.checked;
+    if (enabled === checked) return;
     setChecked(enabled);
     await window.electron_API.setSettings("launchSteam", enabled);
+    enqueueSnackbar(
+      enabled
+        ? "Steam sera lancé avec le jeu."
+        : "Steam ne sera pas lancé au démarrage du jeu.",
+      { variant: "info" }
+    );
   };
 
   return (

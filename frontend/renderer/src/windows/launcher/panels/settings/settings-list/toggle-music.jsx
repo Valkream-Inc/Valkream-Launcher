@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
 
-import { SettingsBox } from "../component/settings-box/settings-box.jsx";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { useVideoBackground } from "../../../context/video-background.context.jsx";
+import { enqueueSnackbar } from "notistack";
 
 function ToggleMusic() {
   const [checked, setChecked] = useState(false);
@@ -25,11 +26,16 @@ function ToggleMusic() {
 
   const handleChange = async (event) => {
     const enabled = event.target.checked;
+    if (enabled === checked) return;
     setChecked(enabled);
     await window.electron_API.setSettings("musicEnabled", enabled);
 
     if (enabled) unmute();
     else mute();
+
+    enqueueSnackbar(enabled ? "Musique activée !" : "Musique désactivée !", {
+      variant: "info",
+    });
   };
 
   return (

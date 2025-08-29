@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 
-import { SettingsBox } from "../component/settings-box/settings-box.jsx";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { useTheme } from "../../../context/theme.context.jsx";
 import {
   SelectSettings,
   SelectItemSettings,
 } from "../component/select-settings/select-settings.jsx";
+import { enqueueSnackbar } from "notistack";
 
 function SelectLauncherTheme() {
   const [selected, setSelected] = useState("modern");
@@ -26,9 +27,13 @@ function SelectLauncherTheme() {
 
   const handleChange = async (event) => {
     const value = event.target.value;
+    if (value === selected) return;
     setSelected(value);
     await window.electron_API.setSettings("launcherTheme", value);
     if (value !== theme) changeTheme(value);
+    enqueueSnackbar("Vous avez changé le theme du launcher !", {
+      variant: "info",
+    });
   };
 
   return (

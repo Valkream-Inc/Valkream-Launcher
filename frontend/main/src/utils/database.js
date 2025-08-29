@@ -16,7 +16,7 @@ class Database {
       databaseName: "Databases",
       fileType: isDev ? "sqlite" : "db",
       tableName,
-      path: path.join(DirsManager.defaultRootPath(), "databases"),
+      path: path.join(DirsManager.rootPath(), "databases"),
       tableColumns: tableConfig,
     });
   }

@@ -1,6 +1,6 @@
 import "./settings-box.css";
 
-export const SettingsBox = ({ text, children, warn }) => {
+const SettingsBox = ({ text, children, warn }) => {
   return (
     <div className={`settings-elements-box ${warn ? "warn" : ""}`}>
       <span className="setting-text">{text}</span>
@@ -8,3 +8,5 @@ export const SettingsBox = ({ text, children, warn }) => {
     </div>
   );
 };
+
+export default SettingsBox;

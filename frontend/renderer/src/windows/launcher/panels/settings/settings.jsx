@@ -4,7 +4,8 @@ import {
   NavSettings,
 } from "./component/nav-settings/nav-settings.jsx";
 import SettingsTab from "./component/settings-tab/settings-tab.jsx";
-import { SettingsTitle } from "./component/settings-tittle/settings-title.jsx";
+import SettingsTitle from "./component/settings-tittle/settings-title.jsx";
+import SettingsBox from "./component/settings-box/settings-box.jsx";
 
 import ToggleMusic from "./settings-list/toggle-music.jsx";
 import ToggleDev from "./settings-list/toggle-dev.jsx";
@@ -14,6 +15,28 @@ import ToggleBoostFPS from "./settings-list/toggle-boostfps.jsx";
 import ToggleAdmin from "./settings-list/toggle-admin.jsx";
 import SelectLauncherTheme from "./settings-list/select-launcher-theme.jsx";
 import SelectLauncherBehavior from "./settings-list/select-launcher-behavior.jsx";
+import { enqueueSnackbar } from "notistack";
+
+function Presentation() {
+  return (
+    <SettingsBox warn={false} text="" className="settings-elements-box">
+      Le partage et l’entraide sont des mots clés qui définissent bien l’esprit
+      de la communauté Valkream.
+      <br />
+      Le respect de l’idéologie des développeurs originaux est une priorité.
+      <br />
+      Le mode pack est essentiellement constitué de mécaniques additionnelles,
+      de nouvelles créatures, d’armures, d’armes et tous les biomes sont
+      fonctionnels.
+      <br />
+      Le mode pack Valkream est jouable en partie privée, serveur privée ou
+      serveur Valkream.
+      <br />
+      Garantissant une expérience complète et sans fin.
+      <br />
+    </SettingsBox>
+  );
+}
 
 function Settings() {
   const [activeTab, setActiveTab] = useState("general");
@@ -21,6 +44,12 @@ function Settings() {
   const [isDevActive, setIsDevActive] = useState(false);
 
   const toogleSpecialOption = () => {
+    enqueueSnackbar(
+      isSpecialOptionVisible
+        ? "Option Special désactivée"
+        : "Option Speciale activée !",
+      { variant: "warning" }
+    );
     setIsSpecialOptionVisible(!isSpecialOptionVisible);
   };
 
@@ -58,9 +87,14 @@ function Settings() {
       {/* Tabs */}
       <SettingsTab id="general" activeTab={activeTab}>
         <SettingsTitle warn={false}>General</SettingsTitle>
+        <Presentation />
         <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
         {isSpecialOptionVisible && (
-          <ToggleDev devActive={isDevActive} setDevActive={setIsDevActive} />
+          <ToggleDev
+            devActive={isDevActive}
+            setDevActive={setIsDevActive}
+            setTab={setActiveTab}
+          />
         )}
       </SettingsTab>
 

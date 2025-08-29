@@ -32,10 +32,10 @@ class GameManager {
     // 🔸 Étape 1 : Configuration des liens vers les fichiers
     if ((await CheckInfos.getInfos()).isServerReachable) {
       this.gameZipLink = await LinksManager.gameZipLink();
-      this.gameZipPath = await FilesManager.gameZipPath();
+      this.gameZipPath = FilesManager.gameZipPath();
 
       this.bepInExZipLink = await LinksManager.bepInExZipLink();
-      this.bepInExZipPath = await FilesManager.bepInExZipPath();
+      this.bepInExZipPath = FilesManager.bepInExZipPath();
     }
 
     if (VersionManager.getIsInstalled()) {

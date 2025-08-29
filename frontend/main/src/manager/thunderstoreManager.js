@@ -35,7 +35,7 @@ class ThunderstoreManager {
 
     if ((await checkInfos.getInfos()).isServerReachable) {
       this.modpackZipLink = await LinksManager.modpackZipLink();
-      this.modpackZipPath = await FilesManager.modpackZipPath();
+      this.modpackZipPath = FilesManager.modpackZipPath();
     }
   }
 
@@ -193,7 +193,7 @@ class ThunderstoreManager {
         if (fs.existsSync(modPath)) {
           fs.rmSync(modPath, { recursive: true });
         }
-        return;
+        return true;
       })
     );
 
@@ -237,7 +237,7 @@ class ThunderstoreManager {
         if (fs.existsSync(modPath)) {
           fs.rmSync(modPath, { recursive: true });
         }
-        return;
+        return true;
       })
     );
   };

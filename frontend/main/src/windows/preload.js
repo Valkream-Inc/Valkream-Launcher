@@ -42,4 +42,5 @@ contextBridge.exposeInMainWorld("electron_API", {
   reload: () => ipcRenderer.invoke("reload"),
   getSettings: (key) => ipcRenderer.invoke("get-settings", key),
   setSettings: (key, value) => ipcRenderer.invoke("set-settings", key, value),
+  chooseFolder: () => ipcRenderer.invoke("choose-folder"),
 });

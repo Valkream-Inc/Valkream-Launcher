@@ -15,8 +15,8 @@ const FilesManager = require("./filesManager.js");
 
 class LauncherManager {
   async init() {
-    this.installDir = await DirsManager.launcherRootPath();
-    this.uninstallerPath = await FilesManager.uninstallerPath();
+    this.installDir = DirsManager.launcherRootPath();
+    this.uninstallerPath = FilesManager.uninstallerPath();
   }
 
   getVersion() {

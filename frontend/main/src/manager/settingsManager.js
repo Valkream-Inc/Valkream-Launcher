@@ -12,7 +12,6 @@ class SettingsManager {
       musicEnabled: true,
       launchSteam: true,
       betaEnabled: false,
-      customGamePath: null,
       boostfpsEnabled: false,
       adminEnabled: false,
       launcherBehavior: "close",

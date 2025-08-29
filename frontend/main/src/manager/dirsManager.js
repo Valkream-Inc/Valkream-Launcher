@@ -1,105 +1,71 @@
 const path = require("path");
-const { app } = require("electron");
-
 const newDir = require("../utils/new-dir.js");
-const { isDev } = require("../constants");
 
 class DirsManager {
   launcherRootPath = () => process.cwd();
 
-  defaultRootPath = () => {
-    const basePath = isDev ? this.launcherRootPath() : app.getPath("userData");
-
-    return newDir({
-      win32: path.join(basePath, "data"),
-      linux: path.join(basePath, "data"),
-      darwin: path.join(basePath, "data"),
+  rootPath = () =>
+    newDir({
+      win32: path.join(this.launcherRootPath(), "data"),
+      linux: path.join(this.launcherRootPath(), "data"),
+      darwin: path.join(this.launcherRootPath(), "data"),
     });
-  };
 
-  rootPath = async () => {
-    const SettingsManager = require("./settingsManager.js");
-    const settings = await SettingsManager.getSetting("customGamePath");
-    const defaultPath = this.defaultRootPath();
-
-    return newDir({
-      win32: settings || defaultPath,
-      linux: settings || defaultPath,
-      darwin: settings || defaultPath,
+  gameRootPath = () =>
+    newDir({
+      win32: path.join(this.rootPath(), "game"),
+      linux: path.join(this.rootPath(), "game"),
+      darwin: path.join(this.rootPath(), "game"),
     });
-  };
 
-  gameRootPath = async () => {
-    const root = await this.rootPath();
-    return newDir({
-      win32: path.join(root, "game"),
-      linux: path.join(root, "game"),
-      darwin: path.join(root, "game"),
+  gamePath = () =>
+    newDir({
+      win32: path.join(this.gameRootPath(), "Valheim"),
+      linux: path.join(this.gameRootPath(), "Valheim"),
+      darwin: path.join(this.gameRootPath(), "Valheim"),
     });
-  };
 
-  gamePath = async () => {
-    const gameRoot = await this.gameRootPath();
-    return newDir({
-      win32: path.join(gameRoot, "Valheim"),
-      linux: path.join(gameRoot, "Valheim"),
-      darwin: path.join(gameRoot, "Valheim"),
+  gamePreservedPath = () =>
+    newDir({
+      win32: path.join(this.gameRootPath(), "preserved"),
+      linux: path.join(this.gameRootPath(), "preserved"),
+      darwin: path.join(this.gameRootPath(), "preserved"),
     });
-  };
 
-  gamePreservedPath = async () => {
-    const gameRoot = await this.gameRootPath();
-    return newDir({
-      win32: path.join(gameRoot, "preserved"),
-      linux: path.join(gameRoot, "preserved"),
-      darwin: path.join(gameRoot, "preserved"),
+  bepInExPath = () =>
+    newDir({
+      win32: path.join(this.gamePath(), "BepInEx"),
+      linux: path.join(this.gamePath(), "BepInEx"),
+      darwin: path.join(this.gamePath(), "BepInEx"),
     });
-  };
 
-  bepInExPath = async () => {
-    const game = await this.gamePath();
-    return newDir({
-      win32: path.join(game, "BepInEx"),
-      linux: path.join(game, "BepInEx"),
-      darwin: path.join(game, "BepInEx"),
+  bepInExConfigPath = () =>
+    newDir({
+      win32: path.join(this.bepInExPath(), "config"),
+      linux: path.join(this.bepInExPath(), "config"),
+      darwin: path.join(this.bepInExPath(), "config"),
     });
-  };
 
-  bepInExConfigPath = async () => {
-    const bepInEx = await this.bepInExPath();
-    return newDir({
-      win32: path.join(bepInEx, "config"),
-      linux: path.join(bepInEx, "config"),
-      darwin: path.join(bepInEx, "config"),
+  bepInExPluginsPath = () =>
+    newDir({
+      win32: path.join(this.bepInExPath(), "plugins"),
+      linux: path.join(this.bepInExPath(), "plugins"),
+      darwin: path.join(this.bepInExPath(), "plugins"),
     });
-  };
 
-  bepInExPluginsPath = async () => {
-    const bepInEx = await this.bepInExPath();
-    return newDir({
-      win32: path.join(bepInEx, "plugins"),
-      linux: path.join(bepInEx, "plugins"),
-      darwin: path.join(bepInEx, "plugins"),
+  downloadModPackPath = () =>
+    newDir({
+      win32: path.join(this.gameRootPath(), "Modpack"),
+      linux: path.join(this.gameRootPath(), "Modpack"),
+      darwin: path.join(this.gameRootPath(), "Modpack"),
     });
-  };
 
-  downloadModPackPath = async () => {
-    const gameRoot = await this.gameRootPath();
-    return newDir({
-      win32: path.join(gameRoot, "Modpack"),
-      linux: path.join(gameRoot, "Modpack"),
-      darwin: path.join(gameRoot, "Modpack"),
+  downloadModsPath = () =>
+    newDir({
+      win32: path.join(this.downloadModPackPath(), "mods"),
+      linux: path.join(this.downloadModPackPath(), "mods"),
+      darwin: path.join(this.downloadModPackPath(), "mods"),
     });
-  };
-
-  downloadModsPath = async () => {
-    const modPack = await this.downloadModPackPath();
-    return newDir({
-      win32: path.join(modPack, "mods"),
-      linux: path.join(modPack, "mods"),
-      darwin: path.join(modPack, "mods"),
-    });
-  };
 }
 
 const dirsManager = new DirsManager();

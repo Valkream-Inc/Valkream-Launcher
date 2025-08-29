@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
 
-import { SettingsBox } from "../component/settings-box/settings-box.jsx";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
+import { enqueueSnackbar } from "notistack";
 
-function ToggleDev({ devActive = false, setDevActive = () => {} }) {
+function ToggleDev({
+  devActive = false,
+  setDevActive = () => {},
+  setTab = () => {},
+}) {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -13,8 +18,16 @@ function ToggleDev({ devActive = false, setDevActive = () => {} }) {
 
   const handleChange = (event) => {
     const enabled = event.target.checked;
+    if (enabled === checked) return;
     setChecked(enabled);
     setDevActive(enabled);
+    if (enabled) setTab("dev");
+    enqueueSnackbar(
+      enabled
+        ? "Outils de développement activés !"
+        : "Outils de développement désactivés !",
+      { variant: "success" }
+    );
   };
 
   return (

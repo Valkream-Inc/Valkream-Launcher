@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
 
-import { SettingsBox } from "../component/settings-box/settings-box.jsx";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
+import { enqueueSnackbar } from "notistack";
 
 function ToggleAdmin() {
   const [checked, setChecked] = useState(false);
@@ -18,8 +19,13 @@ function ToggleAdmin() {
 
   const handleChange = async (event) => {
     const enabled = event.target.checked;
+    if (enabled === checked) return;
     setChecked(enabled);
     await window.electron_API.setSettings("betaEnabled", enabled);
+    enqueueSnackbar(
+      enabled ? "Tests beta activées !" : "Tests beta désactivées !",
+      { variant: "success" }
+    );
   };
 
   return (

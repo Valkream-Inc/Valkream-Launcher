@@ -90,6 +90,13 @@ class Index {
           directories: { output: "dist" },
           compression: "maximum",
           asar: true,
+          extraResources: [
+            {
+              from: "data/",
+              to: "data",
+              filter: ["**/*"],
+            },
+          ],
           publish: [
             {
               provider: "github",
@@ -108,6 +115,7 @@ class Index {
             runAfterFinish: true,
             deleteAppDataOnUninstall: false,
             removeDefaultUninstallWelcomePage: true,
+            include: "./installer.nsh",
           },
           mac: {
             icon: "./build/assets/images/icon.icns",

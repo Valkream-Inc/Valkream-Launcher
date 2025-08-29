@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
 
-import { SettingsBox } from "../component/settings-box/settings-box.jsx";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
+import { enqueueSnackbar } from "notistack";
 
 function ToggleBoostFPS() {
   const [checked, setChecked] = useState(false);
@@ -20,8 +21,15 @@ function ToggleBoostFPS() {
 
   const handleChange = async (event) => {
     const enabled = event.target.checked;
+    if (enabled === checked) return;
     setChecked(enabled);
     await window.electron_API.setSettings("boostfpsEnabled", enabled);
+    enqueueSnackbar(
+      enabled
+        ? "Options pour booster les FPS activées !"
+        : "Options pour booster les FPS désactivées !",
+      { variant: "info" }
+    );
   };
 
   return (

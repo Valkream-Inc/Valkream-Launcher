@@ -14,7 +14,7 @@ const CheckInfos = require("../ipc/handlers/check-infos.js");
 class VersionManager {
   async init() {
     this.gameVersionFileLink = await LinksManager.gameVersionUrl();
-    this.gameVersionFilePath = await FilesManager.gameVersionFilePath();
+    this.gameVersionFilePath = FilesManager.gameVersionFilePath();
   }
 
   async updateOnlineVersionConfig() {
