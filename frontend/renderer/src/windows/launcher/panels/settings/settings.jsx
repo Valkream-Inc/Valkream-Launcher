@@ -13,6 +13,7 @@ import ToggleLaunchSteam from "./settings-list/toggle-launch-steam.jsx";
 import ToggleBoostFPS from "./settings-list/toggle-boostfps.jsx";
 import ToggleAdmin from "./settings-list/toggle-admin.jsx";
 import SelectLauncherTheme from "./settings-list/select-launcher-theme.jsx";
+import SelectLauncherBehavior from "./settings-list/select-launcher-behavior.jsx";
 
 function Settings() {
   const [activeTab, setActiveTab] = useState("general");
@@ -48,6 +49,7 @@ function Settings() {
         />
         <NavButton id="game" label="Game" active={false} onClick={() => {}} />
         <NavButton id="mods" label="Mods" active={false} onClick={() => {}} />
+
         {isSpecialOptionVisible && isDevActive && (
           <NavButton id="dev" label="Dev" active={false} onClick={() => {}} />
         )}
@@ -56,6 +58,7 @@ function Settings() {
       {/* Tabs */}
       <SettingsTab id="general" activeTab={activeTab}>
         <SettingsTitle warn={false}>General</SettingsTitle>
+        <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
         {isSpecialOptionVisible && (
           <ToggleDev devActive={isDevActive} setDevActive={setIsDevActive} />
         )}
@@ -64,6 +67,7 @@ function Settings() {
       <SettingsTab id="launcher" activeTab={activeTab}>
         <SettingsTitle warn={false}>Launcher</SettingsTitle>
         <ToggleMusic />
+        <SelectLauncherBehavior />
         {isSpecialOptionVisible && <SelectLauncherTheme />}
       </SettingsTab>
 
@@ -71,6 +75,9 @@ function Settings() {
         <SettingsTitle warn={false}>Game</SettingsTitle>
         <ToggleLaunchSteam />
         <ToggleBoostFPS />
+        {isSpecialOptionVisible && (
+          <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
+        )}
         {isSpecialOptionVisible && <ToggleAdmin />}
       </SettingsTab>
 

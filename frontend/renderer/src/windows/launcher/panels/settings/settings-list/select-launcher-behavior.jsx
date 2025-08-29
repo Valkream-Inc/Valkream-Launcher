@@ -36,7 +36,7 @@ function SelectLauncherBehavior() {
         <SelectItemSettings value="hide">
           Masquer le launcher
         </SelectItemSettings>
-        <SelectItemSettings value="modern">
+        <SelectItemSettings value="close">
           Fermer le launcher
         </SelectItemSettings>
         <SelectItemSettings value="nothing">Ne rien faire</SelectItemSettings>

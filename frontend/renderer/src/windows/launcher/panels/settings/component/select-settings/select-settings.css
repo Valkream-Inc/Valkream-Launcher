@@ -15,3 +15,7 @@
   background-color: var(--secondary-color) !important;
   color: var(--color) !important;
 }
+
+.select-root .MuiSelect-icon {
+  color: var(--color) !important;
+}
