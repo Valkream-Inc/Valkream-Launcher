@@ -17,11 +17,12 @@
 }
 
 .setting-text {
+  display: block;
   font-size: 0.8rem;
+  margin-bottom: 1.5rem;
 }
 
 .settings-elements {
-  margin-top: 1.5rem;
   display: flex;
   align-items: center;
   width: 100%;

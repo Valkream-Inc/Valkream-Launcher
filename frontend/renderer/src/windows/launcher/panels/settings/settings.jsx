@@ -19,7 +19,7 @@ import { enqueueSnackbar } from "notistack";
 
 function Presentation() {
   return (
-    <SettingsBox warn={false} text="" className="settings-elements-box">
+    <SettingsBox warn={false} className="settings-elements-box">
       Le partage et l’entraide sont des mots clés qui définissent bien l’esprit
       de la communauté Valkream.
       <br />
@@ -46,8 +46,8 @@ function Settings() {
   const toogleSpecialOption = () => {
     enqueueSnackbar(
       isSpecialOptionVisible
-        ? "Option Special désactivée"
-        : "Option Speciale activée !",
+        ? "Options Speciales désactivées !"
+        : "Options Speciales activées !",
       { variant: "warning" }
     );
     setIsSpecialOptionVisible(!isSpecialOptionVisible);
