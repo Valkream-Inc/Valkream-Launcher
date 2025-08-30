@@ -4,10 +4,11 @@
  */
 
 const fs = require("fs");
+const fse = require("fs-extra");
+const path = require("path");
 
 const builder = require("electron-builder");
 const JavaScriptObfuscator = require("javascript-obfuscator");
-
 const { name } = require("./package.json");
 
 class Index {
@@ -18,9 +19,13 @@ class Index {
     process.argv.forEach(async (val) => {
       if (val.startsWith("--obf")) {
         this.obf = JSON.parse(val.split("=")[1]);
-        return await this.buildPlatform();
       }
     });
+
+    await this.Obfuscate();
+    await this.buildAll();
+    await this.mergeBuilds();
+    console.log("🎉 Build terminée !");
   }
 
   getFiles(path, file = []) {
@@ -37,6 +42,7 @@ class Index {
   }
 
   async Obfuscate() {
+    console.log("🚀 Obfuscation des fichiers...");
     if (fs.existsSync("./build")) fs.rmSync("./build", { recursive: true });
 
     for (let path of this.Fileslist) {
@@ -68,73 +74,128 @@ class Index {
         fs.copyFileSync(path, `${folder}/${fileName}`);
       }
     }
+    console.log("✅ Obfuscation terminée !");
   }
 
-  async buildPlatform() {
-    await this.Obfuscate();
-
-    builder
-      .build({
-        config: {
-          generateUpdatesFilesForAllChannels: false,
-          appId: name,
-          productName: name,
-          copyright: "Copyright © 2025 Valkream Team",
-          // eslint-disable-next-line no-template-curly-in-string
-          artifactName: "${productName}-${os}-${arch}.${ext}",
-          extraMetadata: { main: "build/app.js" },
-          files: ["build/**/*", "package.json", "LICENSE.md"],
-          directories: { output: "dist" },
-          compression: "maximum",
-          asar: true,
-          extraResources: [
-            {
-              from: "data/",
-              to: "data",
-              filter: ["**/*"],
-            },
-          ],
-          publish: [
-            {
-              provider: "github",
-              releaseType: "release",
-            },
-          ],
-          win: {
-            icon: "./renderer/public/images/icon/icon.ico",
-            target: [{ target: "nsis", arch: ["x64", "arm64"] }],
-          },
-          nsis: {
-            oneClick: false,
-            allowToChangeInstallationDirectory: true,
-            createDesktopShortcut: true,
-            createStartMenuShortcut: true,
-            runAfterFinish: true,
-            deleteAppDataOnUninstall: false,
-            removeDefaultUninstallWelcomePage: true,
-            include: "./installer.nsh",
-          },
-          mac: {
-            icon: "./renderer/public/images/icon/icon.icns",
-            category: "public.app-category.games",
-            identity: null,
-            target: [
-              { target: "dmg", arch: ["x64", "arm64"] },
-              { target: "zip", arch: ["x64", "arm64"] },
-            ],
-          },
-          linux: {
-            icon: "./renderer/public/images/icon/icon.png",
-            target: [{ target: "AppImage", arch: ["x64", "arm64"] }],
-          },
+  async buildAll() {
+    const builds = [
+      {
+        type: "install",
+        nsis: {
+          oneClick: false,
+          allowToChangeInstallationDirectory: true,
+          createDesktopShortcut: true,
+          createStartMenuShortcut: true,
+          runAfterFinish: true,
+          deleteAppDataOnUninstall: true,
+          removeDefaultUninstallWelcomePage: true,
+          include: "./installer.nsh",
         },
-      })
-      .then(() => {
-        console.log("🎉 Le build Electron + React est terminé");
-      })
-      .catch((err) => {
-        console.error("❌ Error during build!", err);
-      });
+      },
+      {
+        type: "update",
+        nsis: {
+          oneClick: true,
+          allowToChangeInstallationDirectory: false,
+          createDesktopShortcut: true,
+          createStartMenuShortcut: true,
+          runAfterFinish: true,
+          deleteAppDataOnUninstall: true,
+          removeDefaultUninstallWelcomePage: true,
+          include: "./installer.nsh",
+        },
+      },
+    ];
+
+    for (const build of builds) {
+      const outputDir = `dist/temp-${build.type}`;
+      console.log(`\n🚀 Building ${build.type} version...`);
+
+      await builder
+        .build({
+          config: {
+            generateUpdatesFilesForAllChannels: false,
+            appId: name,
+            productName: name,
+            copyright: "Copyright © 2025 Valkream Team",
+            // eslint-disable-next-line no-template-curly-in-string
+            artifactName: `${name}-${build.type}-${"${os}-${arch}.${ext}"}`,
+            extraMetadata: { main: "build/app.js" },
+            files: ["build/**/*", "package.json", "LICENSE.md"],
+            directories: { output: outputDir },
+            compression: "maximum",
+            asar: true,
+            extraResources: [{ from: "data/", to: "data", filter: ["**/*"] }],
+            publish: [{ provider: "github", releaseType: "release" }],
+            win: {
+              icon: "./renderer/public/images/icon/icon.ico",
+              target: [{ target: "nsis", arch: ["x64", "arm64"] }],
+            },
+            nsis: build.nsis,
+            mac: {
+              icon: "./renderer/public/images/icon/icon.icns",
+              category: "public.app-category.games",
+              identity: null,
+              target: [
+                { target: "dmg", arch: ["x64", "arm64"] },
+                { target: "zip", arch: ["x64", "arm64"] },
+              ],
+            },
+            linux: {
+              icon: "./renderer/public/images/icon/icon.png",
+              target: [{ target: "AppImage", arch: ["x64", "arm64"] }],
+            },
+          },
+        })
+        .then(() => {
+          console.log(`✅ Build ${build.type} terminé !`);
+        })
+        .catch((err) => {
+          console.error(`❌ Erreur pendant le build ${build.type} !`, err);
+        });
+    }
+  }
+
+  async mergeBuilds() {
+    console.log("\n🔀 Fusion des builds dans dist...");
+
+    const distDir = "dist";
+    const tempInstall = "dist/temp-install";
+    const tempUpdate = "dist/temp-update";
+    const latestFile = "latest.yml";
+
+    if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
+
+    const copyRecursive = (src, dest, ignoreFiles = []) => {
+      if (!fs.existsSync(src)) return;
+      const stats = fs.statSync(src);
+      if (stats.isDirectory()) {
+        if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+        fs.readdirSync(src).forEach((child) => {
+          if (ignoreFiles.includes(child)) return;
+          copyRecursive(path.join(src, child), path.join(dest, child));
+        });
+      } else {
+        fs.copyFileSync(src, dest);
+      }
+    };
+
+    // Copier install → dist
+    copyRecursive(tempInstall, distDir, [latestFile]);
+
+    // Copier update → dist, ignorer latest.yml
+    copyRecursive(tempUpdate, distDir, [latestFile]);
+
+    // Copier latest.yml depuis update → dist
+    const latestSrc = path.join(tempUpdate, latestFile);
+    const latestDest = path.join(distDir, latestFile);
+    fse.copySync(latestSrc, latestDest, { overwrite: true });
+
+    // Supprimer dossiers temporaires
+    fs.rmSync(tempInstall, { recursive: true, force: true });
+    fs.rmSync(tempUpdate, { recursive: true, force: true });
+
+    console.log("✅ Fusion terminée !");
   }
 }
 

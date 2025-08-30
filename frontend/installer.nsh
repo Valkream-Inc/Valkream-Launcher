@@ -1,24 +1,20 @@
 !macro customInstall
   DetailPrint "Installation de MonLauncher..."
-  ; Ici on ne touche pas au dossier data, electron-builder l’a déjà copié
+  ; Le dossier data est déjà copié par Electron-builder
 !macroend
-
 
 !macro customUnInstall
   DetailPrint "Désinstallation de MonLauncher..."
 
-  ; Récupère le dossier d’installation
-  Var /GLOBAL installPath
-  StrCpy $installPath "$INSTDIR"
+  ; Supprimer le dossier data (mods, settings…)
+  IfFileExists "$INSTDIR\data\*" 0 end_remove_data
+    RMDir /r "$INSTDIR\data"
+    DetailPrint "Dossier data supprimé : $INSTDIR\data"
+  end_remove_data:
 
-  ; Supprime ton dossier data (mods, settings…)
-  RMDir /r "$installPath\\data"
-  DetailPrint "Dossier data supprimé : $installPath\\data"
-
-  ; Supprime aussi raccourcis, etc.
-  Delete "$DESKTOP\\MonLauncher.lnk"
-  Delete "$SMPROGRAMS\\MonLauncher\\*.*"
-  RMDir "$SMPROGRAMS\\MonLauncher"
+  ; Supprimer les raccourcis créés
+  Delete "$DESKTOP\MonLauncher.lnk"
+  RMDir /r "$SMPROGRAMS\MonLauncher"
 
   DetailPrint "Désinstallation terminée."
 !macroend

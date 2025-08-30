@@ -56,11 +56,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./frontend-electron-launcher
+        working-directory: ./frontend
 
       - name: Build Electron launcher via custom script
         run: npm run build
-        working-directory: ./frontend-electron-launcher
+        working-directory: ./frontend
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
