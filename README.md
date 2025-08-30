@@ -78,6 +78,7 @@ Ce projet comprend :
 
 - Node.js (version : 22+)
 - Yarn
+- Python (version : 3.10+)
 
 ### Installation des dépendances
 

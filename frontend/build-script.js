@@ -7,31 +7,33 @@ const fs = require("fs");
 
 const builder = require("electron-builder");
 const JavaScriptObfuscator = require("javascript-obfuscator");
-const nodeFetch = require("node-fetch");
-const png2icons = require("png2icons");
-const Jimp = require("jimp");
 
 const { name } = require("./package.json");
 
 class Index {
   async init() {
     this.obf = true;
-    this.Fileslist = [];
-    process.argv.forEach(async (val) => {
-      if (val.startsWith("--icon")) {
-        return this.iconSet(val.split("=")[1]);
-      }
+    this.Fileslist = this.getFiles("main");
 
+    process.argv.forEach(async (val) => {
       if (val.startsWith("--obf")) {
         this.obf = JSON.parse(val.split("=")[1]);
-        this.Fileslist = this.getFiles("src");
-      }
-
-      if (val.startsWith("--build")) {
-        let buildType = val.split("=")[1];
-        if (buildType == "platform") return await this.buildPlatform();
+        return await this.buildPlatform();
       }
     });
+  }
+
+  getFiles(path, file = []) {
+    if (fs.existsSync(path)) {
+      let files = fs.readdirSync(path);
+      if (files.length === 0) file.push(path);
+      for (let i in files) {
+        let name = `${path}/${files[i]}`;
+        if (fs.statSync(name).isDirectory()) this.getFiles(name, file);
+        else file.push(name);
+      }
+    }
+    return file;
   }
 
   async Obfuscate() {
@@ -40,28 +42,21 @@ class Index {
     for (let path of this.Fileslist) {
       let fileName = path.split("/").pop();
       let extFile = fileName.split(".").pop();
-      let folder = path.replace(`/${fileName}`, "").replace("src", "build");
+      let folder = path.replace(`/${fileName}`, "").replace("main", "build");
 
       if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
 
-      if (extFile == "js") {
+      if (extFile === "js") {
         let code = fs.readFileSync(path, "utf8");
-        code = code.replace(/src\//g, "build/");
-        // ignore main process files that create some problems after being obsfuscate
-        if (this.obf && !path.includes("src/main/")) {
-          await new Promise((resolve) => {
-            console.log(`Obfuscate ${path}`);
-            let obf = JavaScriptObfuscator.obfuscate(code, {
-              optionsPreset: "medium-obfuscation",
-              disableConsoleOutput: false,
-            });
-            resolve(
-              fs.writeFileSync(
-                `${folder}/${fileName}`,
-                obf.getObfuscatedCode(),
-                { encoding: "utf-8" }
-              )
-            );
+        // ignore main process files that makes problems after being obfuscated
+        if (this.obf && !path.includes("main/preload")) {
+          console.log(`Obfuscate ${path}`);
+          let obf = JavaScriptObfuscator.obfuscate(code, {
+            optionsPreset: "medium-obfuscation",
+            disableConsoleOutput: false,
+          });
+          fs.writeFileSync(`${folder}/${fileName}`, obf.getObfuscatedCode(), {
+            encoding: "utf-8",
           });
         } else {
           console.log(`Copy ${path}`);
@@ -77,6 +72,7 @@ class Index {
 
   async buildPlatform() {
     await this.Obfuscate();
+
     builder
       .build({
         config: {
@@ -84,6 +80,7 @@ class Index {
           appId: name,
           productName: name,
           copyright: "Copyright © 2025 Valkream Team",
+          // eslint-disable-next-line no-template-curly-in-string
           artifactName: "${productName}-${os}-${arch}.${ext}",
           extraMetadata: { main: "build/app.js" },
           files: ["build/**/*", "package.json", "LICENSE.md"],
@@ -104,7 +101,7 @@ class Index {
             },
           ],
           win: {
-            icon: "./build/assets/images/icon.ico",
+            icon: "./renderer/public/images/icon/icon.ico",
             target: [{ target: "nsis", arch: ["x64", "arm64"] }],
           },
           nsis: {
@@ -118,7 +115,7 @@ class Index {
             include: "./installer.nsh",
           },
           mac: {
-            icon: "./build/assets/images/icon.icns",
+            icon: "./renderer/public/images/icon/icon.icns",
             category: "public.app-category.games",
             identity: null,
             target: [
@@ -127,64 +124,17 @@ class Index {
             ],
           },
           linux: {
-            icon: "./build/assets/images/icon.png",
+            icon: "./renderer/public/images/icon/icon.png",
             target: [{ target: "AppImage", arch: ["x64", "arm64"] }],
           },
         },
       })
       .then(() => {
-        console.log("le build est terminé");
+        console.log("🎉 Le build Electron + React est terminé");
       })
       .catch((err) => {
-        console.error("Error during build!", err);
+        console.error("❌ Error during build!", err);
       });
-  }
-
-  getFiles(path, file = []) {
-    if (fs.existsSync(path)) {
-      let files = fs.readdirSync(path);
-      if (files.length == 0) file.push(path);
-      for (let i in files) {
-        let name = `${path}/${files[i]}`;
-        if (fs.statSync(name).isDirectory()) this.getFiles(name, file);
-        else file.push(name);
-      }
-    }
-    return file;
-  }
-
-  async iconSet(pathOrUrl) {
-    let Buffer;
-    if (/^https?:\/\//.test(pathOrUrl)) {
-      // Si c'est une URL
-      let response = await nodeFetch(pathOrUrl);
-      if (response.status == 200) {
-        Buffer = await response.buffer();
-      } else {
-        console.log("connection error");
-        return;
-      }
-    } else {
-      // Sinon, on suppose que c'est un chemin local
-      if (fs.existsSync(pathOrUrl)) {
-        Buffer = fs.readFileSync(pathOrUrl);
-      } else {
-        console.log("Fichier local introuvable : " + pathOrUrl);
-        return;
-      }
-    }
-    const image = await Jimp.read(Buffer);
-    Buffer = await image.resize(256, 256).getBufferAsync(Jimp.MIME_PNG);
-    fs.writeFileSync(
-      "src/assets/images/icon.icns",
-      png2icons.createICNS(Buffer, png2icons.BILINEAR, 0)
-    );
-    fs.writeFileSync(
-      "src/assets/images/icon.ico",
-      png2icons.createICO(Buffer, png2icons.HERMITE, 0, false)
-    );
-    fs.writeFileSync("src/assets/images/icon.png", Buffer);
-    console.log("new icon set");
   }
 }
 

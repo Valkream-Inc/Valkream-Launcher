@@ -6,10 +6,10 @@ module.exports = {
       // Point d'entrée React
       config.entry = path.resolve(__dirname, "renderer/index.js");
 
-      // Sortie dans renderer/dist
+      // Sortie dans renderer/build
       config.output = {
         ...config.output,
-        path: path.resolve(__dirname, "renderer/dist"),
+        path: path.resolve(__dirname, "renderer/build"),
         publicPath: "/", // pour React Router
       };
 
@@ -32,8 +32,8 @@ module.exports = {
     paths.appPublic = path.resolve(__dirname, "renderer/public");
     paths.appHtml = path.resolve(__dirname, "renderer/public/index.html");
 
-    // Build → renderer/dist
-    paths.appBuild = path.resolve(__dirname, "renderer/dist");
+    // Build → renderer/build
+    paths.appBuild = path.resolve(__dirname, "renderer/build");
 
     return paths;
   },

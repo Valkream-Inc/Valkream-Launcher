@@ -3,78 +3,64 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-const { NodeBDD, DataType } = require("node-bdd");
-const nodedatabase = new NodeBDD();
+const DatabaseLib = require("better-sqlite3");
+const fs = require("fs");
 const path = require("path");
 
 const { isDev } = require("../constants/index.js");
 const DirsManager = require("../manager/dirsManager.js");
 
 class Database {
-  async createDatabase(tableName, tableConfig) {
-    return await nodedatabase.intilize({
-      databaseName: "Databases",
-      fileType: isDev ? "sqlite" : "db",
-      tableName,
-      path: path.join(DirsManager.rootPath(), "databases"),
-      tableColumns: tableConfig,
-    });
+  constructor() {
+    const dbPath = path.join(DirsManager.rootPath(), "databases");
+    if (!fs.existsSync(dbPath)) fs.mkdirSync(dbPath, { recursive: true });
+    const fileName = isDev ? "Databases.sqlite" : "Databases.db";
+    this.db = new DatabaseLib(path.join(dbPath, fileName));
   }
 
-  async getDatabase(tableName) {
-    return await this.createDatabase(tableName, {
-      json_data: DataType.TEXT, // Corrigé
-    });
+  createTable(tableName) {
+    this.db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS ${tableName} (id INTEGER PRIMARY KEY, json_data TEXT)`
+      )
+      .run();
   }
 
-  async createData(tableName, data) {
-    const table = await this.getDatabase(tableName);
-    let row = await nodedatabase.createData(table, {
-      json_data: JSON.stringify(data),
-    });
-
-    return {
-      ...JSON.parse(row.json_data),
-      ID: row.id,
-    };
-  }
-
-  async readData(tableName, key = 1) {
-    const table = await this.getDatabase(tableName);
-    const row = await nodedatabase.getDataById(table, key);
-
-    if (!row) return undefined;
-
-    return {
-      ...JSON.parse(row.json_data),
-      ID: row.id,
-    };
-  }
-
-  async readAllData(tableName) {
-    const table = await this.getDatabase(tableName);
-    const rows = await nodedatabase.getAllData(table);
-
-    return rows.map((row) => ({
-      ...JSON.parse(row.json_data),
-      ID: row.id,
-    }));
-  }
-
-  async updateData(tableName, data, key = 1) {
-    const table = await this.getDatabase(tableName);
-    await nodedatabase.updateData(
-      table,
-      { json_data: JSON.stringify(data) },
-      key
+  createData(tableName, data) {
+    this.createTable(tableName);
+    const stmt = this.db.prepare(
+      `INSERT INTO ${tableName} (json_data) VALUES (?)`
     );
-
-    return this.readData(tableName, key); // on retourne la donnée mise à jour
+    const info = stmt.run(JSON.stringify(data));
+    return { ...data, ID: info.lastInsertRowid };
   }
 
-  async deleteData(tableName, key = 1) {
-    const table = await this.getDatabase(tableName);
-    return await nodedatabase.deleteData(table, key);
+  readData(tableName, key = 1) {
+    this.createTable(tableName);
+    const row = this.db
+      .prepare(`SELECT * FROM ${tableName} WHERE id=?`)
+      .get(key);
+    if (!row) return undefined;
+    return { ...JSON.parse(row.json_data), ID: row.id };
+  }
+
+  readAllData(tableName) {
+    this.createTable(tableName);
+    const rows = this.db.prepare(`SELECT * FROM ${tableName}`).all();
+    return rows.map((row) => ({ ...JSON.parse(row.json_data), ID: row.id }));
+  }
+
+  updateData(tableName, data, key = 1) {
+    this.createTable(tableName);
+    this.db
+      .prepare(`UPDATE ${tableName} SET json_data=? WHERE id=?`)
+      .run(JSON.stringify(data), key);
+    return this.readData(tableName, key);
+  }
+
+  deleteData(tableName, key = 1) {
+    this.createTable(tableName);
+    return this.db.prepare(`DELETE FROM ${tableName} WHERE id=?`).run(key);
   }
 }
 

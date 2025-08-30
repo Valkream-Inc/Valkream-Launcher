@@ -6,7 +6,7 @@
 const { BrowserWindow, Menu, ipcMain } = require("electron");
 const path = require("path");
 
-const rendererPath = path.join(__dirname, "../../src/renderer");
+const rendererPath = path.join(__dirname, "../../../renderer");
 
 const { pkg, isDev } = require("../constants");
 let mainWindow = undefined;
@@ -43,7 +43,9 @@ function createWindow() {
   Menu.setApplicationMenu(null);
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadURL(
-    isDev ? "http://localhost:8080" : `file://${rendererPath}/dist/index.html`
+    isDev
+      ? "http://localhost:8080"
+      : `file://${path.join(rendererPath, "build/index.html")}`
   );
   mainWindow.once("ready-to-show", () => {
     if (mainWindow) {
