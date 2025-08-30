@@ -49,14 +49,11 @@
     "electron-updater": "^6.1.8",
     "fs": "^0.0.1-security",
     "fs-extra": "^11.3.0",
-    "node-bdd": "^2.0.4",
-    "node-fetch": "^2.7.0",
     "notistack": "^3.0.2",
     "path": "^0.12.7",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.1",
-    "react-scripts": "^5.0.1",
     "valkream-function-lib": "1.0.7",
     "yaml": "^2.2.2"
   },
@@ -68,8 +65,10 @@
     "electron-builder": "^26.0.12",
     "javascript-obfuscator": "^4.1.0",
     "jimp": "^0.22.12",
+    "node-fetch": "^2.7.0",
     "nodemon": "^3.1.2",
     "png2icons": "^2.0.1",
+    "react-scripts": "^5.0.1",
     "wait-on": "^8.0.4"
   },
   "repository": {
