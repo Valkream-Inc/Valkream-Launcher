@@ -21,11 +21,7 @@ export default function Loader({ isVisible }) {
 
   return (
     <div className={`loader-container ${!isVisible ? "hidden" : ""}`}>
-      <img
-        src={process.env.PUBLIC_URL + "/images/icon/icon.png"}
-        alt="logo"
-        className="img-loader"
-      />
+      <img src="/images/icon/icon.png" alt="logo" className="img-loader" />
       <br />
       <div className="spinner"></div>
     </div>

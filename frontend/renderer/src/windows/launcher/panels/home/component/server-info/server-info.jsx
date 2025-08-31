@@ -22,11 +22,7 @@ function ServerInfo() {
   return (
     <div className="server-infos-container">
       <div className="header-logo">
-        <img
-          src={`${process.env.PUBLIC_URL}/images/icon/icon.png`}
-          className="logo-image"
-          alt="logo"
-        />
+        <img src="/images/icon/icon.png" className="logo-image" alt="logo" />
         <span className="logo-text">Valkream</span>
         <span className="server-players">{statusText}</span>
       </div>

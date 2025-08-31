@@ -18,10 +18,7 @@ function VideoBackground() {
       loop
       playsInline
     >
-      <source
-        src={`${process.env.PUBLIC_URL}/videos/background.mp4`}
-        type="video/mp4"
-      />
+      <source src="/videos/background.mp4" type="video/mp4" />
     </video>
   );
 }

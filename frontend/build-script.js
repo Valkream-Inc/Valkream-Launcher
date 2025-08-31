@@ -84,12 +84,6 @@ class Index {
         nsis: {
           oneClick: false,
           allowToChangeInstallationDirectory: true,
-          createDesktopShortcut: true,
-          createStartMenuShortcut: true,
-          runAfterFinish: true,
-          deleteAppDataOnUninstall: true,
-          removeDefaultUninstallWelcomePage: true,
-          include: "./installer.nsh",
         },
       },
       {
@@ -97,12 +91,6 @@ class Index {
         nsis: {
           oneClick: true,
           allowToChangeInstallationDirectory: false,
-          createDesktopShortcut: true,
-          createStartMenuShortcut: true,
-          runAfterFinish: true,
-          deleteAppDataOnUninstall: true,
-          removeDefaultUninstallWelcomePage: true,
-          include: "./installer.nsh",
         },
       },
     ];
@@ -114,7 +102,7 @@ class Index {
       await builder
         .build({
           config: {
-            generateUpdatesFilesForAllChannels: false,
+            generateUpdatesFilesForAllChannels: true,
             appId: name,
             productName: name,
             copyright: "Copyright © 2025 Valkream Team",
@@ -126,12 +114,26 @@ class Index {
             compression: "maximum",
             asar: true,
             extraResources: [{ from: "data/", to: "data", filter: ["**/*"] }],
-            publish: [{ provider: "github", releaseType: "release" }],
+            publish: [
+              {
+                provider: "github",
+                releaseType: "release",
+                repo: "Valkream-Inc/Valkream-Launcher",
+              },
+            ],
             win: {
               icon: "./renderer/public/images/icon/icon.ico",
               target: [{ target: "nsis", arch: ["x64", "arm64"] }],
             },
-            nsis: build.nsis,
+            nsis: {
+              ...build.nsis,
+              createDesktopShortcut: true,
+              createStartMenuShortcut: true,
+              runAfterFinish: true,
+              deleteAppDataOnUninstall: true,
+              removeDefaultUninstallWelcomePage: true,
+              include: "./installer.nsh",
+            },
             mac: {
               icon: "./renderer/public/images/icon/icon.icns",
               category: "public.app-category.games",
@@ -164,36 +166,24 @@ class Index {
     const tempUpdate = "dist/temp-update";
     const latestFile = "latest.yml";
 
-    if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
+    // La fonction 'filter' permet d'ignorer le fichier latest.yml
+    fse.copySync(tempInstall, distDir, {
+      overwrite: true,
+      filter: (src) => !src.includes(latestFile),
+    });
+    fse.copySync(tempUpdate, distDir, {
+      overwrite: true,
+      filter: (src) => !src.includes(latestFile),
+    });
 
-    const copyRecursive = (src, dest, ignoreFiles = []) => {
-      if (!fs.existsSync(src)) return;
-      const stats = fs.statSync(src);
-      if (stats.isDirectory()) {
-        if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-        fs.readdirSync(src).forEach((child) => {
-          if (ignoreFiles.includes(child)) return;
-          copyRecursive(path.join(src, child), path.join(dest, child));
-        });
-      } else {
-        fs.copyFileSync(src, dest);
-      }
-    };
-
-    // Copier install → dist
-    copyRecursive(tempInstall, distDir, [latestFile]);
-
-    // Copier update → dist, ignorer latest.yml
-    copyRecursive(tempUpdate, distDir, [latestFile]);
-
-    // Copier latest.yml depuis update → dist
+    // Copie le fichier latest.yml de manière explicite
     const latestSrc = path.join(tempUpdate, latestFile);
     const latestDest = path.join(distDir, latestFile);
     fse.copySync(latestSrc, latestDest, { overwrite: true });
 
-    // Supprimer dossiers temporaires
-    fs.rmSync(tempInstall, { recursive: true, force: true });
-    fs.rmSync(tempUpdate, { recursive: true, force: true });
+    // Supprime les dossiers temporaires
+    fse.removeSync(tempInstall);
+    fse.removeSync(tempUpdate);
 
     console.log("✅ Fusion terminée !");
   }

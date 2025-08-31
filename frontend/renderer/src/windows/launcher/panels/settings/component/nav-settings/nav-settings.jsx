@@ -50,7 +50,7 @@ export const NavSettings = ({
       {/* Header */}
       <img
         onClick={handleToogleSpecialOptionClick}
-        src={`${process.env.PUBLIC_URL}/images/icon-with-name.png`}
+        src="/images/icon-with-name.png"
         alt="Logo Valkream"
         className="menu-header"
       />

@@ -5,5 +5,9 @@
   "workspaces": [
     "./backend",
     "./frontend"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Valkream-Inc/Valkream-Launcher.git"
+  }
 }

@@ -62,10 +62,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "renderer"),
     },
   },
-
-  // Définit l'objet global 'process' pour qu'il soit disponible dans le code du frontend.
-  // C'est nécessaire si votre code fait référence à 'process.env'.
-  define: {
-    "process.env.PUBLIC_URL": JSON.stringify(""),
-  },
 });
