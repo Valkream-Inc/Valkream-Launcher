@@ -21,6 +21,7 @@ import ButtonUninstallGame from "./settings-list/button-uninstall-game.jsx";
 import ButtonOpenGame from "./settings-list/button-open-game.jsx";
 import ButtonOpenAppData from "./settings-list/button-open-appdata.jsx";
 import ButtonDebug from "./settings-list/button-debug.jsx";
+import ModsTab from "./mods-tab.jsx";
 
 function Presentation() {
   return (
@@ -123,6 +124,7 @@ function Settings() {
 
       <SettingsTab id="mods" activeTab={activeTab}>
         <SettingsTitle warn={false}>Mods</SettingsTitle>
+        <ModsTab />
       </SettingsTab>
 
       {isSpecialOptionVisible && isDevActive && (
