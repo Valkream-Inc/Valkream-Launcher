@@ -3,36 +3,34 @@ import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { Button } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 
-const ButtonUninstallGlobal = () => {
+const ButtonOpenAppData = () => {
   const handleClick = async () =>
     await window.electron_API
-      .uninstallLauncher()
+      .openAppData()
       .then(() => {
-        enqueueSnackbar("Launcher désinstallé !", { variant: "success" });
+        enqueueSnackbar("AppData ouvert !", { variant: "success" });
       })
       .catch((error) => {
         console.error(error);
-        enqueueSnackbar("Launcher non désinstallé !", { variant: "error" });
+        enqueueSnackbar("AppData non ouvert !", { variant: "error" });
       });
 
   return (
     <SettingsBox
-      warn={true}
-      text="Vous voulez Désinstaller le launcher et Jeu ? Faites-le ici. Mais
-        attention, vous perdrez ainsi tous les paramètres de jeux mais vous
-        conserverez vos personnages."
+      warn={false}
+      text="Vous pouvez ouvrir le dossier AppData de Valkream."
     >
       <Button
         variant="contained"
         size="large"
         sx={{ fontSize: "1.2rem" }}
-        color="error"
+        color="warning"
         onClick={handleClick}
       >
-        Désinstaller
+        Ouvrir le dossier AppData
       </Button>
     </SettingsBox>
   );
 };
 
-export default ButtonUninstallGlobal;
+export default ButtonOpenAppData;

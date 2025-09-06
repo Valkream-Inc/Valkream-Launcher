@@ -42,5 +42,10 @@ contextBridge.exposeInMainWorld("electron_API", {
   reload: () => ipcRenderer.invoke("reload"),
   getSettings: (key) => ipcRenderer.invoke("get-settings", key),
   setSettings: (key, value) => ipcRenderer.invoke("set-settings", key, value),
-  chooseFolder: () => ipcRenderer.invoke("choose-folder"),
+  // chooseFolder: () => ipcRenderer.invoke("choose-folder"),
+  openDevTools: () => ipcRenderer.invoke("main-window-open-devTools"),
+  openAppData: () => ipcRenderer.invoke("open-appdata"),
+  openGameFolder: () => ipcRenderer.invoke("open-game-folder"),
+  uninstallGame: () => ipcRenderer.invoke("uninstall-game"),
+  uninstallLauncher: () => ipcRenderer.invoke("uninstall-launcher"),
 });

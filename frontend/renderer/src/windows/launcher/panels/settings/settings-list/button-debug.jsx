@@ -3,36 +3,35 @@ import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { Button } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 
-const ButtonUninstallGlobal = () => {
+const ButtonDebug = () => {
   const handleClick = async () =>
     await window.electron_API
-      .uninstallLauncher()
+      .openDevTools()
       .then(() => {
-        enqueueSnackbar("Launcher désinstallé !", { variant: "success" });
+        enqueueSnackbar("Debug ouvert !", { variant: "success" });
       })
       .catch((error) => {
         console.error(error);
-        enqueueSnackbar("Launcher non désinstallé !", { variant: "error" });
+        enqueueSnackbar("Debug non ouvert !", { variant: "error" });
       });
 
   return (
     <SettingsBox
       warn={true}
-      text="Vous voulez Désinstaller le launcher et Jeu ? Faites-le ici. Mais
-        attention, vous perdrez ainsi tous les paramètres de jeux mais vous
-        conserverez vos personnages."
+      text="Vous pouvez ouvrir le debug (⚠️: cela doit etre fait uniquement dans un
+        but de debug et avec des personnes qualifiés :) )"
     >
       <Button
         variant="contained"
         size="large"
         sx={{ fontSize: "1.2rem" }}
-        color="error"
+        color="secondary"
         onClick={handleClick}
       >
-        Désinstaller
+        Ouvrir le debug
       </Button>
     </SettingsBox>
   );
 };
 
-export default ButtonUninstallGlobal;
+export default ButtonDebug;

@@ -154,7 +154,8 @@ class GameManager {
   }
 
   async openFolder() {
-    return await shell.openPath(this.gameDir);
+    if (fs.existsSync(this.gameDir)) return await shell.openPath(this.gameDir);
+    else throw new Error("Le dossier du jeu n'existe pas !");
   }
 
   async clean(gameFolderToRemove = this.gameFolderToRemove || []) {

@@ -9,4 +9,15 @@
   max-width: calc(100% - 7cm - 2px);
   height: calc(100vh - 1cm);
   overflow-y: auto;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.settings-tab-top-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calc(80% - 2px);
+  max-width: calc(100% - 7cm - 2px);
+  height: 1cm;
+  background: rgba(0, 0, 0, 0.5);
 }

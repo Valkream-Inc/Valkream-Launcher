@@ -6,6 +6,7 @@ import {
 import SettingsTab from "./component/settings-tab/settings-tab.jsx";
 import SettingsTitle from "./component/settings-tittle/settings-title.jsx";
 import SettingsBox from "./component/settings-box/settings-box.jsx";
+import { enqueueSnackbar } from "notistack";
 
 import ToggleMusic from "./settings-list/toggle-music.jsx";
 import ToggleDev from "./settings-list/toggle-dev.jsx";
@@ -15,7 +16,11 @@ import ToggleBoostFPS from "./settings-list/toggle-boostfps.jsx";
 import ToggleAdmin from "./settings-list/toggle-admin.jsx";
 import SelectLauncherTheme from "./settings-list/select-launcher-theme.jsx";
 import SelectLauncherBehavior from "./settings-list/select-launcher-behavior.jsx";
-import { enqueueSnackbar } from "notistack";
+import ButtonUninstallGlobal from "./settings-list/button-uninstall-global.jsx";
+import ButtonUninstallGame from "./settings-list/button-uninstall-game.jsx";
+import ButtonOpenGame from "./settings-list/button-open-game.jsx";
+import ButtonOpenAppData from "./settings-list/button-open-appdata.jsx";
+import ButtonDebug from "./settings-list/button-debug.jsx";
 
 function Presentation() {
   return (
@@ -89,6 +94,7 @@ function Settings() {
         <SettingsTitle warn={false}>General</SettingsTitle>
         <Presentation />
         <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
+        <ButtonUninstallGlobal />
         {isSpecialOptionVisible && (
           <ToggleDev
             devActive={isDevActive}
@@ -122,6 +128,11 @@ function Settings() {
       {isSpecialOptionVisible && isDevActive && (
         <SettingsTab id="dev" activeTab={activeTab}>
           <SettingsTitle warn={true}>Dev / Debug</SettingsTitle>
+          <ButtonUninstallGame />
+          <ButtonOpenGame />
+          <ButtonOpenAppData />
+          <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>
+          <ButtonDebug />
           <ToggleBeta />
         </SettingsTab>
       )}

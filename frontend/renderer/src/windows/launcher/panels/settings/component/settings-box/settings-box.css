@@ -11,7 +11,7 @@
 }
 
 .settings-elements-box.warn {
-  background: rgba(255, 69, 0, 0.5); /* Orange clair avec transparence */
+  background: rgb(143, 61, 31); /* Orange clair avec transparence */
   border: 4px solid #ff9800; /* Orange vif */
   color: white;
 }

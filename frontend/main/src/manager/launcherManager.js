@@ -29,7 +29,15 @@ class LauncherManager {
   }
 
   async uninstall() {
-    return execFile(this.uninstallerPath, () => {});
+    return new Promise((resolve, reject) => {
+      execFile(this.uninstallerPath, (error, stdout, stderr) => {
+        if (error) {
+          console.error("Erreur execFile:", error);
+          return reject(new Error(stderr || error.message));
+        }
+        resolve({ success: true, output: stdout });
+      });
+    });
   }
 
   hide() {

@@ -6,7 +6,10 @@ import { Box, Fade } from "@mui/material";
 function SettingsTab({ id, activeTab, children }) {
   return (
     <Fade in={activeTab === id} timeout={300}>
-      <Box className="settings-tab">{children}</Box>
+      <Box>
+        <Box className="settings-tab-top-bar"></Box>
+        <Box className="settings-tab">{children}</Box>
+      </Box>
     </Fade>
   );
 }

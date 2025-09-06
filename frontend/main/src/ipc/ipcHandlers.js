@@ -22,6 +22,18 @@ const VersionManager = require("../manager/versionManager.js");
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
 
+const openAppData = async () => {
+  const path = require("path");
+  const fs = require("fs");
+
+  const appDataPath = path.join(app.getPath("appData"));
+  const valkreamLauncherPath = path.join(appDataPath, "Valkream-Launcher");
+
+  if (fs.existsSync(valkreamLauncherPath))
+    return await shell.openPath(valkreamLauncherPath);
+  else throw new Error("Le dossier AppData n'existe pas !");
+};
+
 class IpcHandlers {
   init() {
     // update  windows
@@ -45,8 +57,10 @@ class IpcHandlers {
         MainWindow.getWindow().maximize();
       }
     });
-    ipcMain.on("main-window-open-devTools", () =>
-      MainWindow.getWindow().webContents.openDevTools(/*{ mode: "detach" }*/)
+    ipcMain.handle(
+      "main-window-open-devTools",
+      async () =>
+        await MainWindow.getWindow().webContents.openDevTools(/*{ mode: "detach" }*/)
     );
 
     // general
@@ -93,8 +107,19 @@ class IpcHandlers {
       return await InstallationStatut.get();
     });
     ipcMain.handle("open-link", async (event, url) => {
+      if (!(url.startsWith("http://") || url.startsWith("https://"))) return;
       await shell.openExternal(url);
     });
+    ipcMain.handle("open-appdata", openAppData);
+    ipcMain.handle(
+      "open-game-folder",
+      async () => await GameManager.openFolder()
+    );
+    ipcMain.handle("uninstall-game", async () => await GameManager.uninstall());
+    ipcMain.handle(
+      "uninstall-launcher",
+      async () => await LauncherManager.uninstall()
+    );
 
     // installation
     ipcMain.on(

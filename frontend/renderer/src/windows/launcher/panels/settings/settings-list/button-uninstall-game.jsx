@@ -3,24 +3,22 @@ import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { Button } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 
-const ButtonUninstallGlobal = () => {
+const ButtonUninstallGame = () => {
   const handleClick = async () =>
     await window.electron_API
-      .uninstallLauncher()
+      .uninstallGame()
       .then(() => {
-        enqueueSnackbar("Launcher désinstallé !", { variant: "success" });
+        enqueueSnackbar("Jeu désinstallé !", { variant: "success" });
       })
       .catch((error) => {
         console.error(error);
-        enqueueSnackbar("Launcher non désinstallé !", { variant: "error" });
+        enqueueSnackbar("Jeu non désinstallé !", { variant: "error" });
       });
 
   return (
     <SettingsBox
-      warn={true}
-      text="Vous voulez Désinstaller le launcher et Jeu ? Faites-le ici. Mais
-        attention, vous perdrez ainsi tous les paramètres de jeux mais vous
-        conserverez vos personnages."
+      warn={false}
+      text="Vous pouvez supprimer les fichiers de jeux valkream."
     >
       <Button
         variant="contained"
@@ -29,10 +27,10 @@ const ButtonUninstallGlobal = () => {
         color="error"
         onClick={handleClick}
       >
-        Désinstaller
+        Désinstaller le jeu
       </Button>
     </SettingsBox>
   );
 };
 
-export default ButtonUninstallGlobal;
+export default ButtonUninstallGame;

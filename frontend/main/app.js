@@ -4,6 +4,8 @@
  */
 
 const { app, session } = require("electron");
+const path = require("path");
+const fs = require("fs");
 
 const UpdateWindow = require("./src/windows/updateWindow.js");
 const MainWindow = require("./src/windows/mainWindow.js");
@@ -12,9 +14,25 @@ const IpcHandlers = require("./src/ipc/ipcHandlers.js");
 const isDev = process.env.NODE_ENV === "dev";
 
 if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
+app.commandLine.appendSwitch("disable-renderer-backgrounding");
+app.commandLine.appendSwitch("disable-background-timer-throttling");
+app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
+
 if (!app.requestSingleInstanceLock() && !isDev) app.quit();
 else {
   app.whenReady().then(async () => {
+    // Supprimer le dossier data si il existe et que le mode de développement n'est pas activé (ancienne version)
+    if (
+      fs.existsSync(
+        path.join(app.getPath("appData"), ".valkream-launcher-data")
+      ) &&
+      !isDev
+    ) {
+      fs.rmSync(path.join(app.getPath("appData"), "Valkream-Launcher"), {
+        recursive: true,
+      });
+    }
+
     // Vider le cache Chromium au démarrage
     await session.defaultSession.clearCache();
 

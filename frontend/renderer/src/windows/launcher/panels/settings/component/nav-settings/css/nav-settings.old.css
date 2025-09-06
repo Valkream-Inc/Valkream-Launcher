@@ -13,7 +13,7 @@
   align-items: center;
   padding-top: 2rem;
   padding-bottom: 2rem;
-  border-right: 4px solid #8b5e3c;
+  border-right: 2px solid #8b5e3c;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
   font-family: "Cinzel", serif;
 }
@@ -72,6 +72,7 @@
   color: #f4e1c1;
   text-shadow: 1px 1px 2px #000;
   margin: 1cm 0;
+  margin-bottom: 1.5cm;
 }
 
 .old-theme .nav-settings-btn#save:hover {

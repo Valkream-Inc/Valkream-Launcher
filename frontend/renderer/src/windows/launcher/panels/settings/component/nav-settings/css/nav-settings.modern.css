@@ -12,6 +12,7 @@
   flex-direction: column;
   padding-top: 0.5cm;
   padding-bottom: 0.5cm;
+  border-right: 2px solid var(--color);
 }
 
 .modern-theme .nav-settings .menu-header {
