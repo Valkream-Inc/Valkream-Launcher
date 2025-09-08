@@ -13,6 +13,7 @@ const Start = require("./handlers/start.js");
 const CustomMods = require("./handlers/custom-mods.js");
 const Reload = require("./handlers/reload.js");
 const InstallationStatut = require("./handlers/installation-statut.js");
+const ModsDataHandler = require("./handlers/mods-data.js");
 
 const SettingsManager = require("../manager/settingsManager.js");
 const LauncherManager = require("../manager/launcherManager.js");
@@ -149,6 +150,13 @@ class IpcHandlers {
       });
       if (result.canceled || !result.filePaths.length) return null;
       return result.filePaths[0];
+    });
+
+    ipcMain.handle("get-mods-data", async (event, signal) => {
+      return await ModsDataHandler.getModsData(signal);
+    });
+    ipcMain.handle("get-mods-details", async (event, baseMod) => {
+      return await ModsDataHandler.getModDetails(baseMod);
     });
   }
 }

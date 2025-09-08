@@ -48,4 +48,7 @@ contextBridge.exposeInMainWorld("electron_API", {
   openGameFolder: () => ipcRenderer.invoke("open-game-folder"),
   uninstallGame: () => ipcRenderer.invoke("uninstall-game"),
   uninstallLauncher: () => ipcRenderer.invoke("uninstall-launcher"),
+
+  getModsData: (signal) => ipcRenderer.invoke("get-mods-data", signal),
+  getModDetails: (baseMod) => ipcRenderer.invoke("get-mods-details", baseMod),
 });

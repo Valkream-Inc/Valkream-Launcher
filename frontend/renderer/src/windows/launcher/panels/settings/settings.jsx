@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   NavButton,
   NavSettings,
@@ -49,6 +49,20 @@ function Settings() {
   const [isSpecialOptionVisible, setIsSpecialOptionVisible] = useState(false);
   const [isDevActive, setIsDevActive] = useState(false);
 
+  const gameTabRef = useRef();
+
+  const changeTab = (tab) => {
+    setActiveTab(tab);
+
+    if (gameTabRef.current) {
+      if (tab === "game") {
+        gameTabRef.current.reload();
+      } else {
+        gameTabRef.current.stop();
+      }
+    }
+  };
+
   const toogleSpecialOption = () => {
     enqueueSnackbar(
       isSpecialOptionVisible
@@ -68,7 +82,7 @@ function Settings() {
         onSave={onSave}
         activeTab={activeTab}
         onToogleSpecialOption={toogleSpecialOption}
-        setActiveTab={setActiveTab}
+        setActiveTab={changeTab}
       >
         <NavButton
           id="general"
@@ -85,7 +99,7 @@ function Settings() {
         <NavButton id="game" label="Game" active={false} onClick={() => {}} />
         <NavButton id="mods" label="Mods" active={false} onClick={() => {}} />
 
-        {isSpecialOptionVisible && isDevActive && (
+        {isDevActive && (
           <NavButton id="dev" label="Dev" active={false} onClick={() => {}} />
         )}
       </NavSettings>
@@ -96,13 +110,11 @@ function Settings() {
         <Presentation />
         <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
         <ButtonUninstallGlobal />
-        {isSpecialOptionVisible && (
-          <ToggleDev
-            devActive={isDevActive}
-            setDevActive={setIsDevActive}
-            setTab={setActiveTab}
-          />
-        )}
+        <ToggleDev
+          devActive={isDevActive}
+          setDevActive={setIsDevActive}
+          setTab={setActiveTab}
+        />
       </SettingsTab>
 
       <SettingsTab id="launcher" activeTab={activeTab}>
@@ -124,10 +136,10 @@ function Settings() {
 
       <SettingsTab id="mods" activeTab={activeTab}>
         <SettingsTitle warn={false}>Mods</SettingsTitle>
-        <ModsTab />
+        <ModsTab ref={gameTabRef} />
       </SettingsTab>
 
-      {isSpecialOptionVisible && isDevActive && (
+      {isDevActive && (
         <SettingsTab id="dev" activeTab={activeTab}>
           <SettingsTitle warn={true}>Dev / Debug</SettingsTitle>
           <ButtonUninstallGame />
@@ -135,7 +147,7 @@ function Settings() {
           <ButtonOpenAppData />
           <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>
           <ButtonDebug />
-          <ToggleBeta />
+          {isSpecialOptionVisible && <ToggleBeta />}
         </SettingsTab>
       )}
     </>
