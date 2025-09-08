@@ -5,8 +5,6 @@
 
 const { execFile } = require("child_process");
 const { shell } = require("electron");
-const fs = require("fs");
-const path = require("path");
 const MainWindow = require("../windows/mainWindow.js");
 
 const { pkg } = require("../constants/index.js");

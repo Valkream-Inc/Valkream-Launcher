@@ -12,7 +12,7 @@ const SettingsManager = require("./settingsManager.js");
 
 class SteamManager {
   async init() {
-    this.gameDir = await DirsManager.gamePath();
+    this.gameDir = DirsManager.gamePath();
   }
 
   install() {

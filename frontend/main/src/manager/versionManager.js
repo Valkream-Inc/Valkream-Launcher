@@ -6,19 +6,24 @@
 const axios = require("axios");
 const fs = require("fs");
 const yaml = require("yaml");
+const { hashFolder } = require("valkream-function-lib");
 
+const DirsManager = require("./dirsManager.js");
 const FilesManager = require("./filesManager.js");
 const LinksManager = require("./linksManager.js");
-const CheckInfos = require("../ipc/handlers/check-infos.js");
+const InfosManager = require("./infosManager.js");
 
 class VersionManager {
   async init() {
+    this.BepInExConfigDir = DirsManager.bepInExConfigPath();
+    this.BepInExPluginsDir = DirsManager.bepInExPluginsPath();
+
     this.gameVersionFileLink = await LinksManager.gameVersionUrl();
     this.gameVersionFilePath = FilesManager.gameVersionFilePath();
   }
 
   async updateOnlineVersionConfig() {
-    if ((await CheckInfos.getInfos()).isServerReachable) {
+    if (await InfosManager.getIsServerReachableFromInternal()) {
       const yamlContent = (
         await axios.get(this.gameVersionFileLink)
       ).data.trim();
@@ -57,6 +62,45 @@ class VersionManager {
 
   getIsInstalled() {
     return fs.existsSync(this.gameVersionFilePath);
+  }
+
+  async ckeckPluginsAndConfig() {
+    const {
+      onlineConfigHash,
+      onlinePluginsHash,
+      localConfigHash,
+      localPluginsHash,
+    } = await this.getHash();
+
+    if (
+      onlinePluginsHash !== localPluginsHash ||
+      onlineConfigHash !== localConfigHash
+    )
+      throw new Error("Plugins or configs are not up to date");
+
+    return;
+  }
+
+  async getHash() {
+    const GameManager = require("./gameManager.js");
+
+    await GameManager.preserveGameFolder();
+    await GameManager.clean();
+    const pluginsHash = await hashFolder(this.BepInExPluginsDir, "sha256", 10);
+    const configsHash = await hashFolder(this.BepInExConfigDir, "sha256", 10);
+    await GameManager.restoreGameFolder();
+
+    const onlinePluginsHash = (await this.getOnlineVersionConfig())?.modpack
+      ?.hash?.plugins;
+    const onlineConfigHash = (await this.getOnlineVersionConfig())?.modpack
+      ?.hash?.config;
+
+    return {
+      localPluginsHash: pluginsHash,
+      localConfigHash: configsHash,
+      onlinePluginsHash: onlinePluginsHash,
+      onlineConfigHash: onlineConfigHash,
+    };
   }
 }
 

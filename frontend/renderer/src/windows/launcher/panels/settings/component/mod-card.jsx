@@ -29,9 +29,9 @@ function ModCard({
 }) {
   let backgroundColor, color;
   const isOutdated =
-    localVersion && onlineVersion && localVersion !== onlineVersion;
+    !localVersion || !onlineVersion || localVersion !== onlineVersion;
   const hasUpdateAvailable =
-    LastBuild && onlineVersion && LastBuild !== onlineVersion;
+    !LastBuild || !onlineVersion || LastBuild !== onlineVersion;
 
   if (!isDevActive) {
     // affichage utilisateur
@@ -85,7 +85,16 @@ function ModCard({
             variant="rounded"
           />
           <Box>
-            <Typography variant="h5" component="h2" sx={{ mb: 0 }}>
+            <Typography
+              variant="h5"
+              component="h2"
+              sx={{
+                mb: 0,
+                overflowWrap: "break-word",
+                wordBreak: "break-word",
+                wordWrap: "break-word",
+              }}
+            >
               {name}
             </Typography>
             <Typography variant="body2" sx={{ mt: 0.5 }}>

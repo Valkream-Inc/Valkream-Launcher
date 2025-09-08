@@ -6,13 +6,11 @@
 const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
-const { hashFolder } = require("valkream-function-lib");
 
-const GameManager = require("./gameManager.js");
 const DirsManager = require("./dirsManager.js");
 const FilesManager = require("./filesManager.js");
 const LinksManager = require("./linksManager.js");
-const checkInfos = require("../ipc/handlers/check-infos.js");
+const InfosManager = require("./infosManager.js");
 
 const {
   dowloadMultiplefiles,
@@ -21,19 +19,19 @@ const {
 
 class ThunderstoreManager {
   async init() {
-    this.gameDir = await DirsManager.gamePath();
+    this.gameDir = DirsManager.gamePath();
 
-    this.BepInExDir = await DirsManager.bepInExPath();
-    this.BepInExConfigDir = await DirsManager.bepInExConfigPath();
-    this.BepInExPluginsDir = await DirsManager.bepInExPluginsPath();
+    this.BepInExDir = DirsManager.bepInExPath();
+    this.BepInExConfigDir = DirsManager.bepInExConfigPath();
+    this.BepInExPluginsDir = DirsManager.bepInExPluginsPath();
 
-    this.ModPackDir = await DirsManager.downloadModPackPath();
-    this.modsDir = await DirsManager.downloadModsPath();
+    this.ModPackDir = DirsManager.downloadModPackPath();
+    this.modsDir = DirsManager.downloadModsPath();
 
-    this.extractManifestPath = await FilesManager.extractManifestPath();
-    this.installedManifestPath = await FilesManager.installedManifestPath();
+    this.extractManifestPath = FilesManager.extractManifestPath();
+    this.installedManifestPath = FilesManager.installedManifestPath();
 
-    if ((await checkInfos.getInfos()).isServerReachable) {
+    if (await InfosManager.getIsServerReachableFromInternal()) {
       this.modpackZipLink = await LinksManager.modpackZipLink();
       this.modpackZipPath = FilesManager.modpackZipPath();
     }
@@ -143,31 +141,6 @@ class ThunderstoreManager {
       author,
       name,
       version,
-    };
-  }
-
-  async ckeckPluginsAndConfig() {
-    const { plugins, config } = await this.getHash();
-
-    if (
-      plugins !== this.getOnlineVersionConfig().hash.plugins ||
-      config !== this.getOnlineVersionConfig().hash.config
-    )
-      throw new Error("Plugins or configs are not up to date");
-
-    return;
-  }
-
-  async getHash() {
-    await GameManager.preserveGameFolder();
-    await GameManager.clean();
-    const pluginsHash = await hashFolder(this.BepInExPluginsDir, "sha256", 10);
-    const configsHash = await hashFolder(this.BepInExConfigDir, "sha256", 10);
-    await GameManager.restoreGameFolder();
-
-    return {
-      plugins: pluginsHash,
-      config: configsHash,
     };
   }
 

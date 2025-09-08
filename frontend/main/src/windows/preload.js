@@ -51,4 +51,5 @@ contextBridge.exposeInMainWorld("electron_API", {
 
   getModsData: (signal) => ipcRenderer.invoke("get-mods-data", signal),
   getModDetails: (baseMod) => ipcRenderer.invoke("get-mods-details", baseMod),
+  getHashData: () => ipcRenderer.invoke("get-hash-data"),
 });

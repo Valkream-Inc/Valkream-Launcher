@@ -158,6 +158,9 @@ class IpcHandlers {
     ipcMain.handle("get-mods-details", async (event, baseMod) => {
       return await ModsDataHandler.getModDetails(baseMod);
     });
+    ipcMain.handle("get-hash-data", async (event) => {
+      return await VersionManager.getHash();
+    });
   }
 }
 

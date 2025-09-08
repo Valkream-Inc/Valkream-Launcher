@@ -35,11 +35,19 @@ const legendItems = [
   { color: "#6d4c41", label: "Mods non présents dans le modpack" },
 ];
 
+const nonDevLegendItems = [
+  { color: "#038913", label: "Mods installés (normal)" },
+  {
+    color: "#f44336",
+    label: "Version locale inégale à la version du modpack (erreur)",
+  },
+];
+
 function CustomTableCell({ children }) {
   return <TableCell sx={{ color: "white" }}>{children}</TableCell>;
 }
 
-function Legend({ stats, error }) {
+function Legend({ stats, error, isDevActive }) {
   const percent = stats.total
     ? Math.round((stats.processed / stats.total) * 100)
     : 0;
@@ -50,15 +58,26 @@ function Legend({ stats, error }) {
           Légende
         </Typography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
-          {legendItems.map((item, index) => (
-            <Box
-              key={index}
-              sx={{ display: "flex", alignItems: "center", gap: 1 }}
-            >
-              <ColorBox color={item.color} />
-              <Typography variant="body2">{item.label}</Typography>
-            </Box>
-          ))}
+          {!isDevActive &&
+            nonDevLegendItems.map((item, index) => (
+              <Box
+                key={index}
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <ColorBox color={item.color} />
+                <Typography variant="body2">{item.label}</Typography>
+              </Box>
+            ))}
+          {isDevActive &&
+            legendItems.map((item, index) => (
+              <Box
+                key={index}
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <ColorBox color={item.color} />
+                <Typography variant="body2">{item.label}</Typography>
+              </Box>
+            ))}
         </Box>
 
         <br />
@@ -83,10 +102,12 @@ function Legend({ stats, error }) {
                 {stats.processed} / {stats.total} ({percent}%)
               </CustomTableCell>
             </TableRow>
-            <TableRow>
-              <CustomTableCell>Mises à jour disponibles</CustomTableCell>
-              <CustomTableCell>{stats.updatesAvailable}</CustomTableCell>
-            </TableRow>
+            {isDevActive && (
+              <TableRow>
+                <CustomTableCell>Mises à jour disponibles</CustomTableCell>
+                <CustomTableCell>{stats.updatesAvailable}</CustomTableCell>
+              </TableRow>
+            )}
             <TableRow>
               <CustomTableCell>Erreurs</CustomTableCell>
               <CustomTableCell>{stats.errors}</CustomTableCell>

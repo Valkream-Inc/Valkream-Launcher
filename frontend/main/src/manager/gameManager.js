@@ -19,8 +19,8 @@ const DirsManager = require("./dirsManager.js");
 
 const SettingsManager = require("./settingsManager.js");
 const LauncherManager = require("./launcherManager.js");
+const InfosManager = require("./infosManager.js");
 
-const CheckInfos = require("../ipc/handlers/check-infos.js");
 const {
   isFolderPathSecured,
   dowloadMultiplefiles,
@@ -30,7 +30,7 @@ const {
 class GameManager {
   async init() {
     // 🔸 Étape 1 : Configuration des liens vers les fichiers
-    if ((await CheckInfos.getInfos()).isServerReachable) {
+    if (await InfosManager.getIsServerReachableFromInternal()) {
       this.gameZipLink = await LinksManager.gameZipLink();
       this.gameZipPath = FilesManager.gameZipPath();
 
@@ -62,10 +62,10 @@ class GameManager {
     }
 
     // 🔸 Étape 4 : Configuration des dossiers
-    this.gameRootDir = await DirsManager.gameRootPath();
-    this.gameDir = await DirsManager.gamePath();
-    this.gameExePath = await FilesManager.gameExePath();
-    this.preservedDir = await DirsManager.gamePreservedPath();
+    this.gameRootDir = DirsManager.gameRootPath();
+    this.gameDir = DirsManager.gamePath();
+    this.gameExePath = FilesManager.gameExePath();
+    this.preservedDir = DirsManager.gamePreservedPath();
 
     await this.restoreGameFolder();
   }
@@ -182,7 +182,10 @@ class GameManager {
     fs.mkdirSync(this.gameRootDir, { recursive: true });
   }
 
-  async preserveGameFolder(gameFolderToPreserve = this.gameFolderToPreserve) {
+  async preserveGameFolder(
+    gameFolderToPreserve = this.gameFolderToPreserve || []
+  ) {
+    if (gameFolderToPreserve?.length === 0) return;
     if (fs.existsSync(this.preservedDir))
       fs.rmSync(this.preservedDir, { recursive: true });
     fs.mkdirSync(this.preservedDir, { recursive: true });

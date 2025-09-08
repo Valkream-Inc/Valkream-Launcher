@@ -2,24 +2,29 @@ import React from "react";
 import {
   Box,
   Typography,
-  Paper,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
+  Container,
 } from "@mui/material";
+import SettingsBox from "./settings-box/settings-box";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 
 function HashChecks({ hashData }) {
   const {
-    pluginLocalHash,
-    pluginOnlineHash,
-    configLocalHash,
-    configOnlineHash,
+    onlineConfigHash,
+    onlinePluginsHash,
+    localConfigHash,
+    localPluginsHash,
   } = hashData;
+
+  const pluginLocalHash = localPluginsHash.toString();
+  const pluginOnlineHash = onlinePluginsHash.toString();
+  const configLocalHash = localConfigHash.toString();
+  const configOnlineHash = onlineConfigHash.toString();
 
   const rows = [
     {
@@ -36,30 +41,29 @@ function HashChecks({ hashData }) {
     },
   ];
 
+  const color = "white";
+
   return (
-    <Box sx={{ width: "80%", mt: 4 }}>
-      <Typography variant="h6" gutterBottom>
-        Vérification des fichiers (hash)
-      </Typography>
-      <TableContainer component={Paper}>
-        <Table aria-label="hash check table">
+    <SettingsBox warn={false}>
+      <Container sx={{ overflowY: "auto" }}>
+        <Table sx={{ mt: 2 }}>
           <TableHead>
             <TableRow>
-              <TableCell>Dossier</TableCell>
-              <TableCell>Hachage local</TableCell>
-              <TableCell>Hachage distant</TableCell>
-              <TableCell>État</TableCell>
+              <TableCell sx={{ color }}>Dossier</TableCell>
+              <TableCell sx={{ color }}>Hachage local</TableCell>
+              <TableCell sx={{ color }}>Hachage distant</TableCell>
+              <TableCell sx={{ color }}>État</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map((row) => (
               <TableRow key={row.label}>
-                <TableCell component="th" scope="row">
+                <TableCell component="th" scope="row" sx={{ color }}>
                   {row.label}
                 </TableCell>
-                <TableCell>{row.local}</TableCell>
-                <TableCell>{row.online}</TableCell>
-                <TableCell>
+                <TableCell sx={{ color }}>{row.local}</TableCell>
+                <TableCell sx={{ color }}>{row.online}</TableCell>
+                <TableCell sx={{ color }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     {row.isSame ? (
                       <>
@@ -88,8 +92,8 @@ function HashChecks({ hashData }) {
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
-    </Box>
+      </Container>
+    </SettingsBox>
   );
 }
 

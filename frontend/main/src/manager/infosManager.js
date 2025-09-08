@@ -11,6 +11,15 @@ const { baseUrl, serverInfos } = require("../constants");
 const LinksManager = require("./linksManager");
 
 class InfosManager {
+  constructor() {
+    this.IsServerReachable = null;
+  }
+
+  async getIsServerReachableFromInternal() {
+    if (this.IsServerReachable === null) await this.getIsServerReachable();
+    return this.IsServerReachable;
+  }
+
   getIsInternetConnected = async (hostname = "google.com") => {
     return await new Promise((resolve) => {
       dns.lookup(hostname, (err) => {
@@ -26,9 +35,11 @@ class InfosManager {
   getIsServerReachable = async (url = baseUrl) => {
     try {
       await axios.get(url, { timeout: 3000 });
+      this.IsServerReachable = true;
       return true;
     } catch (error) {
       console.error("Error checking server reachability:", error.message);
+      this.IsServerReachable = false;
       return false;
     }
   };

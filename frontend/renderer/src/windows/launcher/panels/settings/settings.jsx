@@ -52,16 +52,23 @@ function Settings() {
   const gameTabRef = useRef();
 
   const changeTab = (tab) => {
+    if (gameTabRef.current) {
+      gameTabRef.current.stop();
+    }
+
     setActiveTab(tab);
 
-    if (gameTabRef.current) {
-      if (tab === "game") {
-        gameTabRef.current.reload();
-      } else {
-        gameTabRef.current.stop();
-      }
+    if (tab === "mods" && gameTabRef.current) {
+      gameTabRef.current.reload();
     }
   };
+
+  function returnToHome() {
+    if (gameTabRef.current) {
+      gameTabRef.current.stop();
+      gameTabRef.current.freeze();
+    }
+  }
 
   const toogleSpecialOption = () => {
     enqueueSnackbar(
@@ -73,13 +80,11 @@ function Settings() {
     setIsSpecialOptionVisible(!isSpecialOptionVisible);
   };
 
-  const onSave = () => {};
-
   return (
     <>
       {/* Navs */}
       <NavSettings
-        onSave={onSave}
+        onSave={returnToHome}
         activeTab={activeTab}
         onToogleSpecialOption={toogleSpecialOption}
         setActiveTab={changeTab}
@@ -136,7 +141,7 @@ function Settings() {
 
       <SettingsTab id="mods" activeTab={activeTab}>
         <SettingsTitle warn={false}>Mods</SettingsTitle>
-        <ModsTab ref={gameTabRef} />
+        <ModsTab ref={gameTabRef} isDevActive={isDevActive} />
       </SettingsTab>
 
       {isDevActive && (
