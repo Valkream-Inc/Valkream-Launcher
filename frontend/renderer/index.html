@@ -15,12 +15,14 @@
     <meta
       http-equiv="Content-Security-Policy"
       content="
-      default-src 'self';
-      script-src 'self';
-      style-src 'self' 'unsafe-inline';
-      img-src 'self' data: https://gcdn.thunderstore.io;;
-      font-src 'self';
-    "
+        default-src 'self';
+        script-src 'self' 'wasm-unsafe-eval' blob:;
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: https://gcdn.thunderstore.io;
+        font-src 'self';
+        connect-src 'self' blob:;
+        media-src 'self' blob:;
+      "
     />
 
     <!-- Css -->

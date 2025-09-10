@@ -1,7 +1,73 @@
-import { Html, PointerLockControls, Sky, useGLTF } from "@react-three/drei";
+import {
+  Html,
+  PointerLockControls,
+  Sky,
+  useGLTF,
+  Stars,
+} from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import React, { Suspense, useEffect, useRef } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+
+function DynamicEnvironment() {
+  const [time, setTime] = useState(0);
+  const sunLightRef = useRef();
+  const moonLightRef = useRef();
+  const moonMeshRef = useRef();
+
+  // vitesse en rad/s pour 1 cycle = 120s
+  const cycleSpeed = (2 * Math.PI) / 120;
+
+  useFrame((state, delta) => {
+    setTime((t) => (t + delta * cycleSpeed) % (Math.PI * 2));
+
+    const radius = 100;
+    const x = Math.sin(time) * radius;
+    const y = Math.cos(time) * radius;
+
+    if (sunLightRef.current) {
+      sunLightRef.current.position.set(x, y, 0);
+      sunLightRef.current.intensity = Math.max(0, y / radius); // atténuation
+    }
+
+    if (moonLightRef.current && moonMeshRef.current) {
+      const mx = -x;
+      const my = -y;
+      moonLightRef.current.position.set(mx, my, 0);
+      moonMeshRef.current.position.set(mx, my, 0);
+
+      const moonVisible = my > 0;
+      moonLightRef.current.intensity = moonVisible ? 0.3 : 0;
+      moonMeshRef.current.visible = moonVisible;
+    }
+  });
+
+  return (
+    <>
+      {/* Soleil */}
+      <directionalLight
+        ref={sunLightRef}
+        castShadow
+        intensity={1.2}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
+
+      {/* Lune */}
+      <pointLight ref={moonLightRef} intensity={0.3} color="blue" />
+      <mesh ref={moonMeshRef}>
+        <sphereGeometry args={[2, 32, 32]} />
+        <meshStandardMaterial emissive="white" emissiveIntensity={0.6} />
+      </mesh>
+
+      {/* Ciel dynamique */}
+      <Sky sunPosition={sunLightRef.current?.position.toArray() || [0, 1, 0]} />
+
+      {/* Étoiles */}
+      <Stars radius={200} depth={50} count={5000} factor={4} fade />
+    </>
+  );
+}
 
 export default function GLTFViewer({
   modelPath = "/model.glb",
@@ -11,36 +77,14 @@ export default function GLTFViewer({
   return (
     <div className="video-background">
       <Canvas shadows camera={{ position: [0, 1.8, 5], fov: 75 }}>
-        {/* Lights */}
-        <ambientLight intensity={0.6} />
-        <directionalLight
-          castShadow
-          position={[10, 20, 10]}
-          intensity={1}
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-        />
+        <ambientLight intensity={0.4} />
 
-        {/* Sky */}
-        <Sky
-          distance={450000}
-          sunPosition={[100, 20, 100]}
-          inclination={0.49}
-          azimuth={0.25}
-        />
+        <DynamicEnvironment />
 
-        {/* Ground */}
-        <mesh rotation-x={-Math.PI / 2} receiveShadow>
-          <planeGeometry args={[200, 200]} />
-          <meshStandardMaterial color="#6b8e23" metalness={0} roughness={1} />
-        </mesh>
-
-        {/* The 3D model (suspended while loading) */}
         <Suspense fallback={<LoaderFallback />}>
           <Model modelPath={modelPath} />
         </Suspense>
 
-        {/* Player controls: pointer lock + WASD movement + climb */}
         <PlayerControls speed={speed} climbSpeed={climbSpeed} />
       </Canvas>
     </div>
@@ -63,6 +107,7 @@ function Model({ modelPath }) {
       child.castShadow = true;
       child.receiveShadow = true;
       if (child.material) {
+        child.material.opacity = 1;
         child.material.needsUpdate = true;
       }
     }
