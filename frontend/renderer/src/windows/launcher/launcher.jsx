@@ -6,7 +6,7 @@ import { ServerStatusProvider } from "./context/server-status.context.jsx";
 import { ThemeProvider } from "./context/theme.context.jsx";
 
 import WindowsBar from "./component/windows-bar/windows-bar.jsx";
-import VideoBackground from "./component/video-background/video-background.jsx";
+import Background from "./component/background/background.jsx";
 import Copyright from "./component/copyright/copyright.jsx";
 import Panel from "./component/panel/panel.jsx";
 
@@ -21,8 +21,8 @@ function Launcher() {
       <ServerStatusProvider>
         <PanelsProvider>
           <VideoBackgroundProvider>
-            {/* Video Background */}
-            <VideoBackground />
+            {/* Background */}
+            <Background />
 
             {/* Panels */}
             <ThemeProvider>

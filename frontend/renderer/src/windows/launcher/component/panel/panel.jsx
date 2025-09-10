@@ -7,7 +7,7 @@ function Panel({ id, children }) {
   const { activePanel } = usePanels();
 
   return (
-    <Fade in={activePanel === id} timeout={500}>
+    <Fade in={activePanel === id} timeout={500} sx={{ PointerEvents: "none" }}>
       <Box sx={{ position: "absolute", inset: 0 }}>{children}</Box>
     </Fade>
   );
