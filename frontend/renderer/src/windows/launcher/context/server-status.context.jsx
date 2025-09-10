@@ -21,7 +21,6 @@ export const ServerStatusProvider = ({ children }) => {
   const [serverInfos, setServerInfos] = useState(null);
   const [isInternetConnected, setIsInternetConnected] = useState(false);
   const [isServerReachable, setIsServerReachable] = useState(false);
-  const [installationStatut, setInstallationStatut] = useState(null);
 
   const isLoading = !(loadingState.infosLoaded && loadingState.statusLoaded);
 
@@ -33,10 +32,11 @@ export const ServerStatusProvider = ({ children }) => {
 
     try {
       const statut = await window.electron_API.getInstallationStatut();
-      setInstallationStatut(statut || null);
       setIsInternetConnected(statut?.isInternetConnected || false);
       setIsServerReachable(statut?.isServerReachable || false);
       setLoadingState((prevState) => ({ ...prevState, statusLoaded: true }));
+
+      return statut;
     } catch (error) {
       console.error(
         "Erreur lors de la récupération du statut d'installation :",
@@ -45,18 +45,16 @@ export const ServerStatusProvider = ({ children }) => {
       setIsInternetConnected(false);
       setIsServerReachable(false);
       setLoadingState((prevState) => ({ ...prevState, statusLoaded: true }));
-    }
 
-    return installationStatut;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      return null;
+    }
   }, []);
 
   useEffect(() => {
     if (
       window.electron_API &&
       window.electron_API.onUpdateInfos &&
-      window.electron_API.checkInfos &&
-      window.electron_API.getInstallationStatut
+      window.electron_API.checkInfos
     ) {
       // Utilisation de useCallback pour s'assurer que handleUpdate est stable
       const handleUpdate = (infos) => {
@@ -81,9 +79,9 @@ export const ServerStatusProvider = ({ children }) => {
       console.warn(
         "L'API Electron n'est pas disponible. Vérification des infos impossible."
       );
-      setLoadingState({ infosLoaded: true, statusLoaded: true });
+      setLoadingState({ infosLoaded: true });
     }
-  }, [getInstallationStatut]);
+  }, []);
 
   const contextValue = {
     isLoading,

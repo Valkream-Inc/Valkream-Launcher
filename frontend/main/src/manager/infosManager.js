@@ -46,6 +46,7 @@ class InfosManager {
 
   getEvent = async () => {
     try {
+      if (!this.getIsServerReachableFromInternal()) return;
       const res = await axios.get(LinksManager.eventUrl());
       return res.data;
     } catch (err) {
@@ -56,6 +57,7 @@ class InfosManager {
 
   getMaintenance = async () => {
     try {
+      if (!this.getIsServerReachableFromInternal()) return;
       const res = await axios.get(LinksManager.maintenanceUrl());
       return res.data;
     } catch (err) {

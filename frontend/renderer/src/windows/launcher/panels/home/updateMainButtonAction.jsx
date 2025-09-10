@@ -9,16 +9,8 @@ const formatBytes = (bytes) => {
   return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
 };
 
-/**
- * Headless component to update the main button dynamically based on server status.
- */
 function UpdateMainButtonAction({ changeMainButtonAction }) {
-  const {
-    getInstallationStatut,
-    maintenance,
-    isServerReachable,
-    isInternetConnected,
-  } = useServerStatus();
+  const { getInstallationStatut, maintenance } = useServerStatus();
 
   const disabledMainButton = useCallback(() => {
     changeMainButtonAction({ isDisabled: true });
@@ -38,11 +30,7 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
   };
 
   useEffect(() => {
-    let isMounted = true;
-
     const reload = async () => {
-      if (!isMounted) return;
-
       try {
         const status = await getInstallationStatut();
         const isMaintenanceEnabled = maintenance?.enabled || false;
@@ -59,6 +47,8 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
           isBoostfpsModsActive,
           isBoostfpsModsInstalled,
           isBoostfpsModsAvailable,
+          isServerReachable,
+          isInternetConnected,
         } = status;
 
         const gameVersion = isInstalled ? "2" : undefined;
@@ -179,19 +169,11 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
 
     reload();
     const intervalId = setInterval(reload, 1000);
+
     return () => {
-      isMounted = false;
       clearInterval(intervalId);
     };
-  }, [
-    getInstallationStatut,
-    maintenance,
-    changeMainButtonAction,
-    disabledMainButton,
-    enableMainButton,
-    isInternetConnected,
-    isServerReachable,
-  ]);
+  }, []);
 
   return null;
 }

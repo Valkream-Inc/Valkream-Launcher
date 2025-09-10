@@ -96,6 +96,7 @@ function ModCard({
               }}
             >
               {name}
+              {!isDevActive && ` - ${localVersion}`}
             </Typography>
             <Typography variant="body2" sx={{ mt: 0.5 }}>
               {description}

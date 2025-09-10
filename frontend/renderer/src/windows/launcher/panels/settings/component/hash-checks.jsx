@@ -15,16 +15,11 @@ import CancelIcon from "@mui/icons-material/Cancel";
 
 function HashChecks({ hashData }) {
   const {
-    onlineConfigHash,
-    onlinePluginsHash,
-    localConfigHash,
-    localPluginsHash,
+    onlineConfigHash: configOnlineHash,
+    onlinePluginsHash: pluginOnlineHash,
+    localConfigHash: configLocalHash,
+    localPluginsHash: pluginLocalHash,
   } = hashData;
-
-  const pluginLocalHash = localPluginsHash.toString();
-  const pluginOnlineHash = onlinePluginsHash.toString();
-  const configLocalHash = localConfigHash.toString();
-  const configOnlineHash = onlineConfigHash.toString();
 
   const rows = [
     {

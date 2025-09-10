@@ -28,14 +28,20 @@ class ModsDataHandler {
     let onlineMods = [];
     try {
       if (signal?.aborted) return;
-      const res = await axios.get(
-        `https://thunderstore.io/api/experimental/package/ValheimValkream/Valkream/${onlineValkreamVersion}/`
-      );
+      const res = onlineValkreamVersion
+        ? await axios.get(
+            `https://thunderstore.io/api/experimental/package/ValheimValkream/Valkream/${onlineValkreamVersion}/`
+          )
+        : { data: { dependencies: [] } };
       onlineMods = res.data?.dependencies || [];
 
       if (await SettingsManager.getSetting("boostfpsEnabled")) {
         const boostfpsMods = onlineValkreamInfo?.modpack?.boostfps_mods || [];
         onlineMods.push(...boostfpsMods);
+      }
+      if (await SettingsManager.getSetting("adminEnabled")) {
+        const adminMods = onlineValkreamInfo?.modpack?.admin_mods || [];
+        onlineMods.push(...adminMods);
       }
     } catch (err) {
       console.error("Erreur de récupération des dépendances en ligne :", err);

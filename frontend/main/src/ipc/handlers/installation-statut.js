@@ -4,12 +4,14 @@ const ThunderstoreManager = require("../../manager/thunderstoreManager");
 const VersionManager = require("../../manager/versionManager");
 
 const CheckInfos = require("./check-infos");
+const InfosManager = require("../../manager/infosManager");
 
 class InstallationStatut {
   get = async () => {
+    console.log("get");
     // --- 1. Connectivité ---
-    const { isServerReachable, isInternetConnected } =
-      await CheckInfos.getInfos();
+    const isServerReachable = await InfosManager.getIsServerReachable();
+    const isInternetConnected = await InfosManager.getIsInternetConnected();
 
     // --- 2. Infos locales & installation ---
     const [
