@@ -16,6 +16,7 @@ class SettingsManager {
       adminEnabled: false,
       launcherBehavior: "close",
       launcherTheme: "modern",
+      backgroundType: "video",
     };
   }
 

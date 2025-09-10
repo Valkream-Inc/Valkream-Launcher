@@ -5,20 +5,26 @@ import GltfBackground from "./gltf-background/gltf-background.jsx";
 import VideoBackground from "./video-background/video-background.jsx";
 
 import { useServerStatus } from "../../context/server-status.context.jsx";
+import { useBackground } from "../../context/background.context.jsx";
 
 function Background() {
-  const { isLoading } = useServerStatus();
-  if (isLoading) return null;
+  const { backgroundType } = useBackground();
 
-  const background_type = "video";
+  const { isLoading } = useServerStatus();
 
   return (
     <>
-      <VideoBackground
-        style={{ display: background_type === "video" ? "block" : "none" }}
-      />
-      {background_type === "image" && <ImgBackground />}
-      {background_type === "3d" && <GltfBackground />}
+      {/* afficher l'image pendant le chargement de la video */}
+      {backgroundType === "video" && !isLoading && <ImgBackground />}
+
+      {/* Cas général */}
+      {!isLoading && (
+        <VideoBackground
+          style={{ display: backgroundType === "video" ? "block" : "none" }}
+        />
+      )}
+      {backgroundType === "image" && <ImgBackground />}
+      {backgroundType === "3d" && <GltfBackground />}
     </>
   );
 }

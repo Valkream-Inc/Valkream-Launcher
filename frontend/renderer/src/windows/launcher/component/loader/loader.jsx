@@ -12,7 +12,7 @@ export default function Loader({ isVisible }) {
     if (!isVisible) {
       const timeoutId = setTimeout(() => {
         setShouldRender(false);
-      }, 2000); // This duration should match the 'transition' property in your CSS.
+      }, 1500); // This duration should match the 'transition' property in your CSS.
       return () => clearTimeout(timeoutId);
     }
   }, [isVisible]);

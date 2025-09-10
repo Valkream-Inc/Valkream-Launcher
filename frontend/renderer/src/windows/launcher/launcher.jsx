@@ -1,7 +1,7 @@
 import React from "react";
 
 import { PanelsProvider } from "./context/panels.context.jsx";
-import { VideoBackgroundProvider } from "./context/video-background.context.jsx";
+import { BackgroundProvider } from "./context/background.context.jsx";
 import { ServerStatusProvider } from "./context/server-status.context.jsx";
 import { ThemeProvider } from "./context/theme.context.jsx";
 
@@ -20,7 +20,7 @@ function Launcher() {
       <WindowsBar />
       <ServerStatusProvider>
         <PanelsProvider>
-          <VideoBackgroundProvider>
+          <BackgroundProvider>
             {/* Background */}
             <Background />
 
@@ -32,12 +32,8 @@ function Launcher() {
               <Panel id="settings">
                 <Settings />
               </Panel>
-              <Panel id="alert">Alert</Panel>
-              <Panel id="panel1">Panel1</Panel>
-              <Panel id="panel2">Panel2</Panel>
-              <Panel id="panel3">Panel3</Panel>
             </ThemeProvider>
-          </VideoBackgroundProvider>
+          </BackgroundProvider>
           {/* Copyright */}
           <Copyright />
         </PanelsProvider>

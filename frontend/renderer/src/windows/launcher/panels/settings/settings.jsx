@@ -16,6 +16,7 @@ import ToggleBoostFPS from "./settings-list/toggle-boostfps.jsx";
 import ToggleAdmin from "./settings-list/toggle-admin.jsx";
 import SelectLauncherTheme from "./settings-list/select-launcher-theme.jsx";
 import SelectLauncherBehavior from "./settings-list/select-launcher-behavior.jsx";
+import SelectLauncherBackgroundType from "./settings-list/select-launcher-background-type.jsx";
 import ButtonUninstallGlobal from "./settings-list/button-uninstall-global.jsx";
 import ButtonUninstallGame from "./settings-list/button-uninstall-game.jsx";
 import ButtonOpenGame from "./settings-list/button-open-game.jsx";
@@ -127,6 +128,7 @@ function Settings() {
         <ToggleMusic />
         <SelectLauncherBehavior />
         {isSpecialOptionVisible && <SelectLauncherTheme />}
+        {isSpecialOptionVisible && <SelectLauncherBackgroundType />}
       </SettingsTab>
 
       <SettingsTab id="game" activeTab={activeTab}>

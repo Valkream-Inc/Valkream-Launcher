@@ -6,11 +6,12 @@ export const useTheme = () => useContext(ThemeContext);
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState("modern");
 
-  const changeTheme = (value) => {
+  const changeTheme = async (value) => {
     const themes = ["old", "modern", "futuristic"];
     if (!themes.includes(value)) throw new Error("Invalid theme value");
 
-    setTheme(value);
+    await window.electron_API.setSettings("launcherTheme", value);
+    return setTheme(value);
   };
 
   useEffect(() => {

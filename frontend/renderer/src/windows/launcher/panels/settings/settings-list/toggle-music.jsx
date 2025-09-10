@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
 
 import SettingsBox from "../component/settings-box/settings-box.jsx";
-import { useVideoBackground } from "../../../context/video-background.context.jsx";
+import { useBackground } from "../../../context/background.context.jsx";
 import { enqueueSnackbar } from "notistack";
 
 function ToggleMusic() {
   const [checked, setChecked] = useState(false);
-  const { mute, unmute } = useVideoBackground();
+  const { mute, unmute } = useBackground();
 
   useEffect(() => {
     const loadSettings = async () => {

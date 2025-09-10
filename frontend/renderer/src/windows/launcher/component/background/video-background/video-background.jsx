@@ -1,9 +1,9 @@
 import React from "react";
 
-import { useVideoBackground } from "../../../context/video-background.context.jsx";
+import { useBackground } from "../../../context/background.context.jsx";
 
 function VideoBackground({ style }) {
-  const { VideoBackgroundRef } = useVideoBackground();
+  const { VideoBackgroundRef } = useBackground();
 
   return (
     <>
