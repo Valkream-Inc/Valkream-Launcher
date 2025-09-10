@@ -45,6 +45,8 @@
     "@fabricio-191/valve-server-query": "^4.1.9",
     "@mui/icons-material": "^7.3.1",
     "@mui/material": "^7.3.1",
+    "@react-three/drei": "^10.7.5",
+    "@react-three/fiber": "^9.3.0",
     "axios": "^1.10.0",
     "better-sqlite3": "^12.2.0",
     "electron-updater": "^6.1.8",
@@ -55,10 +57,12 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.1",
+    "three": "^0.180.0",
     "valkream-function-lib": "1.0.7",
     "yaml": "^2.2.2"
   },
   "devDependencies": {
+    "@types/three": "^0.180.0",
     "@vitejs/plugin-react": "^5.0.2",
     "concurrently": "^9.2.0",
     "cross-env": "^10.0.0",
