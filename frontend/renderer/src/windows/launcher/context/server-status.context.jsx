@@ -1,9 +1,9 @@
 import React, {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import Loader from "../component/loader/loader";
 
@@ -25,17 +25,18 @@ export const ServerStatusProvider = ({ children }) => {
   const isLoading = !(loadingState.infosLoaded && loadingState.statusLoaded);
 
   const getInstallationStatut = useCallback(async () => {
-    if (!window.electron_API || !window.electron_API.getInstallationStatut)
-      return console.warn(
+    if (!window.electron_API?.getInstallationStatut) {
+      console.warn(
         "L'API Electron n'est pas disponible. Vérification des infos impossible."
       );
+      return null;
+    }
 
     try {
       const statut = await window.electron_API.getInstallationStatut();
       setIsInternetConnected(statut?.isInternetConnected || false);
       setIsServerReachable(statut?.isServerReachable || false);
-      setLoadingState((prevState) => ({ ...prevState, statusLoaded: true }));
-
+      setLoadingState((prev) => ({ ...prev, statusLoaded: true }));
       return statut;
     } catch (error) {
       console.error(
@@ -44,44 +45,33 @@ export const ServerStatusProvider = ({ children }) => {
       );
       setIsInternetConnected(false);
       setIsServerReachable(false);
-      setLoadingState((prevState) => ({ ...prevState, statusLoaded: true }));
-
+      setLoadingState((prev) => ({ ...prev, statusLoaded: true }));
       return null;
     }
   }, []);
 
+  const handleUpdate = useCallback((infos) => {
+    setEvent(infos?.event || null);
+    setMaintenance(infos?.maintenance || null);
+    setServerInfos(infos?.serverInfos || null);
+    setLoadingState((prev) => ({ ...prev, infosLoaded: true }));
+  }, []);
+
   useEffect(() => {
-    if (
-      window.electron_API &&
-      window.electron_API.onUpdateInfos &&
-      window.electron_API.checkInfos
-    ) {
-      // Utilisation de useCallback pour s'assurer que handleUpdate est stable
-      const handleUpdate = (infos) => {
-        setEvent(infos.event || null);
-        setMaintenance(infos.maintenance || null);
-        setServerInfos(infos.serverInfos || null);
-        setLoadingState((prevState) => ({ ...prevState, infosLoaded: true }));
-      };
-
-      // ✅ Ajout unique du listener
-      window.electron_API.onUpdateInfos(handleUpdate);
-
-      // Check initial
-      window.electron_API.checkInfos();
-      getInstallationStatut();
-
-      // Cleanup pour éviter les fuites
-      return () => {
-        window.electron_API.removeUpdateInfos(handleUpdate);
-      };
-    } else {
+    if (!window.electron_API?.getInfos) {
       console.warn(
         "L'API Electron n'est pas disponible. Vérification des infos impossible."
       );
-      setLoadingState({ infosLoaded: true });
+      return null;
     }
-  }, []);
+
+    const interval = setInterval(async () => {
+      const infos = await window.electron_API.getInfos();
+      handleUpdate(infos);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [getInstallationStatut, handleUpdate]);
 
   const contextValue = {
     isLoading,

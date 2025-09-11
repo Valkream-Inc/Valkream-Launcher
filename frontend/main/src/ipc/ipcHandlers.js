@@ -74,16 +74,7 @@ class IpcHandlers {
     });
 
     // infos
-    ipcMain.handle("check-infos", async (event) => {
-      await CheckInfos.init(event.sender);
-      return true;
-    });
-    ipcMain.handle("get-infos", async () => {
-      return await CheckInfos.getInfos();
-    });
-    ipcMain.on("stop-check-infos", () => {
-      CheckInfos.stop();
-    });
+    ipcMain.handle("get-infos", async () => await CheckInfos.get());
 
     // settings
     ipcMain.handle(

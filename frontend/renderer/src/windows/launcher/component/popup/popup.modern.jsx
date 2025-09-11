@@ -1,22 +1,22 @@
-import React from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography,
-  Button,
-  Box,
-  Slide,
-  Fade,
-} from "@mui/material";
-import InfoIcon from "@mui/icons-material/Info";
-import WarningIcon from "@mui/icons-material/Warning";
-import ErrorIcon from "@mui/icons-material/Error";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import ErrorIcon from "@mui/icons-material/Error";
 import EventIcon from "@mui/icons-material/Event";
+import InfoIcon from "@mui/icons-material/Info";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import WarningIcon from "@mui/icons-material/Warning";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Fade,
+  Slide,
+  Typography,
+} from "@mui/material";
+import React from "react";
 
 const typeConfig = {
   info: {
@@ -81,7 +81,7 @@ export default function ModernPopup({
       className="modern-theme"
       PaperProps={{
         sx: {
-          background: "rgba(255,255,255,0.08)",
+          background: "rgba(0,0,0,0.15)",
           backdropFilter: "blur(10px)",
           borderRadius: "20px",
           border: "1px solid rgba(255,255,255,0.15)",

@@ -32,10 +32,7 @@ contextBridge.exposeInMainWorld("electron_API", {
 
   versionLauncher: () => ipcRenderer.invoke("get-version:launcher"),
   versionGame: () => ipcRenderer.invoke("get-version:game"),
-  checkInfos: () => ipcRenderer.invoke("check-infos"),
-  onUpdateInfos: (callback) =>
-    ipcRenderer.on("update-infos", (event, ...args) => callback(...args)),
-  removeUpdateInfos: (callback) => ipcRenderer.off("update-infos", callback),
+  getInfos: () => ipcRenderer.invoke("get-infos"),
 
   getInstallationStatut: () => ipcRenderer.invoke("get-installation-statut"),
   openLink: (url) => ipcRenderer.invoke("open-link", url),
