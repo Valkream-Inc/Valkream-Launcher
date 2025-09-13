@@ -70,6 +70,8 @@ export const ServerStatusProvider = ({ children }) => {
       handleUpdate(infos);
     }, 1000);
 
+    getInstallationStatut();
+
     return () => clearInterval(interval);
   }, [getInstallationStatut, handleUpdate]);
 

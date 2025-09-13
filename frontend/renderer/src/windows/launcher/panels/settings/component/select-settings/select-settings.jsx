@@ -1,5 +1,5 @@
+import { MenuItem, Select } from "@mui/material";
 import React from "react";
-import { Select, MenuItem } from "@mui/material";
 import "./select-settings.css";
 
 import { useTheme } from "../../../../context/theme.context";

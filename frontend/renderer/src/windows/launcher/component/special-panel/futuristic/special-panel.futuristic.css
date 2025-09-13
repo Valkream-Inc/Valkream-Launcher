@@ -1,0 +1,450 @@
+.special-panel-futuristic {
+  margin: 0;
+  height: 100vh;
+  background: #050505;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", sans-serif;
+  color: white;
+  overflow: hidden;
+}
+
+/* --- COLORS PER TYPE --- */
+.special-panel-futuristic.error {
+  --color: #ff0033;
+}
+
+.special-panel-futuristic.warning {
+  --color: #ff8800;
+}
+
+.special-panel-futuristic.info {
+  --color: #3399ff;
+}
+
+/* --- Background Network --- */
+.special-panel-futuristic .circuit {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.special-panel-futuristic .line,
+.special-panel-futuristic .node {
+  position: absolute;
+  background: var(--color);
+  box-shadow: 0 0 15px var(--color), 0 0 30px var(--color);
+  /* Hide all decorations by default */
+  display: none;
+}
+
+.special-panel-futuristic .line.h {
+  height: 3px;
+}
+
+.special-panel-futuristic .line.v {
+  width: 3px;
+}
+
+.special-panel-futuristic .node {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 0 15px var(--color), 0 0 40px var(--color);
+}
+
+/* --- ERROR Patterns (red) --- */
+.special-panel-futuristic.error .line,
+.special-panel-futuristic.error .node {
+  display: none;
+}
+
+/* Hide all others */
+.special-panel-futuristic.error .line.top,
+.special-panel-futuristic.error .line.bottom,
+.special-panel-futuristic.error .line.left,
+.special-panel-futuristic.error .line.right,
+.special-panel-futuristic.error .line.diag1,
+.special-panel-futuristic.error .line.diag2,
+.special-panel-futuristic.error .node.n1,
+.special-panel-futuristic.error .node.n2,
+.special-panel-futuristic.error .node.n3,
+.special-panel-futuristic.error .node.n4,
+.special-panel-futuristic.error .node.n5,
+.special-panel-futuristic.error .node.n6 {
+  display: block;
+}
+
+.special-panel-futuristic.error .line.top {
+  top: 40px;
+  left: 10%;
+  width: 80%;
+  height: 3px;
+}
+
+.special-panel-futuristic.error .line.bottom {
+  bottom: 40px;
+  left: 5%;
+  width: 90%;
+  height: 3px;
+}
+
+.special-panel-futuristic.error .line.left {
+  top: 10%;
+  left: 40px;
+  width: 3px;
+  height: 80%;
+}
+
+.special-panel-futuristic.error .line.right {
+  top: 15%;
+  right: 40px;
+  width: 3px;
+  height: 70%;
+}
+
+.special-panel-futuristic.error .line.diag1 {
+  top: 100px;
+  left: 0;
+  width: 200px;
+  height: 3px;
+  transform: rotate(45deg);
+}
+
+.special-panel-futuristic.error .line.diag2 {
+  bottom: 120px;
+  right: 0;
+  width: 250px;
+  height: 3px;
+  transform: rotate(-45deg);
+}
+
+.special-panel-futuristic.error .node.n1 {
+  top: 40px;
+  left: 10%;
+}
+
+.special-panel-futuristic.error .node.n2 {
+  top: 40px;
+  left: 90%;
+}
+
+.special-panel-futuristic.error .node.n3 {
+  bottom: 40px;
+  left: 5%;
+}
+
+.special-panel-futuristic.error .node.n4 {
+  bottom: 40px;
+  right: 5%;
+}
+
+.special-panel-futuristic.error .node.n5 {
+  top: 20%;
+  left: 40px;
+}
+
+.special-panel-futuristic.error .node.n6 {
+  bottom: 20%;
+  right: 40px;
+}
+
+/* --- WARNING Patterns (orange, unstable zig-zag) --- */
+.special-panel-futuristic.warning .line,
+.special-panel-futuristic.warning .node {
+  display: none;
+}
+
+/* Hide all others */
+.special-panel-futuristic.warning .line.z1,
+.special-panel-futuristic.warning .line.z2,
+.special-panel-futuristic.warning .line.z3,
+.special-panel-futuristic.warning .line.v1,
+.special-panel-futuristic.warning .line.v2,
+.special-panel-futuristic.warning .line.diag,
+.special-panel-futuristic.warning .node.n1,
+.special-panel-futuristic.warning .node.n2,
+.special-panel-futuristic.warning .node.n3,
+.special-panel-futuristic.warning .node.n4,
+.special-panel-futuristic.warning .node.n5,
+.special-panel-futuristic.warning .node.n6 {
+  display: block;
+}
+
+.special-panel-futuristic.warning .line.z1 {
+  top: 60px;
+  left: 0;
+  width: 30%;
+  height: 3px;
+}
+
+.special-panel-futuristic.warning .line.z2 {
+  top: 120px;
+  left: 30%;
+  width: 40%;
+  height: 3px;
+}
+
+.special-panel-futuristic.warning .line.z3 {
+  top: 180px;
+  left: 70%;
+  width: 30%;
+  height: 3px;
+}
+
+.special-panel-futuristic.warning .line.v1 {
+  left: 15%;
+  top: 200px;
+  width: 3px;
+  height: 40%;
+}
+
+.special-panel-futuristic.warning .line.v2 {
+  right: 20%;
+  top: 250px;
+  width: 3px;
+  height: 40%;
+}
+
+.special-panel-futuristic.warning .line.diag {
+  bottom: 100px;
+  left: 20%;
+  width: 200px;
+  height: 3px;
+  transform: rotate(-30deg);
+}
+
+.special-panel-futuristic.warning .node.n1 {
+  top: 60px;
+  left: 0;
+}
+
+.special-panel-futuristic.warning .node.n2 {
+  top: 120px;
+  left: 30%;
+}
+
+.special-panel-futuristic.warning .node.n3 {
+  top: 180px;
+  left: 70%;
+}
+
+.special-panel-futuristic.warning .node.n4 {
+  bottom: 100px;
+  left: 20%;
+}
+
+.special-panel-futuristic.warning .node.n5 {
+  top: 200px;
+  left: 15%;
+}
+
+.special-panel-futuristic.warning .node.n6 {
+  top: 250px;
+  right: 20%;
+}
+
+/* --- INFO Patterns (blue, structured grid) --- */
+.special-panel-futuristic.info .line,
+.special-panel-futuristic.info .node {
+  display: none;
+}
+
+/* Hide all others */
+.special-panel-futuristic.info .line.h1,
+.special-panel-futuristic.info .line.h2,
+.special-panel-futuristic.info .line.h3,
+.special-panel-futuristic.info .line.v1,
+.special-panel-futuristic.info .line.v2,
+.special-panel-futuristic.info .line.v3,
+.special-panel-futuristic.info .node.n1,
+.special-panel-futuristic.info .node.n2,
+.special-panel-futuristic.info .node.n3,
+.special-panel-futuristic.info .node.n4,
+.special-panel-futuristic.info .node.n5,
+.special-panel-futuristic.info .node.n6,
+.special-panel-futuristic.info .node.n7,
+.special-panel-futuristic.info .node.n8,
+.special-panel-futuristic.info .node.n9 {
+  display: block;
+}
+
+.special-panel-futuristic.info .line.h1 {
+  top: 20%;
+  left: 10%;
+  width: 80%;
+  height: 3px;
+}
+
+.special-panel-futuristic.info .line.h2 {
+  top: 50%;
+  left: 5%;
+  width: 90%;
+  height: 3px;
+}
+
+.special-panel-futuristic.info .line.h3 {
+  top: 80%;
+  left: 15%;
+  width: 70%;
+  height: 3px;
+}
+
+.special-panel-futuristic.info .line.v1 {
+  top: 10%;
+  left: 20%;
+  width: 3px;
+  height: 80%;
+}
+
+.special-panel-futuristic.info .line.v2 {
+  top: 5%;
+  left: 50%;
+  width: 3px;
+  height: 90%;
+}
+
+.special-panel-futuristic.info .line.v3 {
+  top: 15%;
+  left: 80%;
+  width: 3px;
+  height: 70%;
+}
+
+.special-panel-futuristic.info .node {
+  width: 14px;
+  height: 14px;
+}
+
+.special-panel-futuristic.info .node.n1 {
+  top: 20%;
+  left: 20%;
+}
+
+.special-panel-futuristic.info .node.n2 {
+  top: 20%;
+  left: 50%;
+}
+
+.special-panel-futuristic.info .node.n3 {
+  top: 20%;
+  left: 80%;
+}
+
+.special-panel-futuristic.info .node.n4 {
+  top: 50%;
+  left: 20%;
+}
+
+.special-panel-futuristic.info .node.n5 {
+  top: 50%;
+  left: 50%;
+}
+
+.special-panel-futuristic.info .node.n6 {
+  top: 50%;
+  left: 80%;
+}
+
+.special-panel-futuristic.info .node.n7 {
+  top: 80%;
+  left: 20%;
+}
+
+.special-panel-futuristic.info .node.n8 {
+  top: 80%;
+  left: 50%;
+}
+
+.special-panel-futuristic.info .node.n9 {
+  top: 80%;
+  left: 80%;
+}
+
+/* --- Alert Window --- */
+.special-panel-futuristic-box {
+  display: flex;
+  align-items: center;
+  background: #0f0f0f;
+  border: 3px solid var(--color);
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 0 40px var(--color);
+  width: 70%;
+  max-width: 900px;
+  z-index: 10;
+}
+
+.special-panel-futuristic-box .icon {
+  font-size: 150px;
+  color: var(--color);
+  text-shadow: 0 0 20px var(--color), 0 0 40px var(--color);
+  margin-right: 2rem;
+  flex-shrink: 0;
+}
+
+.special-panel-futuristic-box .content {
+  flex: 1;
+}
+
+.special-panel-futuristic-box .title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--color);
+  text-transform: uppercase;
+  text-shadow: 0 0 15px var(--color), 0 0 30px var(--color);
+  letter-spacing: 2px;
+}
+
+.special-panel-futuristic-box p {
+  font-size: 1.2rem;
+}
+
+.special-panel-futuristic-box .buttons {
+  margin-top: 2rem;
+}
+
+.special-panel-futuristic-box button {
+  background: transparent;
+  border: 2px solid var(--color);
+  color: var(--color);
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  margin-right: 1rem;
+  transition: 0.3s;
+  text-shadow: 0 0 10px var(--color);
+}
+
+.special-panel-futuristic-box button:hover {
+  background: var(--color);
+  color: black;
+  box-shadow: 0 0 15px var(--color);
+}
+
+@keyframes flicker {
+  0%,
+  18%,
+  22%,
+  25%,
+  53%,
+  57%,
+  100% {
+    opacity: 1;
+  }
+
+  20%,
+  24%,
+  55% {
+    opacity: 0.4;
+  }
+}
+
+.special-panel-futuristic-box,
+.special-panel-futuristic .line,
+.special-panel-futuristic .node {
+  animation: flicker 3.5s infinite;
+}

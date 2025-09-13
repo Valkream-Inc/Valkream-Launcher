@@ -3,9 +3,13 @@ import "./copyright.css";
 
 import { usePanels } from "../../context/panels.context";
 
-function Copyright() {
+function Copyright({ existPanels = true }) {
   const [versionLauncher, setVersionLauncher] = useState("");
-  const { activePanel } = usePanels();
+  let activePanel;
+
+  if (!existPanels) {
+    activePanel = usePanels();
+  }
 
   useEffect(() => {
     // Only access the Electron API after the component has mounted
