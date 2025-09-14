@@ -1,6 +1,6 @@
-import { useEffect, useCallback } from "react";
-import { useServerStatus } from "../../context/server-status.context";
 import { enqueueSnackbar } from "notistack";
+import { useCallback, useEffect } from "react";
+import { useInfos } from "../../context/infos.context";
 
 const formatBytes = (bytes) => {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
@@ -10,7 +10,7 @@ const formatBytes = (bytes) => {
 };
 
 function UpdateMainButtonAction({ changeMainButtonAction }) {
-  const { getInstallationStatut, maintenance } = useServerStatus();
+  const { getInstallationStatut, maintenance } = useInfos();
 
   const disabledMainButton = useCallback(() => {
     changeMainButtonAction({ isDisabled: true });

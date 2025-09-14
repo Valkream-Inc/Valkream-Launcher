@@ -7,10 +7,10 @@ import React, {
 } from "react";
 import Loader from "../component/loader/loader";
 
-const ServerStatusContext = createContext(undefined);
-export const useServerStatus = () => useContext(ServerStatusContext);
+const InfosContext = createContext(undefined);
+export const useInfos = () => useContext(InfosContext);
 
-export const ServerStatusProvider = ({ children }) => {
+export const InfosProvider = ({ children }) => {
   const [loadingState, setLoadingState] = useState({
     infosLoaded: false,
     statusLoaded: false,
@@ -86,9 +86,9 @@ export const ServerStatusProvider = ({ children }) => {
   };
 
   return (
-    <ServerStatusContext.Provider value={contextValue}>
+    <InfosContext.Provider value={contextValue}>
       <Loader isVisible={isLoading} />
       {children}
-    </ServerStatusContext.Provider>
+    </InfosContext.Provider>
   );
 };

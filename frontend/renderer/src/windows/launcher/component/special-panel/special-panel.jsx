@@ -27,6 +27,7 @@ const SpecialPanel = (props) => {
 
   const type = props.type;
   const title = props.title || alertData[type].title;
+  console.log(title);
   const paragraph = props.paragraph || alertData[type].paragraph;
 
   if (theme === "futuristic")

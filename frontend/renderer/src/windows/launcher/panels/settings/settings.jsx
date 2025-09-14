@@ -1,28 +1,29 @@
-import { useState, useRef } from "react";
+import { enqueueSnackbar } from "notistack";
+import { useRef, useState } from "react";
+import SpecialPanel from "../../component/special-panel/special-panel.jsx";
 import {
   NavButton,
   NavSettings,
 } from "./component/nav-settings/nav-settings.jsx";
+import SettingsBox from "./component/settings-box/settings-box.jsx";
 import SettingsTab from "./component/settings-tab/settings-tab.jsx";
 import SettingsTitle from "./component/settings-tittle/settings-title.jsx";
-import SettingsBox from "./component/settings-box/settings-box.jsx";
-import { enqueueSnackbar } from "notistack";
 
-import ToggleMusic from "./settings-list/toggle-music.jsx";
-import ToggleDev from "./settings-list/toggle-dev.jsx";
-import ToggleBeta from "./settings-list/toggle-beta.jsx";
-import ToggleLaunchSteam from "./settings-list/toggle-launch-steam.jsx";
-import ToggleBoostFPS from "./settings-list/toggle-boostfps.jsx";
-import ToggleAdmin from "./settings-list/toggle-admin.jsx";
-import SelectLauncherTheme from "./settings-list/select-launcher-theme.jsx";
-import SelectLauncherBehavior from "./settings-list/select-launcher-behavior.jsx";
-import SelectLauncherBackgroundType from "./settings-list/select-launcher-background-type.jsx";
-import ButtonUninstallGlobal from "./settings-list/button-uninstall-global.jsx";
-import ButtonUninstallGame from "./settings-list/button-uninstall-game.jsx";
-import ButtonOpenGame from "./settings-list/button-open-game.jsx";
-import ButtonOpenAppData from "./settings-list/button-open-appdata.jsx";
-import ButtonDebug from "./settings-list/button-debug.jsx";
 import ModsTab from "./mods-tab.jsx";
+import ButtonDebug from "./settings-list/button-debug.jsx";
+import ButtonOpenAppData from "./settings-list/button-open-appdata.jsx";
+import ButtonOpenGame from "./settings-list/button-open-game.jsx";
+import ButtonUninstallGame from "./settings-list/button-uninstall-game.jsx";
+import ButtonUninstallGlobal from "./settings-list/button-uninstall-global.jsx";
+import SelectLauncherBackgroundType from "./settings-list/select-launcher-background-type.jsx";
+import SelectLauncherBehavior from "./settings-list/select-launcher-behavior.jsx";
+import SelectLauncherTheme from "./settings-list/select-launcher-theme.jsx";
+import ToggleAdmin from "./settings-list/toggle-admin.jsx";
+import ToggleBeta from "./settings-list/toggle-beta.jsx";
+import ToggleBoostFPS from "./settings-list/toggle-boostfps.jsx";
+import ToggleDev from "./settings-list/toggle-dev.jsx";
+import ToggleLaunchSteam from "./settings-list/toggle-launch-steam.jsx";
+import ToggleMusic from "./settings-list/toggle-music.jsx";
 
 function Presentation() {
   return (
@@ -47,10 +48,45 @@ function Presentation() {
 
 function Settings() {
   const [activeTab, setActiveTab] = useState("general");
+  const [isConfirmSpecialOptionVisible, setIsConfirmSpecialOptionVisible] =
+    useState(false);
   const [isSpecialOptionVisible, setIsSpecialOptionVisible] = useState(false);
   const [isDevActive, setIsDevActive] = useState(false);
 
   const gameTabRef = useRef();
+
+  const toogleSpecialOption = () => {
+    enqueueSnackbar(
+      isSpecialOptionVisible
+        ? "Options Speciales désactivées !"
+        : "Options Speciales activées !",
+      { variant: "warning" }
+    );
+    setIsSpecialOptionVisible(!isSpecialOptionVisible);
+  };
+
+  const EnabledSpecialOption = () => {
+    return (
+      <SpecialPanel
+        type="warning"
+        paragraph="Vous êtes sur le point d’activer des options avancées pouvant endommager votre installation (Admin Tools, Debug Tools, Dev Tools, Fonctionnalités Alpha). Êtes-vous sûr de vouloir continuer ?"
+        buttons={[
+          {
+            text: "Continuer",
+            onClick: () => {
+              toogleSpecialOption();
+              setIsConfirmSpecialOptionVisible(false);
+            },
+          },
+          {
+            text: "Annuler et revenir",
+            onClick: () => setIsConfirmSpecialOptionVisible(false),
+          },
+        ]}
+      />
+    );
+  };
+  if (isConfirmSpecialOptionVisible) return <EnabledSpecialOption />;
 
   const changeTab = (tab) => {
     if (gameTabRef.current) {
@@ -71,15 +107,15 @@ function Settings() {
     }
   }
 
-  const toogleSpecialOption = () => {
-    enqueueSnackbar(
-      isSpecialOptionVisible
-        ? "Options Speciales désactivées !"
-        : "Options Speciales activées !",
-      { variant: "warning" }
-    );
-    setIsSpecialOptionVisible(!isSpecialOptionVisible);
-  };
+  function ToggleIsConfirmSpecialOptionVisible() {
+    // si déja activés --> les désactivés
+    if (isSpecialOptionVisible) {
+      setIsSpecialOptionVisible(false);
+      setIsConfirmSpecialOptionVisible(false);
+    }
+    // sinon rendre visible le panel de confirmation
+    else setIsConfirmSpecialOptionVisible(true);
+  }
 
   return (
     <>
@@ -87,7 +123,7 @@ function Settings() {
       <NavSettings
         onSave={returnToHome}
         activeTab={activeTab}
-        onToogleSpecialOption={toogleSpecialOption}
+        onToogleSpecialOption={ToggleIsConfirmSpecialOptionVisible}
         setActiveTab={changeTab}
       >
         <NavButton

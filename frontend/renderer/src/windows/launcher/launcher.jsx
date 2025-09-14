@@ -1,8 +1,8 @@
 import React from "react";
 
 import { BackgroundProvider } from "./context/background.context.jsx";
+import { InfosProvider } from "./context/infos.context.jsx";
 import { PanelsProvider, usePanels } from "./context/panels.context.jsx";
-import { ServerStatusProvider } from "./context/server-status.context.jsx";
 import { ThemeProvider } from "./context/theme.context.jsx";
 
 import Background from "./component/background/background.jsx";
@@ -38,7 +38,7 @@ function Launcher() {
     <>
       {/* Windows Bar */}
       <WindowsBar />
-      <ServerStatusProvider>
+      <InfosProvider>
         <PanelsProvider>
           <BackgroundProvider>
             {/* Background */}
@@ -61,7 +61,7 @@ function Launcher() {
           {/* Copyright */}
           <Copyright />
         </PanelsProvider>
-      </ServerStatusProvider>
+      </InfosProvider>
     </>
   );
 }

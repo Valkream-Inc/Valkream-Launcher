@@ -1,10 +1,10 @@
 import React from "react";
 import "./css/server-info.css";
 
-import { useServerStatus } from "../../../../context/server-status.context.jsx";
+import { useInfos } from "../../../../context/infos.context";
 
 function ServerInfo() {
-  const { isLoading, serverInfos, maintenance } = useServerStatus();
+  const { isLoading, serverInfos, maintenance } = useInfos();
 
   // Determine the display based on the state
   const statusText = isLoading
