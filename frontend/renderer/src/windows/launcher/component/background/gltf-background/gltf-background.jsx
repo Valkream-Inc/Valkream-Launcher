@@ -1,10 +1,11 @@
 import { Canvas } from "@react-three/fiber";
 import React, { Suspense } from "react";
 
+import CampfireLight from "./component/campfire-light";
+import LoaderFallback from "./component/loader-fallback";
+import Model from "./component/model";
 import PlayerControls from "./component/players-controls";
 import SunsetEnvironment from "./component/sunset-environement";
-import Model from "./component/model";
-import LoaderFallback from "./component/loader-fallback";
 
 function GltfBackground() {
   const speed = 4;
@@ -21,6 +22,8 @@ function GltfBackground() {
         <Suspense fallback={<LoaderFallback />}>
           <Model modelPath={"/models/valheim_black_forest.glb"} />
         </Suspense>
+
+        <CampfireLight />
 
         <PlayerControls speed={speed} climbSpeed={climbSpeed} />
       </Canvas>
