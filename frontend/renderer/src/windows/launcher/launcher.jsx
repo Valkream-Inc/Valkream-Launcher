@@ -18,16 +18,18 @@ function BetaEnabledPanel() {
   const { changePanel } = usePanels();
   const goHome = () => changePanel("home");
 
+  const desactiverBeta = async () => {
+    await window.electron_API.setSettings("betaEnabled", false);
+    return window.location.reload();
+  };
+
   return (
     <SpecialPanel
       type="info"
       paragraph="Vous avez les tests betas activés ..."
       buttons={[
-        {
-          text: "Continuer",
-          onClick: goHome,
-        },
-        { text: "Les desactiver", onClick: () => alert("Plus tard...") },
+        { text: "Continuer", onClick: goHome },
+        { text: "Les desactiver", onClick: desactiverBeta },
       ]}
     />
   );
