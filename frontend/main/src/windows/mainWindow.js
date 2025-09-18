@@ -30,7 +30,12 @@ function createWindow() {
     minWidth: 980,
     minHeight: 552,
     resizable: true,
-    icon: path.join(rendererPath, "public/images/icon/icon.png"),
+    icon: path.join(
+      rendererPath,
+      isDev
+        ? "public/images/icon/icon.png"
+        : "../../frontend/images/icon/icon.png"
+    ),
     frame: false,
     show: false,
     webPreferences: {
@@ -45,7 +50,7 @@ function createWindow() {
   mainWindow.loadURL(
     isDev
       ? "http://localhost:8080"
-      : `file://${path.join(rendererPath, "build/index.html")}`
+      : `file://${path.join(rendererPath, "../../frontend/index.html")}`
   );
   mainWindow.once("ready-to-show", () => {
     if (mainWindow) {

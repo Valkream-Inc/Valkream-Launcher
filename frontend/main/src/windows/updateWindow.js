@@ -28,7 +28,12 @@ function createWindow() {
     width: 512,
     height: 288,
     resizable: false,
-    icon: path.join(rendererPath, "public/images/icon/icon.png"),
+    icon: path.join(
+      rendererPath,
+      isDev
+        ? "public/images/icon/icon.png"
+        : "../../frontend/images/icon/icon.png"
+    ),
     frame: false,
     show: false,
     webPreferences: {
@@ -43,7 +48,10 @@ function createWindow() {
   updateWindow.loadURL(
     isDev
       ? "http://localhost:8080/updater"
-      : `file://${path.join(rendererPath, "build/index.html")}#/updater`
+      : `file://${path.join(
+          rendererPath,
+          "../../frontend/index.html"
+        )}#/updater`
   );
   updateWindow.once("ready-to-show", () => {
     if (updateWindow) {

@@ -23,6 +23,7 @@ class Index {
     });
 
     await this.Obfuscate();
+    await this.copyReact();
     await this.buildAll();
     await this.mergeBuilds();
     console.log("🎉 Build terminée !");
@@ -75,6 +76,14 @@ class Index {
       }
     }
     console.log("✅ Obfuscation terminée !");
+  }
+
+  async copyReact() {
+    console.log("🚀 Copy React...");
+    if (fs.existsSync("./build/frontend")) fs.rmSync("./build/frontend");
+
+    fse.copySync("./renderer/build", "./build/frontend");
+    console.log("✅ Copy React terminée !");
   }
 
   async buildAll() {
