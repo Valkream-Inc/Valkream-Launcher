@@ -115,7 +115,7 @@ export default function ModernPopup({
       </DialogContent>
       <DialogActions sx={{ justifyContent: "center" }}>
         <Button
-          onClick={onConfirm || onClose}
+          onClick={(onConfirm && onConfirm[0]) || onClose}
           sx={{
             background: color,
             color: "#fff",
@@ -124,7 +124,7 @@ export default function ModernPopup({
             "&:hover": { opacity: 0.9 },
           }}
         >
-          OK
+          {(onConfirm && onConfirm[1]) || "OK"}
         </Button>
         {onConfirm && (
           <Button

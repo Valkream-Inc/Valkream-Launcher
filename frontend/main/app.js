@@ -21,18 +21,6 @@ app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
 if (!app.requestSingleInstanceLock() && !isDev) app.quit();
 else {
   app.whenReady().then(async () => {
-    // Supprimer le dossier data si il existe et que le mode de développement n'est pas activé (ancienne version)
-    if (
-      fs.existsSync(
-        path.join(app.getPath("appData"), ".valkream-launcher-data")
-      ) &&
-      !isDev
-    ) {
-      fs.rmSync(path.join(app.getPath("appData"), "Valkream-Launcher"), {
-        recursive: true,
-      });
-    }
-
     // Vider le cache Chromium au démarrage
     await session.defaultSession.clearCache();
 

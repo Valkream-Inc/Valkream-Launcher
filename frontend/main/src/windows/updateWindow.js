@@ -6,6 +6,8 @@
 const { BrowserWindow, Menu } = require("electron");
 const path = require("path");
 
+const rendererPath = path.join(__dirname, "../../../renderer");
+
 const { isDev } = require("../constants");
 let updateWindow = undefined;
 
@@ -26,19 +28,22 @@ function createWindow() {
     width: 512,
     height: 288,
     resizable: false,
-    icon: path.join(__dirname, "../../assets/images/icon.png"),
+    icon: path.join(rendererPath, "public/images/icon/icon.png"),
     frame: false,
     show: false,
     webPreferences: {
-      contextIsolation: false,
-      nodeIntegration: true,
+      preload: path.join(__dirname, "updatePreload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
     },
   });
 
   Menu.setApplicationMenu(null);
   updateWindow.setMenuBarVisibility(false);
-  updateWindow.loadFile(
-    path.join(__dirname, "../../renderer/windows/update/update.html")
+  updateWindow.loadURL(
+    isDev
+      ? "http://localhost:8080/updater"
+      : `file://${path.join(rendererPath, "build/index.html")}#/updater`
   );
   updateWindow.once("ready-to-show", () => {
     if (updateWindow) {

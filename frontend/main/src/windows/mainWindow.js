@@ -34,7 +34,7 @@ function createWindow() {
     frame: false,
     show: false,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, "mainPreload.js"),
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -49,7 +49,7 @@ function createWindow() {
   );
   mainWindow.once("ready-to-show", () => {
     if (mainWindow) {
-      if (isDev) mainWindow.webContents.openDevTools(/*{ mode: "detach" }*/);
+      if (isDev) mainWindow.webContents.openDevTools();
       mainWindow.show();
     }
   });

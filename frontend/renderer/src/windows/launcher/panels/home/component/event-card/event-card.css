@@ -1,0 +1,58 @@
+.event-container {
+  display: flex;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-transparent) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem 2rem !important;
+  width: 50vw;
+  min-height: 120px;
+  position: absolute;
+  top: 36px;
+  left: calc((100vw - 140px) / 4 + 140px);
+  transition: background 0.2s, transform 0.2s;
+  gap: 1.5rem;
+}
+
+.event-container:hover {
+  background: var(--secondary-color);
+  transform: scale(1.05);
+}
+
+.event-image {
+  width: 90px !important;
+  height: 90px !important;
+  object-fit: cover !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.event-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 90px;
+  padding: 0;
+}
+
+.event-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color);
+  margin: 0;
+  text-align: center;
+}
+
+.event-date {
+  font-size: 1.2rem;
+  position: relative;
+  color: var(--color);
+  margin-top: 10px;
+  text-align: center;
+  text-decoration: bold;
+}

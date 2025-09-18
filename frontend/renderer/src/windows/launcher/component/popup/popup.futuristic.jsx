@@ -1,25 +1,25 @@
-import React from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Slide,
-  Fade,
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Fade,
+  Slide,
   Typography,
 } from "@mui/material";
 import { keyframes } from "@mui/system";
+import React from "react";
 
 // Icônes
-import InfoIcon from "@mui/icons-material/Info";
-import WarningIcon from "@mui/icons-material/Warning";
-import ErrorIcon from "@mui/icons-material/Error";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import ErrorIcon from "@mui/icons-material/Error";
 import EventIcon from "@mui/icons-material/Event";
+import InfoIcon from "@mui/icons-material/Info";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import WarningIcon from "@mui/icons-material/Warning";
 
 const flicker = keyframes`
   0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
@@ -366,10 +366,28 @@ export default function FuturisticPopup({
   type = "info",
   title = "Titre du popup",
   message = "Message du popup",
-  buttons = [{ text: "OK", action: onClose }],
+  onConfirm,
 }) {
   const { color, icon, iconSize, titleSize } =
     typeConfig[type] || typeConfig.info;
+
+  const buttons = !onConfirm
+    ? [
+        {
+          text: "OK",
+          action: onClose,
+        },
+      ]
+    : [
+        {
+          text: onConfirm[1] || "OK",
+          action: onConfirm[0],
+        },
+        {
+          text: "Annuler",
+          action: onClose,
+        },
+      ];
 
   return (
     <Dialog

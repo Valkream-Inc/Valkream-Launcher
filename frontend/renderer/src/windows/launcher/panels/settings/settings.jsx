@@ -141,7 +141,7 @@ function Settings() {
         <NavButton id="game" label="Game" active={false} onClick={() => {}} />
         <NavButton id="mods" label="Mods" active={false} onClick={() => {}} />
 
-        {isDevActive && (
+        {(isDevActive || isSpecialOptionVisible) && (
           <NavButton id="dev" label="Dev" active={false} onClick={() => {}} />
         )}
       </NavSettings>
@@ -182,7 +182,7 @@ function Settings() {
         <ModsTab ref={gameTabRef} isDevActive={isDevActive} />
       </SettingsTab>
 
-      {isDevActive && (
+      {(isDevActive || isSpecialOptionVisible) && (
         <SettingsTab id="dev" activeTab={activeTab}>
           <SettingsTitle warn={true}>Dev / Debug</SettingsTitle>
           <ButtonUninstallGame />

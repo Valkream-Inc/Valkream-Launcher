@@ -5,6 +5,7 @@ import SpecialPanel from "./windows/launcher/component/special-panel/special-pan
 import WindowsBar from "./windows/launcher/component/windows-bar/windows-bar.jsx";
 import { ThemeProvider } from "./windows/launcher/context/theme.context.jsx";
 import Launcher from "./windows/launcher/launcher.jsx";
+import Updater from "./windows/updater/updater.jsx";
 
 const ErrorPage = () => {
   return (
@@ -22,11 +23,11 @@ const router = createBrowserRouter([
     element: <Launcher />,
     errorElement: <ErrorPage />,
   },
-  // {
-  //   path: "/settings",
-  //   element: <Settings />,
-  //   errorElement: <SpecialPanel type="error" />,
-  // },
+  {
+    path: "/updater",
+    element: <Updater />,
+    errorElement: <ErrorPage />,
+  },
 ]);
 
 function App() {

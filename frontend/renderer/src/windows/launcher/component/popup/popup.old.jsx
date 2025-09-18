@@ -1,23 +1,23 @@
-import React from "react";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
+import EventIcon from "@mui/icons-material/Event";
+import InfoIcon from "@mui/icons-material/Info";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import WarningIcon from "@mui/icons-material/Warning";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography,
-  Button,
   Box,
-  Slide,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Fade,
+  Slide,
+  Typography,
 } from "@mui/material";
 import { keyframes } from "@mui/system";
-import InfoIcon from "@mui/icons-material/Info";
-import WarningIcon from "@mui/icons-material/Warning";
-import ErrorIcon from "@mui/icons-material/Error";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
-import EventIcon from "@mui/icons-material/Event";
-import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import React from "react";
 
 // Définition des animations en dehors du composant pour de meilleures performances
 const flicker = keyframes`
@@ -184,7 +184,7 @@ export default function OldPopup({
           sx={{ justifyContent: "flex-start", mt: 4, gap: "1rem", p: 0 }}
         >
           <Button
-            onClick={onConfirm || onClose}
+            onClick={(onConfirm && onConfirm[0]) || onClose}
             sx={{
               background: "#5c4438",
               border: `2px solid ${color}`,
@@ -202,7 +202,7 @@ export default function OldPopup({
               },
             }}
           >
-            OK
+            {(onConfirm && onConfirm[1]) || "OK"}
           </Button>
           {onConfirm && (
             <Button
