@@ -118,7 +118,6 @@ class Index {
               {
                 provider: "github",
                 releaseType: "release",
-                repo: "Valkream-Inc/Valkream-Launcher",
               },
             ],
             win: {
