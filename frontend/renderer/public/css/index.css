@@ -1,0 +1,53 @@
+@import "theme.css";
+@import "font.css";
+
+/* general */
+* {
+  outline: none;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  color: var(--color);
+  font-family: "Poppins";
+  font-weight: bolder;
+  background-color: black;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+button {
+  font-size: 0.5cm;
+}
+
+/* Scrollable content */
+.content-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--background);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--background);
+}

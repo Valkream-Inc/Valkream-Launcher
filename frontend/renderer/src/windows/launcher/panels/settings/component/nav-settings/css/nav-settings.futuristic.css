@@ -1,0 +1,108 @@
+.futuristic-theme .nav-settings {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20%;
+  min-width: 7cm;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  background: #0b0b0f;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  box-shadow: 4px 0 20px rgba(0, 255, 255, 0.3);
+  border-right: 2px solid #00ffff;
+  padding-top: 0.5cm;
+  padding-bottom: 0.5cm;
+}
+
+.futuristic-theme .nav-settings .menu-header {
+  width: 80%;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #00ffff;
+  text-shadow: 0 0 8px #00ffff, 0 0 20px #0ff;
+  font-family: "Orbitron", sans-serif;
+  letter-spacing: 1px;
+  font-size: 0.7cm;
+}
+
+.futuristic-theme .nav-settings .nav-box {
+  flex-grow: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center !important;
+  overflow-y: auto !important;
+  padding-top: 0.7cm;
+  padding-bottom: 0.7cm;
+}
+
+.futuristic-theme .nav-box div {
+  transition: all 0.3s ease-in-out;
+  padding: 0.8rem 1rem;
+  width: 70%;
+  text-align: center;
+  border-radius: 12px;
+  margin: 0.5rem 0;
+  color: #00ffff;
+  font-family: "Orbitron", sans-serif;
+  cursor: pointer;
+  position: relative;
+}
+
+.futuristic-theme .nav-box div:hover {
+  color: #ff00ff;
+  background: rgba(255, 0, 255, 0.1);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #ff00ff, 0 0 25px #00ffff;
+}
+
+.futuristic-theme .nav-box div:active {
+  color: #00ff00;
+  transform: scale(0.95);
+  box-shadow: inset 0 0 10px #00ff00;
+}
+
+.futuristic-theme .nav-settings-btn#save {
+  border: solid 4px #00ffff;
+  background: rgba(0, 255, 255, 0.05);
+  text-shadow: 0 0 5px #00ffff;
+  margin: 1cm;
+}
+
+.futuristic-theme .nav-settings-btn#save:hover {
+  border-color: #ff00ff;
+  color: #ff00ff !important;
+  box-shadow: 0 0 20px #ff00ff, 0 0 30px #00ffff;
+}
+
+.futuristic-theme .nav-settings-btn {
+  font-size: 1rem;
+  border: solid 2px #00ffff;
+  padding: 8px 12px;
+  border-radius: 12px;
+  width: 70%;
+  text-align: center;
+  margin: 0.5rem 0;
+  cursor: pointer;
+  background: rgba(0, 255, 255, 0.05);
+  color: #00ffff;
+  transition: all 0.3s ease-in-out;
+}
+
+.futuristic-theme .nav-settings-btn:hover {
+  background: rgba(255, 0, 255, 0.1);
+  color: #ff00ff;
+  box-shadow: 0 0 15px #ff00ff, 0 0 25px #00ffff;
+  transform: scale(1.05);
+}
+
+.futuristic-theme .active-settings-BTN {
+  background: rgba(0, 255, 255, 0.2);
+  border-color: #00ff00;
+  color: #00ff00;
+  text-shadow: 0 0 8px #00ff00;
+  box-shadow: 0 0 15px #00ff00, 0 0 25px #00ffff;
+}

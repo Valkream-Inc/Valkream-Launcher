@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "frontend-electron-launcher/**"
+      - "frontend/**"
 
 jobs:
   create-release:
@@ -19,7 +19,7 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo "version=$(jq -r .version frontend-electron-launcher/package.json)" >> $GITHUB_OUTPUT
+        run: echo "version=$(jq -r .version frontend/package.json)" >> $GITHUB_OUTPUT
 
       - name: Create Release
         id: create_release
@@ -56,11 +56,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./frontend-electron-launcher
+        working-directory: ./frontend
 
       - name: Build Electron launcher via custom script
         run: npm run build
-        working-directory: ./frontend-electron-launcher
+        working-directory: ./frontend
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 

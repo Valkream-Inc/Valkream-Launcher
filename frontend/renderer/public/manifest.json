@@ -1,0 +1,25 @@
+{
+  "short_name": "Valkream Launcher",
+  "name": "Launcher Valheim moddé pour Valkream",
+  "icons": [
+    {
+      "src": "./images/icon/icon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "./images/icon/icon.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "./images/icon/icon.icns",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

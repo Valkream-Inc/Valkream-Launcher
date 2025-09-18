@@ -64,8 +64,8 @@ Ce projet comprend :
 
 ## Structure du projet
 
-- `frontend-electron-launcher/` : Le launcher Electron (interface utilisateur)
-- `backend-update-server/` : Serveur Node.js pour la gestion des mises à jour
+- `frontend/` : Le launcher Electron (interface utilisateur)
+- `backend/` : Serveur Node.js pour la gestion des mises à jour
 - `infra/` : Exemple de fichiers de configuration et de déploiement (Docker, nginx, etc.)
 
 ---
@@ -78,6 +78,7 @@ Ce projet comprend :
 
 - Node.js (version : 22+)
 - Yarn
+- Python (version : 3.10+)
 
 ### Installation des dépendances
 
@@ -94,15 +95,15 @@ yarn install
 ### Lancer le serveur de mise à jour (backend)
 
 ```bash
-cd backend-update-server
+cd backend
 yarn run start # ou yarn run dev
 ```
 
 ### Lancer le launcher Electron (frontend)
 
 ```bash
-cd frontend-electron-launcher
-yarn dev
+cd frontend
+yarn run dev
 ```
 
 ---

@@ -1,0 +1,59 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
+const { execFile } = require("child_process");
+const { shell } = require("electron");
+const MainWindow = require("../windows/mainWindow.js");
+
+const { pkg } = require("../constants/index.js");
+const DirsManager = require("./dirsManager.js");
+const FilesManager = require("./filesManager.js");
+
+class LauncherManager {
+  async init() {
+    this.installDir = DirsManager.launcherRootPath();
+    this.uninstallerPath = FilesManager.uninstallerPath();
+  }
+
+  getVersion() {
+    if (pkg && pkg.version) return pkg.version;
+    else return "0.0.0";
+  }
+
+  async openInstallationFolder() {
+    return await shell.openPath(this.installDir);
+  }
+
+  async uninstall() {
+    return new Promise((resolve, reject) => {
+      execFile(this.uninstallerPath, (error, stdout, stderr) => {
+        if (error) {
+          console.error("Erreur execFile:", error);
+          return reject(new Error(stderr || error.message));
+        }
+        resolve({ success: true, output: stdout });
+      });
+    });
+  }
+
+  hide() {
+    const mainWindow = MainWindow.getWindow();
+    mainWindow.hide();
+  }
+
+  show() {
+    const mainWindow = MainWindow.getWindow();
+    mainWindow.show();
+  }
+
+  close() {
+    const mainWindow = MainWindow.getWindow();
+    mainWindow.close();
+  }
+}
+
+const launcherManager = new LauncherManager();
+launcherManager.init();
+module.exports = launcherManager;

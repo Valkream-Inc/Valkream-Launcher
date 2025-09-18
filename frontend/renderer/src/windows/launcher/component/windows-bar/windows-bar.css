@@ -1,0 +1,64 @@
+.dragbar {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 26px;
+  -webkit-app-region: drag;
+  z-index: 2000;
+}
+
+.windows-bar {
+  background: transparent;
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  z-index: 2000;
+  -webkit-app-region: no-drag;
+}
+
+.button-windows-bar {
+  position: relative;
+  display: table-cell;
+  width: 30px;
+  height: 26px;
+  transition: color 0.2s, background-color 0.2s;
+  color: black;
+  cursor: pointer;
+}
+.button-windows-bar:before {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  color: #f8f9f9;
+}
+
+/* Icons */
+.icon-close:before {
+  font-family: "Icons";
+  content: "\e90e";
+}
+.icon-minimize:before {
+  font-family: "Icons";
+  content: "\e90b";
+}
+.icon-maximize:before {
+  font-family: "Icons";
+  content: "\e90c";
+}
+.icon-restore-down:before {
+  font-family: "Icons";
+  content: "\e90d";
+}
+
+.icon-close:hover {
+  background: #e21212;
+}
+.icon-minimize:hover,
+.icon-restore-down:hover,
+.icon-maximize:hover {
+  background-color: #0000009d;
+}
