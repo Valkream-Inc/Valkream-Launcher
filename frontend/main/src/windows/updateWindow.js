@@ -30,9 +30,8 @@ function createWindow() {
     resizable: false,
     icon: path.join(
       rendererPath,
-      isDev
-        ? "public/images/icon/icon.png"
-        : "../../frontend/images/icon/icon.png"
+      isDev ? "public" : "frontend",
+      "images/icon/icon.png"
     ),
     frame: false,
     show: false,
@@ -45,14 +44,12 @@ function createWindow() {
 
   Menu.setApplicationMenu(null);
   updateWindow.setMenuBarVisibility(false);
-  updateWindow.loadURL(
+  mainWindow.loadURL(
     isDev
-      ? "http://localhost:8080/updater"
-      : `file://${path.join(
-          rendererPath,
-          "../../frontend/index.html"
-        )}#/updater`
+      ? "http://localhost:8080"
+      : `file://${path.join(rendererPath, "frontend", "index.html")}`
   );
+
   updateWindow.once("ready-to-show", () => {
     if (updateWindow) {
       // if (isDev)
