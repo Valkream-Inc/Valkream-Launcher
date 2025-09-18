@@ -30,7 +30,7 @@ function createWindow() {
     resizable: false,
     icon: path.join(
       rendererPath,
-      isDev ? "public" : "frontend",
+      isDev ? "public" : "../frontend",
       "images/icon/icon.png"
     ),
     frame: false,
@@ -47,7 +47,11 @@ function createWindow() {
   updateWindow.loadURL(
     isDev
       ? "http://localhost:8080/#/updater"
-      : `file://${path.join(rendererPath, "frontend", "index.html")}#/updater`
+      : `file://${path.join(
+          rendererPath,
+          "../frontend",
+          "index.html"
+        )}#/updater`
   );
   updateWindow.once("ready-to-show", () => {
     if (updateWindow) {

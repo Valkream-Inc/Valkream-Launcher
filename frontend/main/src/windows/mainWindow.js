@@ -32,7 +32,7 @@ function createWindow() {
     resizable: true,
     icon: path.join(
       rendererPath,
-      isDev ? "public" : "frontend",
+      isDev ? "public" : "../frontend",
       "images/icon/icon.png"
     ),
     frame: false,
@@ -49,7 +49,7 @@ function createWindow() {
   mainWindow.loadURL(
     isDev
       ? "http://localhost:8080"
-      : `file://${path.join(rendererPath, "frontend", "index.html")}`
+      : `file://${path.join(rendererPath, "../frontend", "index.html")}`
   );
   mainWindow.once("ready-to-show", () => {
     if (mainWindow) {
