@@ -2,7 +2,7 @@
 
 Launcher et système de mise à jour pour le serveur Valheim Valkream.
 
-<img src="./frontend-electron-launcher/src/assets/images/icon-with-name.png">
+<img src="./frontend\renderer\public\images\icon-with-name.png">
 
 ## Table des matières
 
