@@ -13,7 +13,7 @@
     "set-icon": "node set-icon.js",
     "build": "npm run set-icon && npm run build:react && npm run build:electron",
     "build:react": "vite build",
-    "build:electron": "node ./build-script.js --obf=true",
+    "build:electron": "node ./build-script.js --obf=false",
     "rebuild": "electron-rebuild"
   },
   "license": "MIT",

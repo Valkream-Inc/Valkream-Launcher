@@ -160,6 +160,7 @@ class Index {
   }
 
   async mergeBuilds() {
+    // step for local build
     console.log("\n🔀 Fusion des builds dans dist...");
 
     const distDir = "dist";
@@ -180,7 +181,9 @@ class Index {
     // Copie le fichier latest.yml de manière explicite
     const latestSrc = path.join(tempUpdate, latestFile);
     const latestDest = path.join(distDir, latestFile);
-    fse.copySync(latestSrc, latestDest, { overwrite: true });
+    if (fs.existsSync(latestSrc)) {
+      fse.copySync(latestSrc, latestDest, { overwrite: true });
+    }
 
     // Supprime les dossiers temporaires
     fse.removeSync(tempInstall);
