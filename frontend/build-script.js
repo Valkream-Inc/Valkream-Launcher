@@ -118,6 +118,8 @@ class Index {
               {
                 provider: "github",
                 releaseType: "release",
+                repo: "Valkream-Launcher",
+                owner: "Valkream-Inc",
               },
             ],
             win: {
