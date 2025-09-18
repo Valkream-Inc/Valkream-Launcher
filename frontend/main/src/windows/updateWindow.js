@@ -44,12 +44,11 @@ function createWindow() {
 
   Menu.setApplicationMenu(null);
   updateWindow.setMenuBarVisibility(false);
-  mainWindow.loadURL(
+  updateWindow.loadURL(
     isDev
-      ? "http://localhost:8080"
-      : `file://${path.join(rendererPath, "frontend", "index.html")}`
+      ? "http://localhost:8080/#/updater"
+      : `file://${path.join(rendererPath, "frontend", "index.html")}#/updater`
   );
-
   updateWindow.once("ready-to-show", () => {
     if (updateWindow) {
       // if (isDev)

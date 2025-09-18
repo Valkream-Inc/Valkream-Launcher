@@ -9,6 +9,7 @@ const { formatBytes } = require("valkream-function-lib");
 const { baseUrl } = require("../../constants");
 const SettingsManager = require("../../manager/settingsManager");
 const InfosManager = require("../../manager/infosManager");
+
 class CheckForUpdates {
   constructor() {
     this.timeout = 1000;
@@ -25,7 +26,7 @@ class CheckForUpdates {
         true
       );
 
-    if (!(await InfosManager.getIsServerReachable()))
+    if (!(await InfosManager.getIsServerReachableFromInternal()))
       return this.onError(
         "no_internet",
         "❌ Pas de connexion au serveur. Impossible de vérifier les mises à jour."
