@@ -1,0 +1,66 @@
+# ──────────────────────────────────────────────────────────────
+# NORME DE VERSIONNAGE : X1.X2.X3.X4
+# ──────────────────────────────────────────────────────────────
+# X1 → Mise à jour majeure du jeu Valheim OU de BepInEx. (réinstallation compléte)
+# X2 → Ajout ou suppression de mods (impacte la compatibilité).
+# X3 → Modification de configuration des mods (paramètres, options, équilibrage).
+# X4 → Modification de la configuration du launcher (ex. : chemin du jeu, mods réservés aux admins, options spéciales).
+#
+# 📌 Important :
+# - Les indices X1, X2 et X3 correspondent à la numérotation publiée sur Thunderstore.
+# - X4 est interne au launcher et ne modifie pas la version Thunderstore.
+# ──────────────────────────────────────────────────────────────
+
+version: 2.24.27.0
+buildDate: 2025-07-03T19:20:08.929Z
+
+modpack:
+  version: 2.24.27
+  download_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.24.27/
+  admin_mods:
+    # mods admin à installer avec l'option admin du launcher
+    # les mods seront présents dans le dossier /BepInEx/plugins
+    - "JereKuusela-Infinity_Hammer-1.72.0"
+    - "JereKuusela-Server_devcommands-1.97.0"
+    - "JereKuusela-Upgrade_World-1.73.0"
+    - "JereKuusela-World_Edit_Commands-1.69.0"
+    - "Astropilot-ValheimTooler-1.11.0"
+  boostfps_mods:
+    # mods pour booster les FPS à installer avec l'option boost FPS du launcher
+    # les mods seront présents dans le dossier /BepInEx/plugins
+    - "castix-ValheimFPSBoost-1.0.0"
+    - "vaffle1-FPSPlus-1.1.3"
+  gameFolderToRemove:
+    # fichiers et dossiers à supprimer lors de la mise à jour
+    # les dossiers doivent commencer par /BepInEx/plugins ou /BepInEx/config
+    - /BepInEx/cache
+    - /BepInEx/config/wackysDatabase/Cache
+    - /BepInEx/config/Marketplace/SavedData
+  gameFolderToPreserve:
+    # fichier et dossiers à conserver lors de la mise à jour
+    # les dossiers doivent commencer par /BepInEx/plugins ou /BepInEx/config
+    - /BepInEx/config/Azumatt.MinimalUI.cfg
+    - /BepInEx/config/WackyMole.EpicMMOSystemUI.cfg
+    - /BepInEx/config/shudnal.ExtraSlots.cfg
+    - /BepInEx/config/org.bepinex.plugins.groups.cfg
+    - /BepInEx/config/randyknapp.mods.minimalstatuseffects.cfg
+  hash:
+    # hash du dossier /BepInEx/plugins et /BepInEx/config
+    # les gameFolderToPreserve et gameFolderToRemove ne sont pas pris en compte dans le hash
+    # pour vérifier la cohérence des fichiers (le hash ne doit pas changer entre avant et après le lancement + modifications du jeu)
+    config: 105517d181528eb09cc8c3360efaa275
+    plugins: f0c7a72372bba288cff438b73c9b2b34264c1370d90201902c7ceb65977d413a
+
+valheim:
+  version: 0.220.5
+  download_url:
+    win32: /game/Valheim/latest/build-game-win32.zip
+    linux: /game/Valheim/latest/build-game-linux.zip
+    darwin: /game/Valheim/latest/build-game-darwin.zip
+
+bepinex:
+  version: 5.4.2202
+  download_url:
+    win32: /game/Valheim/latest/BepInEx-5.4.2202.zip
+    linux: /game/Valheim/latest/BepInEx-5.4.2202.zip
+    darwin: /game/Valheim/latest/BepInEx-5.4.2202.zip

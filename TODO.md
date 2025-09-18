@@ -3,10 +3,11 @@
 ## Frontend
 
 - [ ] ( ) corrige les erreurs d'obfuscation
-- [ ] ( ) mettre en place l'option de doc (en beta)
-- [ ] (+) mettre en place l'installation steam
+- [ ] ( ) mettre valkream team copyright partout
+- [ ] ( ) optimize performance in TreeJs (3d ..?)
 - [ ] (++) mettre en place la verification des plugins et configs via Hash
-- [ ]  (+++) mettre a jour la doc
+- [ ] (++) optimize performance in react (useMemo, useCallback, etc.)
+- [ ] (+++) mettre a jour la doc
 
 ## Backend
 

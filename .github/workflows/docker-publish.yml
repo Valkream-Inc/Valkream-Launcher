@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "backend-update-server/**"
+      - "backend/**"
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./backend-update-server
+          context: ./backend
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/valkream-backend-update-server:latest

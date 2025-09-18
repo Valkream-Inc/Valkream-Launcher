@@ -1,0 +1,37 @@
+import React from "react";
+
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import { ButtonBase, Stack } from "@mui/material";
+
+import { useAction } from "../../../../context/action.context";
+
+export default function SevenDtoDButton() {
+  const { actionLoading } = useAction();
+
+  const handleClick = async () => {
+    const launcherBehavior = await window.electron_API.getSettings(
+      "launcherBehavior"
+    );
+
+    window.electron_API.openLink("steam://rungameid/251570");
+    if (launcherBehavior !== "nothing") window.electron_API.close();
+  };
+
+  return (
+    <>
+      <ButtonBase
+        onClick={handleClick}
+        className="play-btn"
+        disabled={actionLoading}
+        disableRipple={actionLoading}
+      >
+        <Stack direction={"row"} spacing={1} sx={{ alignItems: "center" }}>
+          <SportsEsportsIcon fontSize="large" className="icon-play" />
+          Jouer
+          <br />
+          (7Days.valkream.com)
+        </Stack>
+      </ButtonBase>
+    </>
+  );
+}

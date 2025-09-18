@@ -2,7 +2,7 @@
 
 Launcher et système de mise à jour pour le serveur Valheim Valkream.
 
-<img src="./frontend-electron-launcher/src/assets/images/icon-with-name.png">
+<img src="./frontend\renderer\public\images\Valheim-icon-with-name.png">
 
 ## Table des matières
 
@@ -64,8 +64,8 @@ Ce projet comprend :
 
 ## Structure du projet
 
-- `frontend-electron-launcher/` : Le launcher Electron (interface utilisateur)
-- `backend-update-server/` : Serveur Node.js pour la gestion des mises à jour
+- `frontend/` : Le launcher Electron (interface utilisateur)
+- `backend/` : Serveur Node.js pour la gestion des mises à jour
 - `infra/` : Exemple de fichiers de configuration et de déploiement (Docker, nginx, etc.)
 
 ---
@@ -78,6 +78,7 @@ Ce projet comprend :
 
 - Node.js (version : 22+)
 - Yarn
+- Python (version : 3.10+)
 
 ### Installation des dépendances
 
@@ -94,15 +95,15 @@ yarn install
 ### Lancer le serveur de mise à jour (backend)
 
 ```bash
-cd backend-update-server
+cd backend
 yarn run start # ou yarn run dev
 ```
 
 ### Lancer le launcher Electron (frontend)
 
 ```bash
-cd frontend-electron-launcher
-yarn dev
+cd frontend
+yarn run dev
 ```
 
 ---
@@ -123,6 +124,8 @@ yarn dev
 ---
 
 ## Déploiement (Production)
+
+Pour un déploiment `simple` en production, il suffit de copier le dossier upload sur un serveur de fichiers et de configurer le launcher pour utiliser le bonne url. Si vous souhaitez un déploiement plus complexe (avec Docker, nginx, etc.) pour une meilleure sécurité et une isolation des fichiers sensibles, vous pouvez suivre les instructions ci-dessous. (cela permet aussi d'utiliser l'api REST sécurisée)
 
 Le déploiement en production se fait via **Docker Compose** et un reverse proxy **nginx** pour la gestion du SSL.
 

@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "frontend-electron-launcher/**"
+      - "frontend/**"
 
 jobs:
   create-release:
@@ -19,7 +19,7 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo "version=$(jq -r .version frontend-electron-launcher/package.json)" >> $GITHUB_OUTPUT
+        run: echo "version=$(jq -r .version frontend/package.json)" >> $GITHUB_OUTPUT
 
       - name: Create Release
         id: create_release
@@ -56,11 +56,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./frontend-electron-launcher
+        working-directory: ./frontend
 
       - name: Build Electron launcher via custom script
         run: npm run build
-        working-directory: ./frontend-electron-launcher
+        working-directory: ./frontend
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
@@ -81,11 +81,30 @@ jobs:
       - name: List downloaded files
         run: ls -lh ./release-assets
 
-      - name: Create combined zip without existing zips
+      - name: Create platform-specific zips
         run: |
           cd release-assets
+
+          echo "🧹 Nettoyage des anciens .zip..."
           find . -type f -name '*.zip' -delete
-          zip -r ../combined-release.zip .
+
+          echo "📦 Création des archives d'installation..."
+          zip -r ../combined-install-win.zip . -i '*-install-win*'
+          zip -r ../combined-install-linux.zip . -i '*-install-linux*'
+          zip -r ../combined-install-mac.zip . -i '*-install-mac*'
+
+          echo "📦 Création des archives de mise à jour..."
+          # Windows (inclut latest.yml)
+          zip -r ../combined-update-win.zip . -i '*-update-win*' 'latest.yml'
+
+          # Linux (inclut latest-linux.yml)
+          zip -r ../combined-update-linux.zip . -i '*-update-linux*' 'latest-linux.yml'
+
+          # Mac (inclut latest-mac.yml)
+          zip -r ../combined-update-mac.zip . -i '*-update-mac*' 'latest-mac.yml'
+
+          echo "✅ Zips générés :"
+          ls -lh ../*.zip
         shell: bash
 
       - name: Upload to GitHub Release
@@ -94,6 +113,11 @@ jobs:
           tag_name: ${{ needs.create-release.outputs.version }}
           name: Release ${{ needs.create-release.outputs.version }}
           files: |
-            ./combined-release.zip
+            ./combined-install-win.zip
+            ./combined-install-linux.zip
+            ./combined-install-mac.zip
+            ./combined-update-win.zip
+            ./combined-update-linux.zip
+            ./combined-update-mac.zip
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}

@@ -2,8 +2,18 @@
   "name": "Launcher-Valkream-Infra",
   "description": "Launcher Valheim moddé pour Valkream et server de mise à jour",
   "private": true,
-  "workspaces": [
-    "./backend-update-server",
-    "./frontend-electron-launcher"
-  ]
+  "workspaces": {
+    "packages": [
+      "./backend",
+      "./frontend"
+    ],
+    "nohoist": [
+      "**/better-sqlite3",
+      "**/better-sqlite3/**"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Valkream-Inc/Valkream-Launcher.git"
+  }
 }
