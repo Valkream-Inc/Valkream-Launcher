@@ -1,15 +1,15 @@
-import React from "react";
 import {
-  Typography,
-  Box,
   Avatar,
-  TableCell,
+  Box,
   Container,
-  TableRow,
-  TableHead,
-  TableBody,
   Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
 } from "@mui/material";
+import React from "react";
 import SettingsBox from "./settings-box/settings-box";
 
 function CustomTableCell({ children }) {
@@ -25,7 +25,7 @@ function ModCard({
   installed = false,
   name = "Chargement des mods...",
   description = "Veuillez patienter...",
-  icon = "icon.png",
+  icon = "./images/icon/icon.png",
 }) {
   let backgroundColor, color;
   const isOutdated =
@@ -79,11 +79,7 @@ function ModCard({
     <SettingsBox warn={false} sx={{ backgroundColor, color }}>
       <Container>
         <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
-          <Avatar
-            src={icon || "icon.png"}
-            sx={{ width: 64, height: 64 }}
-            variant="rounded"
-          />
+          <Avatar src={icon} sx={{ width: 64, height: 64 }} variant="rounded" />
           <Box>
             <Typography
               variant="h5"

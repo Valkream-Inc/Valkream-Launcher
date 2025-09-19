@@ -15,7 +15,7 @@ function VideoBackground({ style }) {
         loop
         playsInline
       >
-        <source src="/videos/background.mp4" type="video/mp4" />
+        <source src="./videos/background.mp4" type="video/mp4" />
       </video>
     </>
   );

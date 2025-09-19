@@ -77,7 +77,7 @@ class CheckForUpdates {
       const transferred = formatBytes(progress.transferred);
       const total = formatBytes(progress.total);
 
-      this.onMsg(`📥 ${percent}% (${transferred} / ${total})<br/> à ${speed}`);
+      this.onMsg(`📥 ${percent}% (${transferred} / ${total})\n à ${speed}`);
     });
 
     autoUpdater.on("update-downloaded", () => {

@@ -1,12 +1,12 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { defineConfig } from "vite";
 
 // Exporte la configuration de Vite
 export default defineConfig({
-  // Définit le chemin de base de l'application. Le '/' est essentiel
+  // Définit le chemin de base de l'application. Le './' est essentiel
   // pour le routage de React Router et pour résoudre les assets.
-  base: "/",
+  base: "./",
 
   // Définit le répertoire racine du projet. Vite cherchera le fichier
   // index.html et d'autres fichiers de configuration dans ce répertoire.

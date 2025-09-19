@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./loader.css";
 
 export default function Loader({ isVisible }) {
@@ -21,7 +21,7 @@ export default function Loader({ isVisible }) {
 
   return (
     <div className={`loader-container ${!isVisible ? "hidden" : ""}`}>
-      <img src="/images/icon/icon.png" alt="logo" className="img-loader" />
+      <img src="./images/icon/icon.png" alt="logo" className="img-loader" />
       <br />
       <div className="spinner"></div>
     </div>

@@ -1,8 +1,8 @@
 import React from "react";
 import "./css/nav-settings.css";
 
-import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 
 import { usePanels } from "../../../../context/panels.context.jsx";
 
@@ -49,7 +49,7 @@ export const NavSettings = ({
       {/* Header */}
       <img
         onClick={handleToogleSpecialOptionClick}
-        src="/images/icon-with-name.png"
+        src="./images/icon-with-name.png"
         alt="Logo Valkream"
         className="menu-header"
       />

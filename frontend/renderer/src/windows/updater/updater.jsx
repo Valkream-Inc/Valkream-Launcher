@@ -51,14 +51,14 @@ export default function Updater() {
         muted
         playsInline
       >
-        <source src="/videos/pre-loading.mp4" type="video/mp4" />
+        <source src="./videos/pre-loading.mp4" type="video/mp4" />
       </video>
 
       {/* Section de chargement */}
       <div ref={loadingSectionRef} id="loading-section">
         <div className="loading-content">
           <img
-            src="/images/icon-with-name.png"
+            src="./images/icon-with-name.png"
             className="loading-image"
             alt="Logo Valkream"
           />
@@ -68,7 +68,14 @@ export default function Updater() {
             <div className="spinner-ring"></div>
           </div>
         </div>
-        <div id="loading-message">{message}</div>
+        <div id="loading-message">
+          {message.split("\n").map((line, i) => (
+            <React.Fragment key={i}>
+              {line}
+              <br />
+            </React.Fragment>
+          ))}
+        </div>
       </div>
     </div>
   );

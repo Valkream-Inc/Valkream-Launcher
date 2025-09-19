@@ -1,15 +1,32 @@
 const path = require("path");
 const newDir = require("../utils/new-dir.js");
 
+const isDev = require("../constants/isDev.js");
+
 class DirsManager {
   launcherRootPath = () => process.cwd();
 
   rootPath = () =>
-    newDir({
-      win32: path.join(this.launcherRootPath(), "data"),
-      linux: path.join(this.launcherRootPath(), "data"),
-      darwin: path.join(this.launcherRootPath(), "data"),
-    });
+    isDev
+      ? newDir({
+          win32: path.join(this.launcherRootPath(), "data"),
+          linux: path.join(this.launcherRootPath(), "data"),
+          darwin: path.join(this.launcherRootPath(), "data"),
+        })
+      : newDir({
+          win32: path.join(
+            this.launcherRootPath(),
+            "../valkream-launcher-data"
+          ),
+          linux: path.join(
+            this.launcherRootPath(),
+            "../valkream-launcher-data"
+          ),
+          darwin: path.join(
+            this.launcherRootPath(),
+            "../valkream-launcher-data"
+          ),
+        });
 
   gameRootPath = () =>
     newDir({

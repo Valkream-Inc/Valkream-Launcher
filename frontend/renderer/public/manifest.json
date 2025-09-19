@@ -4,21 +4,16 @@
   "icons": [
     {
       "src": "./images/icon/icon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "16x16 24x24 32x32 48x48 64x64",
       "type": "image/x-icon"
     },
     {
       "src": "./images/icon/icon.png",
-      "type": "image/png",
-      "sizes": "256x256"
-    },
-    {
-      "src": "./images/icon/icon.icns",
-      "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "256x256",
+      "type": "image/png"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"

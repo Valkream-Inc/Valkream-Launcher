@@ -122,7 +122,6 @@ class Index {
             directories: { output: outputDir },
             compression: "maximum",
             asar: true,
-            extraResources: [{ from: "data/", to: "data", filter: ["**/*"] }],
             publish: [
               {
                 provider: "github",
@@ -141,7 +140,7 @@ class Index {
               createStartMenuShortcut: true,
               runAfterFinish: true,
               deleteAppDataOnUninstall: true,
-              removeDefaultUninstallWelcomePage: true,
+              removeDefaultUninstallWelcomePage: false,
               include: "./installer.nsh",
             },
             mac: {

@@ -20,7 +20,7 @@ function GltfBackground() {
         <SunsetEnvironment />
 
         <Suspense fallback={<LoaderFallback />}>
-          <Model modelPath={"/models/valheim_black_forest.glb"} />
+          <Model modelPath={"./models/valheim_black_forest.glb"} />
         </Suspense>
 
         <CampfireLight />
