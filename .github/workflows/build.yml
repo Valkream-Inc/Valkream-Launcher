@@ -81,11 +81,17 @@ jobs:
       - name: List downloaded files
         run: ls -lh ./release-assets
 
-      - name: Create combined zip without existing zips
+      - name: Create combined zips
         run: |
           cd release-assets
+          # Supprimer les .zip déjà présents
           find . -type f -name '*.zip' -delete
-          zip -r ../combined-release.zip .
+
+          # Fichiers -install
+          zip -r ../combined-release-install.zip . -i '*-install*'
+
+          # Tous les autres fichiers (exclure ceux avec -install)
+          zip -r ../combined-release.zip . -x '*-install*'
         shell: bash
 
       - name: Upload to GitHub Release
@@ -95,5 +101,6 @@ jobs:
           name: Release ${{ needs.create-release.outputs.version }}
           files: |
             ./combined-release.zip
+            ./combined-release-install.zip
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
