@@ -1,15 +1,14 @@
 !macro customInstall
   DetailPrint "Installation de MonLauncher..."
-  ; Le dossier data est déjà copié par Electron-builder
 !macroend
 
 !macro customUnInstall
   DetailPrint "Désinstallation de MonLauncher..."
 
   ; Supprimer le dossier data (mods, settings…)
-  IfFileExists "$INSTDIR\data\*" 0 end_remove_data
-    RMDir /r "$INSTDIR\data"
-    DetailPrint "Dossier data supprimé : $INSTDIR\data"
+  IfFileExists "$INSTDIR\..\valkream-launcher-data\*" 0 end_remove_data
+    RMDir /r "$INSTDIR\..\valkream-launcher-data"
+    DetailPrint "Dossier data supprimé : $INSTDIR\..\valkream-launcher-data"
   end_remove_data:
 
   ; Supprimer les raccourcis créés
