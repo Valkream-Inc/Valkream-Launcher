@@ -28,11 +28,9 @@ function createWindow() {
     width: 512,
     height: 288,
     resizable: false,
-    icon: path.join(
-      rendererPath,
-      isDev ? "public" : "../frontend",
-      "images/icon/icon.png"
-    ),
+    icon: isDev
+      ? path.join(rendererPath, "public/images/icon/icon.png")
+      : path.join(__dirname, "../../frontend/images/icon/icon.png"),
     frame: false,
     show: false,
     webPreferences: {
@@ -48,8 +46,8 @@ function createWindow() {
     isDev
       ? "http://localhost:8080/#/updater"
       : `file://${path.join(
-          rendererPath,
-          "../frontend",
+          __dirname,
+          "../../frontend",
           "index.html"
         )}#/updater`
   );
