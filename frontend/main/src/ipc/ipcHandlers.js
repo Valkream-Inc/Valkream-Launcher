@@ -114,10 +114,7 @@ class IpcHandlers {
     );
 
     // installation
-    ipcMain.on(
-      "install",
-      async (event, date) => await Install.init(event, date)
-    );
+    ipcMain.handle("install", async (event) => await Install.init(event));
     ipcMain.handle(
       "update",
       async (event, date) => await new Update().init(event, date)

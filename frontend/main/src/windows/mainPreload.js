@@ -49,4 +49,17 @@ contextBridge.exposeInMainWorld("electron_API", {
   getModsData: (signal) => ipcRenderer.invoke("get-mods-data", signal),
   getModDetails: (baseMod) => ipcRenderer.invoke("get-mods-details", baseMod),
   getHashData: () => ipcRenderer.invoke("get-hash-data"),
+
+  install: () => ipcRenderer.invoke("install"),
+  onInstallProgress: (callback) =>
+    ipcRenderer.on("progress-install", (event, data) => callback(data)),
+  onInstallDone: (callback) =>
+    ipcRenderer.on("done-install", (event, data) => callback(data)),
+  onInstallError: (callback) =>
+    ipcRenderer.on("error-install", (event, data) => callback(data)),
+  removeInstallListeners: () => {
+    ipcRenderer.removeAllListeners("progress-install");
+    ipcRenderer.removeAllListeners("done-install");
+    ipcRenderer.removeAllListeners("error-install");
+  },
 });

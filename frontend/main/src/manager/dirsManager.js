@@ -7,26 +7,28 @@ class DirsManager {
   launcherRootPath = () => process.cwd();
 
   rootPath = () =>
-    isDev
-      ? newDir({
-          win32: path.join(this.launcherRootPath(), "data"),
-          linux: path.join(this.launcherRootPath(), "data"),
-          darwin: path.join(this.launcherRootPath(), "data"),
-        })
-      : newDir({
-          win32: path.join(
-            this.launcherRootPath(),
-            "../valkream-launcher-data"
-          ),
-          linux: path.join(
-            this.launcherRootPath(),
-            "../valkream-launcher-data"
-          ),
-          darwin: path.join(
-            this.launcherRootPath(),
-            "../valkream-launcher-data"
-          ),
-        });
+    newDir(
+      isDev
+        ? {
+            win32: path.join(this.launcherRootPath(), "data"),
+            linux: path.join(this.launcherRootPath(), "data"),
+            darwin: path.join(this.launcherRootPath(), "data"),
+          }
+        : {
+            win32: path.join(
+              this.launcherRootPath(),
+              "../valkream-launcher-data"
+            ),
+            linux: path.join(
+              this.launcherRootPath(),
+              "../valkream-launcher-data"
+            ),
+            darwin: path.join(
+              this.launcherRootPath(),
+              "../valkream-launcher-data"
+            ),
+          }
+    );
 
   gameRootPath = () =>
     newDir({

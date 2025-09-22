@@ -6,9 +6,10 @@ const { isSteamInstallation } = require("../../constants/index.js");
 const Reload = require("./reload.js");
 
 class Install {
-  async init(event, date) {
+  async init(event) {
     const callback = (text, processedBytes, totalBytes, percent, speed) => {
-      event.reply(`progress-${date}`, {
+      // CORRECT: Use event.sender.send for one-way messages
+      event.sender.send("progress-install", {
         text,
         processedBytes,
         totalBytes,
@@ -19,12 +20,12 @@ class Install {
 
     try {
       await GameManager.uninstall();
-      await Reload.init(); // initialisation des sous-folders supprimés
+      await Reload.init();
 
       if (!isSteamInstallation) {
         await GameManager.dowload(callback);
         await GameManager.unzip(callback);
-      } // installation steam a implémenter...
+      }
 
       await GameManager.dowloadBepInEx(callback);
       await GameManager.unzipBepInEx(callback);
@@ -37,11 +38,15 @@ class Install {
 
       await VersionManager.updateLocalVersionConfig();
       await Reload.init();
+
+      // CORRECT: Use event.sender.send for the "done" message
+      event.sender.send("done-install");
+      return { success: true };
     } catch (err) {
       console.error(err);
-      event.reply(`error-${date}`, err.message);
-    } finally {
-      event.reply(`done-${date}`);
+      // CORRECT: Use event.sender.send for the "error" message
+      event.sender.send("error-install", { message: err.message });
+      throw err;
     }
   }
 }

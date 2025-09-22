@@ -20,16 +20,50 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
     changeMainButtonAction({ isDisabled: false });
   }, [changeMainButtonAction]);
 
-  const callback = (text, downloadedBytes, totalBytes, percent, speed) => {
-    changeMainButtonAction({
-      text: `${text}\n
-            (${percent}%)
-            (${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)})
-            à ${formatBytes(speed)}/s`,
-    });
-  };
+  const callback = useCallback(
+    ({ text, downloadedBytes, totalBytes, percent, speed }) => {
+      changeMainButtonAction({
+        text: `${text}\n(${percent}%) (${formatBytes(
+          downloadedBytes
+        )} / ${formatBytes(totalBytes)}) à ${formatBytes(speed)}/s`,
+      });
+    },
+    [changeMainButtonAction]
+  );
 
   useEffect(() => {
+    const error = (err) => {
+      console.error(err);
+      enqueueSnackbar("Erreur lors de l'installation !", { variant: "error" });
+    };
+
+    const install = async () => {
+      const cleanup = () => {
+        window.electron_API.removeInstallListeners();
+      };
+
+      try {
+        // Set up listeners first
+        window.electron_API.onInstallProgress(callback);
+        window.electron_API.onInstallError((data) => {
+          error(data.message);
+          cleanup();
+        });
+        window.electron_API.onInstallDone(() => {
+          cleanup();
+          enqueueSnackbar("Installation terminée !", { variant: "success" });
+          reload();
+        });
+
+        // Now, trigger the installation process. The await ensures we wait for the process to complete.
+        await window.electron_API.install();
+      } catch (err) {
+        // This catch block handles errors thrown by the .invoke() call itself, not the ones from the main process
+        error(err);
+        cleanup();
+      }
+    };
+
     const reload = async () => {
       try {
         const status = await getInstallationStatut();
@@ -66,6 +100,7 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
           isAdminModsAvailable
         ) {
           disabledMainButton();
+          await window.api.installCustomMods(admin_mods, callback);
           // await ThunderstoreManager.InstallCustomMods(admin_mods, callback);
           enableMainButton();
           return reload();
@@ -99,7 +134,7 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
         if (!isInstalled && isServerReachable && isInternetConnected) {
           return changeMainButtonAction({
             text: "Installer",
-            onclick: () => {}, // à remplacer par install()
+            onclick: install, // à remplacer par install()
           });
         }
 

@@ -179,7 +179,10 @@ function Settings() {
 
       <SettingsTab id="mods" activeTab={activeTab}>
         <SettingsTitle warn={false}>Mods</SettingsTitle>
-        <ModsTab ref={gameTabRef} isDevActive={isDevActive} />
+        <ModsTab
+          ref={gameTabRef}
+          isDevActive={isDevActive || isSpecialOptionVisible}
+        />
       </SettingsTab>
 
       {(isDevActive || isSpecialOptionVisible) && (
