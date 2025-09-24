@@ -24,26 +24,12 @@ function Home() {
   const { changePanel } = usePanels();
 
   const [isTipsOpen, setIsTipsOpen] = useState(false);
+  const [isMainButtonDisabled, setIsMainButtonDisabled] = useState(false);
   const [mainButtonAction, setMainButtonAction] = useState({
     text: "Loading...",
-    onclick: () => {},
     isReadyToPlay: false,
-    isDisabled: false,
+    onclick: () => {},
   });
-
-  const changeMainButtonAction = ({
-    text,
-    onclick,
-    isReadyToPlay,
-    isDisabled,
-  }) => {
-    setMainButtonAction((prevState) => ({
-      text: text ?? prevState.text,
-      onclick: onclick ?? prevState.onclick,
-      isReadyToPlay: isReadyToPlay ?? prevState.isReadyToPlay,
-      isDisabled: isDisabled ?? prevState.isDisabled,
-    }));
-  };
 
   return (
     <>
@@ -54,7 +40,11 @@ function Home() {
         title="Astuces du jour"
         message={<TipsMessage />}
       />
-      <UpdateMainButtonAction changeMainButtonAction={changeMainButtonAction} />
+      <UpdateMainButtonAction
+        changeMainButtonAction={setMainButtonAction}
+        changeIsMainButtonDisabled={setIsMainButtonDisabled}
+        isDisabled={isMainButtonDisabled}
+      />
       <ServerInfo />
       <Links />
       <ButtonsBar
@@ -63,7 +53,7 @@ function Home() {
         onPlayClick={() => mainButtonAction.onclick()}
         playIcon={mainButtonAction.isReadyToPlay}
         playButtonText={mainButtonAction.text}
-        isDisabled={mainButtonAction.isDisabled}
+        isDisabled={isMainButtonDisabled}
       />
     </>
   );

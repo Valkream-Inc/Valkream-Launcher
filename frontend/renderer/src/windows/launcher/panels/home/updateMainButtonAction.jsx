@@ -9,16 +9,12 @@ const formatBytes = (bytes) => {
   return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
 };
 
-function UpdateMainButtonAction({ changeMainButtonAction }) {
+function UpdateMainButtonAction({
+  changeMainButtonAction,
+  changeIsMainButtonDisabled,
+  isDisabled,
+}) {
   const { getInstallationStatut, maintenance } = useInfos();
-
-  const disabledMainButton = useCallback(() => {
-    changeMainButtonAction({ isDisabled: true });
-  }, [changeMainButtonAction]);
-
-  const enableMainButton = useCallback(() => {
-    changeMainButtonAction({ isDisabled: false });
-  }, [changeMainButtonAction]);
 
   const callback = useCallback(
     ({ text, downloadedBytes, totalBytes, percent, speed }) => {
@@ -26,9 +22,11 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
         text: `${text}\n(${percent}%) (${formatBytes(
           downloadedBytes
         )} / ${formatBytes(totalBytes)}) à ${formatBytes(speed)}/s`,
+        isReadyToPlay: false,
+        onclick: () => {},
       });
     },
-    [changeMainButtonAction]
+    []
   );
 
   useEffect(() => {
@@ -38,6 +36,8 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
     };
 
     const install = async () => {
+      changeIsMainButtonDisabled(true);
+      console.log("Installing...");
       const cleanup = () => {
         window.electron_API.removeInstallListeners();
       };
@@ -61,10 +61,13 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
         // This catch block handles errors thrown by the .invoke() call itself, not the ones from the main process
         error(err);
         cleanup();
+      } finally {
+        changeIsMainButtonDisabled(false);
       }
     };
 
     const reload = async () => {
+      console.log("reload...");
       try {
         const status = await getInstallationStatut();
         const isMaintenanceEnabled = maintenance?.enabled || false;
@@ -75,17 +78,17 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
           isInstalled,
           isUpToDate,
           isMajorUpdate,
+          isServerReachable,
+          isInternetConnected,
+          gameVersion,
+
           isAdminModsActive,
           isAdminModsInstalled,
           isAdminModsAvailable,
           isBoostfpsModsActive,
           isBoostfpsModsInstalled,
           isBoostfpsModsAvailable,
-          isServerReachable,
-          isInternetConnected,
         } = status;
-
-        const gameVersion = isInstalled ? "2" : undefined;
 
         // Cas 0 : En cours de chargement
         if (isServerReachable == null || isMaintenanceEnabled == null)
@@ -99,10 +102,10 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
           !isAdminModsInstalled &&
           isAdminModsAvailable
         ) {
-          disabledMainButton();
+          changeIsMainButtonDisabled(true);
           await window.api.installCustomMods(admin_mods, callback);
           // await ThunderstoreManager.InstallCustomMods(admin_mods, callback);
-          enableMainButton();
+          changeIsMainButtonDisabled(CSSFontFeatureValuesRule);
           return reload();
         }
 
@@ -114,41 +117,40 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
           !isBoostfpsModsInstalled &&
           isBoostfpsModsAvailable
         ) {
-          disabledMainButton();
+          changeIsMainButtonDisabled(true);
           // await ThunderstoreManager.InstallCustomMods(boostfps_mods, callback);
-          enableMainButton();
+          changeIsMainButtonDisabled(false);
           return reload();
         }
 
         // Cas 2 : Pas installé et pas de connexion internet
-        if (!isInstalled && (!isServerReachable || !isInternetConnected)) {
+        if (!isInstalled && (!isServerReachable || !isInternetConnected))
           return changeMainButtonAction({
             text: `Installation Impossible\n (❌ Pas de connexion ${
               isInternetConnected ? "au serveur" : "internet"
             }.)`,
             onclick: reload,
+            isReadyToPlay: false,
           });
-        }
 
         // Cas 3 : Pas installé et internet OK
-        if (!isInstalled && isServerReachable && isInternetConnected) {
+        if (!isInstalled && isServerReachable && isInternetConnected)
           return changeMainButtonAction({
             text: "Installer",
             onclick: install, // à remplacer par install()
+            isReadyToPlay: false,
           });
-        }
 
         // Cas 4 : Installé, pas internet
-        if (isInstalled && (!isServerReachable || !isInternetConnected)) {
-          changeMainButtonAction({
+        if (isInstalled && (!isServerReachable || !isInternetConnected))
+          return changeMainButtonAction({
             text: `Jouer à la v${gameVersion}\n 
             (⚠️ Pas de connexion ${
               isInternetConnected ? "au serveur" : "internet"
             }.)`,
             onclick: () => {}, // start()
+            isReadyToPlay: true,
           });
-          return;
-        }
 
         // Cas 5 et 6 : Installé, internet, pas à jour
         if (
@@ -156,15 +158,13 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
           isServerReachable &&
           isInternetConnected &&
           !isUpToDate
-        ) {
-          changeMainButtonAction({
+        )
+          return changeMainButtonAction({
             text: isMajorUpdate
               ? "Réinstaller\n (⚠️ Nouvelle version majeure.)"
               : "Mettre à jour",
             onclick: () => {}, // update/install selon le cas
           });
-          return;
-        }
 
         // Cas 7 : Installé, internet, à jour
         if (
@@ -172,21 +172,21 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
           isServerReachable &&
           isInternetConnected &&
           isUpToDate
-        ) {
-          changeMainButtonAction({
+        )
+          return changeMainButtonAction({
             text: `Jouer à la v${gameVersion}
                   ${isMaintenanceEnabled ? "\n (⚠️ Maintenance en cours.)" : ""}
                   ${isAdminModsActive ? "\n (⚠️ Mods Admin activés.)" : ""}`,
 
             onclick: () => {}, // start()
+            isReadyToPlay: true,
           });
-          return;
-        }
 
         // Cas par défaut
-        changeMainButtonAction({
+        return changeMainButtonAction({
           text: "Erreur inconnue, contactez le support.",
           onclick: reload,
+          isReadyToPlay: false,
         });
       } catch (err) {
         console.error(err);
@@ -197,18 +197,19 @@ function UpdateMainButtonAction({ changeMainButtonAction }) {
           text: "Erreur lors de la vérification",
           onclick: reload,
         });
-      } finally {
-        enableMainButton();
       }
     };
 
     reload();
-    const intervalId = setInterval(reload, 1000);
+    const intervalId = setInterval(() => {
+      if (isDisabled) return;
+      else reload();
+    }, 1000);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [isDisabled, maintenance]);
 
   return null;
 }

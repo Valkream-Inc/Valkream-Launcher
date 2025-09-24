@@ -81,6 +81,8 @@ class InstallationStatut {
         localVersionConfig.version === onlineVersionConfig?.version;
     }
 
+    const gameVersion = isInstalled ? localVersionConfig?.version : null;
+
     // --- 5. Résultats ---
     return {
       isInternetConnected,
@@ -88,6 +90,7 @@ class InstallationStatut {
       isInstalled,
       isUpToDate,
       isMajorUpdate,
+      gameVersion,
 
       // Résultats des mods
       isAdminModsActive,

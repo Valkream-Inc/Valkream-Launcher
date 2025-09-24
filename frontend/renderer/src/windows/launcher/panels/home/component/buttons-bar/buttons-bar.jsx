@@ -47,7 +47,7 @@ function PlayButton({
 function ButtonsBar({
   playButtonText = "Loading...",
   playIcon = false,
-  isDisabled = false,
+  isDisabled,
   onPlayClick = () => {},
   onSettingsClick = () => {},
   onTipsClick = () => {},
@@ -69,7 +69,6 @@ function ButtonsBar({
             variant="contained"
             className="settings-btn"
             onClick={onSettingsClick}
-            disabled={isDisabled}
           >
             <SettingsIcon fontSize="large" />
           </Button>
