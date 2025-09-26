@@ -11,7 +11,6 @@ const Install = require("./handlers/install.js");
 const Update = require("./handlers/update.js");
 const Start = require("./handlers/start.js");
 const CustomMods = require("./handlers/custom-mods.js");
-const Reload = require("./handlers/reload.js");
 const InstallationStatut = require("./handlers/installation-statut.js");
 const ModsDataHandler = require("./handlers/mods-data.js");
 
@@ -93,11 +92,10 @@ class IpcHandlers {
       "get-version:game",
       async () => (await VersionManager.getLocalVersionConfig()).version
     );
-    ipcMain.handle("init", async () => await GameManager.init());
-    ipcMain.handle("reload", async () => await Reload.init());
-    ipcMain.handle("get-installation-statut", async () => {
-      return await InstallationStatut.get();
-    });
+    ipcMain.handle(
+      "get-installation-statut",
+      async () => await InstallationStatut.get()
+    );
     ipcMain.handle("open-link", async (event, url) => {
       if (!(url.startsWith("http://") || url.startsWith("https://"))) return;
       await shell.openExternal(url);

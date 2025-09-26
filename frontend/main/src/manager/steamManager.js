@@ -2,33 +2,24 @@
  * @author Valkream Team
  * @license MIT - https://opensource.org/licenses/MIT
  */
-
-const path = require("path");
-const fse = require("fs-extra");
 const { shell } = require("electron");
 
-const DirsManager = require("./dirsManager.js");
-const SettingsManager = require("./settingsManager.js");
-
 class SteamManager {
-  async init() {
-    this.gameDir = DirsManager.gamePath();
-  }
-
-  install() {
-    const steamValheimPath = SettingsManager.getSetting("valheim_steam_path");
-    fse.copySync(path.join(steamValheimPath), this.gameDir);
-  }
-
   async update() {
-    return await shell.openExternal("steam://rungameid/892970");
+    try {
+      await shell.openExternal("steam://rungameid/892970");
+    } catch (err) {
+      console.error("Impossible de lancer la mise à jour Steam :", err.message);
+    }
   }
 
   async open() {
-    return await shell.openExternal("steam://store/892970");
+    try {
+      await shell.openExternal("steam://store/892970");
+    } catch (err) {
+      console.error("Impossible d'ouvrir la page Steam :", err.message);
+    }
   }
 }
 
-const steamManager = new SteamManager();
-steamManager.init();
-module.exports = steamManager;
+module.exports = new SteamManager();

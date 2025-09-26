@@ -4,7 +4,7 @@
  */
 
 const axios = require("axios");
-const fs = require("fs");
+const fs = require("fs/promises");
 const yaml = require("yaml");
 const { hashFolder } = require("valkream-function-lib");
 
@@ -14,6 +14,11 @@ const LinksManager = require("./linksManager.js");
 const InfosManager = require("./infosManager.js");
 
 class VersionManager {
+  constructor() {
+    this.onlineVersionConfig = null;
+    this.localVersionConfig = null;
+  }
+
   async init() {
     this.BepInExConfigDir = DirsManager.bepInExConfigPath();
     this.BepInExPluginsDir = DirsManager.bepInExPluginsPath();
@@ -22,49 +27,65 @@ class VersionManager {
     this.gameVersionFilePath = FilesManager.gameVersionFilePath();
   }
 
-  async updateOnlineVersionConfig() {
+  async updateOnlineVersionConfig(force = false) {
+    await this.init();
+    if (!force && this.onlineVersionConfig) return this.onlineVersionConfig;
+
     if (await InfosManager.getIsServerReachableFromInternal()) {
-      const yamlContent = (
-        await axios.get(this.gameVersionFileLink)
-      ).data.trim();
-
-      const parsed = yaml.parse(yamlContent);
-      this.onlineVersionConfig = parsed;
+      const { data } = await axios.get(this.gameVersionFileLink);
+      this.onlineVersionConfig = yaml.parse(data.trim());
     }
-  }
-
-  async getOnlineVersionConfig() {
-    if (!this.onlineVersionConfig) await this.updateOnlineVersionConfig();
     return this.onlineVersionConfig;
   }
 
-  async getLocalVersionConfig() {
-    if (!fs.existsSync(this.gameVersionFilePath)) return null;
+  async getOnlineVersionConfig() {
+    await this.init();
+    return this.onlineVersionConfig || this.updateOnlineVersionConfig();
+  }
 
-    const yamlContent = fs
-      .readFileSync(this.gameVersionFilePath, "utf8")
-      .trim();
+  async getLocalVersionConfig(force = false) {
+    await this.init();
+    if (!force && this.localVersionConfig) return this.localVersionConfig;
 
-    const parsed = yaml.parse(yamlContent);
-    return parsed;
+    try {
+      const content = await fs.readFile(this.gameVersionFilePath, "utf8");
+      this.localVersionConfig = yaml.parse(content.trim());
+      return this.localVersionConfig;
+    } catch {
+      return null;
+    }
   }
 
   async isVersionUpToDate() {
-    const localVersionConfig = await this.getLocalVersionConfig();
-    const onlineVersionConfig = await this.getOnlineVersionConfig();
-    return localVersionConfig.version === onlineVersionConfig.version;
+    await this.init();
+    const [local, online] = await Promise.all([
+      this.getLocalVersionConfig(),
+      this.getOnlineVersionConfig(),
+    ]);
+    return (
+      local?.version && online?.version && local.version === online.version
+    );
   }
 
   async updateLocalVersionConfig(content) {
+    await this.init();
     const dataToWrite = content || (await this.getOnlineVersionConfig());
-    fs.writeFileSync(this.gameVersionFilePath, yaml.stringify(dataToWrite));
+    this.localVersionConfig = dataToWrite;
+    await fs.writeFile(this.gameVersionFilePath, yaml.stringify(dataToWrite));
   }
 
-  getIsInstalled() {
-    return fs.existsSync(this.gameVersionFilePath);
+  async getIsInstalled() {
+    await this.init();
+    try {
+      await fs.access(this.gameVersionFilePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  async ckeckPluginsAndConfig() {
+  async checkPluginsAndConfig() {
+    await this.init();
     const {
       onlineConfigHash,
       onlinePluginsHash,
@@ -75,35 +96,33 @@ class VersionManager {
     if (
       onlinePluginsHash !== localPluginsHash ||
       onlineConfigHash !== localConfigHash
-    )
+    ) {
       throw new Error("Plugins or configs are not up to date");
-
-    return;
+    }
   }
 
   async getHash() {
+    await this.init();
     const GameManager = require("./gameManager.js");
 
     await GameManager.preserveGameFolder();
     await GameManager.clean();
-    const pluginsHash = await hashFolder(this.BepInExPluginsDir, "sha256", 10);
-    const configsHash = await hashFolder(this.BepInExConfigDir, "sha256", 10);
+
+    const [pluginsHash, configsHash] = await Promise.all([
+      hashFolder(this.BepInExPluginsDir, "sha256", 10),
+      hashFolder(this.BepInExConfigDir, "sha256", 10),
+    ]);
+
     await GameManager.restoreGameFolder();
 
-    const onlinePluginsHash = (await this.getOnlineVersionConfig())?.modpack
-      ?.hash?.plugins;
-    const onlineConfigHash = (await this.getOnlineVersionConfig())?.modpack
-      ?.hash?.config;
-
+    const online = await this.getOnlineVersionConfig();
     return {
       localPluginsHash: pluginsHash,
       localConfigHash: configsHash,
-      onlinePluginsHash: onlinePluginsHash,
-      onlineConfigHash: onlineConfigHash,
+      onlinePluginsHash: online?.modpack?.hash?.plugins,
+      onlineConfigHash: online?.modpack?.hash?.config,
     };
   }
 }
 
-const versionManager = new VersionManager();
-versionManager.init();
-module.exports = versionManager;
+module.exports = new VersionManager();

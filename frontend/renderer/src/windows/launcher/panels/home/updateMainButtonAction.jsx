@@ -1,5 +1,5 @@
 import { enqueueSnackbar } from "notistack";
-import { useCallback, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useInfos } from "../../context/infos.context";
 
 const formatBytes = (bytes) => {
@@ -15,19 +15,20 @@ function UpdateMainButtonAction({
   isDisabled,
 }) {
   const { getInstallationStatut, maintenance } = useInfos();
+  const installingRef = useRef(false); // <-- flag pour bloquer reload pendant l'install
 
-  const callback = useCallback(
-    ({ text, downloadedBytes, totalBytes, percent, speed }) => {
+  let lastUpdate = 0;
+  const callback = ({ downloadedBytes, totalBytes, percent }) => {
+    const now = Date.now();
+    if (now - lastUpdate > 200) {
       changeMainButtonAction({
-        text: `${text}\n(${percent}%) (${formatBytes(
+        text: `Téléchargement ${percent}% (${formatBytes(
           downloadedBytes
-        )} / ${formatBytes(totalBytes)}) à ${formatBytes(speed)}/s`,
-        isReadyToPlay: false,
-        onclick: () => {},
+        )}/${formatBytes(totalBytes)})`,
       });
-    },
-    []
-  );
+      lastUpdate = now;
+    }
+  };
 
   useEffect(() => {
     const error = (err) => {
@@ -36,42 +37,43 @@ function UpdateMainButtonAction({
     };
 
     const install = async () => {
+      if (installingRef.current) return; // déjà en cours
+      installingRef.current = true;
       changeIsMainButtonDisabled(true);
+
       console.log("Installing...");
-      const cleanup = () => {
-        window.electron_API.removeInstallListeners();
-      };
+      const cleanup = () => window.electron_API.removeInstallListeners();
 
       try {
-        // Set up listeners first
         window.electron_API.onInstallProgress(callback);
         window.electron_API.onInstallError((data) => {
           error(data.message);
           cleanup();
+          installingRef.current = false;
         });
         window.electron_API.onInstallDone(() => {
           cleanup();
           enqueueSnackbar("Installation terminée !", { variant: "success" });
-          reload();
+          installingRef.current = false;
+          reload(); // relance le reload une seule fois après fin install
         });
 
-        // Now, trigger the installation process. The await ensures we wait for the process to complete.
         await window.electron_API.install();
       } catch (err) {
-        // This catch block handles errors thrown by the .invoke() call itself, not the ones from the main process
         error(err);
         cleanup();
+        installingRef.current = false;
       } finally {
         changeIsMainButtonDisabled(false);
       }
     };
 
     const reload = async () => {
-      console.log("reload...");
+      if (installingRef.current) return; // bloquer reload pendant l'installation
+
       try {
         const status = await getInstallationStatut();
         const isMaintenanceEnabled = maintenance?.enabled || false;
-
         if (!status) return;
 
         const {
@@ -81,7 +83,6 @@ function UpdateMainButtonAction({
           isServerReachable,
           isInternetConnected,
           gameVersion,
-
           isAdminModsActive,
           isAdminModsInstalled,
           isAdminModsAvailable,
@@ -91,100 +92,42 @@ function UpdateMainButtonAction({
         } = status;
 
         // Cas 0 : En cours de chargement
-        if (isServerReachable == null || isMaintenanceEnabled == null)
-          return setTimeout(reload, 100);
+        if (isServerReachable == null) return;
 
-        // Gérer Admin Mods
-        if (
-          isInstalled &&
-          isInternetConnected &&
-          isAdminModsActive &&
-          !isAdminModsInstalled &&
-          isAdminModsAvailable
-        ) {
-          changeIsMainButtonDisabled(true);
-          await window.api.installCustomMods(admin_mods, callback);
-          // await ThunderstoreManager.InstallCustomMods(admin_mods, callback);
-          changeIsMainButtonDisabled(CSSFontFeatureValuesRule);
-          return reload();
-        }
-
-        // Gérer BoostFPS Mods
-        if (
-          isInstalled &&
-          isInternetConnected &&
-          isBoostfpsModsActive &&
-          !isBoostfpsModsInstalled &&
-          isBoostfpsModsAvailable
-        ) {
-          changeIsMainButtonDisabled(true);
-          // await ThunderstoreManager.InstallCustomMods(boostfps_mods, callback);
-          changeIsMainButtonDisabled(false);
-          return reload();
-        }
-
-        // Cas 2 : Pas installé et pas de connexion internet
-        if (!isInstalled && (!isServerReachable || !isInternetConnected))
-          return changeMainButtonAction({
-            text: `Installation Impossible\n (❌ Pas de connexion ${
-              isInternetConnected ? "au serveur" : "internet"
-            }.)`,
-            onclick: reload,
-            isReadyToPlay: false,
-          });
-
-        // Cas 3 : Pas installé et internet OK
-        if (!isInstalled && isServerReachable && isInternetConnected)
+        // Cas 1 : Pas installé, internet OK
+        if (!isInstalled && isServerReachable && isInternetConnected) {
           return changeMainButtonAction({
             text: "Installer",
-            onclick: install, // à remplacer par install()
+            onclick: install,
             isReadyToPlay: false,
           });
+        }
 
-        // Cas 4 : Installé, pas internet
-        if (isInstalled && (!isServerReachable || !isInternetConnected))
+        // Cas 2 : Installé et à jour
+        if (isInstalled && isUpToDate) {
           return changeMainButtonAction({
-            text: `Jouer à la v${gameVersion}\n 
-            (⚠️ Pas de connexion ${
-              isInternetConnected ? "au serveur" : "internet"
-            }.)`,
-            onclick: () => {}, // start()
+            text: `Jouer à la v${gameVersion}${
+              isMaintenanceEnabled ? "\n(⚠️ Maintenance en cours.)" : ""
+            }`,
+            onclick: () => {},
             isReadyToPlay: true,
           });
+        }
 
-        // Cas 5 et 6 : Installé, internet, pas à jour
-        if (
-          isInstalled &&
-          isServerReachable &&
-          isInternetConnected &&
-          !isUpToDate
-        )
+        // Cas 3 : Installé mais mise à jour disponible
+        if (isInstalled && !isUpToDate) {
           return changeMainButtonAction({
             text: isMajorUpdate
-              ? "Réinstaller\n (⚠️ Nouvelle version majeure.)"
+              ? "Réinstaller\n(⚠️ Nouvelle version majeure.)"
               : "Mettre à jour",
-            onclick: () => {}, // update/install selon le cas
+            onclick: install,
+            isReadyToPlay: false,
           });
-
-        // Cas 7 : Installé, internet, à jour
-        if (
-          isInstalled &&
-          isServerReachable &&
-          isInternetConnected &&
-          isUpToDate
-        )
-          return changeMainButtonAction({
-            text: `Jouer à la v${gameVersion}
-                  ${isMaintenanceEnabled ? "\n (⚠️ Maintenance en cours.)" : ""}
-                  ${isAdminModsActive ? "\n (⚠️ Mods Admin activés.)" : ""}`,
-
-            onclick: () => {}, // start()
-            isReadyToPlay: true,
-          });
+        }
 
         // Cas par défaut
         return changeMainButtonAction({
-          text: "Erreur inconnue, contactez le support.",
+          text: "Vérification...",
           onclick: reload,
           isReadyToPlay: false,
         });
@@ -200,16 +143,22 @@ function UpdateMainButtonAction({
       }
     };
 
-    reload();
+    // Relance automatique toutes les 2 secondes, sauf si installation en cours
     const intervalId = setInterval(() => {
-      if (isDisabled) return;
-      else reload();
+      if (!installingRef.current && !isDisabled) reload();
     }, 1000);
 
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [isDisabled, maintenance]);
+    reload(); // premier appel direct
+
+    return () => clearInterval(intervalId);
+  }, [
+    isDisabled,
+    maintenance,
+    callback,
+    changeIsMainButtonDisabled,
+    changeMainButtonAction,
+    getInstallationStatut,
+  ]);
 
   return null;
 }

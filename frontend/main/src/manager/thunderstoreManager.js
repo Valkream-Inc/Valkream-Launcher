@@ -38,16 +38,13 @@ class ThunderstoreManager {
   }
 
   async downloadModpack(
-    callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
+    callback = () => {},
     text = "Téléchargement du modpack..."
   ) {
-    return await dowloadMultiplefiles(
-      [
-        {
-          url: this.modpackZipLink,
-          destPath: this.modpackZipPath,
-        },
-      ],
+    await this.init();
+    if (!this.modpackZipLink) throw new Error("Lien du modpack introuvable");
+    return dowloadMultiplefiles(
+      [{ url: this.modpackZipLink, destPath: this.modpackZipPath }],
       (data) =>
         callback(
           text,
@@ -60,10 +57,13 @@ class ThunderstoreManager {
   }
 
   async unzipModpack(
-    callback = (text, decompressedBytes, totalBytes, percent, speed) => {},
+    callback = () => {},
     text = "Décompression du modpack..."
   ) {
-    return await unZipMultipleFiles(
+    await this.init();
+    if (!fs.existsSync(this.modpackZipPath))
+      throw new Error("Archive modpack introuvable !");
+    return unZipMultipleFiles(
       [{ path: this.modpackZipPath, destPath: this.ModPackDir }],
       (data) =>
         callback(
@@ -77,25 +77,35 @@ class ThunderstoreManager {
   }
 
   async dowloadMods(
-    callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
+    callback = () => {},
     text = "Téléchargement des mods...",
     customMods = null
   ) {
-    let manifest;
-    if (fs.existsSync(this.extractManifestPath))
-      manifest = JSON.parse(fs.readFileSync(this.extractManifestPath, "utf-8"));
+    await this.init();
+    let manifest = {};
+    if (fs.existsSync(this.extractManifestPath)) {
+      try {
+        manifest = JSON.parse(
+          fs.readFileSync(this.extractManifestPath, "utf-8")
+        );
+      } catch (err) {
+        throw new Error("Manifest invalide ou corrompu");
+      }
+    }
 
     const mods = customMods || manifest.dependencies || [];
+    if (!Array.isArray(mods) || mods.length === 0) return;
 
-    if (fs.existsSync(this.modsDir))
-      fs.rmSync(this.modsDir, { recursive: true });
-    fs.mkdirSync(this.modsDir, { recursive: true });
+    fse.emptyDirSync(this.modsDir);
 
     await dowloadMultiplefiles(
-      mods.map((mod) => ({
-        url: this.getModInfos(mod).url,
-        destPath: path.join(this.modsDir, mod + ".zip"),
-      })),
+      mods.map((mod) => {
+        const infos = this.getModInfos(mod);
+        return {
+          url: infos.url,
+          destPath: path.join(this.modsDir, mod + ".zip"),
+        };
+      }),
       (data) =>
         callback(
           text,
@@ -106,21 +116,24 @@ class ThunderstoreManager {
         )
     );
 
-    return fse.moveSync(this.extractManifestPath, this.installedManifestPath, {
-      overwrite: true,
-      force: true,
-    });
+    if (fs.existsSync(this.extractManifestPath)) {
+      fse.moveSync(this.extractManifestPath, this.installedManifestPath, {
+        overwrite: true,
+      });
+    }
   }
 
-  async unzipMods(
-    callback = (text, decompressedBytes, totalBytes, percent, speed) => {},
-    text = "Décompression des mods..."
-  ) {
-    const mods = fs.readdirSync(this.modsDir);
-    return await unZipMultipleFiles(
+  async unzipMods(callback = () => {}, text = "Décompression des mods...") {
+    await this.init();
+    if (!fs.existsSync(this.modsDir)) return;
+
+    const mods = fs.readdirSync(this.modsDir).filter((m) => m.endsWith(".zip"));
+    if (mods.length === 0) return;
+
+    return unZipMultipleFiles(
       mods.map((mod) => ({
         path: path.join(this.modsDir, mod),
-        destPath: path.join(this.BepInExPluginsDir, mod.replace(".zip", "")),
+        destPath: this.BepInExPluginsDir,
       })),
       (data) =>
         callback(
@@ -135,7 +148,9 @@ class ThunderstoreManager {
 
   getModInfos(modName) {
     if (!modName) throw new Error("Mod name is undefined");
-    const [author, name, version] = modName.split("-");
+    const parts = modName.split("-");
+    if (parts.length < 3) throw new Error(`Nom du mod invalide: ${modName}`);
+    const [author, name, version] = parts;
     return {
       url: `https://thunderstore.io/package/download/${author}/${name}/${version}/`,
       author,
@@ -144,89 +159,87 @@ class ThunderstoreManager {
     };
   }
 
-  update = async (
-    callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
-    text_dowload = "Téléchargement des mods...",
+  async update(
+    callback = () => {},
+    text_download = "Téléchargement des mods...",
     text_unzip = "Décompression des mods..."
-  ) => {
+  ) {
+    await this.init();
+    if (!fs.existsSync(this.extractManifestPath))
+      throw new Error("Manifest inexistant");
+
     const NewManifest = JSON.parse(
       fs.readFileSync(this.extractManifestPath, "utf-8")
     );
-
     const actual_mods = (await this.getInstalledMods()).filter(
       (mod) => !mod.endsWith(".dll")
     );
     const new_mods = NewManifest.dependencies || [];
+
     const to_delete = actual_mods.filter((mod) => !new_mods.includes(mod));
     const to_add = new_mods.filter((mod) => !actual_mods.includes(mod));
 
-    await Promise.all(
-      to_delete.map((mod) => {
-        const modPath = path.join(this.BepInExPluginsDir, mod);
-        if (fs.existsSync(modPath)) {
-          fs.rmSync(modPath, { recursive: true });
-        }
-        return true;
-      })
-    );
+    // suppression
+    for (const mod of to_delete) {
+      const modPath = path.join(this.BepInExPluginsDir, mod);
+      fse.removeSync(modPath);
+    }
 
-    await this.dowloadMods(callback, text_dowload, to_add);
-    await this.unzipMods(callback, text_unzip);
-  };
+    if (to_add.length > 0) {
+      await this.dowloadMods(callback, text_download, to_add);
+      await this.unzipMods(callback, text_unzip);
+    }
+  }
 
   async getInstalledMods() {
+    await this.init();
+    if (!fs.existsSync(this.BepInExPluginsDir)) return [];
     return fs.readdirSync(this.BepInExPluginsDir);
   }
 
   async getIsInstalled() {
+    await this.init();
     return fs.existsSync(this.installedManifestPath);
   }
 
   async uninstallModpackConfig() {
-    fs.rmSync(this.BepInExConfigDir, { recursive: true });
+    await this.init();
+    fse.removeSync(this.BepInExConfigDir);
   }
 
-  isCustomModsInstalled(mods = []) {
+  async isCustomModsInstalled(mods = []) {
+    await this.init();
     if (!Array.isArray(mods) || mods.length === 0) return false;
-    const installedMods = fs.readdirSync(this.BepInExPluginsDir);
+    const installedMods = await this.getInstalledMods();
     return mods.every((mod) => installedMods.includes(mod));
   }
 
   isCustomModsAvailable(mods = []) {
-    if (!Array.isArray(mods) || mods.length === 0) return false;
-    return true;
+    return Array.isArray(mods) && mods.length > 0;
   }
 
-  unInstallCustomMods = async (mods = []) => {
-    if (!this.isCustomModsInstalled(mods))
-      throw new Error("Mods are not installed");
-
-    const installedMods = fs.readdirSync(this.BepInExPluginsDir);
+  async unInstallCustomMods(mods = []) {
+    await this.init();
+    const installedMods = await this.getInstalledMods();
     const to_delete = mods.filter((mod) => installedMods.includes(mod));
+    for (const mod of to_delete) {
+      const modPath = path.join(this.BepInExPluginsDir, mod);
+      fse.removeSync(modPath);
+    }
+  }
 
-    await Promise.all(
-      to_delete.map((mod) => {
-        const modPath = path.join(this.BepInExPluginsDir, mod);
-        if (fs.existsSync(modPath)) {
-          fs.rmSync(modPath, { recursive: true });
-        }
-        return true;
-      })
-    );
-  };
-
-  InstallCustomMods = async (
+  async InstallCustomMods(
     mods = [],
-    callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
-    text_dowload = "Téléchargement des mods Custom...",
+    callback = () => {},
+    text_download = "Téléchargement des mods Custom...",
     text_unzip = "Décompression des mods Custom..."
-  ) => {
+  ) {
+    await this.init();
+    if (!this.isCustomModsAvailable(mods)) return;
     await this.unInstallCustomMods(mods);
-    await this.dowloadMods(callback, text_dowload, mods);
+    await this.dowloadMods(callback, text_download, mods);
     await this.unzipMods(callback, text_unzip);
-  };
+  }
 }
 
-const thunderstoreManager = new ThunderstoreManager();
-thunderstoreManager.init();
-module.exports = thunderstoreManager;
+module.exports = new ThunderstoreManager();

@@ -2,14 +2,15 @@ const SettingsManager = require("../../manager/settingsManager");
 const GameManager = require("../../manager/gameManager");
 const ThunderstoreManager = require("../../manager/thunderstoreManager");
 const VersionManager = require("../../manager/versionManager");
-
 const InfosManager = require("../../manager/infosManager");
 
 class InstallationStatut {
-  get = async () => {
+  async get() {
     // --- 1. Connectivité ---
-    const isServerReachable = await InfosManager.getIsServerReachable();
-    const isInternetConnected = await InfosManager.getIsInternetConnected();
+    const [isServerReachable, isInternetConnected] = await Promise.all([
+      InfosManager.getIsServerReachable(),
+      InfosManager.getIsInternetConnected(),
+    ]);
 
     // --- 2. Infos locales & installation ---
     const [
@@ -28,18 +29,11 @@ class InstallationStatut {
 
     // --- 3. Gestion des mods ---
     const checkCustomMods = async (mods, settingKey) => {
-      const [active] = await Promise.all([
-        SettingsManager.getSetting(settingKey),
-      ]);
-
-      const installed = ThunderstoreManager.isCustomModsInstalled(mods);
+      const active = await SettingsManager.getSetting(settingKey);
+      const installed = await ThunderstoreManager.isCustomModsInstalled(mods);
       const available = ThunderstoreManager.isCustomModsAvailable(mods);
 
-      return {
-        active,
-        installed,
-        available,
-      };
+      return { active, installed, available };
     };
 
     const [adminModsResult, boostfpsModsResult] = await Promise.all([
@@ -70,9 +64,13 @@ class InstallationStatut {
     if (isServerReachable) {
       onlineVersionConfig = await VersionManager.getOnlineVersionConfig();
 
-      const [majorLocal] = (localVersionConfig?.version ?? "0.0.0").split(".");
-      const [majorOnline] = (onlineVersionConfig?.version ?? "0.0.0").split(
-        "."
+      const majorLocal = parseInt(
+        (localVersionConfig?.version ?? "0.0.0").split(".")[0],
+        10
+      );
+      const majorOnline = parseInt(
+        (onlineVersionConfig?.version ?? "0.0.0").split(".")[0],
+        10
       );
       isMajorUpdate = majorLocal !== majorOnline;
 
@@ -101,8 +99,7 @@ class InstallationStatut {
       isBoostfpsModsInstalled,
       isBoostfpsModsAvailable,
     };
-  };
+  }
 }
 
-const installationStatut = new InstallationStatut();
-module.exports = installationStatut;
+module.exports = new InstallationStatut();

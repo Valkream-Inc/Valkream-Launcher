@@ -2,8 +2,6 @@ const GameManager = require("../../manager/gameManager.js");
 const ThunderstoreManager = require("../../manager/thunderstoreManager.js");
 const VersionManager = require("../../manager/versionManager.js");
 
-const Reload = require("./reload.js");
-
 class Update {
   async init(event, date) {
     const callback = (text, processedBytes, totalBytes, percent, speed) => {
@@ -42,7 +40,6 @@ class Update {
 
     await GameManager.restoreGameFolder();
     await VersionManager.updateLocalVersionConfig();
-    await Reload.init();
   }
 }
 

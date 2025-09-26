@@ -3,7 +3,6 @@ const ThunderstoreManager = require("../../manager/thunderstoreManager.js");
 const GameManager = require("../../manager/gameManager.js");
 
 const { isSteamInstallation } = require("../../constants/index.js");
-const Reload = require("./reload.js");
 
 class Install {
   async init(event) {
@@ -20,7 +19,6 @@ class Install {
 
     try {
       await GameManager.uninstall();
-      await Reload.init();
 
       if (!isSteamInstallation) {
         await GameManager.dowload(callback);
@@ -37,7 +35,6 @@ class Install {
       await ThunderstoreManager.unzipMods(callback);
 
       await VersionManager.updateLocalVersionConfig();
-      await Reload.init();
 
       // CORRECT: Use event.sender.send for the "done" message
       event.sender.send("done-install");

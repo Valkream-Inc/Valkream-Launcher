@@ -12,61 +12,62 @@ const LinksManager = require("./linksManager");
 
 class InfosManager {
   constructor() {
-    this.IsServerReachable = null;
+    this.isServerReachable = null;
+    this.server = null;
   }
 
-  async getIsServerReachableFromInternal() {
-    if (this.IsServerReachable === null) await this.getIsServerReachable();
-    return this.IsServerReachable;
+  async getIsServerReachableFromInternal(forceRefresh = false) {
+    if (this.isServerReachable === null || forceRefresh) {
+      await this.getIsServerReachable();
+    }
+    return this.isServerReachable;
   }
 
-  getIsInternetConnected = async (hostname = "google.com") => {
-    return await new Promise((resolve) => {
+  async getIsInternetConnected(hostname = "google.com") {
+    return new Promise((resolve) => {
       dns.lookup(hostname, (err) => {
-        if (err && err.code === "ENOTFOUND") {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
+        resolve(!(err && err.code === "ENOTFOUND"));
       });
     });
-  };
+  }
 
-  getIsServerReachable = async (url = baseUrl) => {
+  async getIsServerReachable(url = baseUrl) {
     try {
       await axios.get(url, { timeout: 3000 });
-      this.IsServerReachable = true;
+      this.isServerReachable = true;
       return true;
     } catch (error) {
       console.error("Error checking server reachability:", error.message);
-      this.IsServerReachable = false;
+      this.isServerReachable = false;
       return false;
     }
-  };
+  }
 
-  getEvent = async () => {
+  async getEvent() {
     try {
-      if (!this.getIsServerReachableFromInternal()) return;
-      const res = await axios.get(LinksManager.eventUrl());
+      if (!(await this.getIsServerReachableFromInternal())) return null;
+      const res = await axios.get(LinksManager.eventUrl(), { timeout: 3000 });
       return res.data;
     } catch (err) {
       console.error("Error getting Event:", err.message);
-      return;
+      return null;
     }
-  };
+  }
 
-  getMaintenance = async () => {
+  async getMaintenance() {
     try {
-      if (!this.getIsServerReachableFromInternal()) return;
-      const res = await axios.get(LinksManager.maintenanceUrl());
+      if (!(await this.getIsServerReachableFromInternal())) return null;
+      const res = await axios.get(LinksManager.maintenanceUrl(), {
+        timeout: 3000,
+      });
       return res.data;
     } catch (err) {
       console.error("Error getting Maintenance:", err.message);
-      return;
+      return null;
     }
-  };
+  }
 
-  getServerInfos = async () => {
+  async getServerInfos() {
     try {
       if (!this.server) this.server = await Server(serverInfos);
       const res = await this.server.getInfo();
@@ -80,8 +81,7 @@ class InfosManager {
       console.error("Error setting server:", err.message);
       return { status: "server offline" };
     }
-  };
+  }
 }
 
-const infosManager = new InfosManager();
-module.exports = infosManager;
+module.exports = new InfosManager();

@@ -74,9 +74,9 @@ class DirsManager {
 
   downloadModPackPath = () =>
     newDir({
-      win32: path.join(this.gameRootPath(), "Modpack"),
-      linux: path.join(this.gameRootPath(), "Modpack"),
-      darwin: path.join(this.gameRootPath(), "Modpack"),
+      win32: path.join(this.gameRootPath(), "modpack"),
+      linux: path.join(this.gameRootPath(), "modpack"),
+      darwin: path.join(this.gameRootPath(), "modpack"),
     });
 
   downloadModsPath = () =>

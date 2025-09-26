@@ -9,11 +9,14 @@ const { platform } = require("os");
 const DirsManager = require("./dirsManager.js");
 
 class FilesManager {
-  uninstallerPath = () =>
-    path.join(
-      DirsManager.launcherRootPath(),
-      "Uninstall Valkream-Launcher.exe"
-    );
+  uninstallerPath = () => {
+    const root = DirsManager.launcherRootPath();
+    if (platform() === "win32") {
+      return path.join(root, "Uninstall Valkream-Launcher.exe");
+    }
+    // Fallback pour Linux/macOS → script ou binaire générique
+    return path.join(root, "uninstall.sh");
+  };
 
   gameZipPath = () => path.join(DirsManager.gameRootPath(), "game.zip");
 
@@ -22,13 +25,17 @@ class FilesManager {
   modpackZipPath = () => path.join(DirsManager.gameRootPath(), "modpack.zip");
 
   gameExePath = () => {
-    const valueForAllPlatforms = {
+    const map = {
       win32: path.join(DirsManager.gamePath(), "Valheim.exe"),
       linux: path.join(DirsManager.gamePath(), "Valheim"),
       darwin: path.join(DirsManager.gamePath(), "Valheim"),
     };
 
-    return valueForAllPlatforms[platform()];
+    const exe = map[platform()];
+    if (!exe) {
+      throw new Error(`Unsupported platform: ${platform()}`);
+    }
+    return exe;
   };
 
   gameVersionFilePath = () =>
