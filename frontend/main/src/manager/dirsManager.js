@@ -32,9 +32,9 @@ class DirsManager {
 
   gameRootPath = () =>
     newDir({
-      win32: path.join(this.rootPath(), "game"),
-      linux: path.join(this.rootPath(), "game"),
-      darwin: path.join(this.rootPath(), "game"),
+      win32: path.join(this.rootPath(), "game/ValheimGame"),
+      linux: path.join(this.rootPath(), "game/ValheimGame"),
+      darwin: path.join(this.rootPath(), "game/ValheimGame"),
     });
 
   gamePath = () =>
