@@ -1,7 +1,5 @@
 import { useState } from "react";
 
-import { Box } from "@mui/material";
-
 import ButtonsBar from "./component/buttons-bar/buttons-bar";
 import Links from "./component/links/links";
 import ServerInfo from "./component/server-info/server-info";
@@ -29,25 +27,23 @@ function Home() {
 
   return (
     <>
-      <Box sx={{ position: "absolute", inset: 0 }}>
-        <Popup
-          open={isTipsOpen}
-          onClose={() => setIsTipsOpen(false)}
-          type="tips"
-          title="Astuces du jour"
-          message={<TipsMessage />}
-        />
+      <Popup
+        open={isTipsOpen}
+        onClose={() => setIsTipsOpen(false)}
+        type="tips"
+        title="Astuces du jour"
+        message={<TipsMessage />}
+      />
 
-        <ServerInfo />
+      <ServerInfo />
 
-        <Links />
+      <Links />
 
-        <ButtonsBar
-          onSettingsClick={() => changePanel("settings")}
-          onChangeGamesClick={() => changePanel("choose-games")}
-          onTipsClick={() => setIsTipsOpen(true)}
-        />
-      </Box>
+      <ButtonsBar
+        onSettingsClick={() => changePanel("settings")}
+        onChangeGamesClick={() => changePanel("choose-games")}
+        onTipsClick={() => setIsTipsOpen(true)}
+      />
     </>
   );
 }
