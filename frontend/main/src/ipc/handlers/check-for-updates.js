@@ -2,6 +2,7 @@
  * @author Valkream Team
  * @license MIT - https://opensource.org/licenses/MIT
  */
+const fs = require("fs");
 
 const { autoUpdater } = require("electron-updater");
 const { formatBytes } = require("../../utils/function/formatBytes");
@@ -9,6 +10,7 @@ const { formatBytes } = require("../../utils/function/formatBytes");
 const { baseUrl } = require("../../constants");
 const SettingsManager = require("../../manager/settingsManager");
 const InfosManager = require("../../manager/infosManager");
+const FilesManager = require("../../manager/filesManager");
 
 class CheckForUpdates {
   constructor() {
@@ -83,6 +85,11 @@ class CheckForUpdates {
     autoUpdater.on("update-downloaded", () => {
       this.onMsg("✅ Mise à jour téléchargée. Redémarrage...");
       setTimeout(() => {
+        try {
+          fs.writeFileSync(FilesManager.updaterDetailsPath(), "update");
+        } catch (err) {
+          console.warn("Impossible d'écrire updaterDetails:", err);
+        }
         autoUpdater.quitAndInstall(false, true);
       }, this.timeout);
     });
@@ -92,14 +99,25 @@ class CheckForUpdates {
     });
   }
 
+  deleteUpdaterDetails() {
+    try {
+      if (!fs.existsSync(FilesManager.updaterDetailsPath())) return;
+      fs.unlinkSync(FilesManager.updaterDetailsPath());
+    } catch (err) {
+      console.warn("Impossible de supprimer updaterDetails:", err);
+    }
+  }
+
   onError = (err, msg) => {
     console.error("Erreur mise à jour :", err);
     this.event.reply("update_status", msg);
+    this.deleteUpdaterDetails();
     this.delayRedirect();
   };
 
   onMsg = (msg, redirect = false) => {
     this.event.reply("update_status", msg);
+    this.deleteUpdaterDetails();
     if (redirect) this.delayRedirect();
   };
 

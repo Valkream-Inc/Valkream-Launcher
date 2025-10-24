@@ -5,7 +5,7 @@
 
 const { app, session } = require("electron");
 const path = require("path");
-const fs = require("fs");
+const fse = require("fs-extra");
 
 const UpdateWindow = require("./src/windows/updateWindow.js");
 const MainWindow = require("./src/windows/mainWindow.js");
@@ -22,15 +22,24 @@ if (!app.requestSingleInstanceLock() && !isDev) app.quit();
 else {
   app.whenReady().then(async () => {
     // Supprimer le dossier data si il existe et que le mode de développement n'est pas activé (ancienne version)
-    if (
-      fs.existsSync(
-        path.join(app.getPath("appData"), ".valkream-launcher-data")
-      ) &&
-      !isDev
-    ) {
-      // fs.rmSync(path.join(app.getPath("appData"), "Valkream-Launcher"), {
-      //   recursive: true,
-      // });
+    try {
+      if (!isDev) {
+        const oldDataPath = path.join(
+          app.getPath("appData"),
+          ".valkream-launcher-data"
+        );
+        const oldDirExists = await fse.pathExists(oldDataPath);
+
+        if (oldDirExists) {
+          await fse.remove(oldDataPath);
+          console.log(`Nettoyage réussi : suppression de ${oldDataPath}.`);
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Erreur lors de la suppresion de l'ancien dossier de données:",
+        error
+      );
     }
 
     // Vider le cache Chromium au démarrage

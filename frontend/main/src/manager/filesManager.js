@@ -18,6 +18,9 @@ class FilesManager {
     return path.join(root, "uninstall.sh");
   };
 
+  updaterDetailsPath = () =>
+    path.join(DirsManager.rootPath(), "updater-details.flag");
+
   gameZipPath = () => path.join(DirsManager.gameRootPath(), "game.zip");
 
   bepInExZipPath = () => path.join(DirsManager.gameRootPath(), "bepinex.zip");
