@@ -1,0 +1,73 @@
+.futuristic-theme .loader-container {
+  background: radial-gradient(circle at center, #0a0014 0%, #000000 100%);
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 11;
+  flex-direction: column;
+  opacity: 1;
+  transition: opacity 1.5s ease-in-out;
+}
+.futuristic-theme .loader-container.hidden {
+  opacity: 0;
+}
+
+.futuristic-theme .loader-container .img-loader {
+  max-height: 4cm;
+  max-width: 4cm;
+  position: absolute;
+  animation: up-anim 1.5s linear forwards;
+  filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.7))
+    drop-shadow(0 0 30px rgba(255, 0, 255, 0.5));
+}
+
+.futuristic-theme .loader-container .spinner {
+  width: 64px;
+  height: 64px;
+  border: 8px solid;
+  border-radius: 50%;
+  border-color: #00ffff transparent transparent transparent;
+  position: relative;
+  top: 3cm;
+  animation: spin-anim 1.2s linear infinite;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.6), 0 0 50px rgba(255, 0, 255, 0.3);
+}
+
+@keyframes spin-anim {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes up-anim {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-2cm);
+  }
+}
+
+@keyframes opacity {
+  0% {
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}

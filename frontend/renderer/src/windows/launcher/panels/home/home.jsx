@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Box } from "@mui/material";
 
 import ButtonsBar from "./component/buttons-bar/buttons-bar";
 import Links from "./component/links/links";
@@ -26,7 +27,7 @@ function Home() {
   const [isTipsOpen, setIsTipsOpen] = useState(false);
 
   return (
-    <>
+    <Box maxWidth={0} sx={{ position: "absolute", inset: 0 }}>
       <Popup
         open={isTipsOpen}
         onClose={() => setIsTipsOpen(false)}
@@ -44,7 +45,7 @@ function Home() {
         onChangeGamesClick={() => changePanel("choose-games")}
         onTipsClick={() => setIsTipsOpen(true)}
       />
-    </>
+    </Box>
   );
 }
 

@@ -70,14 +70,8 @@ function ServerInfo() {
             className="logo-image"
             alt="logo"
           />
-          <span
-            className="logo-text"
-            style={{
-              maxWidth: actualGame === "SevenDtoD" ? "12vw" : undefined,
-              textAlign: actualGame === "SevenDtoD" ? "center" : undefined,
-            }}
-          >
-            {actualGame === "Valheim" ? "Valkream" : "Seven Days To Valkream"}
+          <span className="logo-text">
+            {actualGame === "Valheim" ? "Valheim" : "7 Days"}
           </span>
           <span className="server-players">{statusText}</span>
         </div>

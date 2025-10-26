@@ -41,43 +41,57 @@ function BetaEnabledPanel() {
   );
 }
 
+function MainLauncherProviders({ children }) {
+  return (
+    <ActionProvider>
+      <GamesProvider>
+        <PanelsProvider>{children}</PanelsProvider>
+      </GamesProvider>
+    </ActionProvider>
+  );
+}
+
+function LauncherBackground({ children }) {
+  const { activePanel } = usePanels();
+  return (
+    <BackgroundProvider>
+      {(activePanel === "home" || activePanel === "settings") && <Background />}
+      {children}
+    </BackgroundProvider>
+  );
+}
+
 function Launcher() {
   return (
     <>
       {/* Windows Bar */}
       <WindowsBar />
 
-      <ActionProvider>
-        <GamesProvider>
+      <MainLauncherProviders>
+        {/* Panels */}
+        <ThemeProvider>
+          <Panel id="info-beta-test">
+            <BetaEnabledPanel />
+          </Panel>
+          <Panel id="choose-games">
+            <ChooseGames />
+          </Panel>
+
           <InfosProvider>
-            <PanelsProvider>
-              <BackgroundProvider>
-                {/* Background */}
-                <Background />
-
-                {/* Panels */}
-                <ThemeProvider>
-                  <Panel id="info-beta-test">
-                    <BetaEnabledPanel />
-                  </Panel>
-                  <Panel id="choose-games">
-                    <ChooseGames />
-                  </Panel>
-                  <Panel id="home">
-                    <Home />
-                  </Panel>
-                  <Panel id="settings">
-                    <Settings />
-                  </Panel>
-                </ThemeProvider>
-              </BackgroundProvider>
-
-              {/* Copyright */}
-              <Copyright />
-            </PanelsProvider>
+            <LauncherBackground>
+              <Panel id="home">
+                <Home />
+              </Panel>
+              <Panel id="settings">
+                <Settings />
+              </Panel>
+            </LauncherBackground>
           </InfosProvider>
-        </GamesProvider>
-      </ActionProvider>
+        </ThemeProvider>
+
+        {/* Copyright */}
+        <Copyright />
+      </MainLauncherProviders>
     </>
   );
 }

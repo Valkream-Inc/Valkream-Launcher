@@ -4,9 +4,11 @@ import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { ButtonBase, Stack } from "@mui/material";
 
 import { useAction } from "../../../../context/action.context";
+import { useInfos } from "../../../../context/infos.context";
 
 export default function SevenDtoDButton() {
   const { actionLoading } = useAction();
+  const { maintenance } = useInfos();
 
   const handleClick = async () => {
     const launcherBehavior = await window.electron_API.getSettings(
@@ -29,7 +31,12 @@ export default function SevenDtoDButton() {
           <SportsEsportsIcon fontSize="large" className="icon-play" />
           Jouer
           <br />
-          (7Days.valkream.com)
+          (7days.valkream.com)
+          {maintenance?.enabled && (
+            <>
+              <br /> (⚠️ Maintenance en cours.)
+            </>
+          )}
         </Stack>
       </ButtonBase>
     </>

@@ -15,15 +15,45 @@ const ErrorPage = () => (
   </ThemeProvider>
 );
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, info) {
+    console.error("Erreur capturée par ErrorBoundary :", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) return <ErrorPage />;
+    else return this.props.children;
+  }
+}
+
 function App() {
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<Launcher />} errorElement={<ErrorPage />} />
+        <Route
+          path="/"
+          element={
+            <ErrorBoundary>
+              <Launcher />
+            </ErrorBoundary>
+          }
+        />
         <Route
           path="/updater"
-          element={<Updater />}
-          errorElement={<ErrorPage />}
+          element={
+            <ErrorBoundary>
+              <Updater />
+            </ErrorBoundary>
+          }
         />
       </Routes>
     </HashRouter>

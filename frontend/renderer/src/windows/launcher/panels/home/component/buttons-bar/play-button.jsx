@@ -203,7 +203,7 @@ export default function PlayButton() {
           (⚠️ Pas de connexion ${
             isInternetConnected ? "au server" : "internet"
           }.)`,
-            playIcon: false,
+            playIcon: true,
             onClick: handleStart,
           });
 
@@ -226,9 +226,9 @@ export default function PlayButton() {
         // Cas 7 : Installé, internet, à jour
         if (isInstalled && isConnected && isUpToDate)
           return setAction({
-            text: `Jouer à la v${gameVersion} 
-          ${maintenance?.enabled ? "(⚠️ Maintenance en cours.)" : ""}
-          ${isAdminModsActive ? "(⚠️ Mods Admin activés.)" : ""}`,
+            text: `Jouer à la v${gameVersion}${
+              maintenance?.enabled ? "\n (⚠️ Maintenance en cours.)" : ""
+            }${isAdminModsActive ? "\n (⚠️ Mods Admin activés.)" : ""}`,
             playIcon: true,
             onClick: handleStart,
           });

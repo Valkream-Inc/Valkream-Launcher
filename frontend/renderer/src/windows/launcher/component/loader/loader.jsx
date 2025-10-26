@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
-import "./loader.css";
+import "./css/loader.css";
+
+import { useGames } from "../../context/games.context";
 
 export default function Loader({ isVisible }) {
+  const { actualGame } = useGames();
   const [shouldRender, setShouldRender] = useState(isVisible);
 
   useEffect(() => {
@@ -21,7 +24,11 @@ export default function Loader({ isVisible }) {
 
   return (
     <div className={`loader-container ${!isVisible ? "hidden" : ""}`}>
-      <img src="./images/icon/icon.png" alt="logo" className="img-loader" />
+      <img
+        src={`./images/${actualGame}-icon-loader.png`}
+        alt="logo"
+        className="img-loader"
+      />
       <br />
       <div className="spinner"></div>
     </div>

@@ -1,7 +1,14 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Loader from "../component/loader/loader";
 import { useAction } from "./action.context.jsx";
 import { useGames } from "./games.context.jsx";
+import { usePanels } from "./panels.context.jsx";
 
 const InfosContext = createContext(undefined);
 export const useInfos = () => useContext(InfosContext);
@@ -13,6 +20,7 @@ export const InfosProvider = ({ children }) => {
   });
   const { actionLoading } = useAction();
   const { actualGame } = useGames();
+  const { activePanel } = usePanels();
 
   const [event, setEvent] = useState(null);
   const [maintenance, setMaintenance] = useState(null);
@@ -25,6 +33,7 @@ export const InfosProvider = ({ children }) => {
     loadingState.infosLoaded && loadingState.installationStatusLoaded
   );
 
+  const actualGameRef = useRef("");
   useEffect(() => {
     if (
       !window.electron_API?.getInstallationStatut ||
@@ -36,10 +45,25 @@ export const InfosProvider = ({ children }) => {
       return null;
     }
 
+    if (actualGameRef.current !== actualGame) {
+      actualGameRef.current = actualGame;
+
+      // Reset complet
+      setEvent(null);
+      setMaintenance(null);
+      setServerInfos(null);
+      setLoadingState({
+        infosLoaded: false,
+        installationStatusLoaded: true,
+      });
+    }
+
     const getAllInfos = async () => {
+      const researchGame = actualGame;
+
       try {
         // get installation statut
-        if (!actionLoading) {
+        if (!actionLoading && actualGameRef.current === "Valheim") {
           const statut = await window.electron_API.getInstallationStatut();
           setIsInternetConnected(statut?.isInternetConnected || false);
           setIsServerReachable(statut?.isServerReachable || false);
@@ -52,6 +76,7 @@ export const InfosProvider = ({ children }) => {
 
         // get other infos
         const infos = await window.electron_API.getInfos(actualGame);
+        if (actualGameRef.current !== researchGame) return; // Récupération des infos uniquement si le jeu n'a pas changé
         setServerInfos(infos?.serverInfos || false);
         setEvent(infos?.event || false);
         if (!actionLoading) setMaintenance(infos?.maintenance || false);
@@ -79,7 +104,11 @@ export const InfosProvider = ({ children }) => {
 
   return (
     <InfosContext.Provider value={contextValue}>
-      <Loader isVisible={isLoading} />
+      <Loader
+        isVisible={
+          isLoading && (activePanel === "home" || activePanel === "settings")
+        }
+      />
       {children}
     </InfosContext.Provider>
   );
