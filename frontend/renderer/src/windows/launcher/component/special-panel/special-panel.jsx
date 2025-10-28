@@ -1,3 +1,9 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
+import React, { memo } from "react";
 import SpecialPanelFuturistic from "./futuristic/special-panel.futuristic.jsx";
 import SpecialPanelModern from "./special-panel.modern.jsx";
 import SpecialPanelOld from "./special-panel.old.jsx";
@@ -40,4 +46,4 @@ const SpecialPanel = (props) => {
   return <SpecialPanelModern {...props} paragraph={paragraph} title={title} />;
 };
 
-export default SpecialPanel;
+export default memo(SpecialPanel);

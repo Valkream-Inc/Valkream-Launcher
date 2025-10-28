@@ -1,5 +1,10 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useRef, memo } from "react";
 import * as THREE from "three";
 
 function CampfireLight() {
@@ -45,7 +50,7 @@ function CampfireLight() {
       intensity={5}
       distance={100}
       decay={1.5}
-      castShadow={true}
+      castShadow
       shadow-mapSize-width={2048}
       shadow-mapSize-height={2048}
       shadow-bias={-0.005}
@@ -54,4 +59,4 @@ function CampfireLight() {
   );
 }
 
-export default CampfireLight;
+export default memo(CampfireLight);

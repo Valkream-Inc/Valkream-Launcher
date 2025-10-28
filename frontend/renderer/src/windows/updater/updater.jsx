@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import "./updater.css";
 
@@ -46,13 +51,7 @@ export default function Updater() {
   return (
     <div className="loading-page">
       {/* Vidéo de preload */}
-      <video
-        ref={preloadVideoRef}
-        id="preload-video"
-        autoPlay
-        muted
-        playsInline
-      >
+      <video ref={preloadVideoRef} id="preload-video" autoPlay playsInline>
         <source src="./videos/pre-loading.mp4" type="video/mp4" />
       </video>
 

@@ -1,3 +1,9 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
+import React, { memo } from "react";
 import FuturisticPopup from "./popup.futuristic.jsx";
 import ModernPopup from "./popup.modern.jsx";
 import OldPopup from "./popup.old.jsx";
@@ -11,4 +17,4 @@ const Popup = (props) => {
   return <ModernPopup {...props} />;
 };
 
-export default Popup;
+export default memo(Popup);

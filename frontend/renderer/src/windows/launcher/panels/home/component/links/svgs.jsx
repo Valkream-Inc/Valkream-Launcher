@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import { SvgIcon } from "@mui/material";
 
 function DiscordIcon(props) {

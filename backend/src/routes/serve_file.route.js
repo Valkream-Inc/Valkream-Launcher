@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 var router = require("express").Router();
 const ErrorHandler = require("../components/errorHandler.component.js");
 const { LockHandler } = require("../components/lock.component.js");

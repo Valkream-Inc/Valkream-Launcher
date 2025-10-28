@@ -2,6 +2,7 @@
  * @author Valkream Team
  * @license MIT - https://opensource.org/licenses/MIT
  */
+
 const fs = require("fs");
 
 const { autoUpdater } = require("electron-updater");
@@ -11,6 +12,7 @@ const { baseUrl } = require("../../constants");
 const SettingsManager = require("../../manager/settingsManager");
 const InfosManager = require("../../manager/infosManager");
 const FilesManager = require("../../manager/filesManager");
+const LauncherManager = require("../../manager/launcherManager");
 
 class CheckForUpdates {
   constructor() {
@@ -47,6 +49,9 @@ class CheckForUpdates {
   configureUpdater() {
     autoUpdater.allowDowngrade = true;
     autoUpdater.autoDownload = false;
+    autoUpdater.autoInstallOnAppQuit = false; // ⚠️ mieux pour les updates manuelles
+    autoUpdater.autoRunAppAfterInstall = true; // relance automatique après install
+    autoUpdater.fullChangelog = false;
     autoUpdater.setFeedURL({
       provider: "generic",
       url: `${baseUrl}/launcher/latest/`,
@@ -64,9 +69,14 @@ class CheckForUpdates {
       this.onMsg("🟢 Aucune mise à jour.", true);
     });
 
-    autoUpdater.on("update-available", async () => {
-      this.onMsg("🔄 Mise à jour disponible...");
+    autoUpdater.on("update-available", async (info) => {
+      this.onMsg(
+        `🔄 Mise à jour disponible...\n(${LauncherManager.getVersion()} --> ${
+          info.version
+        })`
+      );
       try {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         await autoUpdater.downloadUpdate();
       } catch (err) {
         this.onError(err, "❌ Échec du téléchargement de la mise à jour.");

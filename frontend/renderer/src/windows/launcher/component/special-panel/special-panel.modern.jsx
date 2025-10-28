@@ -1,5 +1,10 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import { Box, Button, Paper, Stack, Typography } from "@mui/material";
-import React from "react";
+import React, { memo } from "react";
 
 const alertData = {
   error: {
@@ -16,12 +21,7 @@ const alertData = {
   },
 };
 
-export default function SpecialPanelModern({
-  type = "info",
-  buttons = [],
-  title,
-  paragraph,
-}) {
+function SpecialPanelModern({ type = "info", buttons = [], title, paragraph }) {
   const data = {
     ...alertData[type],
     title,
@@ -95,3 +95,5 @@ export default function SpecialPanelModern({
     </Box>
   );
 }
+
+export default memo(SpecialPanelModern);

@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import { useGLTF } from "@react-three/drei";
 import React from "react";
 

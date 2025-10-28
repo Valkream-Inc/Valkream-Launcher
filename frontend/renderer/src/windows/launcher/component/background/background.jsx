@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import React from "react";
 import "./background.css";
 import GltfBackground from "./gltf-background/gltf-background.jsx";

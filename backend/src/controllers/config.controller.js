@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const paths = require("../configs/paths.config");
 const log = require("../components/log.component.js");
 const { ClientError } = require("../components/error.component.js");

@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import React from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import Copyright from "./windows/launcher/component/copyright/copyright.jsx";

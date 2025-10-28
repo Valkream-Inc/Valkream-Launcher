@@ -1,0 +1,16 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
+/* Style du panneau FPS (Stats de Drei/Three.js) */
+.stats {
+  position: absolute !important;
+  top: 45px !important;
+  right: 15px !important;
+  left: auto !important;
+  z-index: 9999 !important;
+  transform: scale(1.5);
+  transform-origin: top right;
+  pointer-events: none;
+}

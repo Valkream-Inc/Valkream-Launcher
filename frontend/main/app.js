@@ -14,6 +14,8 @@ const IpcHandlers = require("./src/ipc/ipcHandlers.js");
 const isDev = process.env.NODE_ENV === "dev";
 
 if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
+
+// Pour garder les parformances quand l'app est en arrière plan
 app.commandLine.appendSwitch("disable-renderer-backgrounding");
 app.commandLine.appendSwitch("disable-background-timer-throttling");
 app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
@@ -42,37 +44,61 @@ else {
       );
     }
 
-    // Vider le cache Chromium au démarrage
-    await session.defaultSession.clearCache();
+    // 🧠 Récupère la session par défaut
+    const ses = session.defaultSession;
 
-    // Désactiver le cache pour toutes les requêtes HTTP
-    session.defaultSession.webRequest.onBeforeSendHeaders(
-      (details, callback) => {
-        details.requestHeaders["Cache-Control"] =
-          "no-cache, no-store, must-revalidate";
-        details.requestHeaders["Pragma"] = "no-cache";
-        callback({ cancel: false, requestHeaders: details.requestHeaders });
+    // 🔹 Garde le cache Chromium entre les sessions
+    console.log("🧱 Cache conservé entre les sessions (interne uniquement).");
+
+    // Liste des extensions internes à mettre en cache
+    const cacheableExtensions = [
+      ".mp3",
+      ".css",
+      ".woff2",
+      ".png",
+      ".glb",
+      ".mp4",
+    ];
+
+    // 🔒 Intercepter les réponses pour les ressources internes
+    ses.webRequest.onHeadersReceived((details, callback) => {
+      const url = details.url || "";
+      const headers = details.responseHeaders || {};
+      const isLocal =
+        url.startsWith("file://") ||
+        url.startsWith("app://") ||
+        url.includes("localhost");
+
+      // Ne pas mettre en cache les ressources externes
+      if (!isLocal) {
+        delete headers["Cache-Control"];
+        delete headers["cache-control"];
+        delete headers["Expires"];
+        delete headers["expires"];
+        delete headers["Pragma"];
+        delete headers["pragma"];
+        return callback({ cancel: false, responseHeaders: headers });
       }
-    );
 
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-      // Supprimer tout header de cache venant du serveur
-      const headers = details.responseHeaders;
-      delete headers["Cache-Control"];
-      delete headers["cache-control"];
-      delete headers["Expires"];
-      delete headers["expires"];
-      delete headers["Pragma"];
-      delete headers["pragma"];
+      // Vérifie si c’est un fichier statique interne
+      const ext = path.extname(new URL(url).pathname).toLowerCase();
+      if (cacheableExtensions.includes(ext)) {
+        headers["Cache-Control"] = ["public, max-age=31536000, immutable"];
+      }
 
       callback({ cancel: false, responseHeaders: headers });
     });
 
-    // Initialisation des handlers IPC
+    // 🔧 Ne pas altérer les requêtes sortantes normales
+    ses.webRequest.onBeforeSendHeaders((details, callback) => {
+      callback({ cancel: false, requestHeaders: details.requestHeaders });
+    });
+
+    // ⚙️ Initialisation des handlers IPC
     const ipcHandlers = new IpcHandlers();
     ipcHandlers.init();
 
-    // Démarrage de la fenêtre principale
+    // 🪟 Lancement de la fenêtre principale
     if (isDev) return MainWindow.createWindow();
     else UpdateWindow.createWindow();
   });

@@ -4,7 +4,7 @@
   flex-direction: column;
   top: 50vh;
   transform: translateY(-50%);
-  right: 32px;
+  left: calc(100vw - 32px - 90px);
   max-height: 10cm;
   margin-bottom: 1rem;
 }

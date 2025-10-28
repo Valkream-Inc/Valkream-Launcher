@@ -1,6 +1,6 @@
 {
   "name": "Valkream-Launcher",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Launcher Valheim moddé pour Valkream",
   "author": "Valkream Team",
   "scripts": {
@@ -13,7 +13,7 @@
     "set-icon": "node set-icon.js",
     "build": "npm run set-icon && npm run build:react && npm run build:electron",
     "build:react": "vite build",
-    "build:electron": "node ./build-script.js --obf=false",
+    "build:electron": "node ./build-script.js --obf=true",
     "rebuild": "electron-rebuild"
   },
   "license": "MIT",

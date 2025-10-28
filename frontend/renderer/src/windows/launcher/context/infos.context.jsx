@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import React, {
   createContext,
   useContext,
@@ -33,7 +38,8 @@ export const InfosProvider = ({ children }) => {
     loadingState.infosLoaded && loadingState.installationStatusLoaded
   );
 
-  const actualGameRef = useRef("");
+  const actualGameRef = useRef(null);
+  const actionLoadingRef = useRef(null);
   useEffect(() => {
     if (
       !window.electron_API?.getInstallationStatut ||
@@ -45,6 +51,9 @@ export const InfosProvider = ({ children }) => {
       return null;
     }
 
+    if (actionLoadingRef.current !== actionLoading)
+      actionLoadingRef.current = actionLoading;
+
     if (actualGameRef.current !== actualGame) {
       actualGameRef.current = actualGame;
 
@@ -54,17 +63,17 @@ export const InfosProvider = ({ children }) => {
       setServerInfos(null);
       setLoadingState({
         infosLoaded: false,
-        installationStatusLoaded: true,
+        installationStatusLoaded: actualGame !== "Valheim",
       });
     }
 
     const getAllInfos = async () => {
-      const researchGame = actualGame;
-
       try {
         // get installation statut
         if (!actionLoading && actualGameRef.current === "Valheim") {
           const statut = await window.electron_API.getInstallationStatut();
+          if (actualGameRef.current !== actualGame) return; // Récupération des infos uniquement si le jeu n'a pas changé
+          if (actionLoadingRef.current) return; // Récupération des infos uniquement si l'action n'a pas changé
           setIsInternetConnected(statut?.isInternetConnected || false);
           setIsServerReachable(statut?.isServerReachable || false);
           setInstallationStatut(statut);
@@ -76,10 +85,11 @@ export const InfosProvider = ({ children }) => {
 
         // get other infos
         const infos = await window.electron_API.getInfos(actualGame);
-        if (actualGameRef.current !== researchGame) return; // Récupération des infos uniquement si le jeu n'a pas changé
+        if (actualGameRef.current !== actualGame) return; // Récupération des infos uniquement si le jeu n'a pas changé
         setServerInfos(infos?.serverInfos || false);
         setEvent(infos?.event || false);
-        if (!actionLoading) setMaintenance(infos?.maintenance || false);
+        if (!actionLoading && !actionLoadingRef.current)
+          setMaintenance(infos?.maintenance || false);
         setLoadingState((prev) => ({ ...prev, infosLoaded: true }));
       } catch (error) {
         console.error("Erreur lors de la récupération des infos :", error);

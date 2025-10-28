@@ -51,5 +51,4 @@ class FilesManager {
     path.join(DirsManager.gameRootPath(), "manifest.json");
 }
 
-const filesManager = new FilesManager();
-module.exports = filesManager;
+module.exports = new FilesManager();

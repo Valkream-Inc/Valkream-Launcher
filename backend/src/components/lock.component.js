@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const { Mutex } = require("async-mutex");
 
 // Ajout du type 'config' en plus de 'game' et 'launcher'

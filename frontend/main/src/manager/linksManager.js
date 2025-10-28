@@ -59,5 +59,4 @@ class LinksManager {
   }
 }
 
-const linksManager = new LinksManager();
-module.exports = linksManager;
+module.exports = new LinksManager();

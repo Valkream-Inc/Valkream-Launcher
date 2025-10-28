@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import React from "react";
 
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";

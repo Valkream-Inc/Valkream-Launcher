@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const fs = require("fs");
 
 const { ServerError } = require("../components/error.component.js");

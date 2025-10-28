@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const path = require("path");
 const paths = require("../configs/paths.config");
 const log = require("../components/log.component.js");

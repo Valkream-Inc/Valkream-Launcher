@@ -1,3 +1,9 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
+import React, { memo } from "react";
 import {
   Box,
   Button,
@@ -10,16 +16,9 @@ import {
   Typography,
 } from "@mui/material";
 import { keyframes } from "@mui/system";
-import React from "react";
 
-// Icônes
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorIcon from "@mui/icons-material/Error";
-import EventIcon from "@mui/icons-material/Event";
-import InfoIcon from "@mui/icons-material/Info";
-import LightbulbIcon from "@mui/icons-material/Lightbulb";
-import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
-import WarningIcon from "@mui/icons-material/Warning";
+import { typeConfig } from "./component/popup.config";
+import { createButtons } from "./component/popup.button";
 
 const flicker = keyframes`
   0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
@@ -27,58 +26,6 @@ const flicker = keyframes`
 `;
 
 // Configurations par type (alignées avec ton HTML)
-const typeConfig = {
-  info: {
-    color: "#33aaff",
-    icon: <InfoIcon fontSize="inherit" />,
-    iconSize: 60,
-    titleSize: "2rem",
-    textSize: "1.2rem",
-  },
-  success: {
-    color: "#4dff88",
-    icon: <CheckCircleIcon fontSize="inherit" />,
-    iconSize: 80,
-    titleSize: "2.2rem",
-    textSize: "1.2rem",
-  },
-  warning: {
-    color: "#ffbb33",
-    icon: <WarningIcon fontSize="inherit" />,
-    iconSize: 65,
-    titleSize: "2.2rem",
-    textSize: "1.2rem",
-  },
-  error: {
-    color: "#ff4d4d",
-    icon: <ErrorIcon fontSize="inherit" />,
-    iconSize: 60,
-    titleSize: "2rem",
-    textSize: "1.2rem",
-  },
-  event: {
-    color: "#ff33cc",
-    icon: <EventIcon fontSize="inherit" />,
-    iconSize: 70,
-    titleSize: "2.5rem",
-    textSize: "1.3rem",
-  },
-  tips: {
-    color: "#ffaa33",
-    icon: <LightbulbIcon fontSize="inherit" />,
-    iconSize: 65,
-    titleSize: "2rem",
-    textSize: "1.2rem",
-  },
-  welcome: {
-    color: "#00eaff",
-    icon: <RocketLaunchIcon fontSize="inherit" />,
-    iconSize: 80,
-    titleSize: "2.2rem",
-    textSize: "1.2rem",
-  },
-};
-
 const decorationsConfig = {
   info: {
     lines: [
@@ -325,7 +272,8 @@ const baseNodeStyle = (color, size = 12) => ({
 });
 
 function PopupDecoration({ type }) {
-  const color = typeConfig[type]?.color || typeConfig.info.color;
+  const color =
+    typeConfig[type]?.color?.futuristic || typeConfig.info.color.futuristic;
   const selectedDecorations = decorationsConfig[type] || {
     lines: [],
     nodes: [],
@@ -350,6 +298,17 @@ function PopupDecoration({ type }) {
   );
 }
 
+function getFuturistTypeConfig(type) {
+  const c = typeConfig[type] || typeConfig.info;
+  return {
+    color: c.color.futuristic,
+    icon: c.icon.futuristic,
+    iconSize: c.iconSize?.futuristic || 60,
+    titleSize: c.titleSize?.futuristic || "2rem",
+    textSize: c.textSize?.futuristic || "1.2rem",
+  };
+}
+
 const Transition = React.forwardRef(function Transition(props, ref) {
   return (
     <Slide direction="down" ref={ref} {...props} timeout={500}>
@@ -360,7 +319,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   );
 });
 
-export default function FuturisticPopup({
+function FuturisticPopup({
   open,
   onClose,
   type = "info",
@@ -368,26 +327,8 @@ export default function FuturisticPopup({
   message = "Message du popup",
   onConfirm,
 }) {
-  const { color, icon, iconSize, titleSize } =
-    typeConfig[type] || typeConfig.info;
-
-  const buttons = !onConfirm
-    ? [
-        {
-          text: "OK",
-          action: onClose,
-        },
-      ]
-    : [
-        {
-          text: onConfirm[1] || "OK",
-          action: onConfirm[0],
-        },
-        {
-          text: "Annuler",
-          action: onClose,
-        },
-      ];
+  const { color, icon, iconSize, titleSize } = getFuturistTypeConfig(type);
+  const buttons = createButtons(onClose, onConfirm);
 
   return (
     <Dialog
@@ -495,3 +436,5 @@ export default function FuturisticPopup({
     </Dialog>
   );
 }
+
+export default memo(FuturisticPopup);

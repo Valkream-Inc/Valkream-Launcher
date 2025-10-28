@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import "./settings-box.css";
 
 const SettingsBox = ({ text, children, warn, sx }) => {

@@ -1,5 +1,10 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import { Box, Button, Stack, Typography } from "@mui/material";
-import React from "react";
+import React, { memo } from "react";
 import "./special-panel.futuristic.css";
 
 const alertData = {
@@ -14,7 +19,7 @@ const alertData = {
   },
 };
 
-export default function SpecialPanelFuturistic({
+function SpecialPanelFuturistic({
   type = "info",
   buttons = [],
   title,
@@ -84,3 +89,5 @@ export default function SpecialPanelFuturistic({
     </Box>
   );
 }
+
+export default memo(SpecialPanelFuturistic);

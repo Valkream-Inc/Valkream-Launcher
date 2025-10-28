@@ -1,5 +1,9 @@
-import React from "react";
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
 
+import React, { useMemo, memo } from "react";
 import { useBackground } from "../../../context/background.context.jsx";
 import { useGames } from "../../../context/games.context.jsx";
 
@@ -7,47 +11,45 @@ function VideoBackground({ style }) {
   const { actualGame } = useGames();
   const { VideoBackgroundRef, backgroundType, isMuted } = useBackground();
 
-  if (backgroundType === "video")
-    return (
-      <>
-        {actualGame === "Valheim" && (
-          <video
-            style={style}
-            className="background"
-            ref={VideoBackgroundRef}
-            muted={isMuted}
-            autoPlay
-            loop
-            playsInline
-          >
-            <source src={`./videos/Valheim-trailer.mp4`} type="video/mp4" />
-          </video>
-        )}
-        {actualGame === "SevenDtoD" && (
-          <video
-            style={style}
-            className="background"
-            ref={VideoBackgroundRef}
-            muted={isMuted}
-            autoPlay
-            loop
-            playsInline
-          >
-            <source src={`./videos/SevenDtoD-trailer.mp4`} type="video/mp4" />
-          </video>
-        )}
-      </>
-    );
-  else
-    return (
-      <audio
-        src={`./audios/${actualGame}-song.mp3`}
-        muted={isMuted}
-        ref={VideoBackgroundRef}
-        autoPlay
-        loop
-      />
-    );
+  // Calcule dynamiquement le chemin source selon le type et le jeu
+  const { src, type, Tag } = useMemo(() => {
+    if (backgroundType === "video") {
+      return {
+        src: `./videos/${actualGame}-trailer.mp4`,
+        type: "video/mp4",
+        Tag: "video",
+      };
+    }
+    return {
+      src: `./audios/${actualGame}-song.mp3`,
+      type: "audio/mpeg",
+      Tag: "audio",
+    };
+  }, [backgroundType, actualGame]);
+
+  // Options communes pour les balises <video> et <audio>
+  const commonProps = useMemo(
+    () => ({
+      ref: VideoBackgroundRef,
+      muted: isMuted,
+      autoPlay: true,
+      loop: true,
+    }),
+    [VideoBackgroundRef, isMuted]
+  );
+
+  // Rendu unique, propre et maintenable
+  return (
+    <Tag
+      {...commonProps}
+      style={Tag === "video" ? style : undefined}
+      className={Tag === "video" ? "background" : undefined}
+      playsInline={Tag === "video"}
+    >
+      {Tag === "video" && <source src={src} type={type} />}
+      {Tag === "audio" && <source src={src} type={type} />}
+    </Tag>
+  );
 }
 
-export default VideoBackground;
+export default memo(VideoBackground);

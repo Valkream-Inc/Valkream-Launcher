@@ -1,7 +1,14 @@
-import { OrbitControls } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber";
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
+
+import { OrbitControls } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
+
 
 function PlayerControls({ speed = 4, climbSpeed = 2 }) {
   const controlsRef = useRef();

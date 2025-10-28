@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from "react";
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
+import React, { useState, useEffect, memo } from "react";
 import "./windows-bar.css";
 
 const WindowsBar = () => {
@@ -75,4 +80,4 @@ const WindowsBar = () => {
   );
 };
 
-export default WindowsBar;
+export default memo(WindowsBar);

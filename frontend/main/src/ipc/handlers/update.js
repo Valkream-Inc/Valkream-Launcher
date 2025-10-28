@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const GameManager = require("../../manager/gameManager.js");
 const ThunderstoreManager = require("../../manager/thunderstoreManager.js");
 const VersionManager = require("../../manager/versionManager.js");

@@ -1,6 +1,11 @@
-import { Sky, Stars } from "@react-three/drei";
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import React, { useMemo } from "react";
 import * as THREE from "three";
+import { Sky, Stars } from "@react-three/drei";
 
 import Snow from "./snow";
 

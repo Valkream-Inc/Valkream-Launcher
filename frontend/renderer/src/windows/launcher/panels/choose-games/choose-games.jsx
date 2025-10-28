@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import React from "react";
 import { Box, Grid, Typography, Card, CardActionArea } from "@mui/material";
 import { styled } from "@mui/material/styles";
