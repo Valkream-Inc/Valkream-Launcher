@@ -13,11 +13,11 @@ const games = [
     name: "Valheim Valkream",
     icon: "./images/Valheim-icon.png",
   },
-  // {
-  //   id: "SevenDtoD",
-  //   name: "7 Days to Valkream",
-  //   icon: "./images/SevenDtoD-icon.png",
-  // },
+  {
+    id: "SevenDtoD",
+    name: "7 Days to Valkream",
+    icon: "./images/SevenDtoD-icon.png",
+  },
 ];
 
 const ModernGameCard = styled(Card)(() => ({
