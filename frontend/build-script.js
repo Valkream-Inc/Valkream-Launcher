@@ -93,6 +93,7 @@ class Index {
         nsis: {
           oneClick: false,
           allowToChangeInstallationDirectory: true,
+          differentialPackage: false, // inutile pour l'install
         },
       },
       {
@@ -100,6 +101,7 @@ class Index {
         nsis: {
           oneClick: true,
           allowToChangeInstallationDirectory: false,
+          differentialPackage: true, // 💡 active la génération des .blockmap
         },
       },
     ];
@@ -132,7 +134,7 @@ class Index {
             ],
             win: {
               icon: "./renderer/public/images/icon/icon.ico",
-              target: [{ target: "nsis", arch: ["x64", "arm64"] }],
+              target: [{ target: "nsis", arch: ["x64", "arm64", "ia32"] }],
             },
             nsis: {
               ...build.nsis,
@@ -141,6 +143,7 @@ class Index {
               runAfterFinish: true,
               deleteAppDataOnUninstall: true,
               removeDefaultUninstallWelcomePage: false,
+              perMachine: false,
               include: "./installer.nsh",
             },
             mac: {
@@ -148,13 +151,18 @@ class Index {
               category: "public.app-category.games",
               identity: null,
               target: [
-                { target: "dmg", arch: ["x64", "arm64"] },
-                { target: "zip", arch: ["x64", "arm64"] },
+                { target: "dmg", arch: ["x64", "arm64", "ia32", "universal"] },
+                { target: "zip", arch: ["x64", "arm64", "ia32", "universal"] },
               ],
             },
             linux: {
               icon: "./renderer/public/images/icon/icon.png",
-              target: [{ target: "AppImage", arch: ["x64", "arm64"] }],
+              target: [
+                {
+                  target: "AppImage",
+                  arch: ["x64", "arm64", "ia32", "universal"],
+                },
+              ],
             },
           },
         })

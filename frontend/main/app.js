@@ -14,6 +14,8 @@ const IpcHandlers = require("./src/ipc/ipcHandlers.js");
 const isDev = process.env.NODE_ENV === "dev";
 
 if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
+
+// Pour garder les parformances quand l'app est en arrière plan
 app.commandLine.appendSwitch("disable-renderer-backgrounding");
 app.commandLine.appendSwitch("disable-background-timer-throttling");
 app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
