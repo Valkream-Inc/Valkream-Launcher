@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import { enqueueSnackbar } from "notistack";
 import { useRef, useState } from "react";
 import SpecialPanel from "../../component/special-panel/special-panel.jsx";

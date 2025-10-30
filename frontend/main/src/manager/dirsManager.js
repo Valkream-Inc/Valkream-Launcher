@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const path = require("path");
 const newDir = require("../utils/new-dir.js");
 
@@ -87,5 +92,4 @@ class DirsManager {
     });
 }
 
-const dirsManager = new DirsManager();
-module.exports = dirsManager;
+module.exports = new DirsManager();

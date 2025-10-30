@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";

@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const getForm = document.getElementById("getForm");
 const postForm = document.getElementById("postForm");
 const resultDiv = document.getElementById("result");

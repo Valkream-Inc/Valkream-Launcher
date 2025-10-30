@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 class ClientError extends Error {
   constructor(message, statusCode, user, process) {
     super(message);

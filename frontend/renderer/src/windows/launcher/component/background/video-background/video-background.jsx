@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import React from "react";
 
 import { useBackground } from "../../../context/background.context.jsx";

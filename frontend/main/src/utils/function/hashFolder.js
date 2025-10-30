@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
@@ -21,7 +26,10 @@ const hashFolder = async (folderPath, algorithm = "sha256", percent = 100) => {
       const tenPercent = Math.ceil(size * (percent / 100));
 
       await new Promise((resolve, reject) => {
-        const stream = fs.createReadStream(file, { start: 0, end: tenPercent - 1 });
+        const stream = fs.createReadStream(file, {
+          start: 0,
+          end: tenPercent - 1,
+        });
 
         stream.on("data", (chunk) => hash.update(chunk));
         stream.on("end", resolve);

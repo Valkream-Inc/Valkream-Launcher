@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const log = require("../components/log.component.js");
 const { ClientError } = require("../components/error.component.js");
 const AddVersion = require("../models/add_version.model.js");

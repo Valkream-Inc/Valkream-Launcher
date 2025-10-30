@@ -1,4 +1,9 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
 const path = require("path");
+
 const fs = require("fs");
 const fse = require("fs-extra");
 const yaml = require("yaml");

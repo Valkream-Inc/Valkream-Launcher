@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const log = require("../components/log.component.js");
 const GetOldVersion = require("../models/get_old_version.model.js");
 const paths = require("../configs/paths.config");

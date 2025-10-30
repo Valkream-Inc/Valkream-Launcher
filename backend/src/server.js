@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");

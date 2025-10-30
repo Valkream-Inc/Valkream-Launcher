@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import { MenuItem, Select } from "@mui/material";
 import React from "react";
 import "./select-settings.css";

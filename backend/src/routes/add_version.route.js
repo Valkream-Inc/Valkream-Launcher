@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 var router = require("express").Router();
 const { temp } = require("../configs/storage.config.js");
 const ErrorHandler = require("../components/errorHandler.component.js");

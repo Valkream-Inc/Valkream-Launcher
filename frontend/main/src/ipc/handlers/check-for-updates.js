@@ -2,8 +2,8 @@
  * @author Valkream Team
  * @license MIT - https://opensource.org/licenses/MIT
  */
+
 const fs = require("fs");
-const { app } = require("electron");
 
 const { autoUpdater } = require("electron-updater");
 const { formatBytes } = require("../../utils/function/formatBytes");
@@ -12,6 +12,7 @@ const { baseUrl } = require("../../constants");
 const SettingsManager = require("../../manager/settingsManager");
 const InfosManager = require("../../manager/infosManager");
 const FilesManager = require("../../manager/filesManager");
+const LauncherManager = require("../../manager/launcherManager");
 
 class CheckForUpdates {
   constructor() {
@@ -70,7 +71,7 @@ class CheckForUpdates {
 
     autoUpdater.on("update-available", async (info) => {
       this.onMsg(
-        `🔄 Mise à jour disponible...\n(${app.getVersion()} --> ${
+        `🔄 Mise à jour disponible...\n(${LauncherManager.getVersion()} --> ${
           info.version
         })`
       );

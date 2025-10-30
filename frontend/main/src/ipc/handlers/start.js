@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const SettingsManager = require("../../manager/settingsManager");
 const SteamManager = require("../../manager/steamManager");
 const GameManager = require("../../manager/gameManager");

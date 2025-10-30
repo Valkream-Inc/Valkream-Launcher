@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import FuturisticPopup from "./popup.futuristic.jsx";
 import ModernPopup from "./popup.modern.jsx";
 import OldPopup from "./popup.old.jsx";

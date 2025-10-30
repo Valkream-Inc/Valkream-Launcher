@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const { ClientError } = require("./error.component.js");
 const { apiKey, apiToken } = process.env;
 

@@ -2,6 +2,7 @@
  * @author Valkream Team
  * @license MIT - https://opensource.org/licenses/MIT
  */
+
 const { shell } = require("electron");
 
 class SteamManager {

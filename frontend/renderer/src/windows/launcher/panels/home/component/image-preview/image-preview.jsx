@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Card,

@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import SpecialPanelFuturistic from "./futuristic/special-panel.futuristic.jsx";
 import SpecialPanelModern from "./special-panel.modern.jsx";
 import SpecialPanelOld from "./special-panel.old.jsx";

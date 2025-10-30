@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const formatBytes = (bytes) => {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   if (bytes === 0) return "0 B";

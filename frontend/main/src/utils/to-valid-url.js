@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 const { baseUrl } = require("../constants");
 
 const toValidUrl = (url) => {

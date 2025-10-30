@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT - https://opensource.org/licenses/MIT
+ */
+
 import { createContext, useState, useContext, useEffect } from "react";
 
 export const ThemeContext = createContext();
