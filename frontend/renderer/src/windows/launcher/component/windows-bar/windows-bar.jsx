@@ -3,7 +3,7 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import "./windows-bar.css";
 
 const WindowsBar = () => {
@@ -80,4 +80,4 @@ const WindowsBar = () => {
   );
 };
 
-export default WindowsBar;
+export default memo(WindowsBar);

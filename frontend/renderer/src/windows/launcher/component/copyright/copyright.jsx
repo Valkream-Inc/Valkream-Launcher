@@ -3,7 +3,7 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import "./copyright.css";
 
 import { usePanels } from "../../context/panels.context";
@@ -35,4 +35,4 @@ function Copyright({ existPanels = true }) {
   );
 }
 
-export default Copyright;
+export default memo(Copyright);

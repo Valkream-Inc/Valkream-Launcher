@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { keyframes } from "@mui/system";
-import React from "react";
+import React, { memo } from "react";
 
 // Définition des animations en dehors du composant pour de meilleures performances
 const flicker = keyframes`
@@ -94,7 +94,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   );
 });
 
-export default function OldPopup({
+function OldPopup({
   open,
   onClose,
   onConfirm,
@@ -238,3 +238,5 @@ export default function OldPopup({
     </Dialog>
   );
 }
+
+export default memo(OldPopup);

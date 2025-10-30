@@ -21,7 +21,7 @@ import {
   Slide,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { memo } from "react";
 
 const typeConfig = {
   info: {
@@ -65,7 +65,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   );
 });
 
-export default function ModernPopup({
+export default memo(function ModernPopup({
   open,
   onClose,
   onConfirm,
@@ -148,4 +148,4 @@ export default function ModernPopup({
       </DialogActions>
     </Dialog>
   );
-}
+});

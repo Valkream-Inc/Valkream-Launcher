@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { keyframes } from "@mui/system";
-import React from "react";
+import React, { memo } from "react";
 
 // Icônes
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -365,7 +365,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   );
 });
 
-export default function FuturisticPopup({
+function FuturisticPopup({
   open,
   onClose,
   type = "info",
@@ -500,3 +500,5 @@ export default function FuturisticPopup({
     </Dialog>
   );
 }
+
+export default memo(FuturisticPopup);
