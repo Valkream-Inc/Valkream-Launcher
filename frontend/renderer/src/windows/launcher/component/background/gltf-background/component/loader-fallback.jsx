@@ -3,13 +3,13 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import { Html } from "@react-three/drei";
 import React from "react";
+import { Html } from "@react-three/drei";
 
 function LoaderFallback() {
   return (
     <Html center>
-      <div className="p-4 bg-white rounded shadow">Chargement...</div>
+      <h1 style={{ color: "white" }}>Chargement...</h1>
     </Html>
   );
 }

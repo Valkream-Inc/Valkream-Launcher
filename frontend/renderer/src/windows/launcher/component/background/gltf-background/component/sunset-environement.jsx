@@ -3,9 +3,9 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import { Sky, Stars } from "@react-three/drei";
 import React, { useMemo } from "react";
 import * as THREE from "three";
+import { Sky, Stars } from "@react-three/drei";
 
 import Snow from "./snow";
 
