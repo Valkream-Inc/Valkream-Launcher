@@ -3,13 +3,7 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorIcon from "@mui/icons-material/Error";
-import EventIcon from "@mui/icons-material/Event";
-import InfoIcon from "@mui/icons-material/Info";
-import LightbulbIcon from "@mui/icons-material/Lightbulb";
-import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
-import WarningIcon from "@mui/icons-material/Warning";
+import React, { memo } from "react";
 import {
   Box,
   Button,
@@ -22,7 +16,9 @@ import {
   Typography,
 } from "@mui/material";
 import { keyframes } from "@mui/system";
-import React, { memo } from "react";
+
+import { typeConfig } from "./component/popup.config";
+import { createButtons } from "./component/popup.button";
 
 // Définition des animations en dehors du composant pour de meilleures performances
 const flicker = keyframes`
@@ -31,40 +27,17 @@ const flicker = keyframes`
   100% { opacity: 1; transform: scale(1) rotate(-5deg); }
 `;
 
-const typeConfig = {
-  info: {
-    color: "#3399ff", // Nouvelle couleur pour le thème 'old'
-    icon: <InfoIcon fontSize="2cm" />,
-  },
-  success: {
-    color: "#4dff88",
-    icon: <CheckCircleIcon fontSize="2cm" />,
-  },
-  warning: {
-    color: "#ffaa33",
-    icon: <WarningIcon fontSize="2cm" />,
-  },
-  error: {
-    color: "#ff0033",
-    icon: <ErrorIcon fontSize="2cm" />,
-  },
-  welcome: {
-    color: "#33ff77",
-    icon: <RocketLaunchIcon fontSize="2cm" />,
-  },
-  event: {
-    color: "#cc33ff",
-    icon: <EventIcon fontSize="2cm" />,
-  },
-  tips: {
-    color: "#ffd700",
-    icon: <LightbulbIcon fontSize="2cm" />,
-  },
-};
+function getOldTypeConfig(type) {
+  const c = typeConfig[type] || typeConfig.info;
+  return {
+    color: c.color.old,
+    icon: c.icon.old,
+  };
+}
 
 // Composant pour les runes animées
 const AnimatedRunes = ({ type }) => {
-  const color = typeConfig[type]?.color || typeConfig.info.color;
+  const color = typeConfig[type]?.color?.old || typeConfig.info.color.old;
   const commonStyle = {
     position: "absolute",
     width: 30,
@@ -102,7 +75,8 @@ function OldPopup({
   title = "Titre du popup",
   message = "Message du popup",
 }) {
-  const { color, icon } = typeConfig[type] || typeConfig.info;
+  const { color, icon } = getOldTypeConfig(type);
+  const buttons = createButtons(onClose, onConfirm);
 
   return (
     <Dialog
@@ -188,34 +162,17 @@ function OldPopup({
         <DialogActions
           sx={{ justifyContent: "flex-start", mt: 4, gap: "1rem", p: 0 }}
         >
-          <Button
-            onClick={(onConfirm && onConfirm[0]) || onClose}
-            sx={{
-              background: "#5c4438",
-              border: `2px solid ${color}`,
-              color,
-              padding: "0.8rem 1.6rem",
-              borderRadius: "8px",
-              fontSize: "1.1rem",
-              fontFamily: "inherit",
-              transition: "0.3s",
-              textShadow: "1px 1px 0 #000",
-              "&:hover": {
-                background: color,
-                color: "#3b2e2e",
-                boxShadow: `0 0 15px ${color}`,
-              },
-            }}
-          >
-            {(onConfirm && onConfirm[1]) || "OK"}
-          </Button>
-          {onConfirm && (
+          {buttons.map((button, index) => (
             <Button
-              onClick={onClose}
+              key={index}
+              onClick={button.action}
               sx={{
-                background: "#5c4438",
-                border: "2px solid #ccc",
-                color: "#ccc",
+                background: button.variant === "main" ? "#5c4438" : "#ccc",
+                border:
+                  button.variant === "main"
+                    ? `2px solid ${color}`
+                    : "2px solid #ccc",
+                color: button.variant === "main" ? color : "#ccc",
                 padding: "0.8rem 1.6rem",
                 borderRadius: "8px",
                 fontSize: "1.1rem",
@@ -223,15 +180,18 @@ function OldPopup({
                 transition: "0.3s",
                 textShadow: "1px 1px 0 #000",
                 "&:hover": {
-                  background: "#ccc",
-                  color: "#3b2e2e",
-                  boxShadow: `0 0 15px #ccc`,
+                  background: button.variant === "main" ? color : "#ccc",
+                  color: button.variant === "main" ? "#3b2e2e" : "#3b2e2e",
+                  boxShadow:
+                    button.variant === "main"
+                      ? `0 0 15px ${color}`
+                      : `0 0 15px #ccc`,
                 },
               }}
             >
-              Annuler
+              {button.text}
             </Button>
-          )}
+          ))}
         </DialogActions>
       </Box>
       <AnimatedRunes type={type} />
