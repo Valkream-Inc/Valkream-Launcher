@@ -4,6 +4,6 @@
 **/temp/
 **/dist/
 
-backend/uploads/launcher
-backend/uploads/game/*/latest/build-game-*.zip
-backend/uploads/game/*/latest/BepInEx-*.zip
+backend/public/launcher
+backend/public/game/*/latest/build-game-*.zip
+backend/public/game/*/latest/BepInEx-*.zip

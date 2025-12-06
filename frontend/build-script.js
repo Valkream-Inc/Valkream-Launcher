@@ -139,10 +139,6 @@ class Index {
                 owner: "Valkream-Inc",
               },
             ],
-            win: {
-              icon: "./renderer/public/images/icon/icon.ico",
-              target: [{ target: "nsis", arch: ["x64", "arm64", "ia32"] }],
-            },
             nsis: {
               ...build.nsis,
               createDesktopShortcut: true,
@@ -153,22 +149,33 @@ class Index {
               perMachine: false,
               include: "./installer.nsh",
             },
-            mac: {
-              icon: "./renderer/public/images/icon/icon.icns",
-              category: "public.app-category.games",
-              identity: null,
-              target: [
-                { target: "dmg", arch: ["x64", "arm64", "ia32", "universal"] },
-                { target: "zip", arch: ["x64", "arm64", "ia32", "universal"] },
-              ],
+            win: {
+              icon: "./renderer/public/images/icon/icon.ico",
+              target: [{ target: "nsis", arch: ["x64"] }],
+              // trop de place sur github (pour le moment)
+              // target: [{ target: "nsis", arch: ["x64", "arm64", "ia32"] }],
             },
             linux: {
               icon: "./renderer/public/images/icon/icon.png",
               target: [
                 {
                   target: "AppImage",
-                  arch: ["x64", "arm64", "ia32", "universal"],
+                  arch: ["x64"],
+                  // trop de place sur github (pour le moment)
+                  // arch: ["x64", "arm64"],
                 },
+              ],
+            },
+            mac: {
+              icon: "./renderer/public/images/icon/icon.icns",
+              category: "public.app-category.games",
+              identity: null,
+              target: [
+                { target: "dmg", arch: ["x64"] },
+                { target: "zip", arch: ["x64"] },
+                // trop de place sur github (pour le moment)
+                // { target: "dmg", arch: ["x64", "arm64", "universal"] },
+                // { target: "zip", arch: ["x64", "arm64", "universal"] },
               ],
             },
           },

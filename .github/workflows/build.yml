@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "frontend/**"
+      - ".github/workflows/**"
 
 jobs:
   create-release:
@@ -38,7 +39,9 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-14, ubuntu-latest, windows-latest]
+        os: [windows-latest]
+        # Désactivations du cross plateforme pour le momment.
+        # os: [macos-14, ubuntu-latest, windows-latest]
 
     steps:
       - name: Checkout
@@ -49,10 +52,13 @@ jobs:
         with:
           node-version: 22.x
 
-      - name: Set up Python (required for node-gyp in some cases)
+      - name: Set up Python 3.11 (Fixes 'distutils' error for node-gyp)
         uses: actions/setup-python@v4
         with:
-          python-version: 3.x
+          python-version: "3.11"
+
+      - name: Install native dependencies (lzma-native)
+        run: pip install setuptools
 
       - name: Install dependencies
         run: npm install

@@ -7,7 +7,6 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
 
-// Exporte la configuration de Vite
 export default defineConfig({
   // Définit le chemin de base de l'application. Le './' est essentiel
   // pour le routage de React Router et pour résoudre les assets.

@@ -1,5 +1,5 @@
 {
-  "name": "Launcher-Valkream-Infra",
+  "name": "Valkream-Launcher-Infra",
   "description": "Launcher Valheim moddé pour Valkream et server de mise à jour",
   "private": true,
   "workspaces": {

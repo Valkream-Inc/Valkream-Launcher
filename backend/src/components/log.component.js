@@ -20,45 +20,17 @@ function resize_to(size, value) {
   return message;
 }
 
-const log = (user, processus, value) => {
-  let message = "";
+const log = (user, processus) => {
   const currentDate = new Date();
 
-  // Les couleurs définies avec Chalk
-  const error = chalk.bgRed.white.bold;
-  const success = chalk.green.bold;
-  const warning = chalk.hex("#FFA500"); // Couleur orange
-
-  // Convertir value en chaîne si ce n'est pas déjà une chaîne
-  const valueString = String(value);
-
-  // Vérifier le type de message
-  if (valueString.startsWith("error_")) {
-    message = error(valueString);
-  } else if (valueString.startsWith("warning_")) {
-    console.log(" ");
-    message = warning(valueString);
-  } else if (valueString.startsWith("success_")) {
-    message = success(valueString);
-  } else {
-    message = chalk.white(valueString); // Si ce n'est pas une valeur reconnue, afficher comme normal
-  }
-
   // Formatage pour un affichage en colonnes alignées
-  const dateColumn = chalk.white(currentDate.toGMTString()) + "     ";
-  const userColumn = chalk.blue(resize_to(30, user || "unknown")) + "     ";
+  const dateColumn = chalk.yellow(currentDate.toGMTString()) + "     ";
+  const userColumn = chalk.blue(resize_to(20, user || "unknown")) + "     ";
   const processColumn =
-    chalk.yellow(resize_to(25, processus || "unknown")) + "     ";
-  const messageColumn = message;
+    chalk.bold.bgBlack(resize_to(70, processus || "unknown")) + "     ";
 
   // Afficher les informations formatées
-  if (valueString.startsWith("warning_")) {
-    console.log(`${dateColumn}${userColumn}${processColumn}${messageColumn}`);
-  } else {
-    if (process.env.LOG == "true") {
-      console.log(`${dateColumn}${userColumn}${processColumn}${messageColumn}`);
-    }
-  }
+  console.log(`${dateColumn}${userColumn}${processColumn}`);
 };
 
 module.exports = log;
