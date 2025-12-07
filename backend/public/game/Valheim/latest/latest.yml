@@ -34,6 +34,7 @@ modpack:
     # mods pour booster les Graphics à installer avec l'option boost Graphics du launcher
     # les mods seront présents dans le dossier /BepInEx/plugins
     - "Willybach-Willybachs_HD_Seasonality-3.5.6"
+    - "RustyMods-Seasonality-3.7.4"
   gameFolderToRemove:
     # fichiers et dossiers à supprimer lors de la mise à jour
     # les dossiers doivent commencer par /BepInEx/plugins ou /BepInEx/config
