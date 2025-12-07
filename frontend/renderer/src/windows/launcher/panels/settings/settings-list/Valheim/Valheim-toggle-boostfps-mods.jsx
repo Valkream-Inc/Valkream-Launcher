@@ -7,11 +7,11 @@ import { Switch } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { enqueueSnackbar } from "notistack";
-import SettingsBox from "../component/settings-box/settings-box.jsx";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
-import { usePanels } from "../../../context/panels.context.jsx";
+import { usePanels } from "../../../../context/panels.context.jsx";
 
-function ToggleBoostFPS() {
+function Valheim_ToggleBoostFpsMods() {
   const { changePanel } = usePanels();
   const [checked, setChecked] = useState(false);
 
@@ -57,4 +57,4 @@ function ToggleBoostFPS() {
   );
 }
 
-export default ToggleBoostFPS;
+export default Valheim_ToggleBoostFpsMods;

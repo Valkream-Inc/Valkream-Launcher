@@ -3,10 +3,10 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React from "react";
-import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { Button } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
+import React from "react";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
 const ButtonOpenGame = () => {
   const handleClick = async () =>

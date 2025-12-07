@@ -4,22 +4,22 @@
  */
 
 import React, {
-  useState, // You must import useEffect to handle side effects
-  useRef,
   forwardRef,
-  useImperativeHandle,
+  useImperativeHandle, // You must import useEffect to handle side effects
+  useRef,
+  useState, // You must import useEffect to handle side effects
 } from "react";
-import ModCard from "./component/mod-card.jsx";
-import Legend from "./component/mods-legend.jsx";
-import HashChecks from "./component/hash-checks.jsx";
-import Wait from "../../component/wait/wait.jsx";
-import SettingsTitle from "./component/settings-tittle/settings-title.jsx";
+import Wait from "../../../component/wait/wait.jsx";
+import HashChecks from "../component/hash-checks.jsx";
+import ModCard from "../component/mod-card.jsx";
+import Legend from "../component/mods-legend.jsx";
+import SettingsTitle from "../component/settings-tittle/settings-title.jsx";
 
-import { useAction } from "../../context/action.context.jsx";
+import { useAction } from "../../../context/action.context.jsx";
 
 const timeout_during_request_for_prevent_429_error = 300;
 
-const ModsTab = forwardRef((props, ref) => {
+const Valheim_ModsTab = forwardRef((props, ref) => {
   const { isDevActive } = props;
   const { runAction } = useAction();
   const [stats, setStats] = useState({
@@ -203,4 +203,4 @@ const ModsTab = forwardRef((props, ref) => {
   );
 });
 
-export default ModsTab;
+export default Valheim_ModsTab;

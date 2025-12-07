@@ -7,9 +7,9 @@ import { Switch } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { enqueueSnackbar } from "notistack";
-import SettingsBox from "../component/settings-box/settings-box.jsx";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
-function ToggleLaunchSteam() {
+function Valheim_ToggleLaunchSteam() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -48,4 +48,4 @@ function ToggleLaunchSteam() {
   );
 }
 
-export default ToggleLaunchSteam;
+export default Valheim_ToggleLaunchSteam;

@@ -3,18 +3,18 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React, { useEffect, useState } from "react";
-import { Box, TextField, Button } from "@mui/material";
-import SettingsBox from "../component/settings-box/settings-box.jsx";
+import { Box, Button, TextField } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
+import React, { useEffect, useState } from "react";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
-function ChooseCustomGamePath() {
+function SevenDtoD_ChooseCustomGamePath() {
   const [path, setPath] = useState("");
 
   useEffect(() => {
     const loadSettings = async () => {
       const customGamePath = await window.electron_API.getSettings(
-        "customGamePath"
+        "gamePathWithSevenDtoD"
       );
       setPath(customGamePath || "");
     };
@@ -28,7 +28,7 @@ function ChooseCustomGamePath() {
       const result = await window.electron_API.chooseFolder();
       if (result === path) return;
       setPath(result || "");
-      await window.electron_API.setSettings("customGamePath", result);
+      await window.electron_API.setSettings("gamePathWithSevenDtoD", result);
       enqueueSnackbar("Chemin personnalisé sauvegardé !", { variant: "info" });
     } catch (error) {
       console.error("Erreur lors du choix du chemin :", error);
@@ -38,8 +38,7 @@ function ChooseCustomGamePath() {
   return (
     <SettingsBox
       warn={false}
-      text="Chemin personnalisé pour l'installation du jeu (⚠️ Cela entraînera
-        cependant un retéléchargement complet du jeu.) :"
+      text="Chemin personnalisé vers votre installation Steam de 7Days To Die:"
     >
       <Box
         display="flex"
@@ -76,4 +75,4 @@ function ChooseCustomGamePath() {
   );
 }
 
-export default ChooseCustomGamePath;
+export default SevenDtoD_ChooseCustomGamePath;

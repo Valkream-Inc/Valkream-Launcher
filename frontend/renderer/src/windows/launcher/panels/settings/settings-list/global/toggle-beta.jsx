@@ -3,11 +3,11 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
+import React, { useEffect, useState } from "react";
 
-import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { enqueueSnackbar } from "notistack";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
 function ToggleAdmin() {
   const [checked, setChecked] = useState(false);

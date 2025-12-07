@@ -3,12 +3,12 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
+import React, { useEffect, useState } from "react";
 
-import SettingsBox from "../component/settings-box/settings-box.jsx";
-import { useBackground } from "../../../context/background.context.jsx";
 import { enqueueSnackbar } from "notistack";
+import { useBackground } from "../../../../context/background.context.jsx";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
 function ToggleMusic() {
   const [checked, setChecked] = useState(false);

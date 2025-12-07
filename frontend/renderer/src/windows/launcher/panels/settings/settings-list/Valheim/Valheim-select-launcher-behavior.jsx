@@ -9,10 +9,10 @@ import { enqueueSnackbar } from "notistack";
 import {
   SelectItemSettings,
   SelectSettings,
-} from "../component/select-settings/select-settings.jsx";
-import SettingsBox from "../component/settings-box/settings-box.jsx";
+} from "../../component/select-settings/select-settings.jsx";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
-function SelectLauncherBehavior() {
+function Valheim_SelectLauncherBehavior() {
   const [selected, setSelected] = useState("close");
 
   useEffect(() => {
@@ -55,4 +55,4 @@ function SelectLauncherBehavior() {
   );
 }
 
-export default SelectLauncherBehavior;
+export default Valheim_SelectLauncherBehavior;

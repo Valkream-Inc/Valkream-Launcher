@@ -3,12 +3,12 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React, { useState } from "react";
-import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { Button } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
-import { useAction } from "../../../context/action.context.jsx";
-import Wait from "../../../component/wait/wait.jsx";
+import React, { useState } from "react";
+import Wait from "../../../../component/wait/wait.jsx";
+import { useAction } from "../../../../context/action.context.jsx";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
 const ButtonUninstallGame = () => {
   const { runAction } = useAction();

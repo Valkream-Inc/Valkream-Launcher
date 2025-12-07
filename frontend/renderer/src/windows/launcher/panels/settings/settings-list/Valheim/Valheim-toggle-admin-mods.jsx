@@ -7,11 +7,11 @@ import { Switch } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { enqueueSnackbar } from "notistack";
-import SettingsBox from "../component/settings-box/settings-box.jsx";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
-import { usePanels } from "../../../context/panels.context.jsx";
+import { usePanels } from "../../../../context/panels.context.jsx";
 
-function ToggleAdmin() {
+function Valheim_ToggleAdminMods() {
   const { changePanel } = usePanels();
   const [checked, setChecked] = useState(false);
 
@@ -55,4 +55,4 @@ function ToggleAdmin() {
   );
 }
 
-export default ToggleAdmin;
+export default Valheim_ToggleAdminMods;

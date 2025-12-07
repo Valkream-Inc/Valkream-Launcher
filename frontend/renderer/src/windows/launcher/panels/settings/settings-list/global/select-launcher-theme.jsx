@@ -6,12 +6,12 @@
 import React from "react";
 
 import { enqueueSnackbar } from "notistack";
-import { useTheme } from "../../../context/theme.context.jsx";
+import { useTheme } from "../../../../context/theme.context.jsx";
 import {
   SelectItemSettings,
   SelectSettings,
-} from "../component/select-settings/select-settings.jsx";
-import SettingsBox from "../component/settings-box/settings-box.jsx";
+} from "../../component/select-settings/select-settings.jsx";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
 function SelectLauncherTheme() {
   const { theme, changeTheme } = useTheme();

@@ -5,13 +5,13 @@
 
 import React from "react";
 
-import SettingsBox from "../component/settings-box/settings-box.jsx";
-import {
-  SelectSettings,
-  SelectItemSettings,
-} from "../component/select-settings/select-settings.jsx";
 import { enqueueSnackbar } from "notistack";
-import { useBackground } from "../../../context/background.context.jsx";
+import { useBackground } from "../../../../context/background.context.jsx";
+import {
+  SelectItemSettings,
+  SelectSettings,
+} from "../../component/select-settings/select-settings.jsx";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
 function SelectLauncherBackgroundType() {
   const { backgroundType, changeBackgroundType } = useBackground();

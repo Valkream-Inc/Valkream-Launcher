@@ -3,9 +3,9 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React from "react";
-import { Box, Grid, Typography, Card, CardActionArea } from "@mui/material";
+import { Box, Card, CardActionArea, Grid, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import React from "react";
 
 import { useGames } from "../../context/games.context.jsx";
 import { usePanels } from "../../context/panels.context.jsx";
@@ -18,11 +18,11 @@ const games = [
     name: "Valheim Valkream",
     icon: "./images/Valheim-icon.png",
   },
-  // {
-  //   id: "SevenDtoD",
-  //   name: "7 Days to Valkream",
-  //   icon: "./images/SevenDtoD-icon.png",
-  // },
+  {
+    id: "SevenDtoD",
+    name: "7 Days to Valkream",
+    icon: "./images/SevenDtoD-icon.png",
+  },
 ];
 
 const ModernGameCard = styled(Card)(() => ({

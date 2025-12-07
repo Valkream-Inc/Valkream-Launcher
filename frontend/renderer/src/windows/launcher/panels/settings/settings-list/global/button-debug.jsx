@@ -3,39 +3,40 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React from "react";
-import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { Button } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
+import React from "react";
+import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
-const ButtonOpenAppData = () => {
+const ButtonDebug = () => {
   const handleClick = async () =>
     await window.electron_API
-      .openAppData()
+      .openDevTools()
       .then(() => {
-        enqueueSnackbar("AppData ouvert !", { variant: "success" });
+        enqueueSnackbar("Debug ouvert !", { variant: "success" });
       })
       .catch((error) => {
         console.error(error);
-        enqueueSnackbar("AppData non ouvert !", { variant: "error" });
+        enqueueSnackbar("Debug non ouvert !", { variant: "error" });
       });
 
   return (
     <SettingsBox
-      warn={false}
-      text="Vous pouvez ouvrir le dossier AppData de Valkream."
+      warn={true}
+      text="Vous pouvez ouvrir le debug (⚠️: cela doit etre fait uniquement dans un
+        but de debug et avec des personnes qualifiés :) )"
     >
       <Button
         variant="contained"
         size="large"
         sx={{ fontSize: "1.2rem" }}
-        color="warning"
+        color="secondary"
         onClick={handleClick}
       >
-        Ouvrir le dossier AppData
+        Ouvrir le debug
       </Button>
     </SettingsBox>
   );
 };
 
-export default ButtonOpenAppData;
+export default ButtonDebug;
