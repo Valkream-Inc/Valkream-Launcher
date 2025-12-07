@@ -16,9 +16,7 @@ export default function SevenDtoDButton() {
   const { maintenance } = useInfos();
 
   const handleClick = async () => {
-    const launcherBehavior = await window.electron_API.getSettings(
-      "launcherBehavior"
-    );
+    const launcherBehavior = "nothing";
 
     window.electron_API.openLink("steam://rungameid/251570");
     if (launcherBehavior !== "nothing") window.electron_API.close();

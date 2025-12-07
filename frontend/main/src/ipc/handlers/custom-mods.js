@@ -54,11 +54,17 @@ class CustomMods {
       // --- 4. Vérification des mods ---
       const admin_mods = localVersionConfig?.modpack?.admin_mods;
       const boostfps_mods = localVersionConfig?.modpack?.boostfps_mods;
+      const boostgraphic_mods = localVersionConfig?.modpack?.boostgraphic_mods;
 
-      const [adminModsResult, boostfpsModsResult] = await Promise.all([
-        checkCustomMods(admin_mods, "adminEnabled"),
-        checkCustomMods(boostfps_mods, "boostfpsEnabled"),
-      ]);
+      const [adminModsResult, boostfpsModsResult, boostgraphicModsResult] =
+        await Promise.all([
+          checkCustomMods(admin_mods, "adminModsEnabledWithValheim"),
+          checkCustomMods(boostfps_mods, "boostfpsModsEnabledWithValheim"),
+          checkCustomMods(
+            boostgraphic_mods,
+            "boostgraphicModsEnabledWithValheim"
+          ),
+        ]);
 
       const {
         active: isAdminModsActive,
@@ -71,6 +77,12 @@ class CustomMods {
         installed: isBoostfpsModsInstalled,
         available: isBoostfpsModsAvailable,
       } = boostfpsModsResult;
+
+      const {
+        active: isBoostgraphicModsActive,
+        installed: isBoostgraphicModsInstalled,
+        available: isBoostgraphicModsAvailable,
+      } = boostgraphicModsResult;
 
       // cas 1.1: Admin mods gestion
       if (
@@ -105,6 +117,27 @@ class CustomMods {
       ) {
         callback("Désinstallation des mods pour booster les FPS...");
         await ThunderstoreManager.unInstallCustomMods(boostfps_mods);
+      }
+
+      // cas 1.3: BoostGRAPHICS mods gestion
+      if (
+        isInstalled &&
+        isInternetConnected &&
+        isBoostgraphicModsActive &&
+        !isBoostgraphicModsInstalled &&
+        isBoostgraphicModsAvailable
+      ) {
+        await ThunderstoreManager.InstallCustomMods(
+          boostgraphic_mods,
+          this.callback
+        );
+      } else if (
+        isInstalled &&
+        !isBoostgraphicModsActive &&
+        isBoostgraphicModsInstalled
+      ) {
+        callback("Désinstallation des mods pour booster les FPS...");
+        await ThunderstoreManager.unInstallCustomMods(boostgraphic_mods);
       }
 
       event.sender.send("done-custom-mods");

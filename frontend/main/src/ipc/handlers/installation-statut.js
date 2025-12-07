@@ -41,13 +41,21 @@ class InstallationStatut {
       return { active, installed, available };
     };
 
-    const [adminModsResult, boostfpsModsResult] = await Promise.all([
-      checkCustomMods(localVersionConfig?.modpack?.admin_mods, "adminEnabled"),
-      checkCustomMods(
-        localVersionConfig?.modpack?.boostfps_mods,
-        "boostfpsEnabled"
-      ),
-    ]);
+    const [adminModsResult, boostfpsModsResult, boostgraphicModsResult] =
+      await Promise.all([
+        checkCustomMods(
+          localVersionConfig?.modpack?.admin_mods,
+          "adminModsEnabledWithValheim"
+        ),
+        checkCustomMods(
+          localVersionConfig?.modpack?.boostfps_mods,
+          "boostfpsModsEnabledWithValheim"
+        ),
+        checkCustomMods(
+          localVersionConfig?.modpack?.boostgraphic_mods,
+          "boostgraphicModsEnabledWithValheim"
+        ),
+      ]);
 
     const {
       active: isAdminModsActive,
@@ -60,6 +68,12 @@ class InstallationStatut {
       installed: isBoostfpsModsInstalled,
       available: isBoostfpsModsAvailable,
     } = boostfpsModsResult;
+
+    const {
+      active: isBoostgraphicModsActive,
+      installed: isBoostgraphicModsInstalled,
+      available: isBoostgraphicModsAvailable,
+    } = boostgraphicModsResult;
 
     // --- 4. Vérification des versions ---
     let onlineVersionConfig = null;
@@ -101,15 +115,29 @@ class InstallationStatut {
       isBoostfpsModsActive &&
       !isBoostfpsModsInstalled &&
       isBoostfpsModsAvailable;
+    const isBoostgraphicModsToInstall =
+      isInstalled &&
+      isInternetConnected &&
+      isBoostgraphicModsActive &&
+      !isBoostgraphicModsInstalled &&
+      isBoostgraphicModsAvailable;
+    // mods a installer ?
     const isCustomModsToInstall =
-      isAdminModsToInstall || isBoostfpsModsToInstall;
+      isAdminModsToInstall ||
+      isBoostfpsModsToInstall ||
+      isBoostgraphicModsToInstall;
 
     const isAdminModsToUninstall =
       isInstalled && !isAdminModsActive && isAdminModsInstalled;
     const isBoostfpsModsToUninstall =
       isInstalled && !isBoostfpsModsActive && isBoostfpsModsInstalled;
+    const isBoostgraphicModsToUninstall =
+      isInstalled && !isBoostgraphicModsActive && isBoostgraphicModsInstalled;
+    //mods a déinstaller
     const isCustomModsToUninstall =
-      isAdminModsToUninstall || isBoostfpsModsToUninstall;
+      isAdminModsToUninstall ||
+      isBoostfpsModsToUninstall ||
+      isBoostgraphicModsToUninstall;
 
     // --- 5. Résultats ---
     return {

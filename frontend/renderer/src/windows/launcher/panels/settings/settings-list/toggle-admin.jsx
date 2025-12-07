@@ -3,11 +3,11 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
+import React, { useEffect, useState } from "react";
 
-import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { enqueueSnackbar } from "notistack";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
 
 import { usePanels } from "../../../context/panels.context.jsx";
 
@@ -18,7 +18,7 @@ function ToggleAdmin() {
   useEffect(() => {
     const loadSettings = async () => {
       const adminEnabled = await window.electron_API.getSettings(
-        "adminEnabled"
+        "adminModsEnabledWithValheim"
       );
       setChecked(adminEnabled);
     };
@@ -31,7 +31,10 @@ function ToggleAdmin() {
     const enabled = event.target.checked;
     if (enabled === checked) return;
     setChecked(enabled);
-    await window.electron_API.setSettings("adminEnabled", enabled);
+    await window.electron_API.setSettings(
+      "adminModsEnabledWithValheim",
+      enabled
+    );
     enqueueSnackbar(
       enabled ? "Options admin activées !" : "Options admin désactivées !",
       { variant: "success" }

@@ -4,12 +4,21 @@
  */
 
 const path = require("path");
+const { app } = require("electron");
 const newDir = require("../utils/new-dir.js");
 
 const isDev = require("../constants/isDev.js");
 
 class DirsManager {
   launcherRootPath = () => process.cwd();
+  appDataPath = () => app.getPath("appData");
+
+  launcherAppDataPath = () =>
+    newDir({
+      win32: path.join(this.appDataPath(), "Valkream-Launcher"),
+      linux: path.join(this.appDataPath(), "Valkream-Launcher"),
+      darwin: path.join(this.appDataPath(), "Valkream-Launcher"),
+    });
 
   rootPath = () =>
     newDir(
@@ -34,6 +43,8 @@ class DirsManager {
             ),
           }
     );
+
+  dbPath = () => (isDev ? this.rootPath() : this.launcherAppDataPath());
 
   gameRootPath = () =>
     newDir({

@@ -9,7 +9,9 @@ const GameManager = require("../../manager/gameManager");
 
 class Start {
   async init(event) {
-    const launchSteam = await SettingsManager.getSetting("launchSteam");
+    const launchSteam = await SettingsManager.getSetting(
+      "launchSteamWithValheim"
+    );
 
     if (launchSteam) await SteamManager.open();
     await GameManager.restoreGameFolder();

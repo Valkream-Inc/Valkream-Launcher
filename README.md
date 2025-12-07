@@ -46,6 +46,10 @@ Ce projet comprend :
 
 > **⚠️ Attention** : A l'heure actuel l'installation cross-platforme ne fonctionne pas (seul windows fonctionne)
 
+### Images
+
+<br>
+   <img src="./doc/images/home.png" style="max-width: 20cm">
 ---
 
 ## Structure du projet
@@ -100,12 +104,20 @@ yarn run dev
 
 1. Pusher les modifications sur la main github
 2. Attendre la fin du workflow de build
-3. activer l'option de test beta dans le launcher sur le pc de test (settings -> dev -> beta)
+3. activer l'option de test beta dans le launcher sur le pc de test (settings -> crtl + maj + click sur l'image -> dev -> beta)
+   <br>
+   <img src="./doc/images/activer les devs.png" style="max-width: 10cm">
+   <br>
+   <img src="./doc/images/activer les devs 2.png" style="max-width: 10cm">
 4. puis télécharger l'installer depuis github
 5. mettre a jour le launcher sur le PC de test (via l'installer)
 6. Lancer le launcher
 7. Vérifier que le launcher fonctionne
-8. Désactiver l'option de test beta dans le launcher (settings -> dev -> beta)
+8. Désactiver l'option de test beta dans le launcher (settings -> crtl + maj + click sur l'image -> dev -> beta)
+   <br>
+   <img src="./doc/images/activer les devs.png" style="max-width: 10cm">
+   <br>
+   <img src="./doc/images/activer les devs 2.png" style="max-width: 10cm">
 9. Lancer le launcher (pour verifier que le beta est désactivé et que le launcher se met à jour)
 10. Installer la mise à jour sur le serveur si tout est ok (voire la procédure dans le dossier de doc)
 

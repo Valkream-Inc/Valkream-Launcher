@@ -3,18 +3,20 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
+import React, { useEffect, useState } from "react";
 
-import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { enqueueSnackbar } from "notistack";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
 
 function ToggleLaunchSteam() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     const loadSettings = async () => {
-      const launchSteam = await window.electron_API.getSettings("launchSteam");
+      const launchSteam = await window.electron_API.getSettings(
+        "launchSteamWithValheim"
+      );
       setChecked(launchSteam);
     };
 
@@ -26,7 +28,7 @@ function ToggleLaunchSteam() {
     const enabled = event.target.checked;
     if (enabled === checked) return;
     setChecked(enabled);
-    await window.electron_API.setSettings("launchSteam", enabled);
+    await window.electron_API.setSettings("launchSteamWithValheim", enabled);
     enqueueSnackbar(
       enabled
         ? "Steam sera lancé avec le jeu."

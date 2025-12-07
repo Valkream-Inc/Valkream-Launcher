@@ -36,10 +36,15 @@ class ModsDataHandler {
         onlineMods = res.data?.dependencies || [];
       }
 
-      if (await SettingsManager.getSetting("boostfpsEnabled")) {
+      if (await SettingsManager.getSetting("boostfpsModsEnabledWithValheim")) {
         onlineMods.push(...(onlineInfo?.modpack?.boostfps_mods || []));
       }
-      if (await SettingsManager.getSetting("adminEnabled")) {
+      if (
+        await SettingsManager.getSetting("boostgraphicModsEnabledWithValheim")
+      ) {
+        onlineMods.push(...(onlineInfo?.modpack?.boostgraphic_mods || []));
+      }
+      if (await SettingsManager.getSetting("adminModsEnabledWithValheim")) {
         onlineMods.push(...(onlineInfo?.modpack?.admin_mods || []));
       }
     } catch (err) {

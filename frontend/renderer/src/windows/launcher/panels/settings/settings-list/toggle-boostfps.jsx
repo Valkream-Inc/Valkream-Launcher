@@ -3,11 +3,11 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React, { useEffect, useState } from "react";
 import { Switch } from "@mui/material";
+import React, { useEffect, useState } from "react";
 
-import SettingsBox from "../component/settings-box/settings-box.jsx";
 import { enqueueSnackbar } from "notistack";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
 
 import { usePanels } from "../../../context/panels.context.jsx";
 
@@ -18,7 +18,7 @@ function ToggleBoostFPS() {
   useEffect(() => {
     const loadSettings = async () => {
       const boostfpsEnabled = await window.electron_API.getSettings(
-        "boostfpsEnabled"
+        "boostfpsModsEnabledWithValheim"
       );
       setChecked(boostfpsEnabled);
     };
@@ -31,7 +31,10 @@ function ToggleBoostFPS() {
     const enabled = event.target.checked;
     if (enabled === checked) return;
     setChecked(enabled);
-    await window.electron_API.setSettings("boostfpsEnabled", enabled);
+    await window.electron_API.setSettings(
+      "boostfpsModsEnabledWithValheim",
+      enabled
+    );
     enqueueSnackbar(
       enabled
         ? "Options pour booster les FPS activées !"

@@ -34,6 +34,18 @@ const openAppData = async () => {
   else throw new Error("Le dossier AppData n'existe pas !");
 };
 
+const openLink = async (event, url) => {
+  if (
+    !(
+      url.startsWith("http://") ||
+      url.startsWith("https://") ||
+      url.startsWith("steam://")
+    )
+  )
+    throw new Error("URL invalide");
+  await shell.openExternal(url);
+};
+
 class IpcHandlers {
   init() {
     // update  windows
@@ -83,17 +95,7 @@ class IpcHandlers {
     );
 
     // utils
-    ipcMain.handle("open-link", async (event, url) => {
-      if (
-        !(
-          url.startsWith("http://") ||
-          url.startsWith("https://") ||
-          url.startsWith("steam://")
-        )
-      )
-        throw new Error("URL invalide");
-      await shell.openExternal(url);
-    });
+    ipcMain.handle("open-link", openLink);
     ipcMain.handle(
       "get-settings",
       async (event, setting) => await SettingsManager.getSetting(setting)

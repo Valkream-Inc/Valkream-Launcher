@@ -5,12 +5,12 @@
 
 import React, { useEffect, useState } from "react";
 
-import SettingsBox from "../component/settings-box/settings-box.jsx";
-import {
-  SelectSettings,
-  SelectItemSettings,
-} from "../component/select-settings/select-settings.jsx";
 import { enqueueSnackbar } from "notistack";
+import {
+  SelectItemSettings,
+  SelectSettings,
+} from "../component/select-settings/select-settings.jsx";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
 
 function SelectLauncherBehavior() {
   const [selected, setSelected] = useState("close");
@@ -18,7 +18,7 @@ function SelectLauncherBehavior() {
   useEffect(() => {
     const loadSettings = async () => {
       const launcherBehavior = await window.electron_API.getSettings(
-        "launcherBehavior"
+        "launcherBehaviorWithValheim"
       );
       setSelected(launcherBehavior);
     };
@@ -31,7 +31,7 @@ function SelectLauncherBehavior() {
     const value = event.target.value;
     if (value === selected) return;
     setSelected(value);
-    await window.electron_API.setSettings("launcherBehavior", value);
+    await window.electron_API.setSettings("launcherBehaviorWithValheim", value);
     enqueueSnackbar("Comportement du launcher sauvegardé !", {
       variant: "info",
     });

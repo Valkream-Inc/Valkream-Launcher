@@ -9,14 +9,19 @@ class SettingsManager {
   constructor() {
     this.db = new Database();
     this.defaultSettings = {
+      // general
       musicEnabled: true,
-      launchSteam: true,
       betaEnabled: false,
-      boostfpsEnabled: false,
-      adminEnabled: false,
-      launcherBehavior: "close",
       launcherTheme: "modern",
       backgroundType: "video",
+      // Valheim
+      launchSteamWithValheim: true,
+      launcherBehaviorWithValheim: "close",
+      boostfpsModsEnabledWithValheim: false,
+      boostgraphicModsEnabledWithValheim: false,
+      adminModsEnabledWithValheim: false,
+      // SevenDtoD
+      gamePathWithSevenDtoD: null,
     };
   }
 

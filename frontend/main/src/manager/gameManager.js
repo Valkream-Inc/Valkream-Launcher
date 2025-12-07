@@ -248,7 +248,9 @@ class GameManager {
 
   async play() {
     await this.init();
-    const behavior = await SettingsManager.getSetting("launcherBehavior");
+    const behavior = await SettingsManager.getSetting(
+      "launcherBehaviorWithValheim"
+    );
 
     const launchGame = () =>
       new Promise((resolve, reject) => {

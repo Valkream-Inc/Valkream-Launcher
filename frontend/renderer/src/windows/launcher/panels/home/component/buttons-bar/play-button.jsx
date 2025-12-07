@@ -3,8 +3,8 @@
  * @license MIT - https://opensource.org/licenses/MIT
  */
 
-import React, { useState, useEffect, useRef } from "react";
 import { enqueueSnackbar } from "notistack";
+import React, { useEffect, useRef, useState } from "react";
 
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { ButtonBase, Stack } from "@mui/material";
@@ -12,8 +12,8 @@ import { ButtonBase, Stack } from "@mui/material";
 import Popup from "../../../../component/popup/popup";
 
 import { useAction } from "../../../../context/action.context.jsx";
-import { useInfos } from "../../../../context/infos.context.jsx";
 import { useBackground } from "../../../../context/background.context.jsx";
+import { useInfos } from "../../../../context/infos.context.jsx";
 
 function WelcomeMessage() {
   return (
@@ -83,7 +83,7 @@ export default function PlayButton() {
   const start = async () => {
     try {
       const launcherBehavior = await window.electron_API.getSettings(
-        "launcherBehavior"
+        "launcherBehaviorWithValheim"
       );
 
       if (launcherBehavior === "hide") pause();
