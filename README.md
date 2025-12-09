@@ -4,6 +4,12 @@ Launcher et système de mise à jour pour le serveur Valheim Valkream.
 
 <img src="./frontend\renderer\public\images\Valheim-icon-with-name.png">
 
+## License
+
+This project is under the **MIT Non-Commercial License (MIT-NC)**.
+
+[![License: MIT-NC](https://img.shields.io/badge/License-MIT--NC-blue.svg)](#license)
+
 ## Table des matières
 
 - [Présentation](#présentation)
@@ -131,4 +137,6 @@ Pour un déploiment `simple` en production, il suffit de copier le dossier publi
 
 ## Auteurs
 
-- Valkream Team
+- Jean-Chante (Valkream Team)
+
+---

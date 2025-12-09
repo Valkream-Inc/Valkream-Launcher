@@ -16,7 +16,7 @@
     "build:electron": "node ./build-script.js --obf=true",
     "rebuild": "electron-rebuild"
   },
-  "license": "MIT",
+  "license": "MIT-NC",
   "nodemonConfig": {
     "ext": "js,json",
     "ignore": "**/src/renderer/**"
