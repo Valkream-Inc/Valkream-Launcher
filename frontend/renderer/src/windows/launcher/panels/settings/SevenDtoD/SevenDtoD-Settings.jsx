@@ -13,8 +13,6 @@ import SettingsTitle from "../component/settings-tittle/settings-title.jsx";
 
 import ButtonDebug from "../settings-list/global/button-debug.jsx";
 import ButtonOpenAppData from "../settings-list/global/button-open-appdata.jsx";
-import ButtonOpenGame from "../settings-list/global/button-open-game.jsx";
-import ButtonUninstallGame from "../settings-list/global/button-uninstall-game.jsx";
 import ButtonUninstallGlobal from "../settings-list/global/button-uninstall-global.jsx";
 import SelectLauncherBackgroundType from "../settings-list/global/select-launcher-background-type.jsx";
 import SelectLauncherTheme from "../settings-list/global/select-launcher-theme.jsx";
@@ -22,6 +20,8 @@ import ToggleBeta from "../settings-list/global/toggle-beta.jsx";
 import ToggleDev from "../settings-list/global/toggle-dev.jsx";
 import ToggleMusic from "../settings-list/global/toggle-music.jsx";
 
+import SevenDtoD_ButtonOpenGame from "../settings-list/SevenDtoD/SevenDtoD-button-open-game.jsx";
+import SevenDtoD_ButtonUninstallGame from "../settings-list/SevenDtoD/SevenDtoD-button-uninstall-game.jsx";
 import SevenDtoD_ChooseCustomGamePath from "../settings-list/SevenDtoD/SevenDtoD-choose-custom-game-path.jsx";
 
 function Presentation() {
@@ -115,8 +115,8 @@ function SevenDtoDSettings({
       {(isDevActive || isSpecialOptionVisible) && (
         <SettingsTab id="dev" activeTab={activeTab}>
           <SettingsTitle warn={true}>Dev / Debug</SettingsTitle>
-          <ButtonUninstallGame />
-          <ButtonOpenGame />
+          <SevenDtoD_ButtonUninstallGame />
+          <SevenDtoD_ButtonOpenGame />
 
           <ButtonOpenAppData />
           <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>

@@ -7,33 +7,33 @@ const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
 
-const DirsManager = require("./dirsManager.js");
-const FilesManager = require("./filesManager.js");
-const LinksManager = require("./linksManager.js");
-const InfosManager = require("./infosManager.js");
+const ValheimDirsManager = require("./ValheimDirsManager.js");
+const ValheimFilesManager = require("./ValheimFilesManager.js");
+const ValheimLinksManager = require("./ValheimLinksManager.js");
+const InfosManager = require("../infosManager.js");
 
 const {
   dowloadMultiplefiles,
   unZipMultipleFiles,
-} = require("../utils/index.js");
+} = require("../../utils/index.js");
 
-class ThunderstoreManager {
+class ValheimThunderstoreManager {
   async init() {
-    this.gameDir = DirsManager.gamePath();
+    this.gameDir = ValheimDirsManager.gamePath();
 
-    this.BepInExDir = DirsManager.bepInExPath();
-    this.BepInExConfigDir = DirsManager.bepInExConfigPath();
-    this.BepInExPluginsDir = DirsManager.bepInExPluginsPath();
+    this.BepInExDir = ValheimDirsManager.bepInExPath();
+    this.BepInExConfigDir = ValheimDirsManager.bepInExConfigPath();
+    this.BepInExPluginsDir = ValheimDirsManager.bepInExPluginsPath();
 
-    this.ModPackDir = DirsManager.downloadModPackPath();
-    this.modsDir = DirsManager.downloadModsPath();
+    this.ModPackDir = ValheimDirsManager.downloadModPackPath();
+    this.modsDir = ValheimDirsManager.downloadModsPath();
 
-    this.extractManifestPath = FilesManager.extractManifestPath();
-    this.installedManifestPath = FilesManager.installedManifestPath();
+    this.extractManifestPath = ValheimFilesManager.extractManifestPath();
+    this.installedManifestPath = ValheimFilesManager.installedManifestPath();
 
     if (await InfosManager.getIsServerReachableFromInternal()) {
-      this.modpackZipLink = await LinksManager.modpackZipLink();
-      this.modpackZipPath = FilesManager.modpackZipPath();
+      this.modpackZipLink = await ValheimLinksManager.modpackZipLink();
+      this.modpackZipPath = ValheimFilesManager.modpackZipPath();
     }
   }
 
@@ -265,4 +265,4 @@ class ThunderstoreManager {
   }
 }
 
-module.exports = new ThunderstoreManager();
+module.exports = new ValheimThunderstoreManager();

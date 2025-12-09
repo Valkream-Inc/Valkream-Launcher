@@ -7,41 +7,41 @@ const path = require("path");
 const fs = require("fs/promises");
 const fse = require("fs-extra");
 const { shell } = require("electron");
-const { cleanGameFolder } = require("../utils/function/cleanGameFolder");
+const { cleanGameFolder } = require("../../utils/function/cleanGameFolder");
 const { execFile } = require("child_process");
 
-const VersionManager = require("./versionManager.js");
-const LinksManager = require("./linksManager.js");
-const FilesManager = require("./filesManager.js");
-const DirsManager = require("./dirsManager.js");
+const ValheimVersionManager = require("./ValheimVersionManager.js");
+const ValheimLinksManager = require("./ValheimLinksManager.js");
+const ValheimFilesManager = require("./ValheimFilesManager.js");
+const ValheimDirsManager = require("./ValheimDirsManager.js");
 
-const SettingsManager = require("./settingsManager.js");
-const LauncherManager = require("./launcherManager.js");
-const InfosManager = require("./infosManager.js");
+const SettingsManager = require("../settingsManager.js");
+const LauncherManager = require("../launcherManager.js");
+const InfosManager = require("../infosManager.js");
 
 const {
   isFolderPathSecured,
   dowloadMultiplefiles,
   unZipMultipleFiles,
-} = require("../utils/index.js");
+} = require("../../utils/index.js");
 
-class GameManager {
+class ValheimGameManager {
   async init() {
     if (await InfosManager.getIsServerReachableFromInternal()) {
-      this.gameZipLink = await LinksManager.gameZipLink();
-      this.gameZipPath = FilesManager.gameZipPath();
+      this.gameZipLink = await ValheimLinksManager.gameZipLink();
+      this.gameZipPath = ValheimFilesManager.gameZipPath();
 
-      this.bepInExZipLink = await LinksManager.bepInExZipLink();
-      this.bepInExZipPath = FilesManager.bepInExZipPath();
+      this.bepInExZipLink = await ValheimLinksManager.bepInExZipLink();
+      this.bepInExZipPath = ValheimFilesManager.bepInExZipPath();
     }
 
-    this.gameRootDir = DirsManager.gameRootPath();
-    this.gameDir = DirsManager.gamePath();
-    this.gameExePath = FilesManager.gameExePath();
-    this.preservedDir = DirsManager.gamePreservedPath();
+    this.gameRootDir = ValheimDirsManager.gameRootPath();
+    this.gameDir = ValheimDirsManager.gamePath();
+    this.gameExePath = ValheimFilesManager.gameExePath();
+    this.preservedDir = ValheimDirsManager.gamePreservedPath();
 
-    if (await VersionManager.getIsInstalled()) {
-      const localConfig = await VersionManager.getLocalVersionConfig();
+    if (await ValheimVersionManager.getIsInstalled()) {
+      const localConfig = await ValheimVersionManager.getLocalVersionConfig();
       this.gameFolderToRemove = localConfig?.modpack?.gameFolderToRemove || [];
       this.configGameFolderToPreserve =
         localConfig?.modpack?.gameFolderToPreserve || [];
@@ -281,4 +281,4 @@ class GameManager {
   }
 }
 
-module.exports = new GameManager();
+module.exports = new ValheimGameManager();

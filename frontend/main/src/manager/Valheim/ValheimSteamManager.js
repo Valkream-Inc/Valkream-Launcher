@@ -5,7 +5,7 @@
 
 const { shell } = require("electron");
 
-class SteamManager {
+class ValheimSteamManager {
   async start() {
     try {
       await shell.openExternal("steam://rungameid/892970");
@@ -23,4 +23,4 @@ class SteamManager {
   }
 }
 
-module.exports = new SteamManager();
+module.exports = new ValheimSteamManager();

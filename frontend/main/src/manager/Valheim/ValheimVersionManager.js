@@ -6,25 +6,25 @@
 const axios = require("axios");
 const fs = require("fs/promises");
 const yaml = require("yaml");
-const { hashFolder } = require("../utils/function/hashFolder");
+const { hashFolder } = require("../../utils/function/hashFolder");
 
-const DirsManager = require("./dirsManager.js");
-const FilesManager = require("./filesManager.js");
-const LinksManager = require("./linksManager.js");
-const InfosManager = require("./infosManager.js");
+const ValheimDirsManager = require("./ValheimDirsManager.js");
+const ValheimFilesManager = require("./ValheimFilesManager.js");
+const ValheimLinksManager = require("./ValheimLinksManager.js");
+const InfosManager = require("../infosManager.js");
 
-class VersionManager {
+class ValheimVersionManager {
   constructor() {
     this.onlineVersionConfig = null;
     this.localVersionConfig = null;
   }
 
   async init() {
-    this.BepInExConfigDir = DirsManager.bepInExConfigPath();
-    this.BepInExPluginsDir = DirsManager.bepInExPluginsPath();
+    this.BepInExConfigDir = ValheimDirsManager.bepInExConfigPath();
+    this.BepInExPluginsDir = ValheimDirsManager.bepInExPluginsPath();
 
-    this.gameVersionFileLink = await LinksManager.gameVersionUrl();
-    this.gameVersionFilePath = FilesManager.gameVersionFilePath();
+    this.gameVersionFileLink = await ValheimLinksManager.gameVersionUrl();
+    this.gameVersionFilePath = ValheimFilesManager.gameVersionFilePath();
   }
 
   async updateOnlineVersionConfig(force = false) {
@@ -103,17 +103,17 @@ class VersionManager {
 
   async getHash() {
     await this.init();
-    const GameManager = require("./gameManager.js");
+    const ValheimGameManager = require("./ValheimGameManager.js");
 
-    await GameManager.preserveGameFolder();
-    await GameManager.clean();
+    await ValheimGameManager.preserveGameFolder();
+    await ValheimGameManager.clean();
 
     const [pluginsHash, configsHash] = await Promise.all([
       hashFolder(this.BepInExPluginsDir, "sha256", 10),
       hashFolder(this.BepInExConfigDir, "sha256", 10),
     ]);
 
-    await GameManager.restoreGameFolder();
+    await ValheimGameManager.restoreGameFolder();
 
     const online = await this.getOnlineVersionConfig();
     return {
@@ -125,4 +125,4 @@ class VersionManager {
   }
 }
 
-module.exports = new VersionManager();
+module.exports = new ValheimVersionManager();

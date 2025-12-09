@@ -42,7 +42,7 @@ export const InfosProvider = ({ children }) => {
   const actionLoadingRef = useRef(null);
   useEffect(() => {
     if (
-      !window.electron_API?.getInstallationStatut ||
+      !window.electron_Valheim_API?.getInstallationStatut ||
       !window.electron_API?.getInfos
     ) {
       console.warn(
@@ -71,7 +71,8 @@ export const InfosProvider = ({ children }) => {
       try {
         // get installation statut
         if (!actionLoading && actualGameRef.current === "Valheim") {
-          const statut = await window.electron_API.getInstallationStatut();
+          const statut =
+            await window.electron_Valheim_API.getInstallationStatut();
           if (actualGameRef.current !== actualGame) return; // Récupération des infos uniquement si le jeu n'a pas changé
           if (actionLoadingRef.current) return; // Récupération des infos uniquement si l'action n'a pas changé
           setIsInternetConnected(statut?.isInternetConnected || false);

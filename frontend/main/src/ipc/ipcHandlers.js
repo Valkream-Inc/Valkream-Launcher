@@ -7,47 +7,54 @@ const { ipcMain, app, dialog, shell } = require("electron");
 
 const CheckForUpdates = require("./handlers/check-for-updates.js");
 const CheckInfos = require("./handlers/check-infos.js");
-const Install = require("./handlers/install.js");
-const Update = require("./handlers/update.js");
-const Start = require("./handlers/start.js");
-const CustomMods = require("./handlers/custom-mods.js");
-const InstallationStatut = require("./handlers/installation-statut.js");
-const ModsDataHandler = require("./handlers/mods-data.js");
 
 const SettingsManager = require("../manager/settingsManager.js");
 const LauncherManager = require("../manager/launcherManager.js");
-const GameManager = require("../manager/gameManager.js");
-const VersionManager = require("../manager/versionManager.js");
 
 const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
 
-const openAppData = async () => {
-  const path = require("path");
-  const fs = require("fs");
-
-  const appDataPath = path.join(app.getPath("appData"));
-  const valkreamLauncherPath = path.join(appDataPath, "Valkream-Launcher");
-
-  if (fs.existsSync(valkreamLauncherPath))
-    return await shell.openPath(valkreamLauncherPath);
-  else throw new Error("Le dossier AppData n'existe pas !");
-};
-
-const openLink = async (event, url) => {
-  if (
-    !(
-      url.startsWith("http://") ||
-      url.startsWith("https://") ||
-      url.startsWith("steam://")
-    )
-  )
-    throw new Error("URL invalide");
-  await shell.openExternal(url);
-};
+const ValheimIpcHandlers = require("./ValheimIpcHandlers.js");
 
 class IpcHandlers {
+  async openAppData() {
+    const path = require("path");
+    const fs = require("fs");
+
+    const appDataPath = path.join(app.getPath("appData"));
+    const valkreamLauncherPath = path.join(appDataPath, "Valkream-Launcher");
+
+    if (fs.existsSync(valkreamLauncherPath))
+      return await shell.openPath(valkreamLauncherPath);
+    else throw new Error("Le dossier AppData n'existe pas !");
+  }
+
+  async openLink(url) {
+    if (
+      !(
+        url.startsWith("http://") ||
+        url.startsWith("https://") ||
+        url.startsWith("steam://")
+      )
+    )
+      throw new Error("URL invalide");
+    await shell.openExternal(url);
+  }
+
+  async choseFolder() {
+    const result = await dialog.showOpenDialog(MainWindow.getWindow(), {
+      properties: ["openDirectory"],
+      title: "Choisissez le dossier",
+    });
+    if (result.canceled || !result.filePaths.length) return null;
+    return result.filePaths[0];
+  }
+
+  /* Main Fucntions */
   init() {
+    // games ipc
+    ValheimIpcHandlers();
+
     // update  windows
     ipcMain.on("update-window-close", () => UpdateWindow.destroyWindow());
     ipcMain.on("check-for-updates", (event) =>
@@ -81,21 +88,10 @@ class IpcHandlers {
 
     // infos
     ipcMain.handle("get-version:launcher", () => LauncherManager.getVersion());
-    ipcMain.handle(
-      "get-version:game",
-      async () => (await VersionManager.getLocalVersionConfig()).version
-    );
-    ipcMain.handle(
-      "get-infos",
-      async (event, game) => await CheckInfos.get(game)
-    );
-    ipcMain.handle(
-      "get-installation-statut",
-      async () => await InstallationStatut.get()
-    );
+    ipcMain.handle("get-infos", async (event, game) => await CheckInfos(game));
 
     // utils
-    ipcMain.handle("open-link", openLink);
+    ipcMain.handle("open-link", this.openLink.bind(this));
     ipcMain.handle(
       "get-settings",
       async (event, setting) => await SettingsManager.getSetting(setting)
@@ -110,36 +106,14 @@ class IpcHandlers {
       async () =>
         await MainWindow.getWindow().webContents.openDevTools(/*{ mode: "detach" }*/)
     );
-    ipcMain.handle("open-appdata", openAppData);
-    ipcMain.handle(
-      "open-game-folder",
-      async () => await GameManager.openFolder()
-    );
-    ipcMain.handle("uninstall-game", async () => await GameManager.uninstall());
+    ipcMain.handle("open-appdata", this.openAppData.bind(this));
     ipcMain.handle(
       "uninstall-launcher",
       async () => await LauncherManager.uninstall()
     );
 
-    // mods data
-    ipcMain.handle("get-mods-data", async (event, signal) => {
-      return await ModsDataHandler.getModsData(signal);
-    });
-    ipcMain.handle("get-mods-details", async (event, baseMod) => {
-      return await ModsDataHandler.getModDetails(baseMod);
-    });
-    ipcMain.handle("get-hash-data", async (event) => {
-      return await VersionManager.getHash();
-    });
-
-    // installation / start / update / custom mods
-    ipcMain.handle("install", async (event) => await Install.init(event));
-    ipcMain.handle("start", async (event) => await Start.init(event));
-    ipcMain.handle("update", async (event) => await Update.init(event));
-    ipcMain.handle(
-      "custom-mods",
-      async (event) => await CustomMods.action(event)
-    );
+    // Sélection dossier
+    ipcMain.handle("choose-folder", this.choseFolder.bind(this));
   }
 }
 

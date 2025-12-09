@@ -10,7 +10,7 @@ import Wait from "../../../../component/wait/wait.jsx";
 import { useAction } from "../../../../context/action.context.jsx";
 import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
-const ButtonUninstallGame = () => {
+const SevenDtoD_ButtonUninstallGame = () => {
   const { runAction } = useAction();
   const [isWaiting, setIsWaiting] = useState(false);
 
@@ -18,7 +18,7 @@ const ButtonUninstallGame = () => {
     runAction(async () => {
       try {
         setIsWaiting(true);
-        await window.electron_API.uninstallGame();
+        await window.electron_Valheim_API.uninstallGame();
         enqueueSnackbar("Jeu désinstallé !", { variant: "success" });
       } catch (error) {
         console.error(error);
@@ -50,4 +50,4 @@ const ButtonUninstallGame = () => {
   );
 };
 
-export default ButtonUninstallGame;
+export default SevenDtoD_ButtonUninstallGame;

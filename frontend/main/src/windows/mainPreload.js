@@ -34,9 +34,7 @@ contextBridge.exposeInMainWorld("electron_API", {
 
   // infos
   versionLauncher: () => ipcRenderer.invoke("get-version:launcher"),
-  versionGame: () => ipcRenderer.invoke("get-version:game"),
   getInfos: (game) => ipcRenderer.invoke("get-infos", game),
-  getInstallationStatut: () => ipcRenderer.invoke("get-installation-statut"),
 
   // utils
   openLink: (url) => ipcRenderer.invoke("open-link", url),
@@ -44,57 +42,74 @@ contextBridge.exposeInMainWorld("electron_API", {
   setSettings: (key, value) => ipcRenderer.invoke("set-settings", key, value),
   openDevTools: () => ipcRenderer.invoke("main-window-open-devTools"),
   openAppData: () => ipcRenderer.invoke("open-appdata"),
-  openGameFolder: () => ipcRenderer.invoke("open-game-folder"),
-  uninstallGame: () => ipcRenderer.invoke("uninstall-game"),
   uninstallLauncher: () => ipcRenderer.invoke("uninstall-launcher"),
+  chooseFolder: () => ipcRenderer.invoke("choose-folder"),
+});
+
+// Expose these window control functions to the renderer process (your React app).
+// They will be available in the renderer as `window.electron_Valheim_API.install()`, `window.electron_Valheim_API.update()`, etc.
+contextBridge.exposeInMainWorld("electron_Valheim_API", {
+  // infos
+  versionGame: () => ipcRenderer.invoke("Valheim-get-version:game"),
+  getInstallationStatut: () =>
+    ipcRenderer.invoke("Valheim-get-installation-statut"),
+
+  // utils
+  openGameFolder: () => ipcRenderer.invoke("Valheim-open-game-folder"),
+  uninstallGame: () => ipcRenderer.invoke("Valheim-uninstall-game"),
 
   // mods data
-  getModsData: (signal) => ipcRenderer.invoke("get-mods-data", signal),
-  getModDetails: (baseMod) => ipcRenderer.invoke("get-mods-details", baseMod),
-  getHashData: () => ipcRenderer.invoke("get-hash-data"),
+  getModsData: (signal) => ipcRenderer.invoke("Valheim-get-mods-data", signal),
+  getModDetails: (baseMod) =>
+    ipcRenderer.invoke("Valheim-get-mods-details", baseMod),
+  getHashData: () => ipcRenderer.invoke("Valheim-get-hash-data"),
 
   // installation
-  install: () => ipcRenderer.invoke("install"),
+  install: () => ipcRenderer.invoke("Valheim-install"),
   onInstallProgress: (callback) =>
-    ipcRenderer.on("progress-install", (event, data) => callback(data)),
+    ipcRenderer.on("progress-install-valheim", (event, data) => callback(data)),
   onInstallDone: (callback) =>
-    ipcRenderer.on("done-install", (event, data) => callback(data)),
+    ipcRenderer.on("done-install-valheim", (event, data) => callback(data)),
   onInstallError: (callback) =>
-    ipcRenderer.on("error-install", (event, data) => callback(data)),
+    ipcRenderer.on("error-install-valheim", (event, data) => callback(data)),
   removeInstallListeners: () => {
-    ipcRenderer.removeAllListeners("progress-install");
-    ipcRenderer.removeAllListeners("done-install");
-    ipcRenderer.removeAllListeners("error-install");
+    ipcRenderer.removeAllListeners("progress-install-valheim");
+    ipcRenderer.removeAllListeners("done-install-valheim");
+    ipcRenderer.removeAllListeners("error-install-valheim");
   },
 
   // play
-  start: () => ipcRenderer.invoke("start"),
+  start: () => ipcRenderer.invoke("Valheim-start"),
 
   // update
   update: () => ipcRenderer.invoke("update"),
   onUpdateProgress: (callback) =>
-    ipcRenderer.on("progress-update", (event, data) => callback(data)),
+    ipcRenderer.on("progress-update-valheim", (event, data) => callback(data)),
   onUpdateDone: (callback) =>
-    ipcRenderer.on("done-update", (event, data) => callback(data)),
+    ipcRenderer.on("done-update-valheim", (event, data) => callback(data)),
   onUpdateError: (callback) =>
-    ipcRenderer.on("error-update", (event, data) => callback(data)),
+    ipcRenderer.on("error-update-valheim", (event, data) => callback(data)),
   removeUpdateListeners: () => {
-    ipcRenderer.removeAllListeners("progress-update");
-    ipcRenderer.removeAllListeners("done-update");
-    ipcRenderer.removeAllListeners("error-update");
+    ipcRenderer.removeAllListeners("progress-update-valheim");
+    ipcRenderer.removeAllListeners("done-update-valheim");
+    ipcRenderer.removeAllListeners("error-update-valheim");
   },
 
   // custom mods
-  customMods: () => ipcRenderer.invoke("custom-mods"),
+  customMods: () => ipcRenderer.invoke("Valheim-custom-mods"),
   onCustomModsProgress: (callback) =>
-    ipcRenderer.on("progress-custom-mods", (event, data) => callback(data)),
+    ipcRenderer.on("progress-custom-mods-valheim", (event, data) =>
+      callback(data)
+    ),
   onCustomModsDone: (callback) =>
-    ipcRenderer.on("done-custom-mods", (event, data) => callback(data)),
+    ipcRenderer.on("done-custom-mods-valheim", (event, data) => callback(data)),
   onCustomModsError: (callback) =>
-    ipcRenderer.on("error-custom-mods", (event, data) => callback(data)),
+    ipcRenderer.on("error-custom-mods-valheim", (event, data) =>
+      callback(data)
+    ),
   removeCustomModsListeners: () => {
-    ipcRenderer.removeAllListeners("progress-custom-mods");
-    ipcRenderer.removeAllListeners("done-custom-mods");
-    ipcRenderer.removeAllListeners("error-custom-mods");
+    ipcRenderer.removeAllListeners("progress-custom-mods-valheim");
+    ipcRenderer.removeAllListeners("done-custom-mods-valheim");
+    ipcRenderer.removeAllListeners("error-custom-mods-valheim");
   },
 });

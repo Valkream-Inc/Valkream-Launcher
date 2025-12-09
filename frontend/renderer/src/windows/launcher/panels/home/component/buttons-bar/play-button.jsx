@@ -58,20 +58,20 @@ export default function PlayButton() {
   };
 
   const install = async () => {
-    const cleanup = () => window.electron_API.removeInstallListeners();
+    const cleanup = () => window.electron_Valheim_API.removeInstallListeners();
 
     try {
-      window.electron_API.onInstallProgress(callback);
-      window.electron_API.onInstallError((data) => {
+      window.electron_Valheim_API.onInstallProgress(callback);
+      window.electron_Valheim_API.onInstallError((data) => {
         error("l'installation", data.message);
         cleanup();
       });
-      window.electron_API.onInstallDone(() => {
+      window.electron_Valheim_API.onInstallDone(() => {
         cleanup();
         enqueueSnackbar("Installation terminée !", { variant: "success" });
       });
 
-      await window.electron_API.install();
+      await window.electron_Valheim_API.install();
       return;
     } catch (err) {
       cleanup();
@@ -87,7 +87,7 @@ export default function PlayButton() {
       );
 
       if (launcherBehavior === "hide") pause();
-      await window.electron_API.start();
+      await window.electron_Valheim_API.start();
       if (launcherBehavior === "hide") play();
     } catch (err) {
       console.error("Erreur lors du démarrage du jeu :", err);
@@ -97,20 +97,20 @@ export default function PlayButton() {
   const handleStart = () => runAction(start, "start");
 
   const update = async () => {
-    const cleanup = () => window.electron_API.removeUpdateListeners();
+    const cleanup = () => window.electron_Valheim_API.removeUpdateListeners();
 
     try {
-      window.electron_API.onUpdateProgress(callback);
-      window.electron_API.onUpdateError((data) => {
+      window.electron_Valheim_API.onUpdateProgress(callback);
+      window.electron_Valheim_API.onUpdateError((data) => {
         error("la mise à jour", data.message);
         cleanup();
       });
-      window.electron_API.onUpdateDone(() => {
+      window.electron_Valheim_API.onUpdateDone(() => {
         cleanup();
         enqueueSnackbar("Mise à jour terminée !", { variant: "success" });
       });
 
-      await window.electron_API.update();
+      await window.electron_Valheim_API.update();
       return;
     } catch (err) {
       cleanup();
@@ -122,23 +122,24 @@ export default function PlayButton() {
   const modsRunningRef = useRef(false);
   const customMods = async () => {
     modsRunningRef.current = true;
-    const cleanup = () => window.electron_API.removeCustomModsListeners();
+    const cleanup = () =>
+      window.electron_Valheim_API.removeCustomModsListeners();
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
     try {
-      window.electron_API.onCustomModsProgress(callback);
-      window.electron_API.onCustomModsError((data) => {
+      window.electron_Valheim_API.onCustomModsProgress(callback);
+      window.electron_Valheim_API.onCustomModsError((data) => {
         error("l'actualisation des mods", data.message);
         cleanup();
       });
-      window.electron_API.onCustomModsDone(() => {
+      window.electron_Valheim_API.onCustomModsDone(() => {
         cleanup();
         enqueueSnackbar("Actualisation des mods terminée !", {
           variant: "success",
         });
       });
 
-      await window.electron_API.customMods();
+      await window.electron_Valheim_API.customMods();
     } catch (err) {
       cleanup();
     } finally {

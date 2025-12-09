@@ -8,9 +8,9 @@ import { enqueueSnackbar } from "notistack";
 import React from "react";
 import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
-const ButtonOpenGame = () => {
+const Valheim_ButtonOpenGame = () => {
   const handleClick = async () =>
-    await window.electron_API
+    await window.electron_Valheim_API
       .openGameFolder()
       .then(() => {
         enqueueSnackbar("Dossier du jeu ouvert !", { variant: "success" });
@@ -38,4 +38,4 @@ const ButtonOpenGame = () => {
   );
 };
 
-export default ButtonOpenGame;
+export default Valheim_ButtonOpenGame;

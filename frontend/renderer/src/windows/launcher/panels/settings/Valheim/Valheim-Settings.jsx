@@ -13,8 +13,6 @@ import SettingsTitle from "../component/settings-tittle/settings-title.jsx";
 
 import ButtonDebug from "../settings-list/global/button-debug.jsx";
 import ButtonOpenAppData from "../settings-list/global/button-open-appdata.jsx";
-import ButtonOpenGame from "../settings-list/global/button-open-game.jsx";
-import ButtonUninstallGame from "../settings-list/global/button-uninstall-game.jsx";
 import ButtonUninstallGlobal from "../settings-list/global/button-uninstall-global.jsx";
 import SelectLauncherBackgroundType from "../settings-list/global/select-launcher-background-type.jsx";
 import SelectLauncherTheme from "../settings-list/global/select-launcher-theme.jsx";
@@ -22,6 +20,8 @@ import ToggleBeta from "../settings-list/global/toggle-beta.jsx";
 import ToggleDev from "../settings-list/global/toggle-dev.jsx";
 import ToggleMusic from "../settings-list/global/toggle-music.jsx";
 
+import Valheim_ButtonOpenGame from "../settings-list/Valheim/Valheim-button-open-game.jsx";
+import Valheim_ButtonUninstallGame from "../settings-list/Valheim/Valheim-button-uninstall-game.jsx";
 import Valheim_SelectLauncherBehavior from "../settings-list/Valheim/Valheim-select-launcher-behavior.jsx";
 import Valheim_ToggleAdminMods from "../settings-list/Valheim/Valheim-toggle-admin-mods.jsx";
 import Valheim_ToggleBoostFpsMods from "../settings-list/Valheim/Valheim-toggle-boostfps-mods.jsx";
@@ -132,8 +132,8 @@ function ValheimSettings({
       {(isDevActive || isSpecialOptionVisible) && (
         <SettingsTab id="dev" activeTab={activeTab}>
           <SettingsTitle warn={true}>Dev / Debug</SettingsTitle>
-          <ButtonUninstallGame />
-          <ButtonOpenGame />
+          <Valheim_ButtonUninstallGame />
+          <Valheim_ButtonOpenGame />
 
           <ButtonOpenAppData />
           <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>

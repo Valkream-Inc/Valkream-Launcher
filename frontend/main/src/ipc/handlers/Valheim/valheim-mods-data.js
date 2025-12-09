@@ -5,17 +5,18 @@
 
 const axios = require("axios");
 
-const SettingsManager = require("../../manager/settingsManager");
-const ThunderstoreManager = require("../../manager/thunderstoreManager");
-const VersionManager = require("../../manager/versionManager");
+const SettingsManager = require("../../../manager/settingsManager");
 
-class ModsDataHandler {
+const ValheimThunderstoreManager = require("../../../manager/Valheim/ValheimThunderstoreManager");
+const ValheimVersionManager = require("../../../manager/Valheim/ValheimVersionManager");
+
+class ValheimModsDataHandler {
   #getModId = (modName) => modName.split("-").slice(0, 2).join("-");
   #getModVersion = (modName) => modName.split("-").slice(2).join("-");
 
   async getModsData(signal) {
-    const onlineInfo = await VersionManager.getOnlineVersionConfig();
-    const localInfo = await VersionManager.getLocalVersionConfig();
+    const onlineInfo = await ValheimVersionManager.getOnlineVersionConfig();
+    const localInfo = await ValheimVersionManager.getLocalVersionConfig();
 
     const onlineValkreamVersion = onlineInfo?.modpack?.version || "";
     const localValkreamVersion = localInfo?.modpack?.version || "";
@@ -23,7 +24,8 @@ class ModsDataHandler {
     const localBepInExVersion = localInfo?.bepinex?.version || "";
     const adminMods = onlineInfo?.modpack?.admin_mods || [];
 
-    const installedModsRaw = await ThunderstoreManager.getInstalledMods();
+    const installedModsRaw =
+      await ValheimThunderstoreManager.getInstalledMods();
     const installedMods = installedModsRaw.filter((m) => !m.endsWith(".dll"));
 
     let onlineMods = [];
@@ -156,4 +158,4 @@ class ModsDataHandler {
   }
 }
 
-module.exports = new ModsDataHandler();
+module.exports = new ValheimModsDataHandler();
