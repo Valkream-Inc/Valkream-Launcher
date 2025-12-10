@@ -27,20 +27,16 @@ class ValheimVersionManager {
     this.gameVersionFilePath = ValheimFilesManager.gameVersionFilePath();
   }
 
-  async updateOnlineVersionConfig(force = false) {
+  async getOnlineVersionConfig(force = false) {
     await this.init();
     if (!force && this.onlineVersionConfig) return this.onlineVersionConfig;
 
-    if (await InfosManager.getIsServerReachableFromInternal()) {
+    if (await InfosManager.getIsServerReachable()) {
       const { data } = await axios.get(this.gameVersionFileLink);
       this.onlineVersionConfig = yaml.parse(data.trim());
     }
-    return this.onlineVersionConfig;
-  }
 
-  async getOnlineVersionConfig() {
-    await this.init();
-    return this.onlineVersionConfig || this.updateOnlineVersionConfig();
+    return this.onlineVersionConfig;
   }
 
   async getLocalVersionConfig(force = false) {

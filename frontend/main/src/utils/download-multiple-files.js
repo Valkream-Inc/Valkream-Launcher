@@ -4,7 +4,7 @@
  */
 
 const axios = require("axios");
-const { downloadZip } = require("./function/dowloadZip");
+const { downloadFile } = require("./function/dowloadFile");
 
 const pLimit = require("./p-limit");
 const throttle = require("./throttle");
@@ -53,7 +53,7 @@ const dowloadMultiplefiles = async (
   // 🔸 Étape 4 : Lancer les téléchargement avec suivi
   const downloads = files.map((file, index) =>
     limit(async () => {
-      await downloadZip(file.url, file.destPath, (downloadedBytes) => {
+      await downloadFile(file.url, file.destPath, (downloadedBytes) => {
         downloaded[index] = downloadedBytes;
         downloadedGlobal = downloaded.reduce((a, b) => a + b, 0);
         sendProgressThrottled();

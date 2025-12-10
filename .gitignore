@@ -4,7 +4,12 @@
 **/temp/
 **/dist/
 
+
+# backend/public/
 backend/public/launcher
-backend/public/game/*/latest/build-game-*.zip
-backend/public/game/*/latest/BepInEx-*.zip
+
+backend/public/game/Valheim/latest/build-game-*.zip
+backend/public/game/Valheim/latest/BepInEx-*.zip
+
 backend/public/game/SevenDtoD/latest/files
+backend/public/game/SevenDtoD/latest/beta-files

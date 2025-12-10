@@ -31,7 +31,7 @@ class ValheimThunderstoreManager {
     this.extractManifestPath = ValheimFilesManager.extractManifestPath();
     this.installedManifestPath = ValheimFilesManager.installedManifestPath();
 
-    if (await InfosManager.getIsServerReachableFromInternal()) {
+    if (await InfosManager.getIsServerReachable()) {
       this.modpackZipLink = await ValheimLinksManager.modpackZipLink();
       this.modpackZipPath = ValheimFilesManager.modpackZipPath();
     }

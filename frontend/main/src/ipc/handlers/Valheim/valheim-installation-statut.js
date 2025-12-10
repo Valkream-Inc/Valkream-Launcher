@@ -13,8 +13,8 @@ const ValheimVersionManager = require("../../../manager/Valheim/ValheimVersionMa
 async function ValheimInstallationStatut() {
   // --- 1. Connectivité ---
   const [isServerReachable, isInternetConnected] = await Promise.all([
-    InfosManager.getIsServerReachable(),
-    InfosManager.getIsInternetConnected(),
+    InfosManager.getIsServerReachable(undefined, true),
+    InfosManager.getIsInternetConnected(undefined, true),
   ]);
 
   // --- 2. Infos locales & installation ---
@@ -83,7 +83,7 @@ async function ValheimInstallationStatut() {
   let isMajorUpdate = false;
 
   if (isServerReachable) {
-    onlineVersionConfig = await ValheimVersionManager.updateOnlineVersionConfig(
+    onlineVersionConfig = await ValheimVersionManager.getOnlineVersionConfig(
       true
     );
 

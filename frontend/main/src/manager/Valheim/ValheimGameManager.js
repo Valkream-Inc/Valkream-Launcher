@@ -27,7 +27,7 @@ const {
 
 class ValheimGameManager {
   async init() {
-    if (await InfosManager.getIsServerReachableFromInternal()) {
+    if (await InfosManager.getIsServerReachable()) {
       this.gameZipLink = await ValheimLinksManager.gameZipLink();
       this.gameZipPath = ValheimFilesManager.gameZipPath();
 

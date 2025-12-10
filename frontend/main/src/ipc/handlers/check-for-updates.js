@@ -30,7 +30,7 @@ class CheckForUpdates {
         true
       );
 
-    if (!(await InfosManager.getIsServerReachableFromInternal()))
+    if (!(await InfosManager.getIsServerReachable()))
       return this.onError(
         "no_internet",
         "❌ Pas de connexion au serveur. Impossible de vérifier les mises à jour."

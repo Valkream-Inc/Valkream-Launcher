@@ -13,16 +13,12 @@ const LinksManager = require("./linksManager");
 class InfosManager {
   constructor() {
     this.isServerReachable = null;
+    this.isInternetConnected = null;
   }
 
-  async getIsServerReachableFromInternal(forceRefresh = false) {
-    if (this.isServerReachable === null || forceRefresh) {
-      await this.getIsServerReachable();
-    }
-    return this.isServerReachable;
-  }
+  async getIsInternetConnected(hostname = "google.com", force = false) {
+    if (!force && this.isInternetConnected) return this.isInternetConnected;
 
-  async getIsInternetConnected(hostname = "google.com") {
     return new Promise((resolve) => {
       dns.lookup(hostname, (err) => {
         resolve(!(err && err.code === "ENOTFOUND"));
@@ -30,7 +26,9 @@ class InfosManager {
     });
   }
 
-  async getIsServerReachable(url = baseUrl) {
+  async getIsServerReachable(url = baseUrl, force = false) {
+    if (!force && this.isServerReachable) return this.isServerReachable;
+
     try {
       await axios.get(url, { timeout: 3000 });
       this.isServerReachable = true;
@@ -44,7 +42,7 @@ class InfosManager {
 
   async getEvent(game) {
     try {
-      if (!(await this.getIsServerReachableFromInternal())) return false;
+      if (!(await this.getIsServerReachable())) return false;
       const res = await axios.get(LinksManager.eventUrl(game), {
         timeout: 3000,
       });
@@ -57,7 +55,7 @@ class InfosManager {
 
   async getMaintenance(game) {
     try {
-      if (!(await this.getIsServerReachableFromInternal())) return false;
+      if (!(await this.getIsServerReachable())) return false;
       const res = await axios.get(LinksManager.maintenanceUrl(game), {
         timeout: 3000,
       });

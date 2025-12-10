@@ -11,12 +11,12 @@ const { Throttle } = require("stream-throttle");
 const { formatBytes } = require("./formatBytes");
 const { consoleStreamAnswer } = require("./consoleStreamAnswer");
 
-const downloadZip = (
+const downloadFile = (
   downloadUrl,
   destPath,
   callback = (downloadedBytes, totalBytes, percent, speed) =>
     consoleStreamAnswer(
-      `📥 Téléchargement du zip ${path.basename(
+      `📥 Téléchargement du fichier ${path.basename(
         destPath
       )}: ${percent}% (${formatBytes(downloadedBytes)} / ${formatBytes(
         totalBytes
@@ -54,4 +54,4 @@ const downloadZip = (
   });
 };
 
-module.exports = { downloadZip };
+module.exports = { downloadFile };
