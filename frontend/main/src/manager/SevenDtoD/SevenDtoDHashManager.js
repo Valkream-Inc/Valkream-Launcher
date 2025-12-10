@@ -70,6 +70,16 @@ class SevenDtoDHashManager {
       );
     }
   }
+
+  async isUpToDate() {
+    this.init();
+    const [actual, online] = await Promise.all([
+      this.getActualHash(),
+      this.getOnlineHash(),
+    ]);
+
+    return actual === online;
+  }
 }
 
 module.exports = new SevenDtoDHashManager();

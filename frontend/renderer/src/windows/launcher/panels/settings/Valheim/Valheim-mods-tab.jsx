@@ -70,7 +70,7 @@ const Valheim_ModsTab = forwardRef((props, ref) => {
 
       try {
         const modpackInfo = await runAction(
-          () => window.electron_API.getModsData(),
+          () => window.electron_Valheim_API.getModsData(),
           "get-mods-data"
         );
         const allMods = modpackInfo.mods || [];
@@ -81,7 +81,9 @@ const Valheim_ModsTab = forwardRef((props, ref) => {
           if (abortController.signal.aborted) return;
 
           try {
-            const modDetails = await window.electron_API.getModDetails(baseMod);
+            const modDetails = await window.electron_Valheim_API.getModDetails(
+              baseMod
+            );
             const mod = { ...baseMod, ...modDetails };
             if (abortController.signal.aborted) return;
 
@@ -125,7 +127,7 @@ const Valheim_ModsTab = forwardRef((props, ref) => {
 
         if (!abortController.signal.aborted && isDevActive) {
           const hash = await runAction(
-            () => window.electron_API.getHashData(),
+            () => window.electron_Valheim_API.getHashData(),
             "get-hash-data"
           );
           setHashData(hash);

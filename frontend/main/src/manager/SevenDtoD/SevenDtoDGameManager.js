@@ -3,6 +3,10 @@
  * @license MIT-NC
  */
 
-class SevenDtoDGameManager {}
+class SevenDtoDGameManager {
+  install() {}
+  uninstall() {}
+  update() {}
+}
 
 module.exports = new SevenDtoDGameManager();
