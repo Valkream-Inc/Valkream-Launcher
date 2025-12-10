@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT-NC
+ */
+
 const express = require("express");
 const log = require("./components/log.component");
 

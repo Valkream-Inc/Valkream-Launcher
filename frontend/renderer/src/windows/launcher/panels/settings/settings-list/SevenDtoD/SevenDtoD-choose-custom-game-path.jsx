@@ -1,6 +1,6 @@
 /**
  * @author Valkream Team
- * @license MIT - https://opensource.org/licenses/MIT
+ * @license MIT-NC
  */
 
 import { Box, Button, TextField } from "@mui/material";

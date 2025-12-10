@@ -1,6 +1,6 @@
 /**
  * @author Valkream Team
- * @license MIT - https://opensource.org/licenses/MIT
+ * @license MIT-NC
  */
 
 import { createContext, useState, useContext, useEffect } from "react";

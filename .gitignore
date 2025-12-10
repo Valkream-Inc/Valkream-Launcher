@@ -7,3 +7,4 @@
 backend/public/launcher
 backend/public/game/*/latest/build-game-*.zip
 backend/public/game/*/latest/BepInEx-*.zip
+backend/public/game/SevenDtoD/latest/files
