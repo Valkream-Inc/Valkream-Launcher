@@ -9,12 +9,10 @@ class SevenDtoDLinksManager {
   async gameHashUrl() {
     const SettingsManager = require("../settingsManager");
     const isBeta = await SettingsManager.getSetting("betaEnabled");
-    return `${baseUrl}/game/SevenDtoD/latest/latest${
-      isBeta ? ".beta" : ""
-    }.json`;
+    return `${baseUrl}/game/SevenDtoD/latest/mods${isBeta ? ".beta" : ""}.json`;
   }
 
-  async gameFileBaseUrl() {
+  async modsFileBaseUrl() {
     const SettingsManager = require("../settingsManager");
     const isBeta = await SettingsManager.getSetting("betaEnabled");
     return `${baseUrl}/game/SevenDtoD/latest/${

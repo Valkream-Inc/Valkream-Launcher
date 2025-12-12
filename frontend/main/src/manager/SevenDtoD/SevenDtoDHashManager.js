@@ -60,17 +60,6 @@ class SevenDtoDHashManager {
     }
   }
 
-  async uninstall() {
-    this.init();
-    try {
-      await fs.remove(this.actualHashFilePath);
-    } catch {
-      throw new Error(
-        `Impossible de supprimer le hash du jeu : ${err.message}`
-      );
-    }
-  }
-
   async isUpToDate() {
     this.init();
     const [actual, online] = await Promise.all([
