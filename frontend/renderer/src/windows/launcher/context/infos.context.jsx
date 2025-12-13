@@ -67,12 +67,16 @@ export const InfosProvider = ({ children }) => {
       });
     }
 
+    const GAMES_APIS = {
+      Valheim: window.electron_Valheim_API,
+      SevenDtoD: window.electron_SevenDtoD_API,
+    };
+
     const getAllInfos = async () => {
       try {
         // get installation statut
-        if (!actionLoading && actualGameRef.current === "Valheim") {
-          const statut =
-            await window.electron_Valheim_API.getInstallationStatut();
+        if (!actionLoading && GAMES_APIS[actualGame]) {
+          const statut = await GAMES_APIS[actualGame].getInstallationStatut();
           if (actualGameRef.current !== actualGame) return; // Récupération des infos uniquement si le jeu n'a pas changé
           if (actionLoadingRef.current) return; // Récupération des infos uniquement si l'action n'a pas changé
           setIsInternetConnected(statut?.isInternetConnected || false);

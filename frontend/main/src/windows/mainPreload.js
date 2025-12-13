@@ -113,3 +113,14 @@ contextBridge.exposeInMainWorld("electron_Valheim_API", {
     ipcRenderer.removeAllListeners("error-custom-mods-valheim");
   },
 });
+
+// Expose these window control functions to the renderer process (your React app).
+// They will be available in the renderer as `window.electron_SevenDtoD_API.install()`, `window.electron_SevenDtoD_API.update()`, etc.
+contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
+  // infos
+  getInstallationStatut: () =>
+    ipcRenderer.invoke("SevenDtoD-get-installation-statut"),
+  // mods data
+  getModsData: () => ipcRenderer.invoke("SevenDtoD-get-mods-data"),
+  getHashData: () => ipcRenderer.invoke("SevenDtoD-get-hash-data"),
+});

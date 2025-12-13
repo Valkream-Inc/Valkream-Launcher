@@ -140,6 +140,7 @@ class SevenDtoDModsManager {
         movedFiles.push({
           oldPath: deletedOldPaths[i],
           newPath: addedNewPaths[i],
+          hash: hash,
         });
       }
     }

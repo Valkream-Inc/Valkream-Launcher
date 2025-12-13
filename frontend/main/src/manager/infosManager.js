@@ -17,7 +17,8 @@ class InfosManager {
   }
 
   async getIsInternetConnected(hostname = "google.com", force = false) {
-    if (!force && this.isInternetConnected) return this.isInternetConnected;
+    if (!force && this.isInternetConnected !== null)
+      return this.isInternetConnected;
 
     return new Promise((resolve) => {
       dns.lookup(hostname, (err) => {
@@ -27,7 +28,8 @@ class InfosManager {
   }
 
   async getIsServerReachable(url = baseUrl, force = false) {
-    if (!force && this.isServerReachable) return this.isServerReachable;
+    if (!force && this.isServerReachable !== null)
+      return this.isServerReachable;
 
     try {
       await axios.get(url, { timeout: 3000 });

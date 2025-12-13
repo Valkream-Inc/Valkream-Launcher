@@ -15,6 +15,7 @@ const MainWindow = require("../windows/mainWindow.js");
 const UpdateWindow = require("../windows/updateWindow.js");
 
 const ValheimIpcHandlers = require("./ValheimIpcHandlers.js");
+const SevenDtoDIpcHandlers = require("./SevenDtoDIpcHandlers.js");
 
 class IpcHandlers {
   async openAppData() {
@@ -54,6 +55,7 @@ class IpcHandlers {
   init() {
     // games ipc
     ValheimIpcHandlers();
+    SevenDtoDIpcHandlers();
 
     // update  windows
     ipcMain.on("update-window-close", () => UpdateWindow.destroyWindow());

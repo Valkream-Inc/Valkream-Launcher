@@ -16,38 +16,42 @@ const SevenDtoDLinksManager = require("./SevenDtoDLinksManager.js");
 
 class SevenDtoDHashManager {
   init() {
+    this.localHash = null;
+    this.onlineHash = null;
+
     this.modsPath = SevenDtoDDirsManager.modsPath();
     this.actualHashFilePath = SevenDtoDFilesManager.actualHashFilePath();
-    this.onlineHashUrl = SevenDtoDLinksManager.gameHashUrl();
   }
 
   async getActualHash() {
     this.init();
     const content = await fs.readFile(this.actualHashFilePath, "utf8");
-    return JSON.parse(content);
+    return JSON.parse(content) || {};
+  }
+
+  async getNewHash(force = false) {
+    this.init();
+    if (!force && this.localHash !== null) return this.localHash;
+    return (await hashFolderWithArborescence(this.modsPath)) || {};
   }
 
   async getOnlineHash(force = false) {
     this.init();
-    if (!force && this.onlineHash) return this.onlineHash;
-
+    if (!force && this.onlineHash !== null) return this.onlineHash;
     if (await InfosManager.getIsServerReachable()) {
-      const { data } = await axios.get(this.onlineHashUrl);
-      this.onlineHash = JSON.parse(data.trim());
+      const { data } = await axios.get(
+        await SevenDtoDLinksManager.gameHashUrl()
+      );
+      this.onlineHash = data;
     }
 
-    return this.onlineHash;
+    return this.onlineHash || {};
   }
 
   async updateActualHash(content) {
     this.init();
     const json = JSON.stringify(content, null, 2);
     await fs.writeFile(this.actualHashFilePath, json, "utf8");
-  }
-
-  async getNewHash() {
-    this.init();
-    return await hashFolderWithArborescence(this.modsPath());
   }
 
   async getIsInstalled() {
