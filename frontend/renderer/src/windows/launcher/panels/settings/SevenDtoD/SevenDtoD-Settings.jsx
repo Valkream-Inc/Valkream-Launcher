@@ -6,10 +6,10 @@
 import {
   NavButton,
   NavSettings,
-} from "../components/nav-settings/nav-settings.jsx";
-import SettingsBox from "../components/settings-box/settings-box.jsx";
-import SettingsTab from "../components/settings-tab/settings-tab.js";
-import SettingsTitle from "../components/settings-tittle/settings-title.js";
+} from "../component/nav-settings/nav-settings.jsx";
+import SettingsBox from "../component/settings-box/settings-box.jsx";
+import SettingsTab from "../component/settings-tab/settings-tab.jsx";
+import SettingsTitle from "../component/settings-tittle/settings-title.jsx";
 
 import ButtonDebug from "../settings-list/global/button-debug.jsx";
 import ButtonOpenAppData from "../settings-list/global/button-open-appdata.jsx";
