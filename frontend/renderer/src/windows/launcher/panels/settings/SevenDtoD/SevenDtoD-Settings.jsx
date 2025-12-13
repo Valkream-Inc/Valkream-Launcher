@@ -82,8 +82,11 @@ function SevenDtoDSettings({
       >
         <NavButton id="general" label="General" active={false} />
         <NavButton id="launcher" label="Launcher" active={false} />
-        <NavButton id="game" label="Game" active={false} />
-        <NavButton id="mods" label="Mods" active={false} />
+        <NavButton id="game" label="Game" active={true} />
+
+        {isSpecialOptionVisible && (
+          <NavButton id="mods" label="Mods" active={false} />
+        )}
 
         {(isDevActive || isSpecialOptionVisible) && (
           <NavButton id="dev" label="Dev" active={false} />
