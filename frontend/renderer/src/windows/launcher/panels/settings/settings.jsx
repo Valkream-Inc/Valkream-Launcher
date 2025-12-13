@@ -19,7 +19,7 @@ function Settings() {
   const [isSpecialOptionVisible, setIsSpecialOptionVisible] = useState(false);
   const [isDevActive, setIsDevActive] = useState(false);
 
-  const gameTabRef = useRef();
+  const modsTabRef = useRef();
 
   const toogleSpecialOption = () => {
     enqueueSnackbar(
@@ -55,21 +55,21 @@ function Settings() {
   if (isConfirmSpecialOptionVisible) return <EnabledSpecialOption />;
 
   const changeTab = (tab) => {
-    if (gameTabRef.current) {
-      gameTabRef.current.stop();
+    if (modsTabRef.current) {
+      modsTabRef.current.stop();
     }
 
     setActiveTab(tab);
 
-    if (tab === "mods" && gameTabRef.current) {
-      gameTabRef.current.reload();
+    if (tab === "mods" && modsTabRef.current) {
+      modsTabRef.current.reload();
     }
   };
 
   function returnToHome() {
-    if (gameTabRef.current) {
-      gameTabRef.current.stop();
-      gameTabRef.current.freeze();
+    if (modsTabRef.current) {
+      modsTabRef.current.stop();
+      modsTabRef.current.freeze();
     }
   }
 
@@ -88,7 +88,7 @@ function Settings() {
       {actualGame === "Valheim" && (
         <ValheimSettings
           returnToHome={returnToHome}
-          gameTabRef={gameTabRef}
+          modsTabRef={modsTabRef}
           changeTab={changeTab}
           activeTab={activeTab}
           ToggleIsConfirmSpecialOptionVisible={
@@ -102,6 +102,7 @@ function Settings() {
       {actualGame === "SevenDtoD" && (
         <SevenDtoDSettings
           returnToHome={returnToHome}
+          modsTabRef={modsTabRef}
           changeTab={changeTab}
           activeTab={activeTab}
           ToggleIsConfirmSpecialOptionVisible={

@@ -6,10 +6,10 @@
 import {
   NavButton,
   NavSettings,
-} from "../component/nav-settings/nav-settings.jsx";
-import SettingsBox from "../component/settings-box/settings-box.jsx";
-import SettingsTab from "../component/settings-tab/settings-tab.jsx";
-import SettingsTitle from "../component/settings-tittle/settings-title.jsx";
+} from "../components/nav-settings/nav-settings.jsx";
+import SettingsBox from "../components/settings-box/settings-box.jsx";
+import SettingsTab from "../components/settings-tab/settings-tab.js";
+import SettingsTitle from "../components/settings-tittle/settings-title.js";
 
 import ButtonDebug from "../settings-list/global/button-debug.jsx";
 import ButtonOpenAppData from "../settings-list/global/button-open-appdata.jsx";
@@ -23,6 +23,7 @@ import ToggleMusic from "../settings-list/global/toggle-music.jsx";
 import SevenDtoD_ButtonOpenGame from "../settings-list/SevenDtoD/SevenDtoD-button-open-game.jsx";
 import SevenDtoD_ButtonUninstallGame from "../settings-list/SevenDtoD/SevenDtoD-button-uninstall-game.jsx";
 import SevenDtoD_ChooseCustomGamePath from "../settings-list/SevenDtoD/SevenDtoD-choose-custom-game-path.jsx";
+import SecenDtoD_ModsTab from "./SecenDtoD-mods-tab.jsx";
 
 function Presentation() {
   return (
@@ -62,6 +63,7 @@ function Presentation() {
 
 function SevenDtoDSettings({
   returnToHome,
+  modsTabRef,
   changeTab,
   activeTab,
   ToggleIsConfirmSpecialOptionVisible,
@@ -81,6 +83,7 @@ function SevenDtoDSettings({
         <NavButton id="general" label="General" active={false} />
         <NavButton id="launcher" label="Launcher" active={false} />
         <NavButton id="game" label="Game" active={false} />
+        <NavButton id="mods" label="Mods" active={false} />
 
         {(isDevActive || isSpecialOptionVisible) && (
           <NavButton id="dev" label="Dev" active={false} />
@@ -111,6 +114,16 @@ function SevenDtoDSettings({
         <SettingsTitle warn={false}>Game</SettingsTitle>
         <SevenDtoD_ChooseCustomGamePath />
       </SettingsTab>
+
+      {isSpecialOptionVisible && (
+        <SettingsTab id="mods" activeTab={activeTab}>
+          <SettingsTitle warn={false}>Mods</SettingsTitle>
+          <SecenDtoD_ModsTab
+            ref={modsTabRef}
+            isDevActive={isDevActive || isSpecialOptionVisible}
+          />
+        </SettingsTab>
+      )}
 
       {(isDevActive || isSpecialOptionVisible) && (
         <SettingsTab id="dev" activeTab={activeTab}>

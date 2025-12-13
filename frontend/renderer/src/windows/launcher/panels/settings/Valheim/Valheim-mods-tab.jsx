@@ -10,10 +10,10 @@ import React, {
   useState, // You must import useEffect to handle side effects
 } from "react";
 import Wait from "../../../component/wait/wait.jsx";
-import HashChecks from "../component/hash-checks.jsx";
-import ModCard from "../component/mod-card.jsx";
-import Legend from "../component/mods-legend.jsx";
-import SettingsTitle from "../component/settings-tittle/settings-title.jsx";
+import HashChecks from "./components/hash-checks.jsx";
+import ModCard from "./components/mod-card.jsx";
+import Legend from "./components/mods-legend.jsx";
+import SettingsTitle from "../components/settings-tittle/settings-title.js";
 
 import { useAction } from "../../../context/action.context.jsx";
 
