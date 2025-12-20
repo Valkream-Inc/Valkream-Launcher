@@ -9,6 +9,7 @@ const { GameDig } = require("gamedig");
 
 const { baseUrl, serversInfos } = require("../constants");
 const LinksManager = require("./linksManager");
+const noCache = require("../constants/noCaheHeader");
 
 class InfosManager {
   constructor() {
@@ -32,7 +33,7 @@ class InfosManager {
       return this.isServerReachable;
 
     try {
-      await axios.get(url, { timeout: 3000 });
+      await axios.get(url, { timeout: 3000, ...noCache });
       this.isServerReachable = true;
       return true;
     } catch (error) {
@@ -47,6 +48,7 @@ class InfosManager {
       if (!(await this.getIsServerReachable())) return false;
       const res = await axios.get(LinksManager.eventUrl(game), {
         timeout: 3000,
+        ...noCache,
       });
       return res.data;
     } catch (err) {
@@ -60,6 +62,7 @@ class InfosManager {
       if (!(await this.getIsServerReachable())) return false;
       const res = await axios.get(LinksManager.maintenanceUrl(game), {
         timeout: 3000,
+        ...noCache,
       });
       return res.data;
     } catch (err) {

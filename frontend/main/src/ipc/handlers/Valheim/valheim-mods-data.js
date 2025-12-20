@@ -124,7 +124,7 @@ class ValheimModsDataHandler {
       );
       const latest = res.data?.latest;
 
-      const onlineMods = await VersionManager.getOnlineVersionConfig();
+      const onlineMods = await ValheimVersionManager.getOnlineVersionConfig();
       const onlineMod = onlineMods?.modpack?.dependencies?.find((m) =>
         m.startsWith(`${author}-${name}-`)
       );

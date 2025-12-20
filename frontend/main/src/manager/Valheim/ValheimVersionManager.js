@@ -12,6 +12,7 @@ const ValheimDirsManager = require("./ValheimDirsManager.js");
 const ValheimFilesManager = require("./ValheimFilesManager.js");
 const ValheimLinksManager = require("./ValheimLinksManager.js");
 const InfosManager = require("../infosManager.js");
+const noCache = require("../../constants/noCaheHeader.js");
 
 class ValheimVersionManager {
   constructor() {
@@ -32,7 +33,7 @@ class ValheimVersionManager {
     if (!force && this.onlineVersionConfig) return this.onlineVersionConfig;
 
     if (await InfosManager.getIsServerReachable()) {
-      const { data } = await axios.get(this.gameVersionFileLink);
+      const { data } = await axios.get(this.gameVersionFileLink, noCache);
       this.onlineVersionConfig = yaml.parse(data.trim());
     }
 

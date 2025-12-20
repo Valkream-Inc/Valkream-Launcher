@@ -13,6 +13,7 @@ const InfosManager = require("../infosManager.js");
 const SevenDtoDDirsManager = require("./SevenDtoDDirsManager.js");
 const SevenDtoDFilesManager = require("./SevenDtoDFilesManager.js");
 const SevenDtoDLinksManager = require("./SevenDtoDLinksManager.js");
+const noCache = require("../../constants/noCaheHeader.js");
 
 class SevenDtoDHashManager {
   init() {
@@ -40,7 +41,8 @@ class SevenDtoDHashManager {
     if (!force && this.onlineHash !== null) return this.onlineHash;
     if (await InfosManager.getIsServerReachable()) {
       const { data } = await axios.get(
-        await SevenDtoDLinksManager.gameHashUrl()
+        await SevenDtoDLinksManager.gameHashUrl(),
+        noCache
       );
       this.onlineHash = data;
     }
