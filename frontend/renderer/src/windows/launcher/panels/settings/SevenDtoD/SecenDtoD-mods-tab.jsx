@@ -3,21 +3,22 @@
  * @license MIT-NC
  */
 
-import React, { forwardRef, useImperativeHandle, useState } from "react";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { keyframes } from "@mui/system";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 
+import Wait from "../../../component/wait/wait.jsx";
 import { useTheme } from "../../../context/theme.context.jsx";
-import ModsSyncTable from "./components/ModsSyncTable"; // Importation du composant Tableau
 import getModsThemeStyles from "./components/ModsStyle.jsx";
+import ModsSyncTable from "./components/ModsSyncTable"; // Importation du composant Tableau
 
 // Wait composant
 const pulse = keyframes`
     0%, 100% { opacity: 1; }
     50% { opacity: .5; }
   `;
-const Wait = ({ children, isLoading }) => (
+const WaitPulse = ({ children, isLoading }) => (
   <Box sx={isLoading ? { animation: `${pulse} 1.5s infinite` } : {}}>
     {children}
   </Box>
@@ -214,31 +215,34 @@ const SevenDtotD_ModsTab = forwardRef((props, ref) => {
   );
 
   return (
-    <Box
-      sx={{
-        p: 3,
-        bgcolor: themeStyles.mainBg,
-        color: themeStyles.textPrimary,
-        borderRadius: 2,
-        boxShadow: themeStyles.boxShadow,
-        maxWidth: "90%",
-        mx: "auto",
-        my: 4,
-        fontFamily: themeStyles.fontFamily,
-      }}
-    >
-      <DynamicSettingsTitle>
-        Statut de Synchronisation des Mods
-      </DynamicSettingsTitle>
+    <>
+      <Wait isVisible={isLoading} />
+      <Box
+        sx={{
+          p: 3,
+          bgcolor: themeStyles.mainBg,
+          color: themeStyles.textPrimary,
+          borderRadius: 2,
+          boxShadow: themeStyles.boxShadow,
+          maxWidth: "90%",
+          mx: "auto",
+          my: 4,
+          fontFamily: themeStyles.fontFamily,
+        }}
+      >
+        <DynamicSettingsTitle>
+          Statut de Synchronisation des Mods
+        </DynamicSettingsTitle>
 
-      <Wait isLoading={isLoading}>
-        <ModsSyncTable
-          modsToDisplay={modsToDisplay}
-          theme={theme}
-          themeStyles={themeStyles}
-        />
-      </Wait>
-    </Box>
+        <WaitPulse isLoading={isLoading}>
+          <ModsSyncTable
+            modsToDisplay={modsToDisplay}
+            theme={theme}
+            themeStyles={themeStyles}
+          />
+        </WaitPulse>
+      </Box>
+    </>
   );
 });
 
