@@ -19,7 +19,9 @@ class SevenDtoDModsManager {
     this.modsFilesBaseUrl = SevenDtoDLinksManager.modsFileBaseUrl();
 
     this.onlineHash = SevenDtoDHashManager.getOnlineHash();
-    this.localHash = SevenDtoDHashManager.getLocalHash();
+    this.onlineMods = this.onlineHash?.mods || {};
+    this.localHash = SevenDtoDHashManager.getInstalledHash();
+    this.localMods = this.localHash?.mods || {};
   }
 
   async uninstall() {

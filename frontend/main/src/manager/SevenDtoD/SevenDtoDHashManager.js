@@ -24,7 +24,7 @@ class SevenDtoDHashManager {
     this.actualHashFilePath = SevenDtoDFilesManager.actualHashFilePath();
   }
 
-  async getActualHash() {
+  async getInstalledHash() {
     this.init();
     const content = await fs.readFile(this.actualHashFilePath, "utf8");
     return JSON.parse(content) || {};
@@ -69,7 +69,7 @@ class SevenDtoDHashManager {
   async isUpToDate() {
     this.init();
     const [actual, online] = await Promise.all([
-      this.getActualHash(),
+      this.getInstalledHash(),
       this.getOnlineHash(),
     ]);
 
