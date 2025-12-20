@@ -26,8 +26,23 @@ const log = (user, processus) => {
   // Formatage pour un affichage en colonnes alignées
   const dateColumn = chalk.yellow(currentDate.toGMTString()) + "     ";
   const userColumn = chalk.blue(resize_to(20, user || "unknown")) + "     ";
-  const processColumn =
-    chalk.bold.bgBlack(resize_to(70, processus || "unknown")) + "     ";
+
+  // Séparer le processus en deux parties : avant et après le "?"
+  const processValue = processus || "unknown";
+  const resizedProcess = resize_to(70, processValue);
+  const questionMarkIndex = resizedProcess.indexOf("?");
+
+  let processColumn;
+  if (questionMarkIndex !== -1) {
+    const resizedBeforeQuestion = resizedProcess.slice(0, questionMarkIndex);
+    const resizedAfterQuestion = resizedProcess.slice(questionMarkIndex);
+    processColumn =
+      chalk.bold.bgBlack(resizedBeforeQuestion) +
+      chalk.green(resizedAfterQuestion) +
+      "     ";
+  } else {
+    processColumn = chalk.bold.bgBlack(resizedProcess) + "     ";
+  }
 
   // Afficher les informations formatées
   console.log(`${dateColumn}${userColumn}${processColumn}`);
