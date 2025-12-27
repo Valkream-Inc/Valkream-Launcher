@@ -16,11 +16,11 @@ function SevenDtoDIpcHandlers() {
     async () => await SevenDtoD_InstallationStatut()
   );
   // mods data
-  ipcMain.handle("SevenDtoD-get-mods-data", async () => {
-    return await SevenDtoD_ModsDataHandler();
+  ipcMain.handle("SevenDtoD-get-mods-data", async (event) => {
+    return await SevenDtoD_ModsDataHandler(event);
   });
-  ipcMain.handle("SevenDtoD-get-hash-data", async () => {
-    return JSON.stringify(await SevenDtoDHachManager.getNewHash(), null, 2);
+  ipcMain.handle("SevenDtoD-get-local-hash-data", async () => {
+    return JSON.stringify(await SevenDtoDHachManager.getLocalHash(), null, 2);
   });
 }
 

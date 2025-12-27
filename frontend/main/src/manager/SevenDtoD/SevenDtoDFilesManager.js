@@ -10,9 +10,6 @@ const SevenDtoDDirsManager = require("./SevenDtoDDirsManager.js");
 const SettingsManager = require("../settingsManager");
 
 class SevenDtoDFilesManager {
-  actualHashFilePath = () =>
-    path.join(SevenDtoDDirsManager.gameRootPath(), "mods.json");
-
   gameExePath = () => {
     const map = {
       win32: path.join(

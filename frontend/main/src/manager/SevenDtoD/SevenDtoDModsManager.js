@@ -19,7 +19,7 @@ class SevenDtoDModsManager {
     this.modsFilesBaseUrl = SevenDtoDLinksManager.modsFileBaseUrl();
 
     this.onlineHash = SevenDtoDHashManager.getOnlineHash();
-    this.localHash = SevenDtoDHashManager.getNewHash();
+    this.localHash = SevenDtoDHashManager.getLocalHash();
   }
 
   async uninstall() {

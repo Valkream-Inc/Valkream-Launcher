@@ -135,10 +135,6 @@ const ModsSyncRow = ({ mod, theme, themeStyles }) => {
   const oldPath = mod.oldPath || "N/A";
   const newPath = mod.newPath || "N/A";
 
-  // Logique pour déterminer si les hashes sont différents (pour la coloration)
-  const hashesAreDifferent =
-    mod.hashLocal && mod.hashOnline && mod.hashLocal !== mod.hashOnline;
-
   const hashLocalDisplay = formatHash(mod.hashLocal);
   const hashOnlineDisplay = formatHash(mod.hashOnline);
 
@@ -179,7 +175,7 @@ const ModsSyncRow = ({ mod, theme, themeStyles }) => {
           {newPath}
         </Typography>
       </TableCell>
-      {/* NOUVELLE CELLULE - HASH LOCAL */}
+
       <TableCell>
         <Tooltip title={mod.hashLocal || "N/A"} placement="top">
           <Typography
@@ -192,7 +188,7 @@ const ModsSyncRow = ({ mod, theme, themeStyles }) => {
           </Typography>
         </Tooltip>
       </TableCell>
-      {/* NOUVELLE CELLULE - HASH ONLINE */}
+
       <TableCell>
         <Tooltip title={mod.hashOnline || "N/A"} placement="top">
           <Typography

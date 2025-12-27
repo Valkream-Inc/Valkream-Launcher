@@ -102,7 +102,6 @@ const ModsSyncTable = ({
     if (searchTerm) {
       const lower = searchTerm.toLowerCase();
       result = result.filter((mod) =>
-        // Ajout de sécurités sur les champs du mod également
         (
           (mod.oldPath || "") +
           (mod.newPath || "") +
@@ -128,26 +127,18 @@ const ModsSyncTable = ({
     []
   );
 
-  if (!initialMods || initialMods.length === 0) {
-    return (
-      <Typography
-        sx={{ textAlign: "center", color: themeStyles.textSecondary, py: 5 }}
-      >
-        Aucune donnée disponible.
-      </Typography>
-    );
-  }
-
   return (
     <>
-      <Wait isVisible={isPending || isCalculating} />
-      <TableContainer
-        component={Paper}
+      <Wait isVisible={isPending && !isCalculating} />
+      <Paper
         sx={{
           mt: 2,
           border: `1px solid ${themeStyles.borderColor}`,
           bgcolor: themeStyles.tableBg,
           backgroundImage: "none",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
         }}
       >
         <ModsSyncToolbar
@@ -157,60 +148,74 @@ const ModsSyncTable = ({
           modsToDisplay={processedMods}
         />
 
-        <Table size="small" stickyHeader>
-          <TableHead>
-            <TableRow>
-              {headCells.map((headCell) => (
-                <TableCell
-                  key={headCell.id}
-                  sortDirection={sortBy === headCell.id ? sortDirection : false}
-                  sx={{
-                    bgcolor: themeStyles.headerBg,
-                    color: themeStyles.textPrimary,
-                    width: headCell.width,
-                    fontWeight: "bold",
-                  }}
-                >
-                  <TableSortLabel
-                    active={sortBy === headCell.id}
-                    direction={sortBy === headCell.id ? sortDirection : "asc"}
-                    onClick={() => handleRequestSort(headCell.id)}
+        <TableContainer
+          sx={{
+            flex: 1,
+            overflowX: "auto",
+            overflowY: "auto",
+          }}
+        >
+          <Table size="small" stickyHeader>
+            <TableHead>
+              <TableRow>
+                {headCells.map((headCell) => (
+                  <TableCell
+                    key={headCell.id}
+                    sortDirection={
+                      sortBy === headCell.id ? sortDirection : false
+                    }
                     sx={{
-                      "&.Mui-active": { color: themeStyles.textPrimary },
-                      "& .MuiTableSortLabel-icon": {
-                        color: `${themeStyles.textPrimary} !important`,
-                      },
+                      bgcolor: themeStyles.headerBg,
+                      color: themeStyles.textPrimary,
+                      width: headCell.width,
+                      fontWeight: "bold",
                     }}
                   >
-                    {headCell.label}
-                  </TableSortLabel>
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {processedMods.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  <Typography sx={{ color: themeStyles.textSecondary, py: 4 }}>
-                    Aucun résultat pour "{searchTerm}".
-                  </Typography>
-                </TableCell>
+                    <TableSortLabel
+                      active={sortBy === headCell.id}
+                      direction={sortBy === headCell.id ? sortDirection : "asc"}
+                      onClick={() => handleRequestSort(headCell.id)}
+                      sx={{
+                        "&.Mui-active": { color: themeStyles.textPrimary },
+                        "& .MuiTableSortLabel-icon": {
+                          color: `${themeStyles.textPrimary} !important`,
+                        },
+                      }}
+                    >
+                      {headCell.label}
+                    </TableSortLabel>
+                  </TableCell>
+                ))}
               </TableRow>
-            ) : (
-              processedMods
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((mod, index) => (
-                  <ModsSyncRow
-                    key={`${mod.oldPath || mod.newPath}-${index}`}
-                    mod={mod}
-                    theme={theme}
-                    themeStyles={themeStyles}
-                  />
-                ))
-            )}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {processedMods.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <Typography
+                      sx={{ color: themeStyles.textSecondary, py: 4 }}
+                    >
+                      {searchTerm.trim()
+                        ? `Aucun résultat pour "${searchTerm}".`
+                        : "Aucune donnée disponible."}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                processedMods
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((mod, index) => (
+                    <ModsSyncRow
+                      key={`${mod.oldPath || mod.newPath}-${index}`}
+                      mod={mod}
+                      theme={theme}
+                      themeStyles={themeStyles}
+                    />
+                  ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
         <ModsSyncPagination
           processedMods={processedMods}
@@ -220,7 +225,7 @@ const ModsSyncTable = ({
           rowsPerPage={rowsPerPage}
           setRowsPerPage={setRowsPerPage}
         />
-      </TableContainer>
+      </Paper>
     </>
   );
 };

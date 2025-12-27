@@ -40,6 +40,7 @@ export const InfosProvider = ({ children }) => {
 
   const actualGameRef = useRef(null);
   const actionLoadingRef = useRef(null);
+  const intervalRef = useRef(null);
   useEffect(() => {
     if (
       !window.electron_Valheim_API?.getInstallationStatut ||
@@ -101,10 +102,26 @@ export const InfosProvider = ({ children }) => {
       }
     };
 
-    const interval = setInterval(getAllInfos, 1000);
-    getAllInfos();
+    // Nettoyer l'interval précédent s'il existe
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
-    return () => clearInterval(interval);
+    // Appeler la première fois et attendre la réponse avant de lancer l'intervalle
+    getAllInfos().then(() => {
+      // Vérifier que le composant n'a pas été démonté ou que les dépendances n'ont pas changé
+      if (intervalRef.current === null) {
+        intervalRef.current = setInterval(getAllInfos, 1000);
+      }
+    });
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [actionLoading, actualGame]);
 
   const contextValue = {

@@ -16,28 +16,24 @@ const SevenDtoDLinksManager = require("./SevenDtoDLinksManager.js");
 const noCache = require("../../constants/noCaheHeader.js");
 
 class SevenDtoDHashManager {
-  init() {
+  constructor() {
     this.localHash = null;
     this.onlineHash = null;
+  }
 
+  init() {
     this.modsPath = SevenDtoDDirsManager.modsPath();
-    this.actualHashFilePath = SevenDtoDFilesManager.actualHashFilePath();
   }
 
-  async getInstalledHash() {
-    this.init();
-    const content = await fs.readFile(this.actualHashFilePath, "utf8");
-    return JSON.parse(content) || {};
-  }
-
-  async getNewHash(force = false) {
+  async getLocalHash(force = false, callback = () => {}) {
     this.init();
     if (!force && this.localHash !== null) return this.localHash;
-    return (await hashFolderWithArborescence(this.modsPath)) || {};
+    this.localHash =
+      (await hashFolderWithArborescence(this.modsPath, callback)) || {};
+    return this.localHash;
   }
 
   async getOnlineHash(force = false) {
-    this.init();
     if (!force && this.onlineHash !== null) return this.onlineHash;
     if (await InfosManager.getIsServerReachable()) {
       const { data } = await axios.get(
@@ -50,30 +46,22 @@ class SevenDtoDHashManager {
     return this.onlineHash || {};
   }
 
-  async updateActualHash(content) {
-    this.init();
-    const json = JSON.stringify(content, null, 2);
-    await fs.writeFile(this.actualHashFilePath, json, "utf8");
-  }
-
   async getIsInstalled() {
-    this.init();
     try {
-      await fs.access(this.actualHashFilePath);
+      if ((await this.getLocalHash()).length === 0) return false;
       return true;
     } catch {
       return false;
     }
   }
 
-  async isUpToDate() {
-    this.init();
-    const [actual, online] = await Promise.all([
-      this.getInstalledHash(),
+  async getIsUpToDate() {
+    const [local, online] = await Promise.all([
+      this.getLocalHash(),
       this.getOnlineHash(),
     ]);
 
-    return actual === online;
+    return local === online;
   }
 }
 

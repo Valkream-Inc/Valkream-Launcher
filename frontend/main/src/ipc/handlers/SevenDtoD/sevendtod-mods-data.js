@@ -6,11 +6,22 @@
 const SevenDtoDHashManager = require("../../../manager/SevenDtoD/SevenDtoDHashManager");
 const SevenDtoDModsManager = require("../../../manager/SevenDtoD/SevenDtoDModsManager");
 
-async function SevenDtoD_ModsDataHandler() {
+const { formatBytes } = require("../../../utils/function/formatBytes");
+
+async function SevenDtoD_ModsDataHandler(event) {
+  const callback = (processedBytes, totalBytes, percent, speed) => {
+    event.sender.send("progress-mods-data-sevendtod", {
+      processedBytes: formatBytes(processedBytes),
+      totalBytes: formatBytes(totalBytes),
+      percent,
+      speed: formatBytes(speed),
+    });
+  };
+
   // Récupérer les deux listes de hashs (local et en ligne)
   const [localHash, onlineHash] = await Promise.all([
-    SevenDtoDHashManager.getNewHash(),
-    SevenDtoDHashManager.getOnlineHash(),
+    SevenDtoDHashManager.getLocalHash(true, callback),
+    SevenDtoDHashManager.getOnlineHash(true),
   ]);
 
   const results = [];

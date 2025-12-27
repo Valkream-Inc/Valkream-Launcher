@@ -11,6 +11,7 @@ import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTheme } from "../../../context/theme.context.jsx";
 import getModsThemeStyles from "./components/ModsStyle.jsx";
 import ModsSyncTable from "./components/ModsSyncTable";
+import Wait from "../../../component/wait/wait.jsx";
 
 const pulse = keyframes`
     0%, 100% { opacity: 1; }
@@ -27,16 +28,28 @@ const SevenDtotD_ModsTab = forwardRef((props, ref) => {
   const themeStyles = getModsThemeStyles(theme);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState("");
   const [modsToDisplay, setModsToDisplay] = useState([]);
 
   const fetchMods = async () => {
     setIsLoading(true);
     setModsToDisplay({});
     try {
+      window.electron_SevenDtoD_API.onModsDataProgress((data) => {
+        setProgress(
+          `Analyse des mods en cours...
+          ${data.percent}% (${data.processedBytes}/${data.totalBytes}) à ${data.speed}/s`
+        );
+      });
+
       setModsToDisplay(await window.electron_SevenDtoD_API.getModsData());
     } catch (err) {
       console.error(err);
+    } finally {
+      window.electron_SevenDtoD_API.removeModsDataListeners();
+      setProgress("");
     }
+
     setTimeout(() => {
       setIsLoading(false);
     }, 1500);
@@ -44,8 +57,6 @@ const SevenDtotD_ModsTab = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     reload: () => fetchMods(),
-    freeze: () => {},
-    stop: () => {},
   }));
 
   const DynamicSettingsTitle = ({ children }) => (
@@ -64,31 +75,34 @@ const SevenDtotD_ModsTab = forwardRef((props, ref) => {
   );
 
   return (
-    <Box
-      sx={{
-        p: 3,
-        bgcolor: themeStyles.mainBg,
-        color: themeStyles.textPrimary,
-        borderRadius: 2,
-        boxShadow: themeStyles.boxShadow,
-        maxWidth: "90%",
-        mx: "auto",
-        my: 4,
-        fontFamily: themeStyles.fontFamily,
-      }}
-    >
-      <DynamicSettingsTitle>
-        Statut de Synchronisation des Mods
-      </DynamicSettingsTitle>
+    <>
+      <Wait isVisible={isLoading} text={progress} />
+      <Box
+        sx={{
+          p: 3,
+          bgcolor: themeStyles.mainBg,
+          color: themeStyles.textPrimary,
+          borderRadius: 2,
+          boxShadow: themeStyles.boxShadow,
+          maxWidth: "90%",
+          mx: "auto",
+          my: 4,
+          fontFamily: themeStyles.fontFamily,
+        }}
+      >
+        <DynamicSettingsTitle>
+          Statut de Synchronisation des Mods
+        </DynamicSettingsTitle>
 
-      <WaitPulse isLoading={isLoading}>
-        <ModsSyncTable
-          modsToDisplay={modsToDisplay}
-          theme={theme}
-          themeStyles={themeStyles}
-        />
-      </WaitPulse>
-    </Box>
+        <WaitPulse isLoading={isLoading}>
+          <ModsSyncTable
+            modsToDisplay={modsToDisplay}
+            theme={theme}
+            themeStyles={themeStyles}
+          />
+        </WaitPulse>
+      </Box>
+    </>
   );
 });
 

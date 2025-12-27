@@ -55,19 +55,19 @@ function Settings() {
   if (isConfirmSpecialOptionVisible) return <EnabledSpecialOption />;
 
   const changeTab = (tab) => {
-    if (modsTabRef.current) {
+    if (modsTabRef?.current?.stop) {
       modsTabRef.current.stop();
     }
 
     setActiveTab(tab);
 
-    if (tab === "mods" && modsTabRef.current) {
+    if (tab === "mods" && modsTabRef?.current?.reload) {
       modsTabRef.current.reload();
     }
   };
 
   function returnToHome() {
-    if (modsTabRef.current) {
+    if (modsTabRef?.current?.stop && modsTabRef?.current?.freeze) {
       modsTabRef.current.stop();
       modsTabRef.current.freeze();
     }

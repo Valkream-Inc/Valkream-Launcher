@@ -5,6 +5,8 @@
 
 const chalk = require("chalk");
 
+const SHOW_QUERY_PARAMS = false;
+
 function resize_to(size, value) {
   // Si la chaîne est plus longue que la taille donnée, on la tronque
   if (value.length > size) {
@@ -28,7 +30,16 @@ const log = (user, processus) => {
   const userColumn = chalk.blue(resize_to(20, user || "unknown")) + "     ";
 
   // Séparer le processus en deux parties : avant et après le "?"
-  const processValue = processus || "unknown";
+  let processValue = processus || "unknown";
+
+  // Si la config est false, masquer les paramètres de requête
+  if (!SHOW_QUERY_PARAMS) {
+    const questionMarkIndex = processValue.indexOf("?");
+    if (questionMarkIndex !== -1) {
+      processValue = processValue.slice(0, questionMarkIndex);
+    }
+  }
+
   const resizedProcess = resize_to(70, processValue);
   const questionMarkIndex = resizedProcess.indexOf("?");
 

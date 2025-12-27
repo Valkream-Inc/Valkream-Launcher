@@ -120,7 +120,15 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   // infos
   getInstallationStatut: () =>
     ipcRenderer.invoke("SevenDtoD-get-installation-statut"),
+
   // mods data
   getModsData: () => ipcRenderer.invoke("SevenDtoD-get-mods-data"),
-  getHashData: () => ipcRenderer.invoke("SevenDtoD-get-hash-data"),
+  onModsDataProgress: (callback) =>
+    ipcRenderer.on("progress-mods-data-sevendtod", (event, data) =>
+      callback(data)
+    ),
+  removeModsDataListeners: () =>
+    ipcRenderer.removeAllListeners("progress-mods-data-sevendtod"),
+
+  getLocalHashData: () => ipcRenderer.invoke("SevenDtoD-get-local-hash-data"),
 });
