@@ -120,6 +120,8 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   // infos
   getInstallationStatut: () =>
     ipcRenderer.invoke("SevenDtoD-get-installation-statut"),
+  testIsSteamGamePathValid: (path) =>
+    ipcRenderer.invoke("SevenDtoD-test-is-steam-game-path-valid", path),
 
   // mods data
   getModsData: () => ipcRenderer.invoke("SevenDtoD-get-mods-data"),

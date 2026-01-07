@@ -8,12 +8,17 @@ const { ipcMain } = require("electron");
 const SevenDtoD_ModsDataHandler = require("./handlers/SevenDtoD/sevendtod-mods-data.js");
 const SevenDtoD_InstallationStatut = require("./handlers/SevenDtoD/sevendtod-installation-statut.js");
 const SevenDtoDHachManager = require("../manager/SevenDtoD/SevenDtoDHashManager.js");
+const SevenDtoDSteamManager = require("../manager/SevenDtoD/SevenDtoDSteamManager.js");
 
 function SevenDtoDIpcHandlers() {
   // infos
   ipcMain.handle(
     "SevenDtoD-get-installation-statut",
     async () => await SevenDtoD_InstallationStatut()
+  );
+  ipcMain.handle(
+    "SevenDtoD-test-is-steam-game-path-valid",
+    async (event, path) => await SevenDtoDSteamManager.testSteamGamePath(path)
   );
   // mods data
   ipcMain.handle("SevenDtoD-get-mods-data", async (event) => {

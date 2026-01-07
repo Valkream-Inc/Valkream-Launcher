@@ -6,15 +6,15 @@
 const path = require("path");
 const { platform } = require("os");
 
-const SevenDtoDDirsManager = require("./SevenDtoDDirsManager.js");
 const SettingsManager = require("../settingsManager");
 
 class SevenDtoDFilesManager {
-  gameExePath = () => {
+  gameExeName = "7DaysToDie.exe";
+  gameExePath = async () => {
     const map = {
       win32: path.join(
-        SettingsManager.getSetting("gamePathWithSevenDtoD"),
-        "7DaysToDie.exe"
+        await SettingsManager.getSetting("gamePathWithSevenDtoD"),
+        this.gameExeName
       ),
     };
 

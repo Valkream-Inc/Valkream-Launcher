@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from "react";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { ButtonBase, Stack } from "@mui/material";
 
-import Popup from "../../../../component/popup/popup";
+import Popup from "../../../../component/popup/popup.jsx";
 
 import { useAction } from "../../../../context/action.context.jsx";
 import { useBackground } from "../../../../context/background.context.jsx";
@@ -27,7 +27,7 @@ function WelcomeMessage() {
   );
 }
 
-export default function PlayButton() {
+export default function ValheimButton() {
   const { actionLoading, runAction } = useAction();
   const { pause, play } = useBackground();
   const { installationStatut, maintenance } = useInfos();
@@ -78,7 +78,7 @@ export default function PlayButton() {
       return;
     }
   };
-  const handleInstall = () => runAction(install, "install");
+  const handleInstall = () => runAction(install, "Valheim-install");
 
   const start = async () => {
     try {
@@ -94,7 +94,7 @@ export default function PlayButton() {
       showSnackbar("Erreur lors du lancement du jeu !", "error");
     }
   };
-  const handleStart = () => runAction(start, "start");
+  const handleStart = () => runAction(start, "Valheim-start");
 
   const update = async () => {
     const cleanup = () => window.electron_Valheim_API.removeUpdateListeners();
@@ -117,7 +117,7 @@ export default function PlayButton() {
       return;
     }
   };
-  const handleUpdate = () => runAction(update, "update");
+  const handleUpdate = () => runAction(update, "Valheim-update");
 
   const modsRunningRef = useRef(false);
   const customMods = async () => {
@@ -147,7 +147,7 @@ export default function PlayButton() {
       return;
     }
   };
-  const handleCustomMods = () => runAction(customMods, "custom-mods");
+  const handleCustomMods = () => runAction(customMods, "Valheim-custom-mods");
 
   useEffect(() => {
     const run = async () => {

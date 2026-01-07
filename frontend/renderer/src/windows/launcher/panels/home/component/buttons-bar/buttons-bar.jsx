@@ -13,7 +13,7 @@ import { Button } from "@mui/material";
 import { useAction } from "../../../../context/action.context.jsx";
 import { useGames } from "../../../../context/games.context.jsx";
 
-import PlayButton from "./play-button.jsx";
+import ValheimButton from "./Valheim-button.jsx";
 import SevenDtoDButton from "./SevenDtoD-button.jsx";
 
 function TipsButton({ onClick = () => {} }) {
@@ -51,7 +51,7 @@ function ButtonsBar({
           </Button>
         )}
 
-        {actualGame === "Valheim" && <PlayButton />}
+        {actualGame === "Valheim" && <ValheimButton />}
         {actualGame === "SevenDtoD" && <SevenDtoDButton />}
 
         {!actionLoading && (
