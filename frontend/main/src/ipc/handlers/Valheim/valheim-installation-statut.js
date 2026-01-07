@@ -18,13 +18,16 @@ async function ValheimInstallationStatut() {
   ]);
 
   // --- 2. Infos locales & installation ---
+  const onlineVersionConfig =
+    await ValheimVersionManager.getOnlineVersionConfig(true);
+
   const [
     localVersionConfig,
     gameInstalled,
     thunderInstalled,
     versionInstalled,
   ] = await Promise.all([
-    ValheimVersionManager.getLocalVersionConfig(),
+    ValheimVersionManager.getLocalVersionConfig(true),
     ValheimGameManager.getIsInstalled(),
     ValheimThunderstoreManager.getIsInstalled(),
     ValheimVersionManager.getIsInstalled(),
@@ -78,15 +81,10 @@ async function ValheimInstallationStatut() {
   } = boostgraphicModsResult;
 
   // --- 4. Vérification des versions ---
-  let onlineVersionConfig = null;
   let isUpToDate = false;
   let isMajorUpdate = false;
 
   if (isServerReachable) {
-    onlineVersionConfig = await ValheimVersionManager.getOnlineVersionConfig(
-      true
-    );
-
     const majorLocal = parseInt(
       (localVersionConfig?.version ?? "0.0.0").split(".")[0],
       10

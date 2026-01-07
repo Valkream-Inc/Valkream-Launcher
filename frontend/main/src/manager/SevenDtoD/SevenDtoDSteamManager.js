@@ -17,7 +17,7 @@ class SevenDtoDSteamManager {
     }
   }
 
-  async isAValidSteamGamePath() {
+  async getIsAValidSteamGamePath() {
     try {
       await fs.access(SevenDtoDFilesManager.gameExePath());
       return true;
