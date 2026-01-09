@@ -60,10 +60,27 @@ class SevenDtoDHashManager {
       this.getOnlineHash(),
     ]);
 
-    const localStr = local?.toString("utf8").trim();
-    const onlineStr = online?.toString("utf8").trim();
+    // Fonction de comparaison profonde des objets
+    function deepEqual(obj1, obj2) {
+      const k1 = Object.keys(obj1).sort();
+      const k2 = Object.keys(obj2).sort();
+      if (k1.length !== k2.length) return false;
+      for (let i = 0; i < k1.length; i++) {
+        if (k1[i] !== k2[i]) return false;
 
-    return localStr === onlineStr;
+        const val1 = obj1[k1[i]];
+        const val2 = obj2[k2[i]];
+
+        if (typeof val1 === "object" && val1 !== null) {
+          if (!deepEqual(val1, val2)) return false;
+        } else if (val1 !== val2) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    return deepEqual(local, online);
   }
 }
 

@@ -30,7 +30,7 @@ class IpcHandlers {
     else throw new Error("Le dossier AppData n'existe pas !");
   }
 
-  async openLink(url) {
+  async openLink(event, url = "") {
     if (
       !(
         url.startsWith("http://") ||

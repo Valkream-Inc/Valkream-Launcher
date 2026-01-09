@@ -9,8 +9,9 @@ const SevenDtoDModsManager = require("../../../manager/SevenDtoD/SevenDtoDModsMa
 const { formatBytes } = require("../../../utils/function/formatBytes");
 
 async function SevenDtoD_ModsDataHandler(event) {
-  const callback = (processedBytes, totalBytes, percent, speed) => {
+  const callback = (text, processedBytes, totalBytes, percent, speed) => {
     event.sender.send("progress-mods-data-SevenDtoD", {
+      text,
       processedBytes: formatBytes(processedBytes),
       totalBytes: formatBytes(totalBytes),
       percent,
