@@ -81,59 +81,67 @@ export default function SevenDtoDButton() {
     runAction(selectGamePath, "SevenDtoD-select-game-path");
 
   const install = async () => {
-    // const cleanup = () => window.electron_Valheim_API.removeInstallListeners();
-    // try {
-    //   window.electron_Valheim_API.onInstallProgress(callback);
-    //   window.electron_Valheim_API.onInstallError((data) => {
-    //     error("l'installation", data.message);
-    //     cleanup();
-    //   });
-    //   window.electron_Valheim_API.onInstallDone(() => {
-    //     cleanup();
-    //     enqueueSnackbar("Installation terminée !", { variant: "success" });
-    //   });
-    //   await window.electron_Valheim_API.install();
-    //   return;
-    // } catch (err) {
-    //   cleanup();
-    //   return;
-    // }
+    const cleanup = () =>
+      window.electron_SevenDtoD_API.removeInstallListeners();
+    try {
+      window.electron_SevenDtoD_API.onInstallProgress(callback);
+      window.electron_SevenDtoD_API.onInstallError((data) => {
+        error("l'installation", data.message);
+        cleanup();
+      });
+      window.electron_SevenDtoD_API.onInstallDone(() => {
+        cleanup();
+        enqueueSnackbar("Installation terminée !", { variant: "success" });
+      });
+      await window.electron_SevenDtoD_API.install();
+      return;
+    } catch (err) {
+      cleanup();
+      return;
+    }
   };
   const handleInstall = () => runAction(install, "SevenDtoD-install");
 
   const start = async () => {
-    // try {
-    //   const launcherBehavior = await window.electron_API.getSettings(
-    //     "launcherBehaviorWithValheim"
-    //   );
-    //   if (launcherBehavior === "hide") pause();
-    //   await window.electron_Valheim_API.start();
-    //   if (launcherBehavior === "hide") play();
-    // } catch (err) {
-    //   console.error("Erreur lors du démarrage du jeu :", err);
-    //   showSnackbar("Erreur lors du lancement du jeu !", "error");
-    // }
+    const cleanup = () => window.electron_SevenDtoD_API.removePlayListeners();
+    try {
+      window.electron_SevenDtoD_API.onPlayProgress(callback);
+      window.electron_SevenDtoD_API.onPlayError((data) => {
+        error("la tentative de lancement", data.message);
+        cleanup();
+      });
+      window.electron_SevenDtoD_API.onPlayDone(() => {
+        cleanup();
+        enqueueSnackbar("Lancement du jeu terminée !", { variant: "success" });
+      });
+      await window.electron_SevenDtoD_API.play();
+      await window.electron_API.close(); // Ferme le launcher pas de launcher behaviour pour le moment
+      return;
+    } catch (err) {
+      cleanup();
+      return;
+    }
   };
   const handleStart = () => runAction(start, "SevenDtoD-start");
 
   const update = async () => {
-    // const cleanup = () => window.electron_Valheim_API.removeUpdateListeners();
-    // try {
-    //   window.electron_Valheim_API.onUpdateProgress(callback);
-    //   window.electron_Valheim_API.onUpdateError((data) => {
-    //     error("la mise à jour", data.message);
-    //     cleanup();
-    //   });
-    //   window.electron_Valheim_API.onUpdateDone(() => {
-    //     cleanup();
-    //     enqueueSnackbar("Mise à jour terminée !", { variant: "success" });
-    //   });
-    //   await window.electron_Valheim_API.update();
-    //   return;
-    // } catch (err) {
-    //   cleanup();
-    //   return;
-    // }
+    const cleanup = () => window.electron_SevenDtoD_API.removeUpdateListeners();
+    try {
+      window.electron_SevenDtoD_API.onUpdateProgress(callback);
+      window.electron_SevenDtoD_API.onUpdateError((data) => {
+        error("la mise à jour", data.message);
+        cleanup();
+      });
+      window.electron_SevenDtoD_API.onUpdateDone(() => {
+        cleanup();
+        enqueueSnackbar("Mise à jour terminée !", { variant: "success" });
+      });
+      await window.electron_SevenDtoD_API.update();
+      return;
+    } catch (err) {
+      cleanup();
+      return;
+    }
   };
   const handleUpdate = () => runAction(update, "SevenDtoD-update");
 
@@ -149,6 +157,8 @@ export default function SevenDtoDButton() {
           isUpToDate,
           isAValidSteamGamePath,
         } = installationStatut;
+
+        console.log(installationStatut);
 
         const isConnected = isInternetConnected && isServerReachable;
 

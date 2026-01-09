@@ -10,7 +10,7 @@ import SettingsBox from "../../component/settings-box/settings-box.jsx";
 
 const SevenDtoD_ButtonOpenGame = () => {
   const handleClick = async () =>
-    await window.electron_Valheim_API
+    await window.electron_SevenDtoD_API
       .openGameFolder()
       .then(() => {
         enqueueSnackbar("Dossier du jeu ouvert !", { variant: "success" });

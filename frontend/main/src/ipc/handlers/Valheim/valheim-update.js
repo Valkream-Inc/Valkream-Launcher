@@ -11,7 +11,7 @@ const ValheimVersionManager = require("../../../manager/Valheim/ValheimVersionMa
 
 async function ValheimUpdate(event) {
   const callback = (text, processedBytes, totalBytes, percent, speed) => {
-    event.sender.send("progress-update-valheim", {
+    event.sender.send("progress-update-Valheim", {
       text,
       processedBytes: formatBytes(processedBytes),
       totalBytes: formatBytes(totalBytes),
@@ -65,11 +65,11 @@ async function ValheimUpdate(event) {
     await ValheimGameManager.restoreGameFolder();
     await ValheimVersionManager.updateLocalVersionConfig();
 
-    event.sender.send("done-update-valheim");
+    event.sender.send("done-update-Valheim");
     return { success: true };
   } catch (err) {
     console.error(err);
-    event.sender.send("error-update-valheim", { message: err.message });
+    event.sender.send("error-update-Valheim", { message: err.message });
     throw err;
   }
 }

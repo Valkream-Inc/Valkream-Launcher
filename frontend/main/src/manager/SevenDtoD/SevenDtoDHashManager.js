@@ -11,7 +11,6 @@ const {
 
 const InfosManager = require("../infosManager.js");
 const SevenDtoDDirsManager = require("./SevenDtoDDirsManager.js");
-const SevenDtoDFilesManager = require("./SevenDtoDFilesManager.js");
 const SevenDtoDLinksManager = require("./SevenDtoDLinksManager.js");
 const noCache = require("../../constants/noCaheHeader.js");
 
@@ -48,8 +47,8 @@ class SevenDtoDHashManager {
 
   async getIsInstalled() {
     try {
-      if ((await this.getLocalHash()).length === 0) return false;
-      return true;
+      const localHash = await this.getLocalHash();
+      return localHash && Object.keys(localHash).length > 0;
     } catch {
       return false;
     }
@@ -61,7 +60,10 @@ class SevenDtoDHashManager {
       this.getOnlineHash(),
     ]);
 
-    return local === online;
+    const localStr = local?.toString("utf8").trim();
+    const onlineStr = online?.toString("utf8").trim();
+
+    return localStr === onlineStr;
   }
 }
 

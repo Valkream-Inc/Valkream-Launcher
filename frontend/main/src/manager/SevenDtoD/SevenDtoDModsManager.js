@@ -3,6 +3,7 @@
  * @license MIT-NC
  */
 
+const fs = require("fs/promises");
 const fse = require("fs-extra");
 const path = require("path");
 
@@ -11,15 +12,11 @@ const SevenDtoDLinksManager = require("./SevenDtoDLinksManager.js");
 const SevenDtoDHashManager = require("./SevenDtoDHashManager.js");
 
 const { dowloadMultiplefiles } = require("../../utils/");
+const { copyFolder } = require("../../utils/function/copyFolder");
 
 class SevenDtoDModsManager {
   init() {
     this.gameModsDir = SevenDtoDDirsManager.modsPath();
-    this.installedGameModsDir = SevenDtoDDirsManager.installedModsPath();
-    this.modsFilesBaseUrl = SevenDtoDLinksManager.modsFileBaseUrl();
-
-    this.onlineHash = SevenDtoDHashManager.getOnlineHash();
-    this.localHash = SevenDtoDHashManager.getLocalHash();
   }
 
   async uninstall() {
@@ -40,12 +37,15 @@ class SevenDtoDModsManager {
     try {
       await this.uninstall();
 
-      const mods = Object.keys(this.onlineHash).map((modPath) => ({
-        url: this.modsFilesBaseUrl + modPath,
+      const modsFilesBaseUrl = await SevenDtoDLinksManager.modsFileBaseUrl();
+      const onlineHash = await SevenDtoDHashManager.getOnlineHash();
+
+      const mods = Object.keys(onlineHash ?? {}).map((modPath) => ({
+        url: `${modsFilesBaseUrl}/${modPath}`,
         destPath: path.join(this.gameModsDir, modPath),
       }));
 
-      return dowloadMultiplefiles(mods, (data) =>
+      return await dowloadMultiplefiles(mods, (data) =>
         callback(
           text,
           data.downloadedBytes,
@@ -55,17 +55,28 @@ class SevenDtoDModsManager {
         )
       );
     } catch (err) {
-      throw new Error(`Échec de l'installation : ${err.message}`);
+      throw new Error(`Échec de l'installation : ${err}`);
     }
   }
 
-  async play() {
+  async play(
+    callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
+    text = "Copie des mods..."
+  ) {
     this.init();
     try {
-      fse.remove(this.installedGameModsDir);
-      fse.copy(this.gameModsDir, this.installedGameModsDir, {
-        overwrite: true,
+      const installedGameModsDir =
+        await SevenDtoDDirsManager.installedModsPath();
+
+      await fs.rm(installedGameModsDir, {
+        recursive: true,
+        force: true,
+        maxRetries: 5,
+        retryDelay: 200,
       });
+      await fs.mkdir(installedGameModsDir, { recursive: true });
+
+      await copyFolder(this.gameModsDir, installedGameModsDir, callback);
     } catch (err) {
       throw new Error(`Échec du lancement du jeu : ${err.message}`);
     }
@@ -210,8 +221,8 @@ class SevenDtoDModsManager {
   ) {
     this.init();
     try {
-      const oldFiles = this.localHash;
-      const newFiles = this.onlineHash;
+      const oldFiles = await SevenDtoDHashManager.getLocalHash();
+      const newFiles = await SevenDtoDHashManager.getOnlineHash();
 
       // 1. Détermination des actions de synchronisation
       const modifiedFiles = this.findModifiedFiles(oldFiles, newFiles);

@@ -32,7 +32,11 @@ function hashFile(filePath, algorithm = "sha256") {
  *   "file2.png": "hash2"
  * }
  */
-async function hashFolderWithArborescence(rootDir, callback = null) {
+async function hashFolderWithArborescence(
+  rootDir,
+  callback = null,
+  text = "Analyse..."
+) {
   try {
     const files = getAllFilesInAFolder(rootDir);
 
@@ -58,7 +62,7 @@ async function hashFolderWithArborescence(rootDir, callback = null) {
         const elapsed = (Date.now() - startTime) / 1000;
         const speed = processedBytes / elapsed;
 
-        callback(processedBytes, totalBytes, percent, speed);
+        callback(text, processedBytes, totalBytes, percent, speed);
       }
     }
 

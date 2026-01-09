@@ -5,12 +5,12 @@
 
 const { ipcMain } = require("electron");
 
-const ValheimInstall = require("./handlers/Valheim/valheim-install.js");
-const ValheimUpdate = require("./handlers/Valheim/valheim-update.js");
-const ValheimStart = require("./handlers/Valheim/valheim-start.js");
-const ValheimCustomMods = require("./handlers/Valheim/valheim-custom-mods.js");
-const ValheimInstallationStatut = require("./handlers/Valheim/valheim-installation-statut.js");
-const ValheimModsData = require("./handlers/Valheim/valheim-mods-data.js");
+const ValheimInstall = require("./handlers/Valheim/Valheim-install.js");
+const ValheimUpdate = require("./handlers/Valheim/Valheim-update.js");
+const ValheimStart = require("./handlers/Valheim/Valheim-start.js");
+const ValheimCustomMods = require("./handlers/Valheim/Valheim-custom-mods.js");
+const ValheimInstallationStatut = require("./handlers/Valheim/Valheim-installation-statut.js");
+const ValheimModsData = require("./handlers/Valheim/Valheim-mods-data.js");
 
 const ValheimGameManager = require("../manager/Valheim/ValheimGameManager.js");
 const ValheimVersionManager = require("../manager/Valheim/ValheimVersionManager.js");

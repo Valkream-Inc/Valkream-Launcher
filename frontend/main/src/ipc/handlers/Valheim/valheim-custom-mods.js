@@ -14,7 +14,7 @@ const ValheimGameManager = require("../../../manager/Valheim/ValheimGameManager"
 
 async function ValheimCustomMods(event) {
   const callback = (text, processedBytes, totalBytes, percent, speed) => {
-    event.sender.send("progress-custom-mods-valheim", {
+    event.sender.send("progress-custom-mods-Valheim", {
       text,
       processedBytes: formatBytes(processedBytes),
       totalBytes: formatBytes(totalBytes),
@@ -142,11 +142,11 @@ async function ValheimCustomMods(event) {
       await ValheimThunderstoreManager.unInstallCustomMods(boostgraphic_mods);
     }
 
-    event.sender.send("done-custom-mods-valheim");
+    event.sender.send("done-custom-mods-Valheim");
     return { success: true };
   } catch (err) {
     console.error(err);
-    event.sender.send("error-custom-mods-valheim", { message: err.message });
+    event.sender.send("error-custom-mods-Valheim", { message: err.message });
     throw err;
   }
 }

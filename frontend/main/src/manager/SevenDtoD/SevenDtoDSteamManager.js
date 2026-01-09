@@ -10,7 +10,7 @@ const path = require("path");
 const SevenDtoDFilesManager = require("./SevenDtoDFilesManager.js");
 
 class SevenDtoDSteamManager {
-  async start() {
+  async play() {
     try {
       await shell.openExternal("steam://rungameid/251570");
     } catch (err) {

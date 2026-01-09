@@ -67,15 +67,15 @@ contextBridge.exposeInMainWorld("electron_Valheim_API", {
   // installation
   install: () => ipcRenderer.invoke("Valheim-install"),
   onInstallProgress: (callback) =>
-    ipcRenderer.on("progress-install-valheim", (event, data) => callback(data)),
+    ipcRenderer.on("progress-install-Valheim", (event, data) => callback(data)),
   onInstallDone: (callback) =>
-    ipcRenderer.on("done-install-valheim", (event, data) => callback(data)),
+    ipcRenderer.on("done-install-Valheim", (event, data) => callback(data)),
   onInstallError: (callback) =>
-    ipcRenderer.on("error-install-valheim", (event, data) => callback(data)),
+    ipcRenderer.on("error-install-Valheim", (event, data) => callback(data)),
   removeInstallListeners: () => {
-    ipcRenderer.removeAllListeners("progress-install-valheim");
-    ipcRenderer.removeAllListeners("done-install-valheim");
-    ipcRenderer.removeAllListeners("error-install-valheim");
+    ipcRenderer.removeAllListeners("progress-install-Valheim");
+    ipcRenderer.removeAllListeners("done-install-Valheim");
+    ipcRenderer.removeAllListeners("error-install-Valheim");
   },
 
   // play
@@ -84,33 +84,33 @@ contextBridge.exposeInMainWorld("electron_Valheim_API", {
   // update
   update: () => ipcRenderer.invoke("update"),
   onUpdateProgress: (callback) =>
-    ipcRenderer.on("progress-update-valheim", (event, data) => callback(data)),
+    ipcRenderer.on("progress-update-Valheim", (event, data) => callback(data)),
   onUpdateDone: (callback) =>
-    ipcRenderer.on("done-update-valheim", (event, data) => callback(data)),
+    ipcRenderer.on("done-update-Valheim", (event, data) => callback(data)),
   onUpdateError: (callback) =>
-    ipcRenderer.on("error-update-valheim", (event, data) => callback(data)),
+    ipcRenderer.on("error-update-Valheim", (event, data) => callback(data)),
   removeUpdateListeners: () => {
-    ipcRenderer.removeAllListeners("progress-update-valheim");
-    ipcRenderer.removeAllListeners("done-update-valheim");
-    ipcRenderer.removeAllListeners("error-update-valheim");
+    ipcRenderer.removeAllListeners("progress-update-Valheim");
+    ipcRenderer.removeAllListeners("done-update-Valheim");
+    ipcRenderer.removeAllListeners("error-update-Valheim");
   },
 
   // custom mods
   customMods: () => ipcRenderer.invoke("Valheim-custom-mods"),
   onCustomModsProgress: (callback) =>
-    ipcRenderer.on("progress-custom-mods-valheim", (event, data) =>
+    ipcRenderer.on("progress-custom-mods-Valheim", (event, data) =>
       callback(data)
     ),
   onCustomModsDone: (callback) =>
-    ipcRenderer.on("done-custom-mods-valheim", (event, data) => callback(data)),
+    ipcRenderer.on("done-custom-mods-Valheim", (event, data) => callback(data)),
   onCustomModsError: (callback) =>
-    ipcRenderer.on("error-custom-mods-valheim", (event, data) =>
+    ipcRenderer.on("error-custom-mods-Valheim", (event, data) =>
       callback(data)
     ),
   removeCustomModsListeners: () => {
-    ipcRenderer.removeAllListeners("progress-custom-mods-valheim");
-    ipcRenderer.removeAllListeners("done-custom-mods-valheim");
-    ipcRenderer.removeAllListeners("error-custom-mods-valheim");
+    ipcRenderer.removeAllListeners("progress-custom-mods-Valheim");
+    ipcRenderer.removeAllListeners("done-custom-mods-Valheim");
+    ipcRenderer.removeAllListeners("error-custom-mods-Valheim");
   },
 });
 
@@ -123,14 +123,64 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   testIsSteamGamePathValid: (path) =>
     ipcRenderer.invoke("SevenDtoD-test-is-steam-game-path-valid", path),
 
+  // utils
+  openGameFolder: () => ipcRenderer.invoke("SevenDtoD-open-game-folder"),
+  uninstallGame: () => ipcRenderer.invoke("SevenDtoD-uninstall-game"),
+
   // mods data
   getModsData: () => ipcRenderer.invoke("SevenDtoD-get-mods-data"),
   onModsDataProgress: (callback) =>
-    ipcRenderer.on("progress-mods-data-sevendtod", (event, data) =>
+    ipcRenderer.on("progress-mods-data-SevenDtoD", (event, data) =>
       callback(data)
     ),
   removeModsDataListeners: () =>
-    ipcRenderer.removeAllListeners("progress-mods-data-sevendtod"),
+    ipcRenderer.removeAllListeners("progress-mods-data-SevenDtoD"),
 
   getLocalHashData: () => ipcRenderer.invoke("SevenDtoD-get-local-hash-data"),
+
+  // installation
+  install: () => ipcRenderer.invoke("SevenDtoD-install"),
+  onInstallProgress: (callback) =>
+    ipcRenderer.on("progress-install-SevenDtoD", (event, data) =>
+      callback(data)
+    ),
+  onInstallDone: (callback) =>
+    ipcRenderer.on("done-install-SevenDtoD", (event, data) => callback(data)),
+  onInstallError: (callback) =>
+    ipcRenderer.on("error-install-SevenDtoD", (event, data) => callback(data)),
+  removeInstallListeners: () => {
+    ipcRenderer.removeAllListeners("progress-install-SevenDtoD");
+    ipcRenderer.removeAllListeners("done-install-SevenDtoD");
+    ipcRenderer.removeAllListeners("error-install-SevenDtoD");
+  },
+
+  // play
+  play: () => ipcRenderer.invoke("SevenDtoD-play"),
+  onPlayProgress: (callback) =>
+    ipcRenderer.on("progress-play-SevenDtoD", (event, data) => callback(data)),
+  onPlayDone: (callback) =>
+    ipcRenderer.on("done-play-SevenDtoD", (event, data) => callback(data)),
+  onPlayError: (callback) =>
+    ipcRenderer.on("error-play-SevenDtoD", (event, data) => callback(data)),
+  removePlayListeners: () => {
+    ipcRenderer.removeAllListeners("progress-play-SevenDtoD");
+    ipcRenderer.removeAllListeners("done-play-SevenDtoD");
+    ipcRenderer.removeAllListeners("error-play-SevenDtoD");
+  },
+
+  // update
+  update: () => ipcRenderer.invoke("update"),
+  onUpdateProgress: (callback) =>
+    ipcRenderer.on("progress-update-SevenDtoD", (event, data) =>
+      callback(data)
+    ),
+  onUpdateDone: (callback) =>
+    ipcRenderer.on("done-update-SevenDtoD", (event, data) => callback(data)),
+  onUpdateError: (callback) =>
+    ipcRenderer.on("error-update-SevenDtoD", (event, data) => callback(data)),
+  removeUpdateListeners: () => {
+    ipcRenderer.removeAllListeners("progress-update-SevenDtoD");
+    ipcRenderer.removeAllListeners("done-update-SevenDtoD");
+    ipcRenderer.removeAllListeners("error-update-SevenDtoD");
+  },
 });

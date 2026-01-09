@@ -34,8 +34,11 @@ class SevenDtoDDirsManager {
       darwin: path.join(this.gamePath(), "Mods"),
     });
 
-  installedModsPath = () =>
-    path.join(SettingsManager.getSetting("gamePathWithSevenDtoD"), "Mods");
+  installedModsPath = async () =>
+    path.join(
+      await SettingsManager.getSetting("gamePathWithSevenDtoD"),
+      "Mods"
+    );
 }
 
 module.exports = new SevenDtoDDirsManager();

@@ -11,7 +11,7 @@ const ValheimGameManager = require("../../../manager/Valheim/ValheimGameManager"
 
 async function ValheimInstall(event) {
   const callback = (text, processedBytes, totalBytes, percent, speed) => {
-    event.sender.send("progress-install-valheim", {
+    event.sender.send("progress-install-Valheim", {
       text,
       processedBytes: formatBytes(processedBytes),
       totalBytes: formatBytes(totalBytes),
@@ -41,11 +41,11 @@ async function ValheimInstall(event) {
 
     await ValheimVersionManager.updateLocalVersionConfig();
 
-    event.sender.send("done-install-valheim");
+    event.sender.send("done-install-Valheim");
     return { success: true };
   } catch (err) {
     console.error(err);
-    event.sender.send("error-install-valheim", { message: err.message });
+    event.sender.send("error-install-Valheim", { message: err.message });
     throw err;
   }
 }

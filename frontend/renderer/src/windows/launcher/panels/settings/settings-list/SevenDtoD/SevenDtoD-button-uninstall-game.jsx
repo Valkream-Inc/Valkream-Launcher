@@ -13,17 +13,30 @@ import SettingsBox from "../../component/settings-box/settings-box.jsx";
 const SevenDtoD_ButtonUninstallGame = () => {
   const { runAction } = useAction();
   const [isWaiting, setIsWaiting] = useState(false);
+  const [progress, setProgress] = useState("");
 
   const handleClick = () => {
     runAction(async () => {
       try {
         setIsWaiting(true);
-        await window.electron_Valheim_API.uninstallGame();
+        await window.electron_SevenDtoD_API.uninstallGame();
+
+        window.electron_SevenDtoD_API.onModsDataProgress((data) => {
+          setProgress(
+            `Analyse des mods en cours...
+              ${data.percent}% (${data.processedBytes}/${data.totalBytes}) à ${data.speed}/s`
+          );
+        });
+
+        await window.electron_SevenDtoD_API.getModsData();
+
         enqueueSnackbar("Jeu désinstallé !", { variant: "success" });
       } catch (error) {
         console.error(error);
         enqueueSnackbar("Jeu non désinstallé !", { variant: "error" });
       } finally {
+        window.electron_SevenDtoD_API.removeModsDataListeners();
+        setProgress("");
         setIsWaiting(false);
       }
     }, "uninstallGame");
@@ -31,7 +44,7 @@ const SevenDtoD_ButtonUninstallGame = () => {
 
   return (
     <>
-      <Wait isVisible={isWaiting} />
+      <Wait isVisible={isWaiting} text={progress} />
       <SettingsBox
         warn={false}
         text="Vous pouvez supprimer les fichiers de jeux valkream."

@@ -31,7 +31,7 @@ function Links() {
       />
       <Link url="https://valkream.com" icon={<WebIcon />} />
       <Link
-        url="https://top-serveurs.net/valheim/vote/valheim-valkream"
+        url="https://top-serveurs.net/Valheim/vote/Valheim-valkream"
         icon={
           <TopServerIcon sx={{ transform: "scale(2.4) translate(0,30%)" }} />
         }

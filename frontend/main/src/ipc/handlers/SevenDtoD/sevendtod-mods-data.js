@@ -10,7 +10,7 @@ const { formatBytes } = require("../../../utils/function/formatBytes");
 
 async function SevenDtoD_ModsDataHandler(event) {
   const callback = (processedBytes, totalBytes, percent, speed) => {
-    event.sender.send("progress-mods-data-sevendtod", {
+    event.sender.send("progress-mods-data-SevenDtoD", {
       processedBytes: formatBytes(processedBytes),
       totalBytes: formatBytes(totalBytes),
       percent,

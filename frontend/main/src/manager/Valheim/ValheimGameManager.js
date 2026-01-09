@@ -184,8 +184,14 @@ class ValheimGameManager {
   async uninstall() {
     await this.init();
     try {
-      await fse.remove(this.gameRootDir);
-      await fse.ensureDir(this.gameRootDir);
+      await fs.rm(this.gameRootDir, {
+        recursive: true,
+        force: true,
+        maxRetries: 5,
+        retryDelay: 200,
+      });
+
+      await fs.mkdir(this.gameRootDir, { recursive: true });
     } catch (err) {
       throw new Error(`Échec de la désinstallation : ${err.message}`);
     }

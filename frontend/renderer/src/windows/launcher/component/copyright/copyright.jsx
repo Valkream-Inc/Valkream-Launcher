@@ -30,7 +30,7 @@ function Copyright({ existPanels = true }) {
         display: activePanel === "settings" ? "none" : "block",
       }}
     >
-      © Valkream 2025 - v{versionLauncher}
+      © Valkream 2026 - v{versionLauncher}
     </div>
   );
 }

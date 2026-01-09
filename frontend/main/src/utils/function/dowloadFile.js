@@ -63,6 +63,7 @@ const downloadFile = (
         callback(p.transferred, totalSize, Math.round(p.percentage), p.speed);
       });
 
+      await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
       writer = fs.createWriteStream(destPath);
 
       response.data
