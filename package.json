@@ -1,6 +1,6 @@
 {
   "name": "Valkream-Launcher-Infra",
-  "description": "Launcher Valheim moddé pour Valkream et server de mise à jour",
+  "description": "Launcher Multi-Gaming moddé pour Valkream",
   "license": "MIT-NC",
   "private": true,
   "workspaces": {
