@@ -158,8 +158,6 @@ export default function SevenDtoDButton() {
           isAValidSteamGamePath,
         } = installationStatut;
 
-        console.log(installationStatut);
-
         const isConnected = isInternetConnected && isServerReachable;
 
         // Cas 0 : En cours de chargement

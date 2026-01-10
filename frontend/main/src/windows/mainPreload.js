@@ -169,7 +169,7 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   },
 
   // update
-  update: () => ipcRenderer.invoke("update"),
+  update: () => ipcRenderer.invoke("SevenDtoD-update"),
   onUpdateProgress: (callback) =>
     ipcRenderer.on("progress-update-SevenDtoD", (event, data) =>
       callback(data)

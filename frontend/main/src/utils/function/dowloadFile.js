@@ -17,7 +17,7 @@ const { consoleStreamAnswer } = require("./consoleStreamAnswer");
 
 axiosRetry(axios, {
   retries: 5,
-  retryDelay: (retryCount) => retryCount * 1500,
+  retryDelay: (retryCount) => retryCount * 1000,
   retryCondition: (error) =>
     error.code === "ECONNRESET" ||
     error.code === "ETIMEDOUT" ||

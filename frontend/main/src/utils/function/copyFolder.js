@@ -20,10 +20,10 @@ const { consoleStreamAnswer } = require("./consoleStreamAnswer");
 const copyFolder = async (
   srcDir,
   destDir,
-  callback = (downloadedBytes, totalBytes, percent, speed) =>
+  callback = ({ transferredBytes, totalBytes, percent, speed }) =>
     consoleStreamAnswer(
       `📁 Copie du dossier ${path.basename(srcDir)}: ${percent}% ` +
-        `(${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}) ` +
+        `(${formatBytes(transferredBytes)} / ${formatBytes(totalBytes)}) ` +
         `à ${formatBytes(speed)}/s`
     )
 ) => {
@@ -77,7 +77,12 @@ const copyFolder = async (
                   (transferredBytes / totalSize) * 100
                 );
 
-                callback(transferredBytes, totalSize, percent, p.speed);
+                callback({
+                  transferredBytes,
+                  totalBytes: totalSize,
+                  percent,
+                  speed: p.speed,
+                });
               });
 
               fs.createReadStream(srcPath)

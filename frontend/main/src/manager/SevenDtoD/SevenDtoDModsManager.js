@@ -60,7 +60,7 @@ class SevenDtoDModsManager {
   }
 
   async play(
-    callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
+    callback = (text, processedBytes, totalBytes, percent, speed) => {},
     text = "Copie des mods..."
   ) {
     this.init();
@@ -76,7 +76,15 @@ class SevenDtoDModsManager {
       });
       await fs.mkdir(installedGameModsDir, { recursive: true });
 
-      await copyFolder(this.gameModsDir, installedGameModsDir, callback);
+      await copyFolder(this.gameModsDir, installedGameModsDir, (data) =>
+        callback(
+          text,
+          data.transferredBytes,
+          data.totalBytes,
+          data.percent,
+          data.speed
+        )
+      );
     } catch (err) {
       throw new Error(`Échec du lancement du jeu : ${err.message}`);
     }
@@ -238,20 +246,15 @@ class SevenDtoDModsManager {
 
       // Fichiers à télécharger : Les nouveaux fichiers + les nouvelles versions des fichiers modifiés
       const filesToDownloadMap = { ...newFilesToDownload, ...modifiedFiles };
+      const modsFilesBaseUrl = await SevenDtoDLinksManager.modsFileBaseUrl();
       const downloads = Object.keys(filesToDownloadMap).map((filePath) => ({
-        url: this.modsFilesBaseUrl + filePath,
+        url: `${modsFilesBaseUrl}/${filePath}`,
         destPath: path.join(this.gameModsDir, filePath),
       }));
 
       // 2. Opérations de suppression (Supprimés + Anciens Modifiés)
       if (filesToDelete.size > 0) {
-        callback(
-          `Suppression de ${filesToDelete.size} fichiers obsolètes...`,
-          0,
-          0,
-          0,
-          0
-        );
+        callback(`Suppression de ${filesToDelete.size} fichiers obsolètes...`);
         const deletePromises = Array.from(filesToDelete).map((filePath) =>
           fse.remove(path.join(this.gameModsDir, filePath))
         );
@@ -260,13 +263,7 @@ class SevenDtoDModsManager {
 
       // 3. Opérations de déplacement (Renommés/Déplacés)
       if (movedFiles.length > 0) {
-        callback(
-          `Déplacement de ${movedFiles.length} fichiers renommés...`,
-          0,
-          0,
-          0,
-          0
-        );
+        callback(`Déplacement de ${movedFiles.length} fichiers renommés...`);
         const movePromises = movedFiles.map(({ oldPath, newPath }) =>
           fse.move(
             path.join(this.gameModsDir, oldPath),
@@ -279,7 +276,7 @@ class SevenDtoDModsManager {
 
       // 4. Opérations de téléchargement (Nouveaux + Modifiés)
       if (downloads.length > 0) {
-        callback(text, 0, 0, 0, 0);
+        callback(text);
         await dowloadMultiplefiles(downloads, (data) =>
           callback(
             text,
