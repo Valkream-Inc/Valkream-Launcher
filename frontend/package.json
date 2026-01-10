@@ -1,7 +1,7 @@
 {
   "name": "Valkream-Launcher",
-  "version": "2.1.0",
-  "description": "Launcher Valheim moddé pour Valkream",
+  "version": "2.2.0",
+  "description": "Launcher Multi-Gaming moddé pour Valkream (Valheim, 7 Days To Die, etc.)",
   "author": "Valkream Team",
   "scripts": {
     "start": "concurrently \"npm run start:react\" \"npm run start:electron\"",
@@ -16,7 +16,7 @@
     "build:electron": "node ./build-script.js --obf=true",
     "rebuild": "electron-rebuild"
   },
-  "license": "MIT",
+  "license": "MIT-NC",
   "nodemonConfig": {
     "ext": "js,json",
     "ignore": "**/src/renderer/**"
@@ -47,6 +47,7 @@
     "@react-three/drei": "^10.7.5",
     "@react-three/fiber": "^9.3.0",
     "axios": "^1.10.0",
+    "axios-retry": "^4.5.0",
     "better-sqlite3": "^12.2.0",
     "crypto": "^1.0.1",
     "electron-updater": "^6.1.8",

@@ -1,6 +1,6 @@
 /**
  * @author Valkream Team
- * @license MIT - https://opensource.org/licenses/MIT
+ * @license MIT-NC
  */
 
 const axios = require("axios");
@@ -9,20 +9,18 @@ const { GameDig } = require("gamedig");
 
 const { baseUrl, serversInfos } = require("../constants");
 const LinksManager = require("./linksManager");
+const noCache = require("../constants/noCaheHeader");
 
 class InfosManager {
   constructor() {
     this.isServerReachable = null;
+    this.isInternetConnected = null;
   }
 
-  async getIsServerReachableFromInternal(forceRefresh = false) {
-    if (this.isServerReachable === null || forceRefresh) {
-      await this.getIsServerReachable();
-    }
-    return this.isServerReachable;
-  }
+  async getIsInternetConnected(hostname = "google.com", force = false) {
+    if (!force && this.isInternetConnected !== null)
+      return this.isInternetConnected;
 
-  async getIsInternetConnected(hostname = "google.com") {
     return new Promise((resolve) => {
       dns.lookup(hostname, (err) => {
         resolve(!(err && err.code === "ENOTFOUND"));
@@ -30,9 +28,12 @@ class InfosManager {
     });
   }
 
-  async getIsServerReachable(url = baseUrl) {
+  async getIsServerReachable(url = baseUrl, force = false) {
+    if (!force && this.isServerReachable !== null)
+      return this.isServerReachable;
+
     try {
-      await axios.get(url, { timeout: 3000 });
+      await axios.get(url, { timeout: 3000, ...noCache });
       this.isServerReachable = true;
       return true;
     } catch (error) {
@@ -44,9 +45,10 @@ class InfosManager {
 
   async getEvent(game) {
     try {
-      if (!(await this.getIsServerReachableFromInternal())) return false;
+      if (!(await this.getIsServerReachable())) return false;
       const res = await axios.get(LinksManager.eventUrl(game), {
         timeout: 3000,
+        ...noCache,
       });
       return res.data;
     } catch (err) {
@@ -57,9 +59,10 @@ class InfosManager {
 
   async getMaintenance(game) {
     try {
-      if (!(await this.getIsServerReachableFromInternal())) return false;
+      if (!(await this.getIsServerReachable())) return false;
       const res = await axios.get(LinksManager.maintenanceUrl(game), {
         timeout: 3000,
+        ...noCache,
       });
       return res.data;
     } catch (err) {

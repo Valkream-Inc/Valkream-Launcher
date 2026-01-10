@@ -1,6 +1,6 @@
 /**
  * @author Valkream Team
- * @license MIT - https://opensource.org/licenses/MIT
+ * @license MIT-NC
  */
 
 import React, {
@@ -38,11 +38,14 @@ export const InfosProvider = ({ children }) => {
     loadingState.infosLoaded && loadingState.installationStatusLoaded
   );
 
-  const actualGameRef = useRef(null);
-  const actionLoadingRef = useRef(null);
+  const actualGameRef = useRef(null); // Pour vérifier si le jeu a changé
+  const actionLoadingRef = useRef(null); // Pour vérifier si une nouvelle action est en cours
+  const intervalRef = useRef(null); // Pour lancer une fois à blanc avant de lancer la boucle
+  const isLoadingRef = useRef(false); // Pour empêcher les appels parallèles
+
   useEffect(() => {
     if (
-      !window.electron_API?.getInstallationStatut ||
+      !window.electron_Valheim_API?.getInstallationStatut ||
       !window.electron_API?.getInfos
     ) {
       console.warn(
@@ -67,13 +70,28 @@ export const InfosProvider = ({ children }) => {
       });
     }
 
+    const GAMES_APIS = {
+      Valheim: window.electron_Valheim_API,
+      SevenDtoD: window.electron_SevenDtoD_API,
+    };
+
     const getAllInfos = async () => {
+      // Empêcher les appels parallèles
+      if (isLoadingRef.current) return;
+      isLoadingRef.current = true;
+
       try {
         // get installation statut
-        if (!actionLoading && actualGameRef.current === "Valheim") {
-          const statut = await window.electron_API.getInstallationStatut();
-          if (actualGameRef.current !== actualGame) return; // Récupération des infos uniquement si le jeu n'a pas changé
-          if (actionLoadingRef.current) return; // Récupération des infos uniquement si l'action n'a pas changé
+        if (!actionLoading && GAMES_APIS[actualGame]) {
+          const statut = await GAMES_APIS[actualGame].getInstallationStatut();
+          if (actualGameRef.current !== actualGame) {
+            isLoadingRef.current = false;
+            return; // Récupération des infos uniquement si le jeu n'a pas changé
+          }
+          if (actionLoadingRef.current) {
+            isLoadingRef.current = false;
+            return; // Récupération des infos uniquement si l'action n'a pas changé
+          }
           setIsInternetConnected(statut?.isInternetConnected || false);
           setIsServerReachable(statut?.isServerReachable || false);
           setInstallationStatut(statut);
@@ -85,7 +103,10 @@ export const InfosProvider = ({ children }) => {
 
         // get other infos
         const infos = await window.electron_API.getInfos(actualGame);
-        if (actualGameRef.current !== actualGame) return; // Récupération des infos uniquement si le jeu n'a pas changé
+        if (actualGameRef.current !== actualGame) {
+          isLoadingRef.current = false;
+          return; // Récupération des infos uniquement si le jeu n'a pas changé
+        }
         setServerInfos(infos?.serverInfos || false);
         setEvent(infos?.event || false);
         if (!actionLoading && !actionLoadingRef.current)
@@ -93,13 +114,31 @@ export const InfosProvider = ({ children }) => {
         setLoadingState((prev) => ({ ...prev, infosLoaded: true }));
       } catch (error) {
         console.error("Erreur lors de la récupération des infos :", error);
+      } finally {
+        isLoadingRef.current = false;
       }
     };
 
-    const interval = setInterval(getAllInfos, 1000);
-    getAllInfos();
+    // Nettoyer l'interval précédent s'il existe
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
-    return () => clearInterval(interval);
+    // Appeler la première fois et attendre la réponse avant de lancer l'intervalle
+    getAllInfos().then(() => {
+      // Vérifier que le composant n'a pas été démonté ou que les dépendances n'ont pas changé
+      if (intervalRef.current === null) {
+        intervalRef.current = setInterval(getAllInfos, 1000);
+      }
+    });
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [actionLoading, actualGame]);
 
   const contextValue = {

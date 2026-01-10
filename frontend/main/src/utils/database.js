@@ -1,6 +1,6 @@
 /**
  * @author Valkream Team
- * @license MIT - https://opensource.org/licenses/MIT
+ * @license MIT-NC
  */
 
 const DatabaseLib = require("better-sqlite3");
@@ -12,7 +12,7 @@ const DirsManager = require("../manager/dirsManager.js");
 
 class Database {
   constructor() {
-    const dbPath = path.join(DirsManager.rootPath(), "databases");
+    const dbPath = path.join(DirsManager.dbPath(), "databases");
     if (!fs.existsSync(dbPath)) fs.mkdirSync(dbPath, { recursive: true });
     const fileName = isDev ? "Databases.sqlite" : "Databases.db";
     this.db = new DatabaseLib(path.join(dbPath, fileName));

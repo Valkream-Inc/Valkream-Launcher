@@ -1,12 +1,12 @@
 /**
  * @author Valkream Team
- * @license MIT - https://opensource.org/licenses/MIT
+ * @license MIT-NC
  */
 
 import React, { useState, useEffect } from "react";
 import "./wait.css";
 
-export default function Wait({ isVisible }) {
+export default function Wait({ isVisible, text }) {
   const [shouldRender, setShouldRender] = useState(isVisible);
 
   useEffect(() => {
@@ -27,6 +27,7 @@ export default function Wait({ isVisible }) {
   return (
     <div className={`wait-container ${!isVisible ? "hidden" : ""}`}>
       <div className="spinner"></div>
+      {text && <div className="wait-text">{text}</div>}
     </div>
   );
 }

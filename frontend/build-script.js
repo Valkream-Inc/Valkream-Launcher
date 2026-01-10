@@ -1,6 +1,6 @@
 /**
  * @author Valkream Team
- * @license MIT - https://opensource.org/licenses/MIT
+ * @license MIT-NC
  */
 
 const fs = require("fs");
@@ -123,7 +123,7 @@ class Index {
             generateUpdatesFilesForAllChannels: true,
             appId: name,
             productName: name,
-            copyright: "Copyright © 2025 Valkream Team",
+            copyright: "Copyright © 2026 Valkream Team",
             // eslint-disable-next-line no-template-curly-in-string
             artifactName: `${name}-${build.type}-${"${os}-${arch}.${ext}"}`,
             extraMetadata: { main: "build/app.js" },

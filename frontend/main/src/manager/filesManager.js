@@ -1,6 +1,6 @@
 /**
  * @author Valkream Team
- * @license MIT - https://opensource.org/licenses/MIT
+ * @license MIT-NC
  */
 
 const path = require("path");
@@ -20,35 +20,6 @@ class FilesManager {
 
   updaterDetailsPath = () =>
     path.join(DirsManager.rootPath(), "updater-details.flag");
-
-  gameZipPath = () => path.join(DirsManager.gameRootPath(), "game.zip");
-
-  bepInExZipPath = () => path.join(DirsManager.gameRootPath(), "bepinex.zip");
-
-  modpackZipPath = () => path.join(DirsManager.gameRootPath(), "modpack.zip");
-
-  gameExePath = () => {
-    const map = {
-      win32: path.join(DirsManager.gamePath(), "Valheim.exe"),
-      linux: path.join(DirsManager.gamePath(), "Valheim"),
-      darwin: path.join(DirsManager.gamePath(), "Valheim"),
-    };
-
-    const exe = map[platform()];
-    if (!exe) {
-      throw new Error(`Unsupported platform: ${platform()}`);
-    }
-    return exe;
-  };
-
-  gameVersionFilePath = () =>
-    path.join(DirsManager.gameRootPath(), "latest.yml");
-
-  extractManifestPath = () =>
-    path.join(DirsManager.downloadModPackPath(), "manifest.json");
-
-  installedManifestPath = () =>
-    path.join(DirsManager.gameRootPath(), "manifest.json");
 }
 
 module.exports = new FilesManager();

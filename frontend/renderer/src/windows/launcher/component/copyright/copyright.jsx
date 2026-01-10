@@ -1,6 +1,6 @@
 /**
  * @author Valkream Team
- * @license MIT - https://opensource.org/licenses/MIT
+ * @license MIT-NC
  */
 
 import React, { useEffect, useState, memo } from "react";
@@ -30,7 +30,7 @@ function Copyright({ existPanels = true }) {
         display: activePanel === "settings" ? "none" : "block",
       }}
     >
-      © Valkream 2025 - v{versionLauncher}
+      © Valkream 2026 - v{versionLauncher}
     </div>
   );
 }

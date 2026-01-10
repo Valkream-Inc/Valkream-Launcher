@@ -4,6 +4,7 @@
     "**/build/": true,
     "**/temp/": true,
     "**/LICENSE": true,
+    "**/LICENSE.md": true,
     "**.gitattributes": true,
     "**/yarn.lock": true
   }

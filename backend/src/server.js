@@ -1,3 +1,8 @@
+/**
+ * @author Valkream Team
+ * @license MIT-NC
+ */
+
 const express = require("express");
 const log = require("./components/log.component");
 
@@ -16,7 +21,11 @@ const loggerMiddleware = (req, res, next) => {
 };
 
 app.use(loggerMiddleware);
-app.use(express.static("public"));
+app.use(
+  express.static("public", {
+    dotfiles: "allow",
+  })
+);
 
 // Home page
 app.get("/", (req, res) => {
