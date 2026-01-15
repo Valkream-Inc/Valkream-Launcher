@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Get version
         id: get_version
@@ -45,27 +45,21 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 22.x
-
-      - name: Set up Python 3.11 (Fixes 'distutils' error for node-gyp)
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install native dependencies (lzma-native)
-        run: pip install setuptools
+          node-version: "22.17.0"
+          cache: "yarn"
+          cache-dependency-path: "./yarn.lock"
 
       - name: Install dependencies
-        run: npm install
-        working-directory: ./frontend
+        run: yarn install --frozen-lockfile
+        working-directory: ./
 
-      - name: Build Electron launcher via custom script
-        run: npm run build
+      - name: Build Electron launcher
+        run: yarn run build
         working-directory: ./frontend
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
@@ -120,10 +114,14 @@ jobs:
           name: Release ${{ needs.create-release.outputs.version }}
           files: |
             ./combined-install-win.zip
-            ./combined-install-linux.zip
-            ./combined-install-mac.zip
             ./combined-update-win.zip
-            ./combined-update-linux.zip
-            ./combined-update-mac.zip
+          # Désactivations du cross plateforme pour le momment.
+          # files: |
+          #   ./combined-install-win.zip
+          #   ./combined-install-linux.zip
+          #   ./combined-install-mac.zip
+          #   ./combined-update-win.zip
+          #   ./combined-update-linux.zip
+          #   ./combined-update-mac.zip
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}

@@ -67,7 +67,12 @@ class Index {
           console.log(`Obfuscate ${path}`);
           let obf = JavaScriptObfuscator.obfuscate(code, {
             optionsPreset: "medium-obfuscation",
+            target: "node",
             disableConsoleOutput: false,
+            transformObjectKeys: false,
+            rotateStringArray: true,
+            stringArray: true,
+            identifierNamesGenerator: "mangled",
           });
           fs.writeFileSync(`${folder}/${fileName}`, obf.getObfuscatedCode(), {
             encoding: "utf-8",

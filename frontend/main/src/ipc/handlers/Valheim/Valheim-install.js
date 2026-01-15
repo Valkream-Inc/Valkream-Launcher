@@ -5,9 +5,9 @@
 
 const { formatBytes } = require("../../../utils/function/formatBytes.js");
 
-const ValheimVersionManager = require("../../../manager/Valheim/ValheimVersionManager");
-const ValheimThunderstoreManager = require("../../../manager/Valheim/ValheimThunderstoreManager");
-const ValheimGameManager = require("../../../manager/Valheim/ValheimGameManager");
+const ValheimVersionManager = require("../../../manager/Valheim/ValheimVersionManager.js");
+const ValheimThunderstoreManager = require("../../../manager/Valheim/ValheimThunderstoreManager.js");
+const ValheimGameManager = require("../../../manager/Valheim/ValheimGameManager.js");
 
 async function ValheimInstall(event) {
   const callback = (text, processedBytes, totalBytes, percent, speed) => {

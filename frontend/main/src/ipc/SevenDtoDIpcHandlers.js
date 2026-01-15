@@ -7,9 +7,9 @@ const { ipcMain } = require("electron");
 
 const SevenDtoD_ModsDataHandler = require("./handlers/SevenDtoD/SevenDtoD-mods-data.js");
 const SevenDtoD_InstallationStatut = require("./handlers/SevenDtoD/SevenDtoD-installation-statut.js");
-const SevenDtoD_Install = require("./handlers/SevenDtoD/sevendotod-install.js");
-const SevenDtoD_Play = require("./handlers/SevenDtoD/sevendotod-play.js");
-const SevenDtoD_Update = require("./handlers/SevenDtoD/sevendotod-update.js");
+const SevenDtoD_Install = require("./handlers/SevenDtoD/SevenDtoD-install.js");
+const SevenDtoD_Play = require("./handlers/SevenDtoD/SevenDtoD-play.js");
+const SevenDtoD_Update = require("./handlers/SevenDtoD/SevenDtoD-update.js");
 const SevenDtoDHachManager = require("../manager/SevenDtoD/SevenDtoDHashManager.js");
 const SevenDtoDSteamManager = require("../manager/SevenDtoD/SevenDtoDSteamManager.js");
 const SevenDtoDGameManager = require("../manager/SevenDtoD/SevenDtoDGameManager.js");
