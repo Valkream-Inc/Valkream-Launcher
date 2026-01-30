@@ -37,8 +37,11 @@ class SevenDtoDDirsManager {
   installedModsPath = async () =>
     path.join(
       await SettingsManager.getSetting("gamePathWithSevenDtoD"),
-      "Mods"
+      "Mods",
     );
+
+  modsFixPath = () => path.join(this.gameRootPath(), "ModsFix");
+  modsFixFilesPath = () => path.join(this.modsFixPath(), "files");
 }
 
 module.exports = new SevenDtoDDirsManager();

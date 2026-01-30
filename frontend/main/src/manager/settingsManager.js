@@ -21,7 +21,8 @@ class SettingsManager {
       boostgraphicModsEnabledWithValheim: false,
       adminModsEnabledWithValheim: false,
       // SevenDtoD
-      gamePathWithSevenDtoD: null,
+      launchSteamWithSevenDtoD: true,
+      launcherBehaviorWithSevenDtoD: "close",
     };
   }
 

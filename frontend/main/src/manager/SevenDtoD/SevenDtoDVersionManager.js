@@ -8,22 +8,18 @@ const fs = require("fs/promises");
 const yaml = require("yaml");
 const { hashFolder } = require("../../utils/function/hashFolder");
 
-const ValheimDirsManager = require("./ValheimDirsManager.js");
 const ValheimFilesManager = require("./ValheimFilesManager.js");
 const ValheimLinksManager = require("./ValheimLinksManager.js");
 const InfosManager = require("../infosManager.js");
 const noCache = require("../../constants/noCaheHeader.js");
 
-class ValheimVersionManager {
+class SevenDtoDVersionManager {
   constructor() {
     this.onlineVersionConfig = null;
     this.localVersionConfig = null;
   }
 
   async init() {
-    this.BepInExConfigDir = ValheimDirsManager.bepInExConfigPath();
-    this.BepInExPluginsDir = ValheimDirsManager.bepInExPluginsPath();
-
     this.gameVersionFileLink = await ValheimLinksManager.gameVersionUrl();
     this.gameVersionFilePath = ValheimFilesManager.gameVersionFilePath();
   }
@@ -80,46 +76,6 @@ class ValheimVersionManager {
       return false;
     }
   }
-
-  async checkPluginsAndConfig() {
-    await this.init();
-    const {
-      onlineConfigHash,
-      onlinePluginsHash,
-      localConfigHash,
-      localPluginsHash,
-    } = await this.getHash();
-
-    if (
-      onlinePluginsHash !== localPluginsHash ||
-      onlineConfigHash !== localConfigHash
-    ) {
-      throw new Error("Plugins or configs are not up to date");
-    }
-  }
-
-  async getHash() {
-    await this.init();
-    const ValheimGameManager = require("./ValheimGameManager.js");
-
-    await ValheimGameManager.preserveGameFolder();
-    await ValheimGameManager.clean();
-
-    const [pluginsHash, configsHash] = await Promise.all([
-      hashFolder(this.BepInExPluginsDir, "sha256", 10),
-      hashFolder(this.BepInExConfigDir, "sha256", 10),
-    ]);
-
-    await ValheimGameManager.restoreGameFolder();
-
-    const online = await this.getOnlineVersionConfig();
-    return {
-      localPluginsHash: pluginsHash,
-      localConfigHash: configsHash,
-      onlinePluginsHash: online?.modpack?.hash?.plugins,
-      onlineConfigHash: online?.modpack?.hash?.config,
-    };
-  }
 }
 
-module.exports = new ValheimVersionManager();
+module.exports = new SevenDtoDVersionManager();
