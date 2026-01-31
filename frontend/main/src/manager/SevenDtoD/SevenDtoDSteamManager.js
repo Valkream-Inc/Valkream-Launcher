@@ -13,14 +13,6 @@ class SevenDtoDSteamManager {
       console.error("Impossible d'ouvrir la page Steam :", err.message);
     }
   }
-  
-  async start() {
-    try {
-      await shell.openExternal("steam://rungameid/251570");
-    } catch (err) {
-      console.error("Impossible de lancer le jeu via Steam :", err.message);
-    }
-  }
 }
 
 module.exports = new SevenDtoDSteamManager();

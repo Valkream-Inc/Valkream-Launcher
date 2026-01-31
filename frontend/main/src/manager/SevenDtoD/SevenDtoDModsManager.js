@@ -6,6 +6,7 @@
 const fs = require("fs/promises");
 const fse = require("fs-extra");
 const path = require("path");
+const { shell } = require("electron");
 
 const SevenDtoDDirsManager = require("./SevenDtoDDirsManager.js");
 const SevenDtoDFilesManger = require("./SevenDtoDFilesManager.js");
@@ -344,6 +345,17 @@ class SevenDtoDModsManager {
       return true;
     } catch (err) {
       throw new Error(`Échec de la génération du fix : ${err.message}`);
+    }
+  }
+
+  async openFixFolder() {
+    this.init();
+    try {
+      const modFixFolder = SevenDtoDDirsManager.modsFixPath();
+      await fs.access(modFixFolder);
+      return shell.openPath(modFixFolder);
+    } catch {
+      throw new Error("Le dossier de fix n'existe pas !");
     }
   }
 }

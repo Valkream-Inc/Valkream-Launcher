@@ -4,8 +4,9 @@
  */
 
 const InfosManager = require("../../../manager/infosManager");
+const SevenDtoDGameManager = require("../../../manager/SevenDtoD/SevenDtoDGameManager");
 const SevenDtoDHashManager = require("../../../manager/SevenDtoD/SevenDtoDHashManager");
-const SecenDtoDSteamManager = require("../../../manager/SevenDtoD/SevenDtoDSteamManager");
+const SevenDtoDVersionManager = require("../../../manager/SevenDtoD/SevenDtoDVersionManager");
 
 async function SevenDtoD_InstallationStatut() {
   const [isServerReachable, isInternetConnected] = await Promise.all([
@@ -13,23 +14,31 @@ async function SevenDtoD_InstallationStatut() {
     InfosManager.getIsInternetConnected(undefined, true),
   ]);
 
-  await Promise.all([
-    await SevenDtoDHashManager.getLocalHash(),
-    await SevenDtoDHashManager.getOnlineHash(true),
-  ]);
+  await SevenDtoDHashManager.getLocalHash();
 
-  const [isInstalled, isUpToDate, isAValidSteamGamePath] = await Promise.all([
+  const [isHashInstalled, isGameInstalled] = await Promise.all([
     SevenDtoDHashManager.getIsInstalled(),
     SevenDtoDHashManager.getIsUpToDate(),
-    SecenDtoDSteamManager.getIsAValidSteamGamePath(),
+    SevenDtoDGameManager.getIsInstalled(),
   ]);
 
+  const isInstalled = isGameInstalled && isHashInstalled;
+
+  const [isUpToDate, isMajorUpdate, gameVersion] = await Promise.all([
+    SevenDtoDVersionManager.isUpToDate(),
+    SevenDtoDVersionManager.isMajorUpdate(),
+    SevenDtoDVersionManager.getLocalVersion(),
+  ]);
+
+  if (!isUpToDate) await SevenDtoDHashManager.getOnlineHash(true);
+
   return {
-    isInternetConnected,
     isServerReachable,
+    isInternetConnected,
     isInstalled,
     isUpToDate,
-    isAValidSteamGamePath,
+    isMajorUpdate,
+    gameVersion,
   };
 }
 

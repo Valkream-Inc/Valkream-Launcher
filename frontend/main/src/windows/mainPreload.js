@@ -99,13 +99,13 @@ contextBridge.exposeInMainWorld("electron_Valheim_API", {
   customMods: () => ipcRenderer.invoke("Valheim-custom-mods"),
   onCustomModsProgress: (callback) =>
     ipcRenderer.on("progress-custom-mods-Valheim", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   onCustomModsDone: (callback) =>
     ipcRenderer.on("done-custom-mods-Valheim", (event, data) => callback(data)),
   onCustomModsError: (callback) =>
     ipcRenderer.on("error-custom-mods-Valheim", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   removeCustomModsListeners: () => {
     ipcRenderer.removeAllListeners("progress-custom-mods-Valheim");
@@ -120,18 +120,17 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   // infos
   getInstallationStatut: () =>
     ipcRenderer.invoke("SevenDtoD-get-installation-statut"),
-  testIsSteamGamePathValid: (path) =>
-    ipcRenderer.invoke("SevenDtoD-test-is-steam-game-path-valid", path),
 
   // utils
   openGameFolder: () => ipcRenderer.invoke("SevenDtoD-open-game-folder"),
+  openModsFixFolder: () => ipcRenderer.invoke("SevenDtoD-open-mods-fix-folder"),
   uninstallGame: () => ipcRenderer.invoke("SevenDtoD-uninstall-game"),
 
   // mods data
   getModsData: () => ipcRenderer.invoke("SevenDtoD-get-mods-data"),
   onModsDataProgress: (callback) =>
     ipcRenderer.on("progress-mods-data-SevenDtoD", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   removeModsDataListeners: () =>
     ipcRenderer.removeAllListeners("progress-mods-data-SevenDtoD"),
@@ -142,7 +141,7 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   install: () => ipcRenderer.invoke("SevenDtoD-install"),
   onInstallProgress: (callback) =>
     ipcRenderer.on("progress-install-SevenDtoD", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   onInstallDone: (callback) =>
     ipcRenderer.on("done-install-SevenDtoD", (event, data) => callback(data)),
@@ -172,7 +171,7 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   update: () => ipcRenderer.invoke("SevenDtoD-update"),
   onUpdateProgress: (callback) =>
     ipcRenderer.on("progress-update-SevenDtoD", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   onUpdateDone: (callback) =>
     ipcRenderer.on("done-update-SevenDtoD", (event, data) => callback(data)),

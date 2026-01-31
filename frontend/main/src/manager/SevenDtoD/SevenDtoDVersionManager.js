@@ -49,7 +49,7 @@ class SevenDtoDVersionManager {
     }
   }
 
-  async isVersionUpToDate() {
+  async isUpToDate() {
     await this.init();
     const [local, online] = await Promise.all([
       this.getLocalVersionConfig(),
@@ -58,6 +58,25 @@ class SevenDtoDVersionManager {
     return (
       local?.version && online?.version && local.version === online.version
     );
+  }
+
+  async isMajorUpdate() {
+    const [local, online] = await Promise.all([
+      this.getLocalVersionConfig(),
+      this.getOnlineVersionConfig(),
+    ]);
+
+    const majorLocal = parseInt((local?.version ?? "0.0.0").split(".")[0], 10);
+    const majorOnline = parseInt(
+      (online?.version ?? "0.0.0").split(".")[0],
+      10,
+    );
+    isMajorUpdate = majorLocal !== majorOnline;
+  }
+
+  async getLocalVersion() {
+    const [local] = await Promise.all([this.getLocalVersionConfig()]);
+    return this.getIsInstalled() ? local?.version : "0.0.0";
   }
 
   async updateLocalVersionConfig(content) {
