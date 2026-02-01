@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import { Box, Card, CardActionArea, Grid, Typography } from "@mui/material";
+import { Box, Card, CardActionArea, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React from "react";
 
@@ -15,13 +15,11 @@ import { useTheme } from "../../context/theme.context.jsx";
 const games = [
   {
     id: "Valheim",
-    name: "Valheim Valkream",
-    icon: "./images/Valheim-icon.png",
+    icon: "./images/Valheim-name.png",
   },
   {
     id: "SevenDtoD",
-    name: "7 Days to Valkream",
-    icon: "./images/SevenDtoD-icon.png",
+    icon: "./images/SevenDtoD-name.png",
   },
 ];
 
@@ -33,7 +31,7 @@ const ModernGameCard = styled(Card)(() => ({
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {
     transform: "scale(1.05)",
-    boxShadow: "0 0 20px rgba(255,255,255,0.2)",
+    boxShadow: "0 0 20px rgba(255, 255, 255, 0.96)",
   },
 }));
 
@@ -118,45 +116,61 @@ export default function ChooseGames() {
   };
 
   return (
-    <Box
-      sx={{
-        backgroundColor: backgroundColor(),
-        minHeight: "100vh",
-        minWidth: "100vw",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Grid
-        container
-        spacing={3}
-        justifyContent="center"
-        alignItems="center"
-        maxWidth="800px"
+    <>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "0.5rem",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
-        {games.map((game) => (
-          <Grid key={game.id}>
-            <GameCard>
-              <CardActionArea onClick={() => handleClick(game.id)}>
-                <Box
-                  sx={{
-                    p: 4,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: 180,
-                  }}
-                >
+        <img
+          style={{
+            margin: "1cm",
+            height: "20vh",
+            minHeight: "3cm",
+            maxHeight: "10cm",
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
+          }}
+          src="./images/icon/Valkream-icon-with-name.png"
+          alt="Valkream"
+        />
+      </Box>
+
+      <Box
+        sx={{
+          backgroundColor: backgroundColor(),
+          minHeight: "100vh",
+          minWidth: "100vw",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Grid
+          container
+          spacing={3}
+          justifyContent="center"
+          alignItems="center"
+          maxWidth="800px"
+        >
+          {games.map((game) => (
+            <Grid key={game.id}>
+              <GameCard>
+                <CardActionArea onClick={() => handleClick(game.id)}>
                   <Box
                     sx={{
-                      mb: 1,
-                      width: 64,
-                      height: 64,
+                      p: 4,
                       display: "flex",
+                      flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
+                      height: 100,
                     }}
                   >
                     {typeof game.icon === "string" ? (
@@ -174,13 +188,12 @@ export default function ChooseGames() {
                       game.icon
                     )}
                   </Box>
-                  <Typography variant="h6">{game.name}</Typography>
-                </Box>
-              </CardActionArea>
-            </GameCard>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
+                </CardActionArea>
+              </GameCard>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    </>
   );
 }

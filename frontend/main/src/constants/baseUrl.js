@@ -5,6 +5,8 @@
 
 const isDev = require("./isDev");
 
-const baseUrl = isDev ? "http://localhost:3000" : "https://play.valkream.com";
+const baseUrl = isDev
+  ? "https://play.valkream.com"
+  : "https://play.valkream.com";
 
 module.exports = baseUrl;

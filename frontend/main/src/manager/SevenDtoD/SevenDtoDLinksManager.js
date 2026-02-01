@@ -5,12 +5,15 @@
 
 const { baseUrl } = require("../../constants");
 const { toValidUrl } = require("../../utils");
+const { platform } = require("os");
 
 class SevenDtoDLinksManager {
   async gameVersionUrl() {
     const SettingsManager = require("../settingsManager");
     const isBeta = await SettingsManager.getSetting("betaEnabled");
-    return `${baseUrl}/games/SevenDtoD/latest/latest${isBeta ? ".beta" : ""}.yml`;
+    return `${baseUrl}/games/SevenDtoD/latest/latest${
+      isBeta ? ".beta" : ""
+    }.yml`;
   }
 
   async gameZipLink() {

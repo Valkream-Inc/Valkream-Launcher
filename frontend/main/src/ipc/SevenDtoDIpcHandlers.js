@@ -10,29 +10,28 @@ const SevenDtoD_InstallationStatut = require("./handlers/SevenDtoD/SevenDtoD-ins
 const SevenDtoD_Install = require("./handlers/SevenDtoD/SevenDtoD-install.js");
 const SevenDtoD_Play = require("./handlers/SevenDtoD/SevenDtoD-play.js");
 const SevenDtoD_Update = require("./handlers/SevenDtoD/SevenDtoD-update.js");
+const SevenDtoD_FixMods = require("./handlers/SevenDtoD/SevenDtoD-fix-mods.js");
+
 const SevenDtoDHachManager = require("../manager/SevenDtoD/SevenDtoDHashManager.js");
 const SevenDtoDGameManager = require("../manager/SevenDtoD/SevenDtoDGameManager.js");
-const SevenDtoDModsManager = require("../manager/SevenDtoD/SevenDtoDModsManager.js");
 
 function SevenDtoDIpcHandlers() {
   // infos
   ipcMain.handle(
     "SevenDtoD-get-installation-statut",
-    async () => await SevenDtoD_InstallationStatut(),
+    async () => await SevenDtoD_InstallationStatut()
   );
+
   // utils
   ipcMain.handle(
     "SevenDtoD-open-game-folder",
-    async () => await SevenDtoDGameManager.openFolder(),
-  );
-  ipcMain.handle(
-    "SevenDtoD-open-mods-fix-folder",
-    async () => await SevenDtoDModsManager.openFixFolder(),
+    async () => await SevenDtoDGameManager.openFolder()
   );
   ipcMain.handle(
     "SevenDtoD-uninstall-game",
-    async () => await SevenDtoDGameManager.uninstall(),
+    async () => await SevenDtoDGameManager.uninstall()
   );
+
   // mods data
   ipcMain.handle("SevenDtoD-get-mods-data", async (event) => {
     return await SevenDtoD_ModsDataHandler(event);
@@ -40,19 +39,23 @@ function SevenDtoDIpcHandlers() {
   ipcMain.handle("SevenDtoD-get-local-hash-data", async () => {
     return JSON.stringify(await SevenDtoDHachManager.getLocalHash(), null, 2);
   });
+  ipcMain.handle(
+    "SevenDtoD-fix-mods",
+    async (event) => await SevenDtoD_FixMods(event)
+  );
 
   // installation / start / update
   ipcMain.handle(
     "SevenDtoD-install",
-    async (event) => await SevenDtoD_Install(event),
+    async (event) => await SevenDtoD_Install(event)
   );
   ipcMain.handle(
     "SevenDtoD-play",
-    async (event) => await SevenDtoD_Play(event),
+    async (event) => await SevenDtoD_Play(event)
   );
   ipcMain.handle(
     "SevenDtoD-update",
-    async (event) => await SevenDtoD_Update(event),
+    async (event) => await SevenDtoD_Update(event)
   );
 }
 

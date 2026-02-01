@@ -8,10 +8,10 @@ import Typography from "@mui/material/Typography";
 import { keyframes } from "@mui/system";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 
+import Wait from "../../../component/wait/wait.jsx";
 import { useTheme } from "../../../context/theme.context.jsx";
 import getModsThemeStyles from "./components/ModsStyle.jsx";
 import ModsSyncTable from "./components/ModsSyncTable";
-import Wait from "../../../component/wait/wait.jsx";
 
 const pulse = keyframes`
     0%, 100% { opacity: 1; }

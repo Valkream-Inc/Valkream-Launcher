@@ -9,8 +9,8 @@ const { platform } = require("os");
 const SevenDtoDDirsManager = require("./SevenDtoDDirsManager");
 
 class SevenDtoDFilesManager {
-  gameZipPath = async () =>
-    path.join(SevenDtoDDirsManager.gameRootPath, "game.zip");
+  gameZipPath = () =>
+    path.join(SevenDtoDDirsManager.gameRootPath(), "game.zip");
 
   gameExePath = async () => {
     const map = {

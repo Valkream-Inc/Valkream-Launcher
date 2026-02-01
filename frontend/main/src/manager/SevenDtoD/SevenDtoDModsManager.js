@@ -32,7 +32,7 @@ class SevenDtoDModsManager {
 
   async install(
     callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
-    text = "Téléchargement des mods...",
+    text = "Téléchargement des mods..."
   ) {
     this.init();
     try {
@@ -52,8 +52,8 @@ class SevenDtoDModsManager {
           data.downloadedBytes,
           data.totalBytes,
           data.percent,
-          data.speed,
-        ),
+          data.speed
+        )
       );
     } catch (err) {
       throw new Error(`Échec de l'installation : ${err}`);
@@ -71,7 +71,7 @@ class SevenDtoDModsManager {
     // 1. Filtrer les chemins qui existent dans les deux listes ET ont un hash différent
     const modifiedPaths = Object.keys(newFiles).filter(
       (path) =>
-        oldFiles.hasOwnProperty(path) && oldFiles[path] !== newFiles[path],
+        oldFiles.hasOwnProperty(path) && oldFiles[path] !== newFiles[path]
     );
 
     // 2. Réduire le résultat filtré à un objet {chemin: nouveau_hash}
@@ -104,7 +104,7 @@ class SevenDtoDModsManager {
 
     // 1. Identifier les hashes présents dans les deux listes (candidats au déplacement)
     const commonHashes = Object.keys(oldFilesByHash).filter((hash) =>
-      newFilesByHash.hasOwnProperty(hash),
+      newFilesByHash.hasOwnProperty(hash)
     );
 
     // 2. Parcourir les hashes communs pour trouver les déplacements (1:1)
@@ -114,12 +114,12 @@ class SevenDtoDModsManager {
 
       // Chemins qui ont disparu (candidats pour 'oldPath')
       const deletedOldPaths = oldPaths.filter(
-        (oldPath) => !newFiles.hasOwnProperty(oldPath),
+        (oldPath) => !newFiles.hasOwnProperty(oldPath)
       );
 
       // Nouveaux chemins qui sont apparus (candidats pour 'newPath')
       const addedNewPaths = newPaths.filter(
-        (newPath) => !oldFiles.hasOwnProperty(newPath),
+        (newPath) => !oldFiles.hasOwnProperty(newPath)
       );
 
       // On ne peut déplacer qu'autant de fichiers qu'il y en a de disparus/apparus
@@ -151,7 +151,7 @@ class SevenDtoDModsManager {
 
     // 1. Filtrer les anciens chemins qui ne sont pas dans la nouvelle liste ET qui ne sont pas déplacés
     const deletedPaths = Object.keys(oldFiles).filter(
-      (path) => !newFiles.hasOwnProperty(path) && !movedOldPaths.has(path),
+      (path) => !newFiles.hasOwnProperty(path) && !movedOldPaths.has(path)
     );
 
     // 2. Réduire le résultat filtré à un objet {chemin: hash}
@@ -175,7 +175,7 @@ class SevenDtoDModsManager {
 
     // 1. Filtrer les nouveaux chemins qui ne sont pas dans l'ancienne liste ET qui ne sont pas des destinations de déplacement
     const newPathsToDownload = Object.keys(newFiles).filter(
-      (path) => !oldFiles.hasOwnProperty(path) && !movedNewPaths.has(path),
+      (path) => !oldFiles.hasOwnProperty(path) && !movedNewPaths.has(path)
     );
 
     // 2. Réduire le résultat filtré à un objet {chemin: hash}
@@ -195,7 +195,7 @@ class SevenDtoDModsManager {
    */
   async update(
     callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
-    text = "Mise à jour des mods...",
+    text = "Mise à jour des mods..."
   ) {
     this.init();
     try {
@@ -226,7 +226,7 @@ class SevenDtoDModsManager {
       if (filesToDelete.size > 0) {
         callback(`Suppression de ${filesToDelete.size} fichiers obsolètes...`);
         const deletePromises = Array.from(filesToDelete).map((filePath) =>
-          fse.remove(path.join(this.gameModsDir, filePath)),
+          fse.remove(path.join(this.gameModsDir, filePath))
         );
         await Promise.all(deletePromises);
       }
@@ -238,8 +238,8 @@ class SevenDtoDModsManager {
           fse.move(
             path.join(this.gameModsDir, oldPath),
             path.join(this.gameModsDir, newPath),
-            { overwrite: true },
-          ),
+            { overwrite: true }
+          )
         );
         await Promise.all(movePromises);
       }
@@ -253,8 +253,8 @@ class SevenDtoDModsManager {
             data.downloadedBytes,
             data.totalBytes,
             data.percent,
-            data.speed,
-          ),
+            data.speed
+          )
         );
       } else {
         callback("Mise à jour terminée. Rien à télécharger.", 0, 0, 100, 0);
@@ -266,7 +266,7 @@ class SevenDtoDModsManager {
 
   async generateFix(
     callback = (text) => {},
-    text = "Création d'un fix pour les mods ...",
+    text = "Création d'un fix pour les mods ..."
   ) {
     this.init();
     try {
@@ -278,11 +278,11 @@ class SevenDtoDModsManager {
       const modifiedFiles = this.findModifiedFiles(onlineFiles, localFiles);
       const newFilesToUpload = this.findFilesToDownload(
         onlineFiles,
-        localFiles,
+        localFiles
       );
       const deletedFilesOnServer = this.findDeletedFiles(
         onlineFiles,
-        localFiles,
+        localFiles
       );
       const movedFiles = this.findMovedFiles(onlineFiles, localFiles);
 
@@ -310,7 +310,7 @@ class SevenDtoDModsManager {
       // 4. Copie physique des fichiers vers le dossier fix
       if (filesToCopyPaths.size > 0) {
         callback(
-          `Préparation de ${filesToCopyPaths.size} fichiers (nouveaux, modifiés ou déplacés)...`,
+          `Préparation de ${filesToCopyPaths.size} fichiers (nouveaux, modifiés ou déplacés)...`
         );
         for (const filePath of filesToCopyPaths) {
           const source = path.join(this.gameModsDir, filePath);
@@ -339,23 +339,14 @@ class SevenDtoDModsManager {
       });
 
       callback(
-        `Fix généré ! ${filesToCopyPaths.size} fichiers à uploader, ${deleteList.length} à supprimer du serveur.`,
+        `Fix généré ! ${filesToCopyPaths.size} fichiers à uploader, ${deleteList.length} à supprimer du serveur.`
       );
 
-      return true;
-    } catch (err) {
-      throw new Error(`Échec de la génération du fix : ${err.message}`);
-    }
-  }
-
-  async openFixFolder() {
-    this.init();
-    try {
       const modFixFolder = SevenDtoDDirsManager.modsFixPath();
       await fs.access(modFixFolder);
       return shell.openPath(modFixFolder);
-    } catch {
-      throw new Error("Le dossier de fix n'existe pas !");
+    } catch (err) {
+      throw new Error(`Échec de la génération du fix : ${err.message}`);
     }
   }
 }

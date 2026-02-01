@@ -6,8 +6,8 @@
 import React, { useState } from "react";
 import "./css/server-info.css";
 
-import { useGames } from "../../../../context/games.context";
 import { Typography } from "@mui/material";
+import { useGames } from "../../../../context/games.context";
 
 import Popup from "../../../../component/popup/popup";
 import { useInfos } from "../../../../context/infos.context";
@@ -71,7 +71,7 @@ function ServerInfo() {
       <div className="server-infos-container" onClick={handleClick}>
         <div className="header-logo">
           <img
-            src={`./images/${actualGame}-icon.png`}
+            src={`./images/icon/Valkream-icon.png`}
             className="logo-image"
             alt="logo"
           />

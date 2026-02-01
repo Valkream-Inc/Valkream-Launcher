@@ -30,7 +30,7 @@ export default function Loader({ isVisible }) {
   return (
     <div className={`loader-container ${!isVisible ? "hidden" : ""}`}>
       <img
-        src={`./images/${actualGame}-icon-loader.png`}
+        src={`./images/${actualGame}-icon.png`}
         alt="logo"
         className="img-loader"
       />

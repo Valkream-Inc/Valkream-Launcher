@@ -10,6 +10,7 @@ const { GameDig } = require("gamedig");
 const { baseUrl, serversInfos } = require("../constants");
 const LinksManager = require("./linksManager");
 const noCache = require("../constants/noCaheHeader");
+const { toValidUrl } = require("../utils");
 
 class InfosManager {
   constructor() {
@@ -50,7 +51,12 @@ class InfosManager {
         timeout: 3000,
         ...noCache,
       });
-      return res.data;
+      return {
+        ...res.data,
+        image: res.data.image.startsWith("data:")
+          ? res.data.image
+          : toValidUrl(res.data.image),
+      };
     } catch (err) {
       console.error("Error getting Event:", err.message);
       return false;

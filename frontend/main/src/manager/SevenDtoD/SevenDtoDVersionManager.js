@@ -6,10 +6,9 @@
 const axios = require("axios");
 const fs = require("fs/promises");
 const yaml = require("yaml");
-const { hashFolder } = require("../../utils/function/hashFolder");
 
-const ValheimFilesManager = require("./ValheimFilesManager.js");
-const ValheimLinksManager = require("./ValheimLinksManager.js");
+const ValheimFilesManager = require("./SevenDtoDFilesManager.js");
+const ValheimLinksManager = require("./SevenDtoDLinksManager.js");
 const InfosManager = require("../infosManager.js");
 const noCache = require("../../constants/noCaheHeader.js");
 
@@ -69,9 +68,9 @@ class SevenDtoDVersionManager {
     const majorLocal = parseInt((local?.version ?? "0.0.0").split(".")[0], 10);
     const majorOnline = parseInt(
       (online?.version ?? "0.0.0").split(".")[0],
-      10,
+      10
     );
-    isMajorUpdate = majorLocal !== majorOnline;
+    return majorLocal !== majorOnline;
   }
 
   async getLocalVersion() {
