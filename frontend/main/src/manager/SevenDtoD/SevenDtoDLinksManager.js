@@ -40,7 +40,7 @@ class SevenDtoDLinksManager {
     return toValidUrl(url);
   }
 
-  async modBaseLink() {
+  async modsFileBaseUrl() {
     const SevenDtoDVersionManager = require("./SevenDtoDVersionManager");
     const config = await SevenDtoDVersionManager.getOnlineVersionConfig();
     const url = config?.modpack?.download_url;

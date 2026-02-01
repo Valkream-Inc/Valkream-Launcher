@@ -4,6 +4,7 @@
  */
 
 const fs = require("fs/promises");
+const fse = require("fs-extra");
 const { shell } = require("electron");
 
 const {
@@ -34,7 +35,7 @@ class SevenDtoDGameManager {
 
   async dowloadGame(
     callback = (text, downloadedBytes, totalBytes, percent, speed) => {},
-    text = "Téléchargement...",
+    text = "Téléchargement..."
   ) {
     await this.init();
     return dowloadMultiplefiles(
@@ -45,14 +46,14 @@ class SevenDtoDGameManager {
           data.downloadedBytes,
           data.totalBytes,
           data.percent,
-          data.speed,
-        ),
+          data.speed
+        )
     );
   }
 
   async unzipGame(
     callback = (text, decompressedBytes, totalBytes, percent, speed) => {},
-    text = "Décompression...",
+    text = "Décompression..."
   ) {
     await this.init();
     return unZipMultipleFiles(
@@ -63,8 +64,8 @@ class SevenDtoDGameManager {
           data.decompressedBytes,
           data.totalBytes,
           data.percent,
-          data.speed,
-        ),
+          data.speed
+        )
     );
   }
 
@@ -114,7 +115,7 @@ class SevenDtoDGameManager {
   async play() {
     await this.init();
     const behavior = await SettingsManager.getSetting(
-      "launcherBehaviorWithSevenDtoD",
+      "launcherBehaviorWithSevenDtoD"
     );
 
     const launchGame = () =>
