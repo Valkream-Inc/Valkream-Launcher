@@ -38,7 +38,7 @@ class SettingsManager {
       throw new Error(`Setting "${setting}" does not exist.`);
 
     const config = await this.db.readData("configClient");
-    return config ? config[setting] : undefined;
+    return config ? config[setting] : this.defaultSettings[setting];
   }
 
   async setSetting(setting, value) {

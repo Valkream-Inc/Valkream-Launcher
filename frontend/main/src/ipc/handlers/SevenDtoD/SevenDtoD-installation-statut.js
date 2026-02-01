@@ -16,13 +16,14 @@ async function SevenDtoD_InstallationStatut() {
 
   await SevenDtoDHashManager.getLocalHash();
 
-  const [isHashInstalled, isGameInstalled] = await Promise.all([
-    SevenDtoDHashManager.getIsInstalled(),
-    SevenDtoDHashManager.getIsUpToDate(),
-    SevenDtoDGameManager.getIsInstalled(),
-  ]);
+  const [isHashInstalled, isGameInstalled, isVersionInstalled] =
+    await Promise.all([
+      SevenDtoDHashManager.getIsInstalled(),
+      SevenDtoDGameManager.getIsInstalled(),
+      SevenDtoDVersionManager.getIsInstalled(),
+    ]);
 
-  const isInstalled = isGameInstalled && isHashInstalled;
+  const isInstalled = isGameInstalled && isHashInstalled && isVersionInstalled;
 
   const [isUpToDate, isMajorUpdate, gameVersion] = await Promise.all([
     SevenDtoDVersionManager.isUpToDate(),

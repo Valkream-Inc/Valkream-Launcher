@@ -8,6 +8,7 @@ const { formatBytes } = require("../../../utils/function/formatBytes.js");
 const SevenDtoDGameManager = require("../../../manager/SevenDtoD/SevenDtoDGameManager.js");
 const SevenDtoDModsManager = require("../../../manager/SevenDtoD/SevenDtoDModsManager.js");
 const SevenDtoDHashManager = require("../../../manager/SevenDtoD/SevenDtoDHashManager.js");
+const SevenDtoDVersionManager = require("../../../manager/SevenDtoD/SevenDtoDVersionManager.js");
 
 async function SevenDtoD_Install(event) {
   const callback = (text, processedBytes, totalBytes, percent, speed) => {
@@ -27,6 +28,7 @@ async function SevenDtoD_Install(event) {
 
     await SevenDtoDModsManager.install(callback);
     await SevenDtoDHashManager.getLocalHash(true, callback);
+    await SevenDtoDVersionManager.updateLocalVersionConfig();
     await event.sender.send("done-install-SevenDtoD");
     return { success: true };
   } catch (err) {
