@@ -8,8 +8,9 @@
 # backend/public/
 backend/public/launcher
 
-backend/public/game/Valheim/latest/build-game-*.zip
-backend/public/game/Valheim/latest/BepInEx-*.zip
+backend/public/games/Valheim/latest/build-game-*.zip
+backend/public/games/Valheim/latest/BepInEx-*.zip
 
-backend/public/game/SevenDtoD/latest/files
-backend/public/game/SevenDtoD/latest/beta-files
+backend/public/games/SevenDtoD/latest/files
+backend/public/games/SevenDtoD/latest/beta-files
+backend/public/games/SevenDtoD/latest/build-game-*.zip

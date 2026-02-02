@@ -6,6 +6,7 @@
 const fs = require("fs/promises");
 const fse = require("fs-extra");
 const { shell } = require("electron");
+const { execFile } = require("child_process");
 
 const {
   dowloadMultiplefiles,
@@ -76,7 +77,7 @@ class SevenDtoDGameManager {
   }
 
   async openFolder() {
-    this.init();
+    await this.init();
     try {
       await fs.access(this.gameDir);
       return shell.openPath(this.gameDir);
@@ -90,6 +91,7 @@ class SevenDtoDGameManager {
     try {
       await fs.access(this.gameDir);
       await fs.access(this.gameExePath);
+      
       return true;
     } catch {
       return false;
@@ -97,7 +99,7 @@ class SevenDtoDGameManager {
   }
 
   async uninstall() {
-    this.init();
+    await this.init();
     try {
       await fs.rm(this.gameRootDir, {
         recursive: true,

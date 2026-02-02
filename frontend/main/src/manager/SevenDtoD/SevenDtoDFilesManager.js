@@ -12,9 +12,9 @@ class SevenDtoDFilesManager {
   gameZipPath = () =>
     path.join(SevenDtoDDirsManager.gameRootPath(), "game.zip");
 
-  gameExePath = async () => {
+  gameExePath = () => {
     const map = {
-      win32: path.join(await SevenDtoDDirsManager.gamePath(), "7DaysToDie.exe"),
+      win32: path.join(SevenDtoDDirsManager.gamePath(), "7DaysToDie.exe"),
     };
 
     const exe = map[platform()];

@@ -22,13 +22,17 @@ async function SevenDtoD_Install(event) {
   };
 
   try {
+    await SevenDtoDGameManager.uninstall();
+    
     await SevenDtoDGameManager.dowloadGame(callback);
     await SevenDtoDGameManager.unzipGame(callback);
     await SevenDtoDGameManager.finishGame(callback);
 
     await SevenDtoDModsManager.install(callback);
     await SevenDtoDHashManager.getLocalHash(true, callback);
+
     await SevenDtoDVersionManager.updateLocalVersionConfig();
+    
     await event.sender.send("done-install-SevenDtoD");
     return { success: true };
   } catch (err) {
