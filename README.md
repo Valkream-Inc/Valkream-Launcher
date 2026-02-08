@@ -27,7 +27,7 @@ This project is under the **MIT Non-Commercial License (MIT-NC)**.
 
 Ce projet comprend :
 
-- Un launcher Electron pour Valheim moddé
+- Un launcher Electron pour Valheim et 7days moddé
 - Un serveur backend pour servir les fichiers pendant le développement
 
 ---
