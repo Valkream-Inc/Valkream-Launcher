@@ -29,8 +29,8 @@ async function SevenDtoD_Install(event) {
     await SevenDtoDGameManager.finishGame(callback);
 
     await SevenDtoDModsManager.install(callback);
-    await SevenDtoDHashManager.getLocalHash(true, callback);
 
+    await SevenDtoDHashManager.getLocalHash(true, callback);
     await SevenDtoDVersionManager.updateLocalVersionConfig();
     
     await event.sender.send("done-install-SevenDtoD");

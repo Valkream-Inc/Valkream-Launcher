@@ -15,6 +15,7 @@ async function SevenDtoD_InstallationStatut() {
   ]);
 
   await SevenDtoDHashManager.getLocalHash();
+  await SevenDtoDVersionManager.getOnlineVersionConfig(true);
 
   const [isHashInstalled, isGameInstalled, isVersionInstalled] =
     await Promise.all([
