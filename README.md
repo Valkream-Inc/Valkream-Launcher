@@ -2,7 +2,7 @@
 
 Launcher et système de mise à jour pour le serveur Valheim Valkream.
 
-<img src="./frontend\renderer\public\images\Valheim-icon-with-name.png">
+<img src="./frontend\renderer\public\images\icon/Valkream-icon-with-name.png">
 
 ## License
 
