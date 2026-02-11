@@ -105,7 +105,6 @@ function ValheimSettings({
       <SettingsTab id="launcher" activeTab={activeTab}>
         <SettingsTitle warn={false}>Launcher</SettingsTitle>
         <ToggleMusic />
-        <Valheim_SelectLauncherBehavior />
         <SelectLauncherTheme />
         <SelectLauncherBackgroundType />
       </SettingsTab>
@@ -113,6 +112,7 @@ function ValheimSettings({
       <SettingsTab id="game" activeTab={activeTab}>
         <SettingsTitle warn={false}>Game</SettingsTitle>
         <Valheim_ToggleLaunchSteam />
+        <Valheim_SelectLauncherBehavior />
         <Valheim_ToggleBoostFpsMods />
         {isSpecialOptionVisible && <Valheim_ToggleBoostGraphicsMods />}
         {isSpecialOptionVisible && (

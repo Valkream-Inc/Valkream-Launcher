@@ -18,10 +18,19 @@ const { consoleStreamAnswer } = require("./consoleStreamAnswer");
 axiosRetry(axios, {
   retries: 5,
   retryDelay: (retryCount) => retryCount * 1000,
-  retryCondition: (error) =>
-    error.code === "ECONNRESET" ||
-    error.code === "ETIMEDOUT" ||
-    error.code === "EPIPE",
+  // retryCondition: (error) =>
+  //   error.code === "ECONNRESET" ||
+  //   error.code === "ETIMEDOUT" ||
+  //   error.code === "EPIPE",
+  onRetry: (retryCount, error, requestConfig) => {
+    // Log les erreurs de retry (sauf la dernière qui sera propagée)
+    console.error(
+      `⚠️ Tentative de retry ${retryCount}/5 pour ${
+        requestConfig.url || requestConfig.baseURL
+      }:`,
+      error.message || error.code || error
+    );
+  },
 });
 
 /* ---------------------------------------------------- */

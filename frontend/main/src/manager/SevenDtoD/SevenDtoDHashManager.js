@@ -36,8 +36,8 @@ class SevenDtoDHashManager {
     if (!force && this.onlineHash !== null) return this.onlineHash;
     if (await InfosManager.getIsServerReachable()) {
       const { data } = await axios.get(
-        await SevenDtoDLinksManager.gameHashUrl(),
-        noCache
+        await SevenDtoDLinksManager.modHashLink(),
+        noCache,
       );
       this.onlineHash = data;
     }

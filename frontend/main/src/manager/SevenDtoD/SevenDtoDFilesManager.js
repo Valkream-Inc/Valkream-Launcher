@@ -6,16 +6,15 @@
 const path = require("path");
 const { platform } = require("os");
 
-const SettingsManager = require("../settingsManager");
+const SevenDtoDDirsManager = require("./SevenDtoDDirsManager");
 
 class SevenDtoDFilesManager {
-  gameExeName = "7DaysToDie.exe";
-  gameExePath = async () => {
+  gameZipPath = () =>
+    path.join(SevenDtoDDirsManager.gameRootPath(), "game.zip");
+
+  gameExePath = () => {
     const map = {
-      win32: path.join(
-        await SettingsManager.getSetting("gamePathWithSevenDtoD"),
-        this.gameExeName
-      ),
+      win32: path.join(SevenDtoDDirsManager.gamePath(), "7DaysToDie.exe"),
     };
 
     const exe = map[platform()];
@@ -24,6 +23,12 @@ class SevenDtoDFilesManager {
     }
     return exe;
   };
+
+  modsToDeleteFixPath = () =>
+    path.join(SevenDtoDDirsManager.modsFixPath(), "to_delete_into_server.fix");
+
+  gameVersionFilePath = () =>
+    path.join(SevenDtoDDirsManager.gameRootPath(), "latest.yml");
 }
 
 module.exports = new SevenDtoDFilesManager();

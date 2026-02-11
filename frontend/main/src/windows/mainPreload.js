@@ -120,8 +120,6 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   // infos
   getInstallationStatut: () =>
     ipcRenderer.invoke("SevenDtoD-get-installation-statut"),
-  testIsSteamGamePathValid: (path) =>
-    ipcRenderer.invoke("SevenDtoD-test-is-steam-game-path-valid", path),
 
   // utils
   openGameFolder: () => ipcRenderer.invoke("SevenDtoD-open-game-folder"),
@@ -182,5 +180,21 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
     ipcRenderer.removeAllListeners("progress-update-SevenDtoD");
     ipcRenderer.removeAllListeners("done-update-SevenDtoD");
     ipcRenderer.removeAllListeners("error-update-SevenDtoD");
+  },
+
+  // generate fix
+  fixMods: () => ipcRenderer.invoke("SevenDtoD-fix-mods"),
+  onFixModsProgress: (callback) =>
+    ipcRenderer.on("progress-fix-mods-SevenDtoD", (event, data) =>
+      callback(data)
+    ),
+  onFixModsDone: (callback) =>
+    ipcRenderer.on("done-fix-mods-SevenDtoD", (event, data) => callback(data)),
+  onFixModsError: (callback) =>
+    ipcRenderer.on("error-fix-mods-SevenDtoD", (event, data) => callback(data)),
+  removeFixModsListeners: () => {
+    ipcRenderer.removeAllListeners("progress-fix-mods-SevenDtoD");
+    ipcRenderer.removeAllListeners("done-fix-mods-SevenDtoD");
+    ipcRenderer.removeAllListeners("error-fix-mods-SevenDtoD");
   },
 });

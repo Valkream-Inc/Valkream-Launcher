@@ -1,0 +1,22 @@
+# ──────────────────────────────────────────────────────────────
+# NORME DE VERSIONNAGE : X1.X2.X3
+# ──────────────────────────────────────────────────────────────
+# X1 → Mise à jour majeure du jeu 7days. (réinstallation compléte)
+# X2 → Ajout ou suppression de mods (impacte la compatibilité).
+# X3 → Modification de configuration des mods (paramètres, options, équilibrage).
+# ──────────────────────────────────────────────────────────────
+
+version: 1.0.0
+buildDate: 2025-07-03T19:20:08.929Z
+
+modpack:
+  version: 1.0.0
+  hashs: /games/SevenDtoD/latest/mods.beta.json
+  download_url: /games/SevenDtoD/latest/files-beta/
+
+sevendtod:
+  version: 2.5b27
+  download_url:
+    win32: /games/SevenDtoD/latest/build-game-win32.zip
+    linux: /games/SevenDtoD/latest/build-game-linux.zip
+    darwin: /games/SevenDtoD/latest/build-game-darwin.zip

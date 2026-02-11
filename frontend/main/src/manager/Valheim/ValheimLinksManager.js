@@ -11,7 +11,7 @@ class ValheimLinksManager {
   async gameVersionUrl() {
     const SettingsManager = require("../settingsManager");
     const isBeta = await SettingsManager.getSetting("betaEnabled");
-    return `${baseUrl}/game/Valheim/latest/latest${isBeta ? ".beta" : ""}.yml`;
+    return `${baseUrl}/games/Valheim/latest/latest${isBeta ? ".beta" : ""}.yml`;
   }
 
   async gameZipLink() {

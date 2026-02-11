@@ -12,7 +12,7 @@ const serversInfos = {
   },
   SevenDtoD: {
     type: "sdtd",
-    host: "host1.valkream.com",
+    host: "7days.valkream.com",
     port: 26900,
     timeout: 2000,
   },

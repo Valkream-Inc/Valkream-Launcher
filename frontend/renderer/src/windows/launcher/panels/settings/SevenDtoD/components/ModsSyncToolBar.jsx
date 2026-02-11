@@ -8,10 +8,13 @@ import React, { useEffect, useState } from "react";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import HandymanIcon from "@mui/icons-material/Handyman";
 import SearchIcon from "@mui/icons-material/Search";
 
 import Wait from "../../../../component/wait/wait.jsx";
@@ -43,6 +46,27 @@ const ModsSyncToolbar = ({
       .writeText(localHashes)
       .then(() => enqueueSnackbar("Hashes copiés !", { variant: "info" }))
       .finally(() => setIsLoading(false));
+  };
+
+  const handleFixMods = async () => {
+    setIsLoading(true);
+
+    try {
+      window.electron_SevenDtoD_API.onFixModsProgress((data) => {
+        enqueueSnackbar(data.text, { variant: "info" });
+      });
+      window.electron_SevenDtoD_API.onFixModsError((data) => {
+        enqueueSnackbar(data.message, { variant: "error" });
+        console.log(data);
+      });
+
+      await window.electron_SevenDtoD_API.fixMods();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      window.electron_SevenDtoD_API.removeFixModsListeners();
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -110,18 +134,34 @@ const ModsSyncToolbar = ({
             ),
           }}
         />
-        <Button
-          variant="contained"
-          onClick={handleCopyLocalHashes}
-          startIcon={<ContentCopyIcon />}
-          sx={{
-            ml: 2,
-            bgcolor: themeStyles.textPrimary,
-            color: themeStyles.mainBg,
-          }}
-        >
-          Copier Hashes
-        </Button>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleCopyLocalHashes}
+            startIcon={<ContentCopyIcon />}
+            sx={{
+              bgcolor: themeStyles.textPrimary,
+              color: themeStyles.mainBg,
+            }}
+          >
+            Copier Hashes
+          </Button>
+          <Tooltip title="Fix">
+            <IconButton
+              onClick={handleFixMods}
+              sx={{
+                bgcolor: themeStyles.textPrimary,
+                color: themeStyles.mainBg,
+                "&:hover": {
+                  bgcolor: themeStyles.textPrimary,
+                  opacity: 0.9,
+                },
+              }}
+            >
+              <HandymanIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
     </>
   );

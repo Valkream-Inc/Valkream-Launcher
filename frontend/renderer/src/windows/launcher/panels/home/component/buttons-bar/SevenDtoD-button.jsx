@@ -7,7 +7,6 @@ import { enqueueSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
-import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import { ButtonBase, Stack } from "@mui/material";
 
 import Popup from "../../../../component/popup/popup.jsx";
@@ -151,29 +150,22 @@ export default function SevenDtoDButton() {
         if (!installationStatut) return;
 
         const {
-          isInternetConnected,
           isServerReachable,
+          isInternetConnected,
           isInstalled,
           isUpToDate,
-          isAValidSteamGamePath,
+          isMajorUpdate,
+          gameVersion,
         } = installationStatut;
 
         const isConnected = isInternetConnected && isServerReachable;
 
-        // Cas 0 : En cours de chargement
+        // Cas 1 : En cours de chargement
         if (isServerReachable === null || maintenance === null)
           return setAction({
             text: "Loading...",
             Icon: null,
             onClick: () => {},
-          });
-
-        // Cas 1 : Pas de chemin de jeu valide
-        if (!isAValidSteamGamePath)
-          return setAction({
-            text: "Veuillez spécifier un chemin de jeu valide !",
-            Icon: FolderOpenIcon,
-            onClick: handleSelectGamePath,
           });
 
         // Cas 2 : Pas installé et pas de connexion internet
@@ -205,18 +197,26 @@ export default function SevenDtoDButton() {
             onClick: handleStart,
           });
 
-        // Cas 5 : Installé, internet, pas à jour
-        if (isInstalled && isConnected && !isUpToDate)
+        // Cas 5 : Installé, internet, pas à jour (majeur)
+        if (isInstalled && isConnected && !isUpToDate && isMajorUpdate)
+          return setAction({
+            text: "Réinstaller\n (⚠️ Nouvelle version majeure.)",
+            Icon: null,
+            onClick: handleInstall,
+          });
+
+        // Cas 6 : Installé, internet, pas à jour (mineur)
+        if (isInstalled && isConnected && !isUpToDate && !isMajorUpdate)
           return setAction({
             text: "Mettre à jour",
             Icon: null,
             onClick: handleUpdate,
           });
 
-        // Cas 6 : Installé, internet, à jour
+        // Cas 7 : Installé, internet, à jour
         if (isInstalled && isConnected && isUpToDate)
           return setAction({
-            text: `Jouer à 7Days to Valkream${
+            text: `Jouer à la v${gameVersion}${
               maintenance?.enabled ? "\n (⚠️ Maintenance en cours.)" : ""
             }`,
             Icon: SportsEsportsIcon,

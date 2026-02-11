@@ -3,32 +3,19 @@
  * @license MIT-NC
  */
 
-const { formatBytes } = require("../../../utils/function/formatBytes.js");
+const SettingsManager = require("../../../manager/settingsManager");
 
-const SevenDtoDModsManager = require("../../../manager/SevenDtoD/SevenDtoDModsManager.js");
-const SevenDtoDSteamManager = require("../../../manager/SevenDtoD/SevenDtoDSteamManager.js");
+const SevenDtoDSteamManager = require("../../../manager/SevenDtoD/SevenDtoDSteamManager");
+const SevenDtoDGameManager = require("../../../manager/SevenDtoD/SevenDtoDGameManager");
 
 async function SevenDtoD_Play(event) {
-  const callback = (text, processedBytes, totalBytes, percent, speed) => {
-    event.sender.send("progress-play-SevenDtoD", {
-      text,
-      processedBytes: formatBytes(processedBytes),
-      totalBytes: formatBytes(totalBytes),
-      percent,
-      speed: formatBytes(speed),
-    });
-  };
+  const launchSteam = await SettingsManager.getSetting(
+    "launchSteamWithSevenDtoD",
+  );
 
-  try {
-    await SevenDtoDModsManager.play(callback);
-    await SevenDtoDSteamManager.play();
-    await event.sender.send("done-play-SevenDtoD");
-    return { success: true };
-  } catch (err) {
-    console.error(err);
-    event.sender.send("error-play-SevenDtoD", { message: err.message });
-    throw err;
-  }
+  if (launchSteam) await SevenDtoDSteamManager.open();
+  await SevenDtoDGameManager.play();
+  return;
 }
 
 module.exports = SevenDtoD_Play;

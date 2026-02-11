@@ -10,8 +10,9 @@ const SevenDtoD_InstallationStatut = require("./handlers/SevenDtoD/SevenDtoD-ins
 const SevenDtoD_Install = require("./handlers/SevenDtoD/SevenDtoD-install.js");
 const SevenDtoD_Play = require("./handlers/SevenDtoD/SevenDtoD-play.js");
 const SevenDtoD_Update = require("./handlers/SevenDtoD/SevenDtoD-update.js");
+const SevenDtoD_FixMods = require("./handlers/SevenDtoD/SevenDtoD-fix-mods.js");
+
 const SevenDtoDHachManager = require("../manager/SevenDtoD/SevenDtoDHashManager.js");
-const SevenDtoDSteamManager = require("../manager/SevenDtoD/SevenDtoDSteamManager.js");
 const SevenDtoDGameManager = require("../manager/SevenDtoD/SevenDtoDGameManager.js");
 
 function SevenDtoDIpcHandlers() {
@@ -20,10 +21,7 @@ function SevenDtoDIpcHandlers() {
     "SevenDtoD-get-installation-statut",
     async () => await SevenDtoD_InstallationStatut()
   );
-  ipcMain.handle(
-    "SevenDtoD-test-is-steam-game-path-valid",
-    async (event, path) => await SevenDtoDSteamManager.testSteamGamePath(path)
-  );
+
   // utils
   ipcMain.handle(
     "SevenDtoD-open-game-folder",
@@ -33,6 +31,7 @@ function SevenDtoDIpcHandlers() {
     "SevenDtoD-uninstall-game",
     async () => await SevenDtoDGameManager.uninstall()
   );
+
   // mods data
   ipcMain.handle("SevenDtoD-get-mods-data", async (event) => {
     return await SevenDtoD_ModsDataHandler(event);
@@ -40,8 +39,12 @@ function SevenDtoDIpcHandlers() {
   ipcMain.handle("SevenDtoD-get-local-hash-data", async () => {
     return JSON.stringify(await SevenDtoDHachManager.getLocalHash(), null, 2);
   });
+  ipcMain.handle(
+    "SevenDtoD-fix-mods",
+    async (event) => await SevenDtoD_FixMods(event)
+  );
 
-  // installation / start / update / custom mods
+  // installation / start / update
   ipcMain.handle(
     "SevenDtoD-install",
     async (event) => await SevenDtoD_Install(event)

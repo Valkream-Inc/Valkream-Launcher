@@ -22,7 +22,8 @@ import ToggleMusic from "../settings-list/global/toggle-music.jsx";
 
 import SevenDtoD_ButtonOpenGame from "../settings-list/SevenDtoD/SevenDtoD-button-open-game.jsx";
 import SevenDtoD_ButtonUninstallGame from "../settings-list/SevenDtoD/SevenDtoD-button-uninstall-game.jsx";
-import SevenDtoD_ChooseCustomGamePath from "../settings-list/SevenDtoD/SevenDtoD-choose-custom-game-path.jsx";
+import SevenDtoD_SelectLauncherBehavior from "../settings-list/SevenDtoD/SevenDtoD-select-launcher-behavior.jsx";
+import SevenDtoD_ToggleLaunchSteam from "../settings-list/SevenDtoD/SevenDtoD-toggle-launch-steam.jsx";
 import SecenDtoD_ModsTab from "./SecenDtoD-mods-tab.jsx";
 
 function Presentation() {
@@ -115,7 +116,8 @@ function SevenDtoDSettings({
 
       <SettingsTab id="game" activeTab={activeTab}>
         <SettingsTitle warn={false}>Game</SettingsTitle>
-        <SevenDtoD_ChooseCustomGamePath />
+        <SevenDtoD_ToggleLaunchSteam />
+        <SevenDtoD_SelectLauncherBehavior />
       </SettingsTab>
 
       {isSpecialOptionVisible && (

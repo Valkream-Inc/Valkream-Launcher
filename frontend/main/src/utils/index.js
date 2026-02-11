@@ -3,6 +3,7 @@
  * @license MIT-NC
  */
 
+const createRateLimiter = require("./create-rate-limiter");
 const pLimit = require("./p-limit");
 const throttle = require("./throttle");
 const newDir = require("./new-dir");
@@ -15,7 +16,9 @@ const Database = require("./database");
 const dowloadMultiplefiles = require("./download-multiple-files");
 const unZipMultipleFiles = require("./unzip-multiple-zips");
 
+
 module.exports = {
+  createRateLimiter,
   pLimit,
   throttle,
   newDir,
