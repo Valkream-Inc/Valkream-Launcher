@@ -59,7 +59,7 @@ export default function Updater() {
       <div ref={loadingSectionRef} id="loading-section">
         <div className="loading-content">
           <img
-            src="./images/Valheim-icon-with-name.png"
+            src="./images/icon/Valkream-icon-with-name.png"
             className="loading-image"
             alt="Logo Valkream"
           />
