@@ -3,7 +3,15 @@
  * @license MIT-NC
  */
 
-const got = require("got");
+let got;
+
+const getGot = async () => {
+  if (!got) {
+    const gotModule = await import("got");
+    got = gotModule.default || gotModule;
+  }
+  return got;
+};
 const fs = require("fs");
 const path = require("path");
 const progress = require("progress-stream");
@@ -26,7 +34,9 @@ const downloadFile = (
     let writer;
 
     try {
-      const downloadStream = got.stream(downloadUrl, {
+      const gotClient = await getGot();
+
+      const downloadStream = gotClient.stream(downloadUrl, {
         http2: true,
         headers: {
           "accept-encoding": "identity", // évite les soucis gzip
@@ -44,10 +54,12 @@ const downloadFile = (
         );
       });
 
-      const totalSize = parseInt(
-        downloadStream.headers["content-length"] || 0,
-        10
-      );
+      const contentLengthHeader =
+        (downloadStream.headers && downloadStream.headers["content-length"]) ||
+        undefined;
+      const totalSize = contentLengthHeader
+        ? parseInt(contentLengthHeader, 10)
+        : 0;
 
       const progressStream = progress({
         length: totalSize,

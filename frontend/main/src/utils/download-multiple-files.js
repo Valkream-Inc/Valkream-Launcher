@@ -3,7 +3,15 @@
  * @license MIT-NC
  */
 
-const got = require("got");
+let got;
+
+const getGot = async () => {
+  if (!got) {
+    const gotModule = await import("got");
+    got = gotModule.default || gotModule;
+  }
+  return got;
+};
 const { downloadFile } = require("./function/dowloadFile");
 
 const pLimit = require("./p-limit");
@@ -28,10 +36,14 @@ const dowloadMultiplefiles = async (
   await Promise.all(
     files.map(async (file, index) => {
       try {
-        const head = await got.head(file.url, {
+        const gotClient = await getGot();
+
+        const head = await gotClient.head(file.url, {
           http2: true,
         });
-        const size = parseInt(head.headers["content-length"], 10) || 0;
+        const contentLengthHeader =
+          (head && head.headers && head.headers["content-length"]) || undefined;
+        const size = contentLengthHeader ? parseInt(contentLengthHeader, 10) : 0;
         totalSizes[index] = size;
         totalGlobal += size;
       } catch (err) {
