@@ -54,6 +54,7 @@
     "fs": "^0.0.1-security",
     "fs-extra": "^11.3.0",
     "gamedig": "^5.3.2",
+    "got": "^14.6.6",
     "notistack": "^3.0.2",
     "path": "^0.12.7",
     "progress-stream": "^2.0.0",
