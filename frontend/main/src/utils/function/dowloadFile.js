@@ -3,37 +3,14 @@
  * @license MIT-NC
  */
 
-const axios = require("axios");
+const got = require("got");
 const fs = require("fs");
 const path = require("path");
 const progress = require("progress-stream");
 const { Throttle } = require("stream-throttle");
-const axiosRetry = require("axios-retry").default;
 
 const { formatBytes } = require("./formatBytes");
 const { consoleStreamAnswer } = require("./consoleStreamAnswer");
-
-/* ----------------- AXIOS CONFIG SAFE ----------------- */
-
-axiosRetry(axios, {
-  retries: 5,
-  retryDelay: (retryCount) => retryCount * 1000,
-  // retryCondition: (error) =>
-  //   error.code === "ECONNRESET" ||
-  //   error.code === "ETIMEDOUT" ||
-  //   error.code === "EPIPE",
-  onRetry: (retryCount, error, requestConfig) => {
-    // Log les erreurs de retry (sauf la dernière qui sera propagée)
-    console.error(
-      `⚠️ Tentative de retry ${retryCount}/5 pour ${
-        requestConfig.url || requestConfig.baseURL
-      }:`,
-      error.message || error.code || error
-    );
-  },
-});
-
-/* ---------------------------------------------------- */
 
 const downloadFile = (
   downloadUrl,
@@ -49,19 +26,28 @@ const downloadFile = (
     let writer;
 
     try {
-      const response = await axios({
-        url: downloadUrl,
-        method: "GET",
-        responseType: "stream",
-        timeout: 0,
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
+      const downloadStream = got.stream(downloadUrl, {
+        http2: true,
         headers: {
-          "Accept-Encoding": "identity", // évite les soucis gzip
+          "accept-encoding": "identity", // évite les soucis gzip
+        },
+        retry: {
+          limit: 5,
+          calculateDelay: ({ attemptCount }) => attemptCount * 1000,
         },
       });
 
-      const totalSize = parseInt(response.headers["content-length"] || 0, 10);
+      downloadStream.on("retry", (retryCount, error, retryOptions) => {
+        console.error(
+          `⚠️ Tentative de retry ${retryCount}/5 pour ${downloadUrl}:`,
+          error.message || error.code || error
+        );
+      });
+
+      const totalSize = parseInt(
+        downloadStream.headers["content-length"] || 0,
+        10
+      );
 
       const progressStream = progress({
         length: totalSize,
@@ -75,15 +61,18 @@ const downloadFile = (
       await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
       writer = fs.createWriteStream(destPath);
 
-      response.data
-        .pipe(new Throttle({ rate: 512 * 1024 * 1024 })) // 0.5 Go/s
+      downloadStream
+        .pipe(new Throttle({ rate: 1024 * 1024 * 1024 })) // 1 Go/s
         .pipe(progressStream)
         .pipe(writer);
 
       writer.on("finish", resolve);
       writer.on("error", reject);
 
-      response.data.on("error", reject);
+      downloadStream.on("error", (err) => {
+        if (writer) writer.destroy();
+        reject(err);
+      });
     } catch (err) {
       if (writer) writer.destroy();
       reject(err);
