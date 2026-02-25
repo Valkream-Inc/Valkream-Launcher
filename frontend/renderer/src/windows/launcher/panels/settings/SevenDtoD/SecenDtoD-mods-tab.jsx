@@ -38,7 +38,7 @@ const SevenDtotD_ModsTab = forwardRef((props, ref) => {
       window.electron_SevenDtoD_API.onModsDataProgress((data) => {
         setProgress(
           `Analyse des mods en cours...
-          ${data.percent}% (${data.processedBytes}/${data.totalBytes}) à ${data.speed}/s`
+          ${data.percent}% (${data.processedBytes}/${data.totalBytes}) à ${data.speed}/s`,
         );
       });
 
@@ -91,7 +91,7 @@ const SevenDtotD_ModsTab = forwardRef((props, ref) => {
         }}
       >
         <DynamicSettingsTitle>
-          Statut de Synchronisation des Mods
+          Tableau de modifications des Mods (Local vs Online)
         </DynamicSettingsTitle>
 
         <WaitPulse isLoading={isLoading}>

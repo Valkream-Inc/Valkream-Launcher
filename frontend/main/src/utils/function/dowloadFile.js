@@ -13,9 +13,12 @@ const axiosRetry = require("axios-retry").default;
 const { formatBytes } = require("./formatBytes");
 const { consoleStreamAnswer } = require("./consoleStreamAnswer");
 
-/* ----------------- AXIOS CONFIG SAFE ----------------- */
+/* ----------------- AXIOS CONFIG SAFE (scopé à ce fichier) ----------------- */
 
-axiosRetry(axios, {
+// Instance Axios dédiée
+const downloadAxios = axios.create();
+
+axiosRetry(downloadAxios, {
   retries: 5,
   retryDelay: (retryCount) => retryCount * 1000,
   // retryCondition: (error) =>
@@ -28,7 +31,7 @@ axiosRetry(axios, {
       `⚠️ Tentative de retry ${retryCount}/5 pour ${
         requestConfig.url || requestConfig.baseURL
       }:`,
-      error.message || error.code || error
+      error.message || error.code || error,
     );
   },
 });
@@ -42,14 +45,14 @@ const downloadFile = (
     consoleStreamAnswer(
       `📥 Téléchargement du fichier ${path.basename(destPath)} : ${percent}% ` +
         `(${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}) ` +
-        `à ${formatBytes(speed)}/s`
-    )
+        `à ${formatBytes(speed)}/s`,
+    ),
 ) => {
   return new Promise(async (resolve, reject) => {
     let writer;
 
     try {
-      const response = await axios({
+      const response = await downloadAxios({
         url: downloadUrl,
         method: "GET",
         responseType: "stream",
@@ -76,7 +79,7 @@ const downloadFile = (
       writer = fs.createWriteStream(destPath);
 
       response.data
-        .pipe(new Throttle({ rate: 512 * 1024 * 1024 })) // 0.5 Go/s
+        .pipe(new Throttle({ rate: 1024 * 1024 * 1024 })) // 1 Go/s
         .pipe(progressStream)
         .pipe(writer);
 

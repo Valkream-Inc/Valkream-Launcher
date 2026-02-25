@@ -13,9 +13,9 @@ const createRateLimiter = require("./create-rate-limiter");
 const dowloadMultiplefiles = async (
   files = [],
   callback = async () => {},
-  maxParallelDownloads = 5,
+  maxParallelDownloads = 10,
   callbackTimeout = 100,
-  maxDownloadsPerSecond = 50
+  maxDownloadsPerSecond = 100,
 ) => {
   const totalSizes = new Array(files.length).fill(0);
   const downloaded = new Array(files.length).fill(0);
@@ -27,15 +27,15 @@ const dowloadMultiplefiles = async (
   // 🔸 Étape 1 : Calcul des tailles totales de tous les fichiers
   await Promise.all(
     files.map(async (file, index) => {
-      try{
-      const head = await axios.head(file.url);
-      const size = parseInt(head.headers["content-length"], 10) || 0;
-      totalSizes[index] = size;
-      totalGlobal += size;
+      try {
+        const head = await axios.head(file.url);
+        const size = parseInt(head.headers["content-length"], 10) || 0;
+        totalSizes[index] = size;
+        totalGlobal += size;
       } catch (err) {
         console.error(err, file.url);
       }
-    })
+    }),
   );
 
   // 🔸 Étape 2 : Fonction de mise à jour de la progression
@@ -63,14 +63,14 @@ const dowloadMultiplefiles = async (
   const downloads = files.map((file, index) =>
     limit(async () => {
       // Attendre que le rate limiter autorise le démarrage
-      await rateLimiter().catch(() => {});;
-      
+      await rateLimiter().catch(() => {});
+
       await downloadFile(file.url, file.destPath, (downloadedBytes) => {
         downloaded[index] = downloadedBytes;
         downloadedGlobal = downloaded.reduce((a, b) => a + b, 0);
         sendProgressThrottled();
       });
-    })
+    }),
   );
 
   // 🔸 Étape 6 : Attendre la fin
