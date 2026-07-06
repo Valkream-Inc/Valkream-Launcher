@@ -1,6 +1,6 @@
 {
   "name": "Valkream-Launcher",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Launcher Multi-Gaming moddé pour Valkream (Valheim, 7 Days To Die, etc.)",
   "author": "Valkream Team",
   "scripts": {
@@ -47,7 +47,6 @@
     "@react-three/drei": "^10.7.5",
     "@react-three/fiber": "^9.3.0",
     "axios": "^1.10.0",
-    "axios-retry": "^4.5.0",
     "better-sqlite3": "^12.2.0",
     "crypto": "^1.0.1",
     "electron-updater": "^6.1.8",

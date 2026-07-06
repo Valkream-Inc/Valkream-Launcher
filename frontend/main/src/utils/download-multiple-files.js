@@ -34,7 +34,7 @@ const dowloadMultiplefiles = async (
   // 🔸 Fonction utilitaire pour récupérer la taille avec le système de retry identique
   const getFileSizeWithRetry = async (url) => {
     let otherRetryCount = 0;
-    const MAX_OTHER_RETRIES = 3;
+    const MAX_OTHER_RETRIES = 5;
 
     while (true) {
       if (signal?.aborted) {

@@ -13,7 +13,7 @@ const { formatBytes } = require("./formatBytes");
 const { consoleStreamAnswer } = require("./consoleStreamAnswer");
 
 const REQUEST_TIMEOUT = 0;
-const MAX_OTHER_RETRIES = 3;
+const MAX_OTHER_RETRIES = 5;
 
 const NETWORK_ERROR_CODES = new Set([
   "ECONNRESET",

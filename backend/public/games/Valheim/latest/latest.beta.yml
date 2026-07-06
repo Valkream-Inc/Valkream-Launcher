@@ -11,18 +11,18 @@
 # - X4 est interne au launcher et ne modifie pas la version Thunderstore.
 # ──────────────────────────────────────────────────────────────
 
-version: 2b.31.34.0
+version: 2.33.36.0
 buildDate: 2025-09-18T19:00:00.929Z
 
 modpack:
-  version: 2.31.34
-  download_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.31.34/
+  version: 2.33.36
+  download_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.33.36/
   admin_mods:
     # mods admin à installer avec l'option admin du launcher
     # les mods seront présents dans le dossier /BepInEx/plugins
-    - "JereKuusela-Infinity_Hammer-1.78.0"
-    - "JereKuusela-Server_devcommands-1.102.0"
-    - "JereKuusela-Upgrade_World-1.74.0"
+    - "JereKuusela-Infinity_Hammer-1.79.0"
+    - "JereKuusela-Server_devcommands-1.106.0"
+    - "JereKuusela-Upgrade_World-1.80.0"
     - "JereKuusela-World_Edit_Commands-1.70.0"
     - "Astropilot-ValheimTooler-1.11.0"
   boostfps_mods:
@@ -52,7 +52,7 @@ modpack:
     plugins: f0c7a72372bba288cff438b73c9b2b34264c1370d90201902c7ceb65977d413a
 
 valheim:
-  version: 0.221.4
+  version: 0.221.12
   download_url:
     win32: /games/Valheim/latest/build-game-win32.zip
     linux: /games/Valheim/latest/build-game-linux.zip
