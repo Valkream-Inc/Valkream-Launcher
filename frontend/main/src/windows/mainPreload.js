@@ -82,7 +82,7 @@ contextBridge.exposeInMainWorld("electron_Valheim_API", {
   start: () => ipcRenderer.invoke("Valheim-start"),
 
   // update
-  update: () => ipcRenderer.invoke("update"),
+  update: () => ipcRenderer.invoke("Valheim-update"),
   onUpdateProgress: (callback) =>
     ipcRenderer.on("progress-update-Valheim", (event, data) => callback(data)),
   onUpdateDone: (callback) =>
@@ -99,13 +99,13 @@ contextBridge.exposeInMainWorld("electron_Valheim_API", {
   customMods: () => ipcRenderer.invoke("Valheim-custom-mods"),
   onCustomModsProgress: (callback) =>
     ipcRenderer.on("progress-custom-mods-Valheim", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   onCustomModsDone: (callback) =>
     ipcRenderer.on("done-custom-mods-Valheim", (event, data) => callback(data)),
   onCustomModsError: (callback) =>
     ipcRenderer.on("error-custom-mods-Valheim", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   removeCustomModsListeners: () => {
     ipcRenderer.removeAllListeners("progress-custom-mods-Valheim");
@@ -129,7 +129,7 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   getModsData: () => ipcRenderer.invoke("SevenDtoD-get-mods-data"),
   onModsDataProgress: (callback) =>
     ipcRenderer.on("progress-mods-data-SevenDtoD", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   removeModsDataListeners: () =>
     ipcRenderer.removeAllListeners("progress-mods-data-SevenDtoD"),
@@ -140,7 +140,7 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   install: () => ipcRenderer.invoke("SevenDtoD-install"),
   onInstallProgress: (callback) =>
     ipcRenderer.on("progress-install-SevenDtoD", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   onInstallDone: (callback) =>
     ipcRenderer.on("done-install-SevenDtoD", (event, data) => callback(data)),
@@ -170,7 +170,7 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   update: () => ipcRenderer.invoke("SevenDtoD-update"),
   onUpdateProgress: (callback) =>
     ipcRenderer.on("progress-update-SevenDtoD", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   onUpdateDone: (callback) =>
     ipcRenderer.on("done-update-SevenDtoD", (event, data) => callback(data)),
@@ -186,7 +186,7 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
   fixMods: () => ipcRenderer.invoke("SevenDtoD-fix-mods"),
   onFixModsProgress: (callback) =>
     ipcRenderer.on("progress-fix-mods-SevenDtoD", (event, data) =>
-      callback(data)
+      callback(data),
     ),
   onFixModsDone: (callback) =>
     ipcRenderer.on("done-fix-mods-SevenDtoD", (event, data) => callback(data)),

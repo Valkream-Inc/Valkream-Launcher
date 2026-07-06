@@ -11,25 +11,25 @@
 # - X4 est interne au launcher et ne modifie pas la version Thunderstore.
 # ──────────────────────────────────────────────────────────────
 
-version: 2.1.20.0
-buildDate: 2025-07-03T19:20:08.929Z
+version: 2.33.36.0
+buildDate: 2025-09-18T19:00:00.929Z
 
 modpack:
-  version: 2.1.20
-  download_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.1.20/
+  version: 2.33.36
+  download_url: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.33.36/
   admin_mods:
     # mods admin à installer avec l'option admin du launcher
     # les mods seront présents dans le dossier /BepInEx/plugins
-    - "JereKuusela-Infinity_Hammer-1.72.0"
-    - "JereKuusela-Server_devcommands-1.97.0"
-    - "JereKuusela-Upgrade_World-1.73.0"
-    - "JereKuusela-World_Edit_Commands-1.69.0"
+    - "JereKuusela-Infinity_Hammer-1.79.0"
+    - "JereKuusela-Server_devcommands-1.106.0"
+    - "JereKuusela-Upgrade_World-1.80.0"
+    - "JereKuusela-World_Edit_Commands-1.70.0"
     - "Astropilot-ValheimTooler-1.11.0"
   boostfps_mods:
     # mods pour booster les FPS à installer avec l'option boost FPS du launcher
     # les mods seront présents dans le dossier /BepInEx/plugins
     - "castix-ValheimFPSBoost-1.0.0"
-    - "vaffle1-FPSPlus-1.1.3"
+    - "vaffle1-FPSPlus-1.1.4"
   gameFolderToRemove:
     # fichiers et dossiers à supprimer lors de la mise à jour
     # les dossiers doivent commencer par /BepInEx/plugins ou /BepInEx/config
@@ -52,15 +52,15 @@ modpack:
     plugins: f0c7a72372bba288cff438b73c9b2b34264c1370d90201902c7ceb65977d413a
 
 valheim:
-  version: 0.220.5
+  version: 0.221.12
   download_url:
     win32: /games/Valheim/latest/build-game-win32.zip
     linux: /games/Valheim/latest/build-game-linux.zip
     darwin: /games/Valheim/latest/build-game-darwin.zip
 
 bepinex:
-  version: 5.4.2202
+  version: 5.4.2333
   download_url:
-    win32: /games/Valheim/latest/BepInEx-5.4.2202.zip
-    linux: /games/Valheim/latest/BepInEx-5.4.2202.zip
-    darwin: /games/Valheim/latest/BepInEx-5.4.2202.zip
+    win32: /games/Valheim/latest/BepInEx-5.4.2333.zip
+    linux: /games/Valheim/latest/BepInEx-5.4.2333.zip
+    darwin: /games/Valheim/latest/BepInEx-5.4.2333.zip

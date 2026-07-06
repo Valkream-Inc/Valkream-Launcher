@@ -27,19 +27,22 @@ async function SevenDtoD_ModsDataHandler(event) {
 
   const results = [];
 
-  // Déterminer les actions
+  // Déterminer les actions (modifications LOCALES par rapport au ONLINE)
   const modifiedFiles = SevenDtoDModsManager.findModifiedFiles(
+    onlineHash,
     localHash,
-    onlineHash
   );
   const deletedFiles = SevenDtoDModsManager.findDeletedFiles(
+    onlineHash,
     localHash,
-    onlineHash
   );
-  const movedFiles = SevenDtoDModsManager.findMovedFiles(localHash, onlineHash);
-  const newFilesToDownload = SevenDtoDModsManager.findFilesToDownload(
+  const movedFiles = SevenDtoDModsManager.findMovedFiles(
+    onlineHash,
     localHash,
-    onlineHash
+  );
+  const newFilesToDownload = SevenDtoDModsManager.findFilesToDownload(
+    onlineHash,
+    localHash,
   );
 
   // =================================================================
@@ -50,31 +53,31 @@ async function SevenDtoD_ModsDataHandler(event) {
       oldPath: path,
       newPath: path,
       hashLocal: localHash[path],
-      hashOnline: modifiedFiles[path],
+      hashOnline: onlineHash[path],
     });
   });
 
   // =================================================================
-  // 2. DELETED (Présent localement, absent en ligne, et non déplacé)
+  // 2. DELETED (Présent en ligne, absent localement, et non déplacé)
   Object.keys(deletedFiles).forEach((path) => {
     results.push({
       status: "DELETED",
       oldPath: path,
       newPath: null, // Le fichier est supprimé côté cible
-      hashLocal: deletedFiles[path],
-      hashOnline: null,
+      hashLocal: null,
+      hashOnline: deletedFiles[path],
     });
   });
 
   // =================================================================
-  // 3. NEW (Absent localement, présent en ligne, et non destination de déplacement)
+  // 3. NEW (Absent en ligne, présent localement, et non destination de déplacement)
   Object.keys(newFilesToDownload).forEach((path) => {
     results.push({
       status: "NEW",
-      oldPath: null, // N'existe pas localement
+      oldPath: null, // N'existe pas en ligne
       newPath: path,
-      hashLocal: null,
-      hashOnline: newFilesToDownload[path],
+      hashLocal: newFilesToDownload[path],
+      hashOnline: null,
     });
   });
 
