@@ -5,11 +5,13 @@
 
 const axios = require("axios");
 const fs = require("fs");
-const { downloadFile } = require("./function/dowloadFile");
+const { downloadFile, isNetworkError } = require("./function/dowloadFile");
 
 const pLimit = require("./p-limit");
 const throttle = require("./throttle");
 const createRateLimiter = require("./create-rate-limiter");
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const dowloadMultiplefiles = async (
   files = [],
@@ -29,19 +31,70 @@ const dowloadMultiplefiles = async (
   const abortController = new AbortController();
   const { signal } = abortController;
 
-  // 🔸 Étape 1 : Calcul des tailles totales
-  await Promise.all(
-    files.map(async (file, index) => {
+  // 🔸 Fonction utilitaire pour récupérer la taille avec le système de retry identique
+  const getFileSizeWithRetry = async (url) => {
+    let otherRetryCount = 0;
+    const MAX_OTHER_RETRIES = 3;
+
+    while (true) {
+      if (signal?.aborted) {
+        throw new Error(`Head request aborted for ${url}`);
+      }
+
       try {
-        const head = await axios.head(file.url, { signal }); // Optionnel mais propre
-        const size = parseInt(head.headers["content-length"], 10) || 0;
+        const head = await axios.head(url, { signal });
+        return parseInt(head.headers["content-length"], 10) || 0;
+      } catch (err) {
+        // Pas de retry si c'est une annulation volontaire
+        if (signal?.aborted || err.message?.includes("aborted")) {
+          throw err;
+        }
+
+        // Retry infini sur erreur réseau
+        if (isNetworkError(err)) {
+          console.log(
+            `⚠️  Erreur réseau ${err.message || err.code} (HEAD) pour ${url}, reprise...`,
+          );
+          await sleep(1000); // Léger délai pour éviter de spammer en boucle fermée
+          continue;
+        }
+
+        // Retry limité pour les autres types d'erreurs
+        if (otherRetryCount < MAX_OTHER_RETRIES) {
+          otherRetryCount++;
+          const delay = otherRetryCount * 1000;
+          console.log(
+            `⚠️  Tentative ${err.message || err.code} (HEAD) ${otherRetryCount}/${MAX_OTHER_RETRIES} pour ${url}...`,
+          );
+          await sleep(delay);
+          continue;
+        }
+
+        // Si on a épuisé les retries hors-réseau, on propage l'erreur
+        throw err;
+      }
+    }
+  };
+
+  // 🔸 Étape 1 : Calcul des tailles totales (avec retry sécurisé)
+  try {
+    await Promise.all(
+      files.map(async (file, index) => {
+        // On passe par la fonction robuste avec retry
+        const size = await getFileSizeWithRetry(file.url);
         totalSizes[index] = size;
         totalGlobal += size;
-      } catch (err) {
-        console.error(err, file.url);
-      }
-    }),
-  );
+      }),
+    );
+  } catch (err) {
+    // Si l'une des requêtes HEAD échoue définitivement (ex: 404), on annule tout le process
+    console.error(
+      "💥 Échec critique lors de la récupération des tailles:",
+      err.message,
+    );
+    abortController.abort();
+    throw err;
+  }
 
   // 🔸 Étape 2 : Fonction de mise à jour de la progression
   const reportProgress = async () => {

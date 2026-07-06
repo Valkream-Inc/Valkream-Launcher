@@ -196,7 +196,6 @@ const downloadFile = async (
   let otherRetryCount = 0;
 
   while (true) {
-    console.log("dowloadFile", downloadUrl, destPath);
     if (signal?.aborted) {
       throw new Error(
         `Download aborted before starting retry for ${downloadUrl}`,
@@ -213,7 +212,7 @@ const downloadFile = async (
 
       if (isNetworkError(err)) {
         console.log(
-          `⚠️ Erreur réseau pour ${downloadUrl}, reprise...`,
+          `⚠️  Erreur réseau ${err.message || err.code} pour ${downloadUrl}, reprise...`,
           err.message || err.code,
         );
         continue;
@@ -223,7 +222,7 @@ const downloadFile = async (
         otherRetryCount++;
         const delay = otherRetryCount * 1000;
         console.log(
-          `⚠️ Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} pour ${downloadUrl}...`,
+          `⚠️  Tentative ${err.message || err.code} ${otherRetryCount}/${MAX_OTHER_RETRIES} pour ${downloadUrl}...`,
         );
         await removePartialFile(destPath);
         callback(0, 0, 0, 0);
@@ -236,4 +235,4 @@ const downloadFile = async (
   }
 };
 
-module.exports = { downloadFile };
+module.exports = { downloadFile, isNetworkError };
