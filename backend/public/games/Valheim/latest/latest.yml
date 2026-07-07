@@ -11,7 +11,7 @@
 # - X4 est interne au launcher et ne modifie pas la version Thunderstore.
 # ──────────────────────────────────────────────────────────────
 
-version: 2.34.37.0
+version: 2.34.37.1
 buildDate: 2025-09-18T19:00:00.929Z
 
 modpack:

@@ -14,6 +14,7 @@ const ValheimGameManager = require("../../../manager/Valheim/ValheimGameManager"
 
 async function ValheimCustomMods(event) {
   const callback = (text, processedBytes, totalBytes, percent, speed) => {
+    console.log(text, processedBytes, totalBytes, percent, speed);
     event.sender.send("progress-custom-mods-Valheim", {
       text,
       processedBytes: formatBytes(processedBytes),
@@ -45,9 +46,8 @@ async function ValheimCustomMods(event) {
     // --- 3. Gestion des mods ---
     const checkCustomMods = async (mods, settingKey) => {
       const active = await SettingsManager.getSetting(settingKey);
-      const installed = await ValheimThunderstoreManager.isCustomModsInstalled(
-        mods
-      );
+      const installed =
+        await ValheimThunderstoreManager.isCustomModsInstalled(mods);
       const available = ValheimThunderstoreManager.isCustomModsAvailable(mods);
 
       return { active, installed, available };
@@ -64,7 +64,7 @@ async function ValheimCustomMods(event) {
         checkCustomMods(boostfps_mods, "boostfpsModsEnabledWithValheim"),
         checkCustomMods(
           boostgraphic_mods,
-          "boostgraphicModsEnabledWithValheim"
+          "boostgraphicModsEnabledWithValheim",
         ),
       ]);
 
@@ -110,7 +110,7 @@ async function ValheimCustomMods(event) {
     ) {
       await ValheimThunderstoreManager.InstallCustomMods(
         boostfps_mods,
-        this.callback
+        callback,
       );
     } else if (
       isInstalled &&
@@ -131,14 +131,14 @@ async function ValheimCustomMods(event) {
     ) {
       await ValheimThunderstoreManager.InstallCustomMods(
         boostgraphic_mods,
-        this.callback
+        callback,
       );
     } else if (
       isInstalled &&
       !isBoostgraphicModsActive &&
       isBoostgraphicModsInstalled
     ) {
-      callback("Désinstallation des mods pour booster les FPS...");
+      callback("Désinstallation des mods pour booster les Graphiques ...");
       await ValheimThunderstoreManager.unInstallCustomMods(boostgraphic_mods);
     }
 

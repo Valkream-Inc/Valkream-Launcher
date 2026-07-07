@@ -39,7 +39,7 @@ class ValheimThunderstoreManager {
 
   async downloadModpack(
     callback = () => {},
-    text = "Téléchargement du modpack..."
+    text = "Téléchargement du modpack...",
   ) {
     await this.init();
     if (!this.modpackZipLink) throw new Error("Lien du modpack introuvable");
@@ -51,14 +51,14 @@ class ValheimThunderstoreManager {
           data.downloadedBytes,
           data.totalBytes,
           data.percent,
-          data.speed
-        )
+          data.speed,
+        ),
     );
   }
 
   async unzipModpack(
     callback = () => {},
-    text = "Décompression du modpack..."
+    text = "Décompression du modpack...",
   ) {
     await this.init();
     if (!fs.existsSync(this.modpackZipPath))
@@ -72,8 +72,8 @@ class ValheimThunderstoreManager {
           data.decompressedBytes,
           data.totalBytes,
           data.percent,
-          data.speed
-        )
+          data.speed,
+        ),
     );
   }
 
@@ -91,14 +91,14 @@ class ValheimThunderstoreManager {
   async dowloadMods(
     callback = () => {},
     text = "Téléchargement des mods...",
-    customMods = null
+    customMods = null,
   ) {
     await this.init();
     let manifest = {};
     if (fs.existsSync(this.extractManifestPath)) {
       try {
         manifest = JSON.parse(
-          fs.readFileSync(this.extractManifestPath, "utf-8")
+          fs.readFileSync(this.extractManifestPath, "utf-8"),
         );
       } catch (err) {
         throw new Error("Manifest invalide ou corrompu");
@@ -118,14 +118,15 @@ class ValheimThunderstoreManager {
           destPath: path.join(this.modsDir, mod + ".zip"),
         };
       }),
-      (data) =>
+      (data) => {
         callback(
           text,
           data.downloadedBytes,
           data.totalBytes,
           data.percent,
-          data.speed
-        )
+          data.speed,
+        );
+      },
     );
 
     if (fs.existsSync(this.extractManifestPath)) {
@@ -153,8 +154,8 @@ class ValheimThunderstoreManager {
           data.decompressedBytes,
           data.totalBytes,
           data.percent,
-          data.speed
-        )
+          data.speed,
+        ),
     );
   }
 
@@ -181,17 +182,17 @@ class ValheimThunderstoreManager {
   async update(
     callback = () => {},
     text_download = "Téléchargement des mods...",
-    text_unzip = "Décompression des mods..."
+    text_unzip = "Décompression des mods...",
   ) {
     await this.init();
     if (!fs.existsSync(this.extractManifestPath))
       throw new Error("Manifest inexistant");
 
     const NewManifest = JSON.parse(
-      fs.readFileSync(this.extractManifestPath, "utf-8")
+      fs.readFileSync(this.extractManifestPath, "utf-8"),
     );
     const actual_mods = (await this.getInstalledMods()).filter(
-      (mod) => !mod.endsWith(".dll")
+      (mod) => !mod.endsWith(".dll"),
     );
     const new_mods = NewManifest.dependencies || [];
 
@@ -254,7 +255,7 @@ class ValheimThunderstoreManager {
     mods = [],
     callback = () => {},
     text_download = "Téléchargement des mods Custom...",
-    text_unzip = "Décompression des mods Custom..."
+    text_unzip = "Décompression des mods Custom...",
   ) {
     await this.init();
     if (!this.isCustomModsAvailable(mods)) return;

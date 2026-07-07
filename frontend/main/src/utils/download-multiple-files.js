@@ -46,7 +46,7 @@ const dowloadMultiplefiles = async (
         return parseInt(head.headers["content-length"], 10) || 0;
       } catch (err) {
         // Pas de retry si c'est une annulation volontaire
-        if (signal?.aborted || err.message?.includes("aborted")) {
+        if (signal?.aborted /*|| err.message?.includes("aborted")*/) {
           throw err;
         }
 
