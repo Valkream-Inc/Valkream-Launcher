@@ -206,13 +206,13 @@ const downloadFile = async (
       return await attemptDownload(downloadUrl, destPath, callback, signal);
     } catch (err) {
       // Si l'erreur provient d'une annulation volontaire, on ne fait PAS de retry
-      if (signal?.aborted || err.message?.includes("aborted")) {
+      if (signal?.aborted /*|| err.message?.includes("aborted")*/) {
         throw err;
       }
 
       if (isNetworkError(err)) {
         console.log(
-          `⚠️  Erreur réseau ${err.message || err.code} pour ${downloadUrl}, reprise...`,
+          `⚠️  Erreur réseau -> ${err.message || err.code} pour ${downloadUrl}, reprise...`,
           err.message || err.code,
         );
         continue;
@@ -222,7 +222,7 @@ const downloadFile = async (
         otherRetryCount++;
         const delay = otherRetryCount * 1000;
         console.log(
-          `⚠️  Tentative ${err.message || err.code} ${otherRetryCount}/${MAX_OTHER_RETRIES} pour ${downloadUrl}...`,
+          `⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} -> ${err.message || err.code} pour ${downloadUrl}...`,
         );
         await removePartialFile(destPath);
         callback(0, 0, 0, 0);

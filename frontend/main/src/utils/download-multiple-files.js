@@ -53,7 +53,7 @@ const dowloadMultiplefiles = async (
         // Retry infini sur erreur réseau
         if (isNetworkError(err)) {
           console.log(
-            `⚠️  Erreur réseau ${err.message || err.code} (HEAD) pour ${url}, reprise...`,
+            `⚠️  Erreur réseau (HEAD) -> ${err.message || err.code} pour ${url}, reprise...`,
           );
           await sleep(1000); // Léger délai pour éviter de spammer en boucle fermée
           continue;
@@ -64,7 +64,7 @@ const dowloadMultiplefiles = async (
           otherRetryCount++;
           const delay = otherRetryCount * 1000;
           console.log(
-            `⚠️  Tentative ${err.message || err.code} (HEAD) ${otherRetryCount}/${MAX_OTHER_RETRIES} pour ${url}...`,
+            `⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} (HEAD) -> ${err.message || err.code} pour ${url}...`,
           );
           await sleep(delay);
           continue;
