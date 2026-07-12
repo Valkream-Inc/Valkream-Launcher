@@ -12,7 +12,7 @@ const { Throttle } = require("stream-throttle");
 const { formatBytes } = require("./formatBytes");
 const { consoleStreamAnswer } = require("./consoleStreamAnswer");
 
-const REQUEST_TIMEOUT = 0;
+const REQUEST_TIMEOUT = 3000;
 const MAX_OTHER_RETRIES = 5;
 
 const NETWORK_ERROR_CODES = new Set([
@@ -215,6 +215,7 @@ const downloadFile = async (
           `⚠️  Erreur réseau -> ${err.message || err.code} pour ${downloadUrl}, reprise...`,
           err.message || err.code,
         );
+        await sleep(1000); // Léger délai pour éviter de spammer en boucle fermée
         continue;
       }
 
@@ -235,4 +236,4 @@ const downloadFile = async (
   }
 };
 
-module.exports = { downloadFile, isNetworkError };
+module.exports = { downloadFile, isNetworkError, REQUEST_TIMEOUT };

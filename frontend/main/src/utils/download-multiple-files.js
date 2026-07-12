@@ -5,7 +5,11 @@
 
 const axios = require("axios");
 const fs = require("fs");
-const { downloadFile, isNetworkError } = require("./function/dowloadFile");
+const {
+  downloadFile,
+  isNetworkError,
+  REQUEST_TIMEOUT,
+} = require("./function/dowloadFile");
 
 const pLimit = require("./p-limit");
 const throttle = require("./throttle");
@@ -42,7 +46,10 @@ const dowloadMultiplefiles = async (
       }
 
       try {
-        const head = await axios.head(url, { signal });
+        const head = await axios.head(url, {
+          signal,
+          timeout: REQUEST_TIMEOUT,
+        });
         return parseInt(head.headers["content-length"], 10) || 0;
       } catch (err) {
         // Pas de retry si c'est une annulation volontaire

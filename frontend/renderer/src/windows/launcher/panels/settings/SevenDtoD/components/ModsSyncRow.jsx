@@ -28,15 +28,15 @@ const getSyncStatusInfo = (status, theme) => {
         theme === "modern"
           ? "#93c5fd"
           : theme === "futuristic"
-          ? "#38bdf8"
-          : "#3b82f6",
+            ? "#38bdf8"
+            : "#3b82f6",
       bg:
         theme === "futuristic"
           ? "#172554"
           : theme === "old"
-          ? "#f5ebe0"
-          : "#172554",
-      label: "Déplacé/Renommé",
+            ? "#f5ebe0"
+            : "#172554",
+      label: "Déplacé/Renommé (Online)",
     },
     DELETED: {
       Icon: DeleteIcon,
@@ -45,15 +45,15 @@ const getSyncStatusInfo = (status, theme) => {
         theme === "modern"
           ? "#fca5a5"
           : theme === "futuristic"
-          ? "#fb7171"
-          : "#b91c1c",
+            ? "#fb7171"
+            : "#b91c1c",
       bg:
         theme === "futuristic"
           ? "#450a0a"
           : theme === "old"
-          ? "#fff7ed"
-          : "#450a0a",
-      label: "Supprimé (Local)",
+            ? "#fff7ed"
+            : "#450a0a",
+      label: "Supprimé (Online)",
     },
     MODIFIED: {
       Icon: EditIcon,
@@ -62,15 +62,15 @@ const getSyncStatusInfo = (status, theme) => {
         theme === "modern"
           ? "#fdba74"
           : theme === "futuristic"
-          ? "#f97316"
-          : "#9a3412",
+            ? "#f97316"
+            : "#9a3412",
       bg:
         theme === "futuristic"
           ? "#431407"
           : theme === "old"
-          ? "#fdf2f8"
-          : "#431407",
-      label: "Modifié/Mis à jour",
+            ? "#fdf2f8"
+            : "#431407",
+      label: "Modifié/Mis à jour (Online)",
     },
     NEW: {
       Icon: AddCircleIcon,
@@ -79,15 +79,15 @@ const getSyncStatusInfo = (status, theme) => {
         theme === "modern"
           ? "#86efac"
           : theme === "futuristic"
-          ? "#4ade80"
-          : "#16a34a",
+            ? "#4ade80"
+            : "#16a34a",
       bg:
         theme === "futuristic"
           ? "#064e3b"
           : theme === "old"
-          ? "#f0fdf4"
-          : "#064e3b",
-      label: "Nouveau",
+            ? "#f0fdf4"
+            : "#064e3b",
+      label: "Nouveau (Online)",
     },
     UNCHANGED: {
       Icon: CheckCircleOutlineIcon,
@@ -96,14 +96,14 @@ const getSyncStatusInfo = (status, theme) => {
         theme === "old"
           ? "#5c4033"
           : theme === "futuristic"
-          ? "#a78bfa"
-          : "#d1d5db",
+            ? "#a78bfa"
+            : "#d1d5db",
       bg:
         theme === "old"
           ? "#e9d7ac"
           : theme === "futuristic"
-          ? "#1c0a2f"
-          : "#1f2937",
+            ? "#1c0a2f"
+            : "#1f2937",
       label: "Inchangé",
     },
   };
@@ -129,7 +129,7 @@ const hashTextStyle = (themeStyles, isDifferent) => ({
 const ModsSyncRow = ({ mod, theme, themeStyles }) => {
   const { Icon, icon, label, bg, primaryText } = getSyncStatusInfo(
     mod.status,
-    theme
+    theme,
   );
 
   const oldPath = mod.oldPath || "N/A";
@@ -181,7 +181,7 @@ const ModsSyncRow = ({ mod, theme, themeStyles }) => {
           <Typography
             sx={hashTextStyle(
               themeStyles,
-              mod.status === "MODIFIED" || mod.status === "DELETED"
+              mod.status === "MODIFIED" || mod.status === "DELETED",
             )}
           >
             {hashLocalDisplay}
@@ -194,7 +194,7 @@ const ModsSyncRow = ({ mod, theme, themeStyles }) => {
           <Typography
             sx={hashTextStyle(
               themeStyles,
-              mod.status === "MODIFIED" || mod.status === "NEW"
+              mod.status === "MODIFIED" || mod.status === "NEW",
             )}
           >
             {hashOnlineDisplay}

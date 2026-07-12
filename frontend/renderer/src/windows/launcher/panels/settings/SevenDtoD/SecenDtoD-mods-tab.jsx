@@ -91,7 +91,7 @@ const SevenDtotD_ModsTab = forwardRef((props, ref) => {
         }}
       >
         <DynamicSettingsTitle>
-          Tableau de modifications des Mods (Local vs Online)
+          Tableau de modifications des Mods (Online vs Local)
         </DynamicSettingsTitle>
 
         <WaitPulse isLoading={isLoading}>

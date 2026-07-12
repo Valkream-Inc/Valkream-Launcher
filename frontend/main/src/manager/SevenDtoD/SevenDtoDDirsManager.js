@@ -7,7 +7,6 @@ const path = require("path");
 const newDir = require("../../utils/new-dir.js");
 
 const DirsManager = require("../dirsManager.js");
-const SettingsManager = require("../settingsManager");
 
 class SevenDtoDDirsManager {
   rootPath = () => DirsManager.rootPath();
@@ -33,12 +32,6 @@ class SevenDtoDDirsManager {
       linux: path.join(this.gamePath(), "Mods"),
       darwin: path.join(this.gamePath(), "Mods"),
     });
-
-  installedModsPath = async () =>
-    path.join(
-      await SettingsManager.getSetting("gamePathWithSevenDtoD"),
-      "Mods",
-    );
 
   modsFixPath = () => path.join(this.gameRootPath(), "ModsFix");
   modsFixFilesPath = () => path.join(this.modsFixPath(), "files");
