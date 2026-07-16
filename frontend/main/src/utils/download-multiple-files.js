@@ -84,15 +84,19 @@ const dowloadMultiplefiles = async (
   };
 
   // 🔸 Étape 1 : Calcul des tailles totales (avec retry sécurisé)
+  const sizeLimit = pLimit(maxParallelDownloads);
+
   try {
-    await Promise.all(
-      files.map(async (file, index) => {
+    const sizes = files.map(async (file, index) =>
+      sizeLimit(async () => {
         // On passe par la fonction robuste avec retry
         const size = await getFileSizeWithRetry(file.url);
         totalSizes[index] = size;
         totalGlobal += size;
       }),
     );
+
+    await Promise.all(sizes);
   } catch (err) {
     // Si l'une des requêtes HEAD échoue définitivement (ex: 404), on annule tout le process
     console.error(

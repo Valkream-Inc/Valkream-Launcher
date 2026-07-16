@@ -12,7 +12,7 @@ const { Throttle } = require("stream-throttle");
 const { formatBytes } = require("./formatBytes");
 const { consoleStreamAnswer } = require("./consoleStreamAnswer");
 
-const REQUEST_TIMEOUT = 3000;
+const REQUEST_TIMEOUT = 10 * 1000;
 const MAX_OTHER_RETRIES = 5;
 
 const NETWORK_ERROR_CODES = new Set([
