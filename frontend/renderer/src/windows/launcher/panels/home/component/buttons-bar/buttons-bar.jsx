@@ -3,7 +3,6 @@
  * @license MIT-NC
  */
 
-import React from "react";
 import "./css/button-bar.css";
 
 import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
@@ -54,15 +53,13 @@ function ButtonsBar({
         {actualGame === "Valheim" && <ValheimButton />}
         {actualGame === "SevenDtoD" && <SevenDtoDButton />}
 
-        {!actionLoading && (
-          <Button
-            variant="contained"
-            className="settings-btn"
-            onClick={onSettingsClick}
-          >
-            <SettingsIcon fontSize="large" />
-          </Button>
-        )}
+        <Button
+          variant="contained"
+          className="settings-btn"
+          onClick={onSettingsClick}
+        >
+          <SettingsIcon fontSize="large" />
+        </Button>
       </div>
     </>
   );

@@ -83,7 +83,7 @@ export default function ValheimButton() {
   const start = async () => {
     try {
       const launcherBehavior = await window.electron_API.getSettings(
-        "launcherBehaviorWithValheim"
+        "launcherBehaviorWithValheim",
       );
 
       if (launcherBehavior === "hide") pause();
@@ -152,6 +152,7 @@ export default function ValheimButton() {
   useEffect(() => {
     const run = async () => {
       try {
+        if (actionLoading) return;
         if (modsRunningRef.current) return;
         if (!installationStatut) return;
 

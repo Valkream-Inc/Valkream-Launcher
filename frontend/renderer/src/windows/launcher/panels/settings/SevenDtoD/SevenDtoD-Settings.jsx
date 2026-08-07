@@ -3,6 +3,7 @@
  * @license MIT-NC
  */
 
+import { useEffect } from "react";
 import {
   NavButton,
   NavSettings,
@@ -25,6 +26,8 @@ import SevenDtoD_ButtonUninstallGame from "../settings-list/SevenDtoD/SevenDtoD-
 import SevenDtoD_SelectLauncherBehavior from "../settings-list/SevenDtoD/SevenDtoD-select-launcher-behavior.jsx";
 import SevenDtoD_ToggleLaunchSteam from "../settings-list/SevenDtoD/SevenDtoD-toggle-launch-steam.jsx";
 import SecenDtoD_ModsTab from "./SecenDtoD-mods-tab.jsx";
+
+import { useAction } from "../../../context/action.context.jsx";
 
 function Presentation() {
   return (
@@ -72,6 +75,15 @@ function SevenDtoDSettings({
   setIsDevActive,
   isDevActive,
 }) {
+  const { actionLoading, currentKey } = useAction();
+
+  const isActionAModAction = currentKey == "get-mods-data";
+
+  useEffect(() => {
+    if (actionLoading && activeTab == "mods" && currentKey !== "get-mods-data")
+      changeTab("general");
+  }, [actionLoading]);
+
   return (
     <>
       {/* Navs */}
@@ -83,9 +95,9 @@ function SevenDtoDSettings({
       >
         <NavButton id="general" label="General" active={false} />
         <NavButton id="launcher" label="Launcher" active={false} />
-        <NavButton id="game" label="Game" active={true} />
+        <NavButton id="game" label="Game" active={false} />
 
-        {isSpecialOptionVisible && (
+        {(!actionLoading || isActionAModAction) && isSpecialOptionVisible && (
           <NavButton id="mods" label="Mods" active={false} />
         )}
 
@@ -99,7 +111,7 @@ function SevenDtoDSettings({
         <SettingsTitle warn={false}>General</SettingsTitle>
         <Presentation />
         <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
-        <ButtonUninstallGlobal />
+        {!actionLoading && <ButtonUninstallGlobal />}
         <ToggleDev
           devActive={isDevActive}
           setDevActive={setIsDevActive}
@@ -133,13 +145,13 @@ function SevenDtoDSettings({
       {(isDevActive || isSpecialOptionVisible) && (
         <SettingsTab id="dev" activeTab={activeTab}>
           <SettingsTitle warn={true}>Dev / Debug</SettingsTitle>
-          <SevenDtoD_ButtonUninstallGame />
-          <SevenDtoD_ButtonOpenGame />
-
+          {!actionLoading && <SevenDtoD_ButtonUninstallGame />}
+          {!actionLoading && <SevenDtoD_ButtonOpenGame />}
           <ButtonOpenAppData />
+
           <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>
           <ButtonDebug />
-          {isSpecialOptionVisible && <ToggleBeta />}
+          {!actionLoading && isSpecialOptionVisible && <ToggleBeta />}
         </SettingsTab>
       )}
     </>

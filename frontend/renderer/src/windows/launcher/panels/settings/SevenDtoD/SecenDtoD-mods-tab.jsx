@@ -6,12 +6,14 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { keyframes } from "@mui/system";
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 
 import Wait from "../../../component/wait/wait.jsx";
 import { useTheme } from "../../../context/theme.context.jsx";
 import getModsThemeStyles from "./components/ModsStyle.jsx";
 import ModsSyncTable from "./components/ModsSyncTable";
+
+import { useAction } from "../../../context/action.context.jsx";
 
 const pulse = keyframes`
     0%, 100% { opacity: 1; }
@@ -25,6 +27,7 @@ const WaitPulse = ({ children, isLoading }) => (
 
 const SevenDtotD_ModsTab = forwardRef((props, ref) => {
   const { theme } = useTheme();
+  const { runAction } = useAction();
   const themeStyles = getModsThemeStyles(theme);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +45,11 @@ const SevenDtotD_ModsTab = forwardRef((props, ref) => {
         );
       });
 
-      setModsToDisplay(await window.electron_SevenDtoD_API.getModsData());
+      const TempModToDisplay = await runAction(
+        async () => window.electron_SevenDtoD_API.getModsData(),
+        "get-mods-data",
+      );
+      setModsToDisplay(TempModToDisplay);
     } catch (err) {
       console.error(err);
     } finally {

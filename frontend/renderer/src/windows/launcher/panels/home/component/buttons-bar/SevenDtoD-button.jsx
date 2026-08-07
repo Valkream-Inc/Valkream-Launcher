@@ -58,7 +58,7 @@ export default function SevenDtoDButton() {
   const selectGamePath = async () => {
     try {
       const actualGamePath = await window.electron_API.getSettings(
-        "gamePathWithSevenDtoD"
+        "gamePathWithSevenDtoD",
       );
       const result = await window.electron_API.chooseFolder();
       if (!result || result === actualGamePath) return;
@@ -147,6 +147,7 @@ export default function SevenDtoDButton() {
   useEffect(() => {
     const run = async () => {
       try {
+        if (actionLoading) return;
         if (!installationStatut) return;
 
         const {

@@ -65,11 +65,8 @@ class SevenDtoDVersionManager {
       this.getOnlineVersionConfig(),
     ]);
 
-    const majorLocal = parseInt((local?.version ?? "0.0.0").split(".")[0], 10);
-    const majorOnline = parseInt(
-      (online?.version ?? "0.0.0").split(".")[0],
-      10
-    );
+    const majorLocal = (local?.version ?? "0.0.0").split(".")[0];
+    const majorOnline = (online?.version ?? "0.0.0").split(".")[0];
     return majorLocal !== majorOnline;
   }
 

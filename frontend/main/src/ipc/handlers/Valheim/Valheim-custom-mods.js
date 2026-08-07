@@ -14,7 +14,6 @@ const ValheimGameManager = require("../../../manager/Valheim/ValheimGameManager"
 
 async function ValheimCustomMods(event) {
   const callback = (text, processedBytes, totalBytes, percent, speed) => {
-    console.log(text, processedBytes, totalBytes, percent, speed);
     event.sender.send("progress-custom-mods-Valheim", {
       text,
       processedBytes: formatBytes(processedBytes),

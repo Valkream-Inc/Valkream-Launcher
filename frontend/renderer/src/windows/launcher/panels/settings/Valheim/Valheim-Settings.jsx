@@ -3,6 +3,7 @@
  * @license MIT-NC
  */
 
+import { useEffect } from "react";
 import {
   NavButton,
   NavSettings,
@@ -28,6 +29,8 @@ import Valheim_ToggleBoostFpsMods from "../settings-list/Valheim/Valheim-toggle-
 import Valheim_ToggleBoostGraphicsMods from "../settings-list/Valheim/Valheim-toggle-boostgraphic-mods.jsx";
 import Valheim_ToggleLaunchSteam from "../settings-list/Valheim/Valheim-toggle-launch-steam.jsx";
 import Valheim_ModsTab from "./Valheim-mods-tab.jsx";
+
+import { useAction } from "../../../context/action.context.jsx";
 
 function Presentation() {
   return (
@@ -70,6 +73,16 @@ function ValheimSettings({
   setIsDevActive,
   isDevActive,
 }) {
+  const { actionLoading, currentKey } = useAction();
+
+  const isActionAModAction =
+    currentKey == "get-mods-data" || currentKey == "get-hash-data";
+
+  useEffect(() => {
+    if (actionLoading && activeTab == "mods" && !isActionAModAction)
+      changeTab("general");
+  }, [actionLoading]);
+
   return (
     <>
       {/* Navs */}
@@ -82,7 +95,9 @@ function ValheimSettings({
         <NavButton id="general" label="General" active={false} />
         <NavButton id="launcher" label="Launcher" active={false} />
         <NavButton id="game" label="Game" active={false} />
-        <NavButton id="mods" label="Mods" active={false} />
+        {(!actionLoading || isActionAModAction) && (
+          <NavButton id="mods" label="Mods" active={false} />
+        )}
 
         {(isDevActive || isSpecialOptionVisible) && (
           <NavButton id="dev" label="Dev" active={false} />
@@ -94,7 +109,7 @@ function ValheimSettings({
         <SettingsTitle warn={false}>General</SettingsTitle>
         <Presentation />
         <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
-        <ButtonUninstallGlobal />
+        {!actionLoading && <ButtonUninstallGlobal />}
         <ToggleDev
           devActive={isDevActive}
           setDevActive={setIsDevActive}
@@ -113,12 +128,16 @@ function ValheimSettings({
         <SettingsTitle warn={false}>Game</SettingsTitle>
         <Valheim_ToggleLaunchSteam />
         <Valheim_SelectLauncherBehavior />
-        <Valheim_ToggleBoostFpsMods />
-        {isSpecialOptionVisible && <Valheim_ToggleBoostGraphicsMods />}
-        {isSpecialOptionVisible && (
+        {!actionLoading && <Valheim_ToggleBoostFpsMods />}
+        {!actionLoading && isSpecialOptionVisible && (
+          <Valheim_ToggleBoostGraphicsMods />
+        )}
+        {!actionLoading && isSpecialOptionVisible && (
           <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
         )}
-        {isSpecialOptionVisible && <Valheim_ToggleAdminMods />}
+        {!actionLoading && isSpecialOptionVisible && (
+          <Valheim_ToggleAdminMods />
+        )}
       </SettingsTab>
 
       <SettingsTab id="mods" activeTab={activeTab}>
@@ -132,13 +151,13 @@ function ValheimSettings({
       {(isDevActive || isSpecialOptionVisible) && (
         <SettingsTab id="dev" activeTab={activeTab}>
           <SettingsTitle warn={true}>Dev / Debug</SettingsTitle>
-          <Valheim_ButtonUninstallGame />
-          <Valheim_ButtonOpenGame />
-
+          {!actionLoading && <Valheim_ButtonUninstallGame />}
+          {!actionLoading && <Valheim_ButtonOpenGame />}
           <ButtonOpenAppData />
+
           <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>
           <ButtonDebug />
-          {isSpecialOptionVisible && <ToggleBeta />}
+          {!actionLoading && isSpecialOptionVisible && <ToggleBeta />}
         </SettingsTab>
       )}
     </>

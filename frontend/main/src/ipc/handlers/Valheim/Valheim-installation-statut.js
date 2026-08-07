@@ -38,9 +38,8 @@ async function ValheimInstallationStatut() {
   // --- 3. Gestion des mods ---
   const checkCustomMods = async (mods, settingKey) => {
     const active = await SettingsManager.getSetting(settingKey);
-    const installed = await ValheimThunderstoreManager.isCustomModsInstalled(
-      mods
-    );
+    const installed =
+      await ValheimThunderstoreManager.isCustomModsInstalled(mods);
     const available = ValheimThunderstoreManager.isCustomModsAvailable(mods);
 
     return { active, installed, available };
@@ -50,15 +49,15 @@ async function ValheimInstallationStatut() {
     await Promise.all([
       checkCustomMods(
         localVersionConfig?.modpack?.admin_mods,
-        "adminModsEnabledWithValheim"
+        "adminModsEnabledWithValheim",
       ),
       checkCustomMods(
         localVersionConfig?.modpack?.boostfps_mods,
-        "boostfpsModsEnabledWithValheim"
+        "boostfpsModsEnabledWithValheim",
       ),
       checkCustomMods(
         localVersionConfig?.modpack?.boostgraphic_mods,
-        "boostgraphicModsEnabledWithValheim"
+        "boostgraphicModsEnabledWithValheim",
       ),
     ]);
 
@@ -85,14 +84,8 @@ async function ValheimInstallationStatut() {
   let isMajorUpdate = false;
 
   if (isServerReachable) {
-    const majorLocal = parseInt(
-      (localVersionConfig?.version ?? "0.0.0").split(".")[0],
-      10
-    );
-    const majorOnline = parseInt(
-      (onlineVersionConfig?.version ?? "0.0.0").split(".")[0],
-      10
-    );
+    const majorLocal = (localVersionConfig?.version ?? "0.0.0").split(".")[0];
+    const majorOnline = (onlineVersionConfig?.version ?? "0.0.0").split(".")[0];
     isMajorUpdate = majorLocal !== majorOnline;
 
     isUpToDate =
