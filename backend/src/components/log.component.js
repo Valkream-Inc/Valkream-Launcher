@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-const chalk = require("chalk");
+import chalk from "chalk";
 
 const SHOW_QUERY_PARAMS = false;
 
@@ -59,4 +59,4 @@ const log = (user, processus) => {
   console.log(`${dateColumn}${userColumn}${processColumn}`);
 };
 
-module.exports = log;
+export default log;

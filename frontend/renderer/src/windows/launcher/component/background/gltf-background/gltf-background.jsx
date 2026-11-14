@@ -5,14 +5,7 @@
 
 import "./gltf-background.css";
 
-import React, {
-  Suspense,
-  useMemo,
-  memo,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
+import { Suspense, useMemo, memo, useState, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
 
@@ -28,21 +21,15 @@ function GltfBackground() {
   const { actualGame } = useGames();
   const [showStats, setShowStats] = useState(false);
 
-  // ✅ Toggle avec Ctrl + Maj + clic sur le Canvas
-  const handleCanvasClick = useCallback((e) => {
+  // ✅ Toggle avec Ctrl + Maj + clic (listener React sur le wrapper :
+  // plus besoin de document.querySelector("canvas"), qui pouvait être
+  // null au moment du useEffect)
+  const handleClick = useCallback((e) => {
     if (e.ctrlKey && e.shiftKey) {
       e.preventDefault();
       setShowStats((prev) => !prev);
     }
   }, []);
-
-  useEffect(() => {
-    // On ajoute le listener une fois que le canvas est dans le DOM
-    const canvas = document.querySelector("canvas");
-    if (!canvas) return;
-    canvas.addEventListener("click", handleCanvasClick);
-    return () => canvas.removeEventListener("click", handleCanvasClick);
-  }, [handleCanvasClick]);
 
   // 📦 Données selon le jeu
   const ValheimData = useMemo(
@@ -53,7 +40,7 @@ function GltfBackground() {
       environment: <SunsetEnvironment />,
       hasCampfire: true,
     }),
-    []
+    [],
   );
 
   const SevenDtoDData = useMemo(
@@ -64,7 +51,7 @@ function GltfBackground() {
       environment: null,
       hasCampfire: false,
     }),
-    []
+    [],
   );
 
   const { camera, lights, fogArgs, environment, hasCampfire } = useMemo(() => {
@@ -80,21 +67,27 @@ function GltfBackground() {
   const [speed, climbSpeed] = useMemo(() => [4, 2], []);
 
   return (
-    <div className="background">
-      <Canvas shadows camera={camera}>
+    <div className="background" onClick={handleClick}>
+      {/* "percentage" = PCFShadowMap : évite le warning PCFSoftShadowMap */}
+      <Canvas shadows="percentage" camera={camera}>
         <ambientLight
           intensity={lights.ambientIntensity}
           color={lights.color}
         />
         <fog attach="fog" args={fogArgs} />
         {environment}
-        <Suspense fallback={<LoaderFallback />}>
-          <Model modelPath={`./models/${actualGame}-3d.glb`} />
+        {/* Fallback = null : rien de DOM dans le Canvas, c'est ça qui
+            faisait planter React (unmount de root pendant un render) */}
+        <Suspense fallback={null}>
+          <Model key={actualGame} modelPath={`./models/${actualGame}-3d.glb`} />
         </Suspense>
         {hasCampfire && <CampfireLight />}
         <PlayerControls speed={speed} climbSpeed={climbSpeed} />
         {showStats && <Stats className="stats" />}
       </Canvas>
+
+      {/* Loader HTML classique, en dehors du Canvas */}
+      <LoaderFallback />
     </div>
   );
 }

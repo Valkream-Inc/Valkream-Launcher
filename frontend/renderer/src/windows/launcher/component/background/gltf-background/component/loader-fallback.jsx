@@ -3,15 +3,32 @@
  * @license MIT-NC
  */
 
-import React from "react";
-import { Html } from "@react-three/drei";
+import { useProgress } from "@react-three/drei";
 
-function LoaderFallback() {
+// ⚠️ À rendre EN DEHORS du <Canvas>, pas dans <Suspense fallback>.
+// useProgress lit un store global de drei : il fonctionne hors Canvas
+// et suit le chargement du .glb sans passer par <Html> de drei.
+export default function LoaderFallback() {
+  const { active, progress } = useProgress();
+
+  if (!active) return null;
+
   return (
-    <Html center>
-      <h1 style={{ color: "white" }}>Chargement...</h1>
-    </Html>
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        pointerEvents: "none",
+        color: "#fff",
+        fontSize: "1.2rem",
+        textShadow: "0 0 8px rgba(0, 0, 0, 0.8)",
+        zIndex: 1,
+      }}
+    >
+      {Math.round(progress)} %
+    </div>
   );
 }
-
-export default LoaderFallback;

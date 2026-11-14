@@ -11,7 +11,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Fade,
   Slide,
   Typography,
 } from "@mui/material";
@@ -57,14 +56,9 @@ const AnimatedRunes = ({ type }) => {
   );
 };
 
+// Transition Slide
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return (
-    <Slide direction="down" ref={ref} {...props} timeout={500}>
-      <Fade in={props.in} timeout={600}>
-        {props.children}
-      </Fade>
-    </Slide>
-  );
+  return <Slide direction="down" ref={ref} timeout={500} {...props} />;
 });
 
 function OldPopup({
@@ -82,24 +76,29 @@ function OldPopup({
     <Dialog
       open={open}
       onClose={onClose}
-      TransitionComponent={Transition}
+      slots={{ transition: Transition }}
       keepMounted
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          position: "relative",
-          background: "linear-gradient(145deg, #3b2e2e, #5c4438)",
-          padding: "2.5rem 3rem",
-          borderRadius: "20px",
-          border: `6px double #7b5e57`,
-          boxShadow:
-            "inset 0 0 30px rgba(255,255,255,0.05), 0 0 30px rgba(0,0,0,0.6)",
-          color: "#f5f1e0",
-          fontFamily: "'MedievalSharp', cursive",
-          overflow: "visible",
-          minWidth: "80vw",
-          maxWidth: "80vw",
+      slotProps={{
+        paper: {
+          sx: {
+            position: "relative",
+            background: "linear-gradient(145deg, #3b2e2e, #5c4438)",
+            padding: "2.5rem 3rem",
+            borderRadius: "20px",
+            border: `6px double #7b5e57`,
+            boxShadow:
+              "inset 0 0 30px rgba(255,255,255,0.05), 0 0 30px rgba(0,0,0,0.6)",
+            color: "#f5f1e0",
+            fontFamily: "'MedievalSharp', cursive",
+            overflow: "visible",
+            minWidth: "80vw",
+            maxWidth: "80vw",
+            //Transition Fade
+            opacity: open ? 1 : 0,
+            transition: "opacity 600ms ease",
+          },
         },
       }}
       sx={{
@@ -171,8 +170,8 @@ function OldPopup({
                 border:
                   button.variant === "main"
                     ? `2px solid ${color}`
-                    : "2px solid #ccc",
-                color: button.variant === "main" ? color : "#ccc",
+                    : "2px solid black",
+                color: button.variant === "main" ? color : "black",
                 padding: "0.8rem 1.6rem",
                 borderRadius: "8px",
                 fontSize: "1.1rem",

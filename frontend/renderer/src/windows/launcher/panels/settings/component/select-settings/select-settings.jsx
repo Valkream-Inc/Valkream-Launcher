@@ -4,28 +4,35 @@
  */
 
 import { MenuItem, Select } from "@mui/material";
-import React from "react";
 import "./select-settings.css";
 
 import { useTheme } from "../../../../context/theme.context";
 
-export function SelectSettings({ children, ...props }) {
+export function SelectSettings({ children, MenuProps, className, ...props }) {
   const { theme } = useTheme();
 
   return (
     <Select
-      className="select-root"
       fullWidth
+      {...props}
+      className={["select-root", className].filter(Boolean).join(" ")}
       MenuProps={{
-        PaperProps: {
-          className: `${theme}-theme`,
-          style: {
-            background: "var(--background)",
-            boxShadow: "none",
+        ...MenuProps,
+        slotProps: {
+          ...MenuProps?.slotProps,
+          paper: {
+            ...MenuProps?.slotProps?.paper,
+            className: `${theme}-theme`,
+            sx: {
+              background: "var(--background)",
+              border: "var(--color) 2px solid",
+              borderRadius: "10px",
+              boxShadow: "none",
+              ...MenuProps?.slotProps?.paper?.sx,
+            },
           },
         },
       }}
-      {...props}
     >
       {children}
     </Select>

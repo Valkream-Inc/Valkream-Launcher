@@ -3,8 +3,8 @@
  * @license MIT-NC
  */
 
-const express = require("express");
-const log = require("./components/log.component");
+import express from "express";
+import log from "./components/log.component.js";
 
 const app = express();
 
@@ -24,7 +24,7 @@ app.use(loggerMiddleware);
 app.use(
   express.static("public", {
     dotfiles: "allow",
-  })
+  }),
 );
 
 // Home page
@@ -41,7 +41,7 @@ app.use((req, res, next) => {
 // Démarrer le serveur
 app.listen(PORT, () => {
   console.log(
-    `\n\n[${new Date().toLocaleString()}] 🚀 Serveur de mise à jour en écoute sur  http://localhost:${PORT}`
+    `\n\n[${new Date().toLocaleString()}] 🚀 Serveur de mise à jour en écoute sur  http://localhost:${PORT}`,
   );
 });
 

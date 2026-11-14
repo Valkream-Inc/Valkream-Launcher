@@ -4,7 +4,7 @@
  */
 
 import { useFrame } from "@react-three/fiber";
-import React, { useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 
 function Snow({ count = 15000, area = 50 }) {
   // positions et vitesses

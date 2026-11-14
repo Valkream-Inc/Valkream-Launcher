@@ -11,7 +11,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Fade,
   Slide,
   Typography,
 } from "@mui/material";
@@ -309,14 +308,9 @@ function getFuturistTypeConfig(type) {
   };
 }
 
+// Transition Slide
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return (
-    <Slide direction="down" ref={ref} {...props} timeout={500}>
-      <Fade in={props.in} timeout={600}>
-        {props.children}
-      </Fade>
-    </Slide>
-  );
+  return <Slide direction="down" ref={ref} timeout={500} {...props} />;
 });
 
 function FuturisticPopup({
@@ -334,21 +328,27 @@ function FuturisticPopup({
     <Dialog
       open={open}
       onClose={onClose}
-      TransitionComponent={Transition}
+      slots={{ transition: Transition }}
       keepMounted
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          position: "relative",
-          background: "#0f0f0f",
-          textAlign: "center",
-          borderRadius: "18px",
-          border: `3px solid ${color}`,
-          boxShadow: `0 0 40px ${color}, inset 0 0 20px rgba(255,255,255,0.1)`,
-          p: 2,
-          color: "white",
-          overflow: "visible", // ✅ autoriser le dépassement
+      slotProps={{
+        paper: {
+          sx: {
+            position: "relative",
+            background: "#0f0f0f",
+            textAlign: "center",
+            borderRadius: "18px",
+            border: `3px solid ${color}`,
+            boxShadow: `0 0 40px ${color}, inset 0 0 20px rgba(255,255,255,0.1)`,
+            p: 2,
+            color: "white",
+            overflow: "visible",
+            overflowY: "unset !important",
+            //Transition Fade
+            opacity: open ? 1 : 0,
+            transition: "opacity 600ms ease",
+          },
         },
       }}
     >
@@ -379,8 +379,6 @@ function FuturisticPopup({
         <DialogContent sx={{ overflow: "visible" }}>
           <Typography
             variant="body1"
-            textAlign="center"
-            color="#e0e0e0"
             component="div"
             className="futuristic-theme"
             sx={{
@@ -389,6 +387,8 @@ function FuturisticPopup({
               lineHeight: 1.6,
               maxHeight: "calc(80vh - 10cm)",
               overflowY: "auto",
+              color: "#e0e0e0",
+              textAlign: "center",
             }}
           >
             {message}

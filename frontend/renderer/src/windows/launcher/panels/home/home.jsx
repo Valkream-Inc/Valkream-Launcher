@@ -32,7 +32,7 @@ function Home() {
   const [isTipsOpen, setIsTipsOpen] = useState(false);
 
   return (
-    <Box maxWidth={0} sx={{ position: "absolute", inset: 0 }}>
+    <Box sx={{ position: "absolute", inset: 0, maxWidth: 0 }}>
       <Popup
         open={isTipsOpen}
         onClose={() => setIsTipsOpen(false)}
