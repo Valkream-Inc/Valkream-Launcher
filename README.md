@@ -72,6 +72,7 @@ Ce projet comprend :
 ### Install Nodejs and npm Windows
 
 ```bash
+winget install Microsoft.VisualStudio.2022.BuildTools --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
 winget install Schniz.fnm
 fnm install 26
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser

@@ -3,7 +3,6 @@
  * @license MIT-NC
  */
 
-import React from "react";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
@@ -14,7 +13,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 /**
  * Mappe l'état de synchronisation à l'icône et la couleur correspondantes. (Inchangé)
@@ -90,7 +89,7 @@ const getSyncStatusInfo = (status, theme) => {
       label: "Nouveau (Online)",
     },
     UNCHANGED: {
-      Icon: CheckCircleOutlineIcon,
+      Icon: CheckCircleIcon,
       icon: "#6b7280",
       primaryText:
         theme === "old"
