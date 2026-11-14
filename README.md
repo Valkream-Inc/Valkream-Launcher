@@ -69,37 +69,33 @@ Ce projet comprend :
 
 ## Installation (Développement)
 
-### Prérequis
+### Install Nodejs and npm Windows
 
-- Git
-- Node.js (version : 22+)
-- Yarn
-- Python (version : 3.10+)
+```bash
+winget install Schniz.fnm
+fnm install 26
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+if (!(Test-Path $PROFILE)) { New-Item -Type File -Path $PROFILE -Force }; Add-Content $PROFILE 'fnm env --use-on-cd | Out-String | Invoke-Expression'
+fnm default 26
+```
 
 ### Installation des dépendances
 
 À la racine du projet :
 
 ```bash
+npm install -g corepack
+yarn set version stable
 yarn install
+yarn workspace Valkream-Launcher rebuild
 ```
 
 ---
 
 ## Utilisation (Développement)
 
-### Lancer le serveur de fichiers (backend)
-
 ```bash
-cd backend
-yarn run dev # ou yarn run start
-```
-
-### Lancer le launcher Electron (frontend)
-
-```bash
-cd frontend
-yarn run dev
+yarn dev
 ```
 
 ### Fichiers Zip du jeu

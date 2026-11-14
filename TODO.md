@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] (++++) Passer a typscript
 - [ ] (++) optimize performance in TreeJs (3d ..?), optimize performance in react (useMemo, useCallback, etc.)
 - [ ] (++) optimize base fonction (trottle, etc.)
 - [ ] (++) mettre http2 en place (got plutot que axios)

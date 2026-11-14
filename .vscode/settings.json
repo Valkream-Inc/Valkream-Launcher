@@ -1,11 +1,12 @@
-{
-  "files.exclude": {
-    "**/node_modules/": true,
-    "**/build/": true,
-    "**/temp/": true,
-    "**/LICENSE": true,
-    "**/LICENSE.md": true,
-    "**.gitattributes": true,
-    "**/yarn.lock": true
-  }
-}
+// {
+//   "files.exclude": {
+//     "**/node_modules/": true,
+//     "**/build/": true,
+//     "**/temp/": true,
+//     "**/LICENSE": true,
+//     "**/LICENSE.md": true,
+//     "**.gitattributes": true,
+//     "**/yarn.lock": true,
+//     "**/.yarn": true
+//   }
+// }

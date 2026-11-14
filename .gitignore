@@ -3,7 +3,7 @@
 **/data/
 **/temp/
 **/dist/
-
+**/.yarn/
 
 # backend/public/
 backend/public/launcher
