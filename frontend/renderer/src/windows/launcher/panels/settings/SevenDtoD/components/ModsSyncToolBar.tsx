@@ -5,6 +5,7 @@
 
 import { enqueueSnackbar } from "notistack";
 import { useEffect, useState } from "react";
+import type { KeyboardEvent } from "react";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -18,13 +19,14 @@ import HandymanIcon from "@mui/icons-material/Handyman";
 import SearchIcon from "@mui/icons-material/Search";
 
 import Wait from "../../../../component/wait/wait";
+import type { ModsSyncToolbarProps } from "./ModsSyncToolBar.types";
 
 const ModsSyncToolbar = ({
   searchTerm,
   onSearchChange,
   themeStyles,
   modsToDisplay,
-}) => {
+}: ModsSyncToolbarProps) => {
   const [tempValue, setTempValue] = useState(searchTerm);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +38,7 @@ const ModsSyncToolbar = ({
     return () => clearTimeout(handler);
   }, [tempValue]);
 
-  const handleKeyPress = (e) =>
+  const handleKeyPress = (e: KeyboardEvent<HTMLDivElement>) =>
     e.key === "Enter" ? onSearchChange(tempValue) : {};
 
   const handleCopyLocalHashes = async () => {

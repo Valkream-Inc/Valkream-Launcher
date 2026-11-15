@@ -3,13 +3,24 @@
  * @license MIT-NC
  */
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-const PanelsContext = createContext();
-export const usePanels = () => useContext(PanelsContext);
+import type { PanelId } from "../../../types/panels.types";
+import type {
+  PanelsContextValue,
+  PanelsProviderProps,
+} from "./panels.context.types";
 
-export const PanelsProvider = ({ children }) => {
-  const [activePanel, setActivePanel] = useState("choose-games");
+const PanelsContext = createContext<PanelsContextValue | undefined>(undefined);
+export const usePanels = (): PanelsContextValue => {
+  const ctx = useContext(PanelsContext);
+  if (!ctx)
+    throw new Error("usePanels doit être utilisé dans un PanelsProvider");
+  return ctx;
+};
+
+export const PanelsProvider = ({ children }: PanelsProviderProps) => {
+  const [activePanel, setActivePanel] = useState<PanelId>("choose-games");
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -21,11 +32,11 @@ export const PanelsProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const changePanel = (PanelsId) => {
+  const changePanel = (PanelsId: PanelId) => {
     setActivePanel(PanelsId);
   };
 
-  const contextValue = {
+  const contextValue: PanelsContextValue = {
     activePanel,
     changePanel,
   };

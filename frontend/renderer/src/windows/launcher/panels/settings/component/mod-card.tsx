@@ -14,9 +14,11 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import type { ReactNode } from "react";
+import type { ModCardProps } from "./mod-card.types";
 import SettingsBox from "./settings-box/settings-box";
 
-function CustomTableCell({ children }) {
+function CustomTableCell({ children }: { children: ReactNode }) {
   return <TableCell sx={{ color: "white" }}>{children}</TableCell>;
 }
 
@@ -30,8 +32,8 @@ function ModCard({
   name = "Chargement des mods...",
   description = "Veuillez patienter...",
   icon = "./images/icon/icon.png",
-}) {
-  let backgroundColor, color;
+}: ModCardProps) {
+  let backgroundColor: string, color: string;
   const isOutdated =
     !localVersion || !onlineVersion || localVersion !== onlineVersion;
   const hasUpdateAvailable =

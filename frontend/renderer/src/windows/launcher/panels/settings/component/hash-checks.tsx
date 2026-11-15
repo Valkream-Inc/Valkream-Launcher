@@ -16,8 +16,9 @@ import {
 import SettingsBox from "./settings-box/settings-box";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import type { HashCheckRow, HashChecksProps } from "./hash-checks.types";
 
-function HashChecks({ hashData }) {
+function HashChecks({ hashData }: HashChecksProps) {
   const {
     onlineConfigHash: configOnlineHash,
     onlinePluginsHash: pluginOnlineHash,
@@ -25,7 +26,7 @@ function HashChecks({ hashData }) {
     localPluginsHash: pluginLocalHash,
   } = hashData;
 
-  const rows = [
+  const rows: HashCheckRow[] = [
     {
       label: "Plugins",
       local: pluginLocalHash,

@@ -12,7 +12,10 @@ import { useInfos } from "../../../../context/infos.context";
 import ImagePreview from "../image-preview/image-preview";
 
 export default function EventCard() {
-  const { event } = useInfos();
+  const { event: rawEvent } = useInfos();
+  // Le contexte peut renvoyer `false` quand il n'y a pas d'évènement
+  const event = rawEvent || null;
+  const eventLink = event?.link;
   const [isEventPopupOpen, setIsEventPopupOpen] = useState(false);
 
   const handleClick = () => setIsEventPopupOpen(true);
@@ -40,9 +43,9 @@ export default function EventCard() {
         title={event?.name || "Évènement"}
         message={event_message}
         onConfirm={
-          event?.link
+          eventLink
             ? [
-                () => window.electron_API.openLink(event?.link),
+                () => window.electron_API.openLink(eventLink),
                 "Voir sur le site Web",
               ]
             : undefined

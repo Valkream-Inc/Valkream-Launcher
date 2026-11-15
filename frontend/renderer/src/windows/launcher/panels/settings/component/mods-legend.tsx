@@ -15,9 +15,11 @@ import {
 } from "@mui/material";
 import { Container, styled } from "@mui/system";
 
+import type { ReactNode } from "react";
+import type { LegendItem, LegendProps } from "./mods-legend.types";
 import SettingsBox from "./settings-box/settings-box";
 
-const ColorBox = styled(Box)(({ theme, color }) => ({
+const ColorBox = styled(Box)(({ color }) => ({
   width: 16,
   height: 16,
   minWidth: 16,
@@ -26,7 +28,7 @@ const ColorBox = styled(Box)(({ theme, color }) => ({
   backgroundColor: color,
 }));
 
-const legendItems = [
+const legendItems: LegendItem[] = [
   { color: "#303f9f", label: "Mods spéciaux installés" },
   { color: "#0288d1", label: "Mods spéciaux à mettre à jour dans le modpack" },
   { color: "#9c27b0", label: "Mods admin installés" },
@@ -39,7 +41,7 @@ const legendItems = [
   { color: "#6d4c41", label: "Mods non présents dans le modpack" },
 ];
 
-const nonDevLegendItems = [
+const nonDevLegendItems: LegendItem[] = [
   { color: "#038913", label: "Mods installés (normal)" },
   {
     color: "#f44336",
@@ -47,11 +49,11 @@ const nonDevLegendItems = [
   },
 ];
 
-function CustomTableCell({ children }) {
+function CustomTableCell({ children }: { children: ReactNode }) {
   return <TableCell sx={{ color: "white" }}>{children}</TableCell>;
 }
 
-function Legend({ stats, error, isDevActive }) {
+function Legend({ stats, error, isDevActive }: LegendProps) {
   const percent = stats.total
     ? Math.round((stats.processed / stats.total) * 100)
     : 0;

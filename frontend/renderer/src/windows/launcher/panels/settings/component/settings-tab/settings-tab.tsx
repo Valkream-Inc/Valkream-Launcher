@@ -6,8 +6,9 @@
 import "./settings-tab.css";
 
 import { Box, Fade } from "@mui/material";
+import type { SettingsTabProps } from "./settings-tab.types";
 
-function SettingsTab({ id, activeTab, children }) {
+function SettingsTab({ id, activeTab, children }: SettingsTabProps) {
   return (
     <Fade in={activeTab === id} timeout={300}>
       <Box>

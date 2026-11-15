@@ -3,13 +3,13 @@
  * @license MIT-NC
  */
 
-const path = require("path");
+import path from "path";
 
 const isFolderPathSecured = (
-  folderToCheck,
-  autorizedRootPath,
-  isAnAutorizedSubFolder = (relativePath) => {}
-) => {
+  folderToCheck: string,
+  autorizedRootPath: string,
+  isAnAutorizedSubFolder: (relativePath: string) => boolean | void = () => {}
+): boolean => {
   const sanitizedFolder =
     folderToCheck.startsWith("/") || folderToCheck.startsWith("\\")
       ? folderToCheck.slice(1)
@@ -24,7 +24,7 @@ const isFolderPathSecured = (
   const isSafe = fullPath.startsWith(autorizedRootPath);
   const isAutorized = isAnAutorizedSubFolder(normalizedRelativePath);
 
-  return isSafe && isAutorized;
+  return isSafe && Boolean(isAutorized);
 };
 
-module.exports = isFolderPathSecured;
+export default isFolderPathSecured;

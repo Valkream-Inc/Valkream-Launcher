@@ -4,15 +4,27 @@
  */
 
 import { createContext, useState, useContext, useEffect } from "react";
+import type { LauncherTheme } from "@shared/types";
 
-export const ThemeContext = createContext();
-export const useTheme = () => useContext(ThemeContext);
+import type {
+  ThemeContextValue,
+  ThemeProviderProps,
+} from "./theme.context.types";
 
-export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState("modern");
+export const ThemeContext = createContext<ThemeContextValue | undefined>(
+  undefined
+);
+export const useTheme = (): ThemeContextValue => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme doit être utilisé dans un ThemeProvider");
+  return ctx;
+};
 
-  const changeTheme = async (value) => {
-    const themes = ["old", "modern", "futuristic"];
+export const ThemeProvider = ({ children }: ThemeProviderProps) => {
+  const [theme, setTheme] = useState<LauncherTheme>("modern");
+
+  const changeTheme = async (value: LauncherTheme) => {
+    const themes: LauncherTheme[] = ["old", "modern", "futuristic"];
     if (!themes.includes(value)) throw new Error("Invalid theme value");
 
     await window.electron_API.setSettings("launcherTheme", value);

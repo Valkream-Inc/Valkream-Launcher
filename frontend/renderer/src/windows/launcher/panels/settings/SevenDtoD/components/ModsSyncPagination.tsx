@@ -4,6 +4,7 @@
  */
 
 import TablePagination from "@mui/material/TablePagination";
+import type { ModsSyncPaginationProps } from "./ModsSyncPagination.types";
 
 const ModsSyncPagination = ({
   processedMods,
@@ -12,7 +13,7 @@ const ModsSyncPagination = ({
   setPage,
   rowsPerPage,
   setRowsPerPage,
-}) => {
+}: ModsSyncPaginationProps) => {
   return (
     <TablePagination
       rowsPerPageOptions={[50, 100, 250]}

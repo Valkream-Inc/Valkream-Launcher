@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import React, {
+import {
   forwardRef,
   useImperativeHandle, // You must import useEffect to handle side effects
   useRef,
@@ -14,28 +14,35 @@ import HashChecks from "../component/hash-checks";
 import ModCard from "../component/mod-card";
 import Legend from "../component/mods-legend";
 import SettingsTitle from "../component/settings-tittle/settings-title";
+import type { ModsStats } from "../component/mods-legend.types";
+import type { ModsTabHandle } from "../settings.types";
+import type {
+  ValheimModEntry,
+  ValheimModsTabProps,
+} from "./Valheim-mods-tab.types";
+import type { ValheimHashData, ValheimModsData } from "@shared/types";
 
 import { useAction } from "../../../context/action.context";
 
 const timeout_during_request_for_prevent_429_error = 300;
 
-const Valheim_ModsTab = forwardRef((props, ref) => {
+const Valheim_ModsTab = forwardRef<ModsTabHandle, ValheimModsTabProps>((props, ref) => {
   const { isDevActive } = props;
   const { runAction } = useAction();
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<ModsStats>({
     total: 0,
     processed: 0,
     updatesAvailable: 0,
     errors: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [hashData, setHashData] = useState(null);
-  const [mods, setMods] = useState([]);
+  const [error, setError] = useState<string | null>(null);
+  const [hashData, setHashData] = useState<ValheimHashData | null>(null);
+  const [mods, setMods] = useState<ValheimModEntry[]>([]);
 
   // Use a ref to store the AbortController
-  const abortControllerRef = useRef(null);
-  const currentFetchRef = useRef(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const currentFetchRef = useRef<Promise<void> | null>(null);
 
   const fetchMods = async () => {
     // Si une opération est déjà en cours → attendre sa fin avant de relancer
@@ -43,7 +50,7 @@ const Valheim_ModsTab = forwardRef((props, ref) => {
       try {
         setLoading(true);
         await currentFetchRef.current;
-        await new Promise((resolve) =>
+        await new Promise<void>((resolve) =>
           setTimeout(resolve, timeout_during_request_for_prevent_429_error)
         );
       } catch {
@@ -73,7 +80,7 @@ const Valheim_ModsTab = forwardRef((props, ref) => {
           () => window.electron_Valheim_API.getModsData(),
           "get-mods-data"
         );
-        const allMods = modpackInfo.mods || [];
+        const allMods = (modpackInfo as ValheimModsData).mods || [];
         setStats((prev) => ({ ...prev, total: allMods.length }));
         setLoading(false);
 
@@ -120,7 +127,7 @@ const Valheim_ModsTab = forwardRef((props, ref) => {
             }));
             setError("Il y eu un problème lors du chargement des mods.");
           }
-          await new Promise((resolve) =>
+          await new Promise<void>((resolve) =>
             setTimeout(resolve, timeout_during_request_for_prevent_429_error)
           );
         }
@@ -133,7 +140,7 @@ const Valheim_ModsTab = forwardRef((props, ref) => {
           setHashData(hash);
         }
       } catch (err) {
-        if (err.name !== "AbortError") {
+        if (!(err instanceof Error && err.name === "AbortError")) {
           console.error("Error loading mods:", err);
           setError("Error loading data. Please retry.");
         }

@@ -14,9 +14,13 @@ import { useInfos } from "../../../../context/infos.context";
 import EventCard from "../event-card/event-card";
 
 function ServerInfo() {
-  const { isLoading, serverInfos, maintenance } = useInfos();
+  const { isLoading, serverInfos: rawServerInfos, maintenance: rawMaintenance } =
+    useInfos();
+  // Le contexte peut renvoyer `false` quand l'info est indisponible
+  const serverInfos = rawServerInfos || null;
+  const maintenance = rawMaintenance || null;
   const { actualGame } = useGames();
-  const [isMaintenancePopupOpen, setIsMaintenancePopupOpen] = useState();
+  const [isMaintenancePopupOpen, setIsMaintenancePopupOpen] = useState(false);
 
   // Determine the display based on the state
   const statusText = isLoading

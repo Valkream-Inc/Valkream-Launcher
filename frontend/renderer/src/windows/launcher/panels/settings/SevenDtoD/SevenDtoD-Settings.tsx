@@ -28,6 +28,7 @@ import SevenDtoD_ToggleLaunchSteam from "../settings-list/SevenDtoD/SevenDtoD-to
 import SecenDtoD_ModsTab from "./SecenDtoD-mods-tab";
 
 import { useAction } from "../../../context/action.context";
+import type { GameSettingsProps } from "../settings.types";
 
 function Presentation() {
   return (
@@ -74,7 +75,7 @@ function SevenDtoDSettings({
   isSpecialOptionVisible,
   setIsDevActive,
   isDevActive,
-}) {
+}: GameSettingsProps) {
   const { actionLoading, currentKey } = useAction();
 
   const isActionAModAction = currentKey == "get-mods-data";

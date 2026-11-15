@@ -15,11 +15,22 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
+import type { LauncherTheme, SevenDtoDModFileStatus } from "@shared/types";
+import type { ModsThemeStyles } from "./ModsStyle.types";
+import type {
+  HashTextStyle,
+  ModsSyncRowProps,
+  SyncStatusInfo,
+} from "./ModsSyncRow.types";
+
 /**
  * Mappe l'état de synchronisation à l'icône et la couleur correspondantes. (Inchangé)
  */
-const getSyncStatusInfo = (status, theme) => {
-  const colors = {
+const getSyncStatusInfo = (
+  status: SevenDtoDModFileStatus,
+  theme: LauncherTheme,
+): SyncStatusInfo => {
+  const colors: Record<SevenDtoDModFileStatus, SyncStatusInfo> = {
     MOVED: {
       Icon: ArrowForwardIcon,
       icon: "#60a5fa",
@@ -112,20 +123,23 @@ const getSyncStatusInfo = (status, theme) => {
 };
 
 // Fonction utilitaire pour tronquer le hash
-const formatHash = (hash) => {
+const formatHash = (hash: string | null) => {
   if (!hash) return "N/A";
   return hash.length > 7 ? hash.substring(0, 7) + "..." : hash;
 };
 
 // Styles pour les hashes
-const hashTextStyle = (themeStyles, isDifferent) => ({
+const hashTextStyle = (
+  themeStyles: ModsThemeStyles,
+  isDifferent: boolean,
+): HashTextStyle => ({
   color: isDifferent ? themeStyles.textPrimary : themeStyles.textSecondary,
   fontWeight: isDifferent ? "bold" : "normal",
   fontFamily: "monospace",
   fontSize: "0.75rem",
 });
 
-const ModsSyncRow = ({ mod, theme, themeStyles }) => {
+const ModsSyncRow = ({ mod, theme, themeStyles }: ModsSyncRowProps) => {
   const { Icon, icon, label, bg, primaryText } = getSyncStatusInfo(
     mod.status,
     theme,

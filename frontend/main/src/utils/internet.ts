@@ -3,15 +3,16 @@
  * @license MIT-NC
  */
 
-const dns = require("dns");
-const { baseUrl } = require("../constants");
-const axios = require("axios");
+import dns from "dns";
+import axios from "axios";
+
+import { baseUrl } from "../constants";
 
 /**
  * Vérifie la connexion Internet en tentant une résolution DNS.
  * @returns {Promise<boolean>} true si connecté, false sinon
  */
-function hasInternetConnection(hostname = "google.com") {
+function hasInternetConnection(hostname = "google.com"): Promise<boolean> {
   return new Promise((resolve) => {
     dns.lookup(hostname, (err) => {
       if (err && err.code === "ENOTFOUND") {
@@ -28,7 +29,7 @@ function hasInternetConnection(hostname = "google.com") {
  * @param {string} url - L'URL du serveur à tester (ex: 'http://localhost:3000')
  * @returns {Promise<boolean>} true si le serveur répond, false sinon
  */
-async function isServerReachable(url = baseUrl) {
+async function isServerReachable(url: string = baseUrl): Promise<boolean> {
   try {
     await axios.get(url, { timeout: 3000 });
     return true;
@@ -37,4 +38,4 @@ async function isServerReachable(url = baseUrl) {
   }
 }
 
-module.exports = { hasInternetConnection, isServerReachable };
+export { hasInternetConnection, isServerReachable };

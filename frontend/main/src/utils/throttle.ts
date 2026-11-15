@@ -3,12 +3,15 @@
  * @license MIT-NC
  */
 
-function throttle(fn, delay) {
+function throttle<A extends unknown[]>(
+  fn: (...args: A) => Promise<void> | void,
+  delay: number
+): (...args: A) => Promise<void> {
   let lastCall = 0;
-  let timeoutId = null;
-  let lastArgs = null;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  let lastArgs: A | null = null;
 
-  return async function throttled(...args) {
+  return async function throttled(...args: A): Promise<void> {
     const now = Date.now();
 
     if (now - lastCall >= delay) {
@@ -23,7 +26,7 @@ function throttle(fn, delay) {
         timeoutId = setTimeout(async () => {
           lastCall = Date.now();
           timeoutId = null;
-          await fn(...lastArgs);
+          await fn(...(lastArgs as A));
           lastArgs = null;
         }, timeRemaining);
       }
@@ -31,4 +34,4 @@ function throttle(fn, delay) {
   };
 }
 
-module.exports = throttle;
+export default throttle;

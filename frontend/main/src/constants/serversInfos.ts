@@ -3,7 +3,9 @@
  * @license MIT-NC
  */
 
-const serversInfos = {
+import type { ServersInfosConfig } from "../types/core";
+
+const serversInfos: ServersInfosConfig = {
   Valheim: {
     type: "valheim",
     host: "51.222.46.122",
@@ -18,4 +20,4 @@ const serversInfos = {
   },
 };
 
-module.exports = serversInfos;
+export default serversInfos;

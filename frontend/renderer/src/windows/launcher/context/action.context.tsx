@@ -3,16 +3,21 @@
  * @license MIT-NC
  */
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 
-const ActionContext = createContext(null);
+import type {
+  ActionContextValue,
+  ActionProviderProps,
+} from "./action.context.types";
 
-export const ActionProvider = ({ children }) => {
+const ActionContext = createContext<ActionContextValue | undefined>(undefined);
+
+export const ActionProvider = ({ children }: ActionProviderProps) => {
   const [actionLoading, setActionLoading] = useState(false);
-  const [currentKey, setCurrentKey] = useState(null);
+  const [currentKey, setCurrentKey] = useState<string | null>(null);
 
   const startAction = useCallback(
-    (id = "default") => {
+    (id: string = "default"): string | null => {
       if (actionLoading) {
         console.warn(
           "Une action est déjà en cours, impossible d'en lancer une autre."
@@ -32,13 +37,13 @@ export const ActionProvider = ({ children }) => {
   }, []);
 
   const runAction = useCallback(
-    async (fn, id = "default") => {
+    async <T,>(fn: () => T | Promise<T>, id: string = "default"): Promise<T> => {
       if (actionLoading) {
         throw new Error("Une action est déjà en cours");
       }
       startAction(id);
       try {
-        const result = await Promise.resolve(fn());
+        const result = (await Promise.resolve(fn())) as T;
         finishAction();
         return result;
       } catch (err) {
@@ -49,7 +54,7 @@ export const ActionProvider = ({ children }) => {
     [actionLoading, startAction, finishAction]
   );
 
-  const value = {
+  const value: ActionContextValue = {
     actionLoading,
     currentKey,
     startAction,

@@ -3,23 +3,42 @@
  * @license MIT-NC
  */
 
-import React, {
+import {
   createContext,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
+import type {
+  ElectronSevenDtoDAPI,
+  ElectronValheimAPI,
+  GameEvent,
+  GameName,
+  Maintenance,
+  ServerInfos,
+} from "@shared/types";
+
 import Loader from "../component/loader/loader";
-import { useAction } from "./action.context.jsx";
-import { useGames } from "./games.context.jsx";
-import { usePanels } from "./panels.context.jsx";
+import { useAction } from "./action.context";
+import { useGames } from "./games.context";
+import { usePanels } from "./panels.context";
+import type {
+  InfosContextValue,
+  InfosLoadingState,
+  InfosProviderProps,
+  InstallationStatut,
+} from "./infos.context.types";
 
-const InfosContext = createContext(undefined);
-export const useInfos = () => useContext(InfosContext);
+const InfosContext = createContext<InfosContextValue | undefined>(undefined);
+export const useInfos = (): InfosContextValue => {
+  const ctx = useContext(InfosContext);
+  if (!ctx) throw new Error("useInfos doit être utilisé dans un InfosProvider");
+  return ctx;
+};
 
-export const InfosProvider = ({ children }) => {
-  const [loadingState, setLoadingState] = useState({
+export const InfosProvider = ({ children }: InfosProviderProps) => {
+  const [loadingState, setLoadingState] = useState<InfosLoadingState>({
     infosLoaded: false,
     installationStatusLoaded: false,
   });
@@ -27,20 +46,29 @@ export const InfosProvider = ({ children }) => {
   const { actualGame } = useGames();
   const { activePanel } = usePanels();
 
-  const [event, setEvent] = useState(null);
-  const [maintenance, setMaintenance] = useState(null);
-  const [serverInfos, setServerInfos] = useState(null);
-  const [isInternetConnected, setIsInternetConnected] = useState(null);
-  const [isServerReachable, setIsServerReachable] = useState(null);
-  const [installationStatut, setInstallationStatut] = useState(null);
+  const [event, setEvent] = useState<GameEvent | false | null>(null);
+  const [maintenance, setMaintenance] = useState<Maintenance | false | null>(
+    null
+  );
+  const [serverInfos, setServerInfos] = useState<ServerInfos | false | null>(
+    null
+  );
+  const [isInternetConnected, setIsInternetConnected] = useState<
+    boolean | null
+  >(null);
+  const [isServerReachable, setIsServerReachable] = useState<boolean | null>(
+    null
+  );
+  const [installationStatut, setInstallationStatut] =
+    useState<InstallationStatut | null>(null);
 
   const isLoading = !(
     loadingState.infosLoaded && loadingState.installationStatusLoaded
   );
 
-  const actualGameRef = useRef(null); // Pour vérifier si le jeu a changé
-  const actionLoadingRef = useRef(null); // Pour vérifier si une nouvelle action est en cours
-  const intervalRef = useRef(null); // Pour lancer une fois à blanc avant de lancer la boucle
+  const actualGameRef = useRef<GameName | null>(null); // Pour vérifier si le jeu a changé
+  const actionLoadingRef = useRef<boolean | null>(null); // Pour vérifier si une nouvelle action est en cours
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null); // Pour lancer une fois à blanc avant de lancer la boucle
   const isLoadingRef = useRef(false); // Pour empêcher les appels parallèles
 
   useEffect(() => {
@@ -51,7 +79,7 @@ export const InfosProvider = ({ children }) => {
       console.warn(
         "L'API Electron n'est pas disponible. Vérification des infos impossible."
       );
-      return null;
+      return;
     }
 
     if (actionLoadingRef.current !== actionLoading)
@@ -70,7 +98,10 @@ export const InfosProvider = ({ children }) => {
       });
     }
 
-    const GAMES_APIS = {
+    const GAMES_APIS: Record<
+      GameName,
+      ElectronValheimAPI | ElectronSevenDtoDAPI
+    > = {
       Valheim: window.electron_Valheim_API,
       SevenDtoD: window.electron_SevenDtoD_API,
     };
@@ -141,7 +172,7 @@ export const InfosProvider = ({ children }) => {
     };
   }, [actionLoading, actualGame]);
 
-  const contextValue = {
+  const contextValue: InfosContextValue = {
     isLoading,
     event,
     maintenance,

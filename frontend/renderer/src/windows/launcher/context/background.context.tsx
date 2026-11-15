@@ -3,26 +3,41 @@
  * @license MIT-NC
  */
 
-import React, {
+import {
   createContext,
   useState,
   useContext,
   useRef,
   useEffect,
 } from "react";
+import type { BackgroundType } from "@shared/types";
 
-const BackgroundContext = createContext();
-export const useBackground = () => useContext(BackgroundContext);
+import type {
+  BackgroundContextValue,
+  BackgroundProviderProps,
+} from "./background.context.types";
 
-export const BackgroundProvider = ({ children }) => {
-  const VideoBackgroundRef = useRef(null);
+const BackgroundContext = createContext<BackgroundContextValue | undefined>(
+  undefined
+);
+export const useBackground = (): BackgroundContextValue => {
+  const ctx = useContext(BackgroundContext);
+  if (!ctx)
+    throw new Error(
+      "useBackground doit être utilisé dans un BackgroundProvider"
+    );
+  return ctx;
+};
+
+export const BackgroundProvider = ({ children }: BackgroundProviderProps) => {
+  const VideoBackgroundRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
-  const [backgroundType, setBackgroundType] = useState("video");
+  const [backgroundType, setBackgroundType] = useState<BackgroundType>("video");
 
-  const changeBackgroundType = async (value) => {
-    const allowedValues = ["video", "image", "3d"];
+  const changeBackgroundType = async (value: BackgroundType) => {
+    const allowedValues: BackgroundType[] = ["video", "image", "3d"];
     if (!allowedValues.includes(value))
       throw new Error("Invalid background type value");
 
@@ -42,36 +57,36 @@ export const BackgroundProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const checkRef = (callback = () => {}) => {
+  const checkRef = (callback: () => void = () => {}): void => {
     if (VideoBackgroundRef.current) callback();
     else requestAnimationFrame(() => checkRef(callback));
   };
 
   const play = () =>
     checkRef(() => {
-      VideoBackgroundRef.current.play();
+      VideoBackgroundRef.current?.play();
       setIsPlaying(true);
     });
 
   const pause = () =>
     checkRef(() => {
-      VideoBackgroundRef.current.pause();
+      VideoBackgroundRef.current?.pause();
       setIsPlaying(false);
     });
 
   const mute = () =>
     checkRef(() => {
-      VideoBackgroundRef.current.muted = true;
+      if (VideoBackgroundRef.current) VideoBackgroundRef.current.muted = true;
       setIsMuted(true);
     });
 
   const unmute = () =>
     checkRef(() => {
-      VideoBackgroundRef.current.muted = false;
+      if (VideoBackgroundRef.current) VideoBackgroundRef.current.muted = false;
       setIsMuted(false);
     });
 
-  const contextValue = {
+  const contextValue: BackgroundContextValue = {
     VideoBackgroundRef,
     isPlaying,
     isMuted,

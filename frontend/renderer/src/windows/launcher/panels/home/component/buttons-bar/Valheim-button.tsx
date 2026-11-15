@@ -9,11 +9,16 @@ import React, { useEffect, useRef, useState } from "react";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { ButtonBase, Stack } from "@mui/material";
 
-import Popup from "../../../../component/popup/popup.jsx";
+import Popup from "../../../../component/popup/popup";
 
-import { useAction } from "../../../../context/action.context.jsx";
-import { useBackground } from "../../../../context/background.context.jsx";
-import { useInfos } from "../../../../context/infos.context.jsx";
+import { useAction } from "../../../../context/action.context";
+import { useBackground } from "../../../../context/background.context";
+import { useInfos } from "../../../../context/infos.context";
+import type { ValheimInstallationStatut } from "@shared/types";
+import type {
+  ValheimButtonAction,
+  ValheimButtonProgress,
+} from "./valheim-button.types";
 
 function WelcomeMessage() {
   return (
@@ -30,16 +35,24 @@ function WelcomeMessage() {
 export default function ValheimButton() {
   const { actionLoading, runAction } = useAction();
   const { pause, play } = useBackground();
-  const { installationStatut, maintenance } = useInfos();
+  const { installationStatut: statut, maintenance } = useInfos();
+  // Le contexte expose le statut du jeu courant : ici, celui de Valheim
+  const installationStatut = statut as ValheimInstallationStatut | null | undefined;
 
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
-  const [action, setAction] = useState({
+  const [action, setAction] = useState<ValheimButtonAction>({
     text: "Loading...",
     playIcon: false,
     onClick: () => {},
   });
 
-  const callback = ({ text, processedBytes, totalBytes, percent, speed }) => {
+  const callback = ({
+    text,
+    processedBytes,
+    totalBytes,
+    percent,
+    speed,
+  }: ValheimButtonProgress) => {
     const existProgress = processedBytes && totalBytes && percent && speed;
     setAction({
       text: existProgress
@@ -50,7 +63,7 @@ export default function ValheimButton() {
     });
   };
 
-  const error = (actionName, err) => {
+  const error = (actionName: string, err: unknown) => {
     console.error(actionName, err);
     enqueueSnackbar(`Erreur lors de ${actionName} !`, {
       variant: "error",
@@ -91,7 +104,9 @@ export default function ValheimButton() {
       if (launcherBehavior === "hide") play();
     } catch (err) {
       console.error("Erreur lors du démarrage du jeu :", err);
-      showSnackbar("Erreur lors du lancement du jeu !", "error");
+      enqueueSnackbar("Erreur lors du lancement du jeu !", {
+        variant: "error",
+      });
     }
   };
   const handleStart = () => runAction(start, "Valheim-start");

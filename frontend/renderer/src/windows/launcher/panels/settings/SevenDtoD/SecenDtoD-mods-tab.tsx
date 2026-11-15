@@ -8,6 +8,13 @@ import Typography from "@mui/material/Typography";
 import { keyframes } from "@mui/system";
 import { forwardRef, useImperativeHandle, useState } from "react";
 
+import type { SevenDtoDModFileDiff } from "@shared/types";
+import type { ModsTabHandle } from "../settings.types";
+import type {
+  DynamicSettingsTitleProps,
+  WaitPulseProps,
+} from "./SecenDtoD-mods-tab.types";
+
 import Wait from "../../../component/wait/wait";
 import { useTheme } from "../../../context/theme.context";
 import getModsThemeStyles from "./components/ModsStyle";
@@ -19,24 +26,24 @@ const pulse = keyframes`
     0%, 100% { opacity: 1; }
     50% { opacity: .5; }
   `;
-const WaitPulse = ({ children, isLoading }) => (
+const WaitPulse = ({ children, isLoading }: WaitPulseProps) => (
   <Box sx={isLoading ? { animation: `${pulse} 1.5s infinite` } : {}}>
     {children}
   </Box>
 );
 
-const SevenDtotD_ModsTab = forwardRef((props, ref) => {
+const SevenDtotD_ModsTab = forwardRef<ModsTabHandle>((_props, ref) => {
   const { theme } = useTheme();
   const { runAction } = useAction();
   const themeStyles = getModsThemeStyles(theme);
 
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState("");
-  const [modsToDisplay, setModsToDisplay] = useState([]);
+  const [modsToDisplay, setModsToDisplay] = useState<SevenDtoDModFileDiff[]>([]);
 
   const fetchMods = async () => {
     setIsLoading(true);
-    setModsToDisplay({});
+    setModsToDisplay([]);
     try {
       window.electron_SevenDtoD_API.onModsDataProgress((data) => {
         setProgress(
@@ -66,7 +73,7 @@ const SevenDtotD_ModsTab = forwardRef((props, ref) => {
     reload: () => fetchMods(),
   }));
 
-  const DynamicSettingsTitle = ({ children }) => (
+  const DynamicSettingsTitle = ({ children }: DynamicSettingsTitleProps) => (
     <Typography
       variant="h5"
       component="h2"

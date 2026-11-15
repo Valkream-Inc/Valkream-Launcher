@@ -3,14 +3,18 @@
  * @license MIT-NC
  */
 
-const DatabaseLib = require("better-sqlite3");
-const fs = require("fs");
-const path = require("path");
+import DatabaseLib from "better-sqlite3";
+import fs from "fs";
+import path from "path";
 
-const { isDev } = require("../constants/index.js");
-const DirsManager = require("../manager/dirsManager.js");
+import type { DatabaseRecord, DatabaseRow } from "../types/utils";
+
+import { isDev } from "../constants";
+import DirsManager from "../manager/dirsManager";
 
 class Database {
+  db: DatabaseLib.Database;
+
   constructor() {
     const dbPath = path.join(DirsManager.dbPath(), "databases");
     if (!fs.existsSync(dbPath)) fs.mkdirSync(dbPath, { recursive: true });
@@ -18,7 +22,7 @@ class Database {
     this.db = new DatabaseLib(path.join(dbPath, fileName));
   }
 
-  createTable(tableName) {
+  createTable(tableName: string): void {
     this.db
       .prepare(
         `CREATE TABLE IF NOT EXISTS ${tableName} (id INTEGER PRIMARY KEY, json_data TEXT)`
@@ -26,7 +30,10 @@ class Database {
       .run();
   }
 
-  createData(tableName, data) {
+  createData<T extends object>(
+    tableName: string,
+    data: T
+  ): T & { ID: number | bigint } {
     this.createTable(tableName);
     const stmt = this.db.prepare(
       `INSERT INTO ${tableName} (json_data) VALUES (?)`
@@ -35,33 +42,42 @@ class Database {
     return { ...data, ID: info.lastInsertRowid };
   }
 
-  readData(tableName, key = 1) {
+  readData<T extends object = Record<string, unknown>>(
+    tableName: string,
+    key: number = 1
+  ): DatabaseRecord<T> | undefined {
     this.createTable(tableName);
     const row = this.db
       .prepare(`SELECT * FROM ${tableName} WHERE id=?`)
-      .get(key);
+      .get(key) as DatabaseRow | undefined;
     if (!row) return undefined;
     return { ...JSON.parse(row.json_data), ID: row.id };
   }
 
-  readAllData(tableName) {
+  readAllData<T extends object = Record<string, unknown>>(
+    tableName: string
+  ): DatabaseRecord<T>[] {
     this.createTable(tableName);
-    const rows = this.db.prepare(`SELECT * FROM ${tableName}`).all();
+    const rows = this.db.prepare(`SELECT * FROM ${tableName}`).all() as DatabaseRow[];
     return rows.map((row) => ({ ...JSON.parse(row.json_data), ID: row.id }));
   }
 
-  updateData(tableName, data, key = 1) {
+  updateData<T extends object = Record<string, unknown>>(
+    tableName: string,
+    data: object,
+    key: number = 1
+  ): DatabaseRecord<T> | undefined {
     this.createTable(tableName);
     this.db
       .prepare(`UPDATE ${tableName} SET json_data=? WHERE id=?`)
       .run(JSON.stringify(data), key);
-    return this.readData(tableName, key);
+    return this.readData<T>(tableName, key);
   }
 
-  deleteData(tableName, key = 1) {
+  deleteData(tableName: string, key: number = 1): DatabaseLib.RunResult {
     this.createTable(tableName);
     return this.db.prepare(`DELETE FROM ${tableName} WHERE id=?`).run(key);
   }
 }
 
-module.exports = Database;
+export default Database;

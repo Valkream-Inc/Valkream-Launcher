@@ -3,10 +3,13 @@
  * @license MIT-NC
  */
 
+import type { LauncherTheme } from "@shared/types";
+import type { ModsThemeStyles } from "./ModsStyle.types";
+
 /**
  * Retourne les styles de base (couleurs et typographie) pour le thème donné.
  */
-const getModsThemeStyles = (currentTheme) => {
+const getModsThemeStyles = (currentTheme: LauncherTheme): ModsThemeStyles => {
   switch (currentTheme) {
     case "old":
       return {

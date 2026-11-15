@@ -3,9 +3,9 @@
  * @license MIT-NC
  */
 
-const { baseUrl } = require("../constants");
+import { baseUrl } from "../constants";
 
-const toValidUrl = (url) => {
+const toValidUrl = (url: string): string => {
   if (typeof url !== "string") throw new Error("URL must be a string");
   if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
@@ -15,4 +15,4 @@ const toValidUrl = (url) => {
   }
 };
 
-module.exports = toValidUrl;
+export default toValidUrl;

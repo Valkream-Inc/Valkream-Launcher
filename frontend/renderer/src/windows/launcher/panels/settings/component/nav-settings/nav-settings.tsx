@@ -4,6 +4,7 @@
  */
 
 import React from "react";
+import type { MouseEvent } from "react";
 import "./css/nav-settings.css";
 
 import Box from "@mui/material/Box";
@@ -11,8 +12,14 @@ import Button from "@mui/material/Button";
 
 import { usePanels } from "../../../../context/panels.context";
 import { useGames } from "../../../../context/games.context";
+import type { NavButtonProps, NavSettingsProps } from "./nav-settings.types";
 
-export const NavButton = ({ id, label, active, onClick = () => {} }) => {
+export const NavButton = ({
+  id,
+  label,
+  active,
+  onClick = () => {},
+}: NavButtonProps) => {
   return (
     <Button
       id={id}
@@ -31,18 +38,18 @@ export const NavSettings = ({
   activeTab,
   setActiveTab,
   onToogleSpecialOption,
-}) => {
+}: NavSettingsProps) => {
   const { changePanel } = usePanels();
   const { actualGame } = useGames();
 
-  const handleToogleSpecialOptionClick = (e) => {
+  const handleToogleSpecialOptionClick = (e: MouseEvent<HTMLImageElement>) => {
     // ctrl + shift click pour rendre les options spéciaux visibles
     if (e.ctrlKey && e.shiftKey) {
       onToogleSpecialOption();
     }
   };
 
-  const handleClick = (id) => {
+  const handleClick = (id: string) => {
     setActiveTab(id);
   };
 
@@ -65,7 +72,7 @@ export const NavSettings = ({
       {/* Boutons */}
       <Box className="nav-box">
         {React.Children.map(children, (child) => {
-          if (React.isValidElement(child) && child.props.id) {
+          if (React.isValidElement<NavButtonProps>(child) && child.props.id) {
             return React.cloneElement(child, {
               active: activeTab === child.props.id,
               onClick: handleClick,

@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import React, {
+import {
   useDeferredValue,
   useMemo,
   useState,
@@ -25,7 +25,15 @@ import ModsSyncPagination from "./ModsSyncPagination";
 import ModsSyncRow from "./ModsSyncRow";
 import ModsSyncToolbar from "./ModsSyncToolBar";
 
-const STATUS_ORDER = {
+import type { SevenDtoDModFileDiff, SevenDtoDModFileStatus } from "@shared/types";
+import type {
+  HeadCell,
+  ModsSyncTableProps,
+  SortDirection,
+  SortKey,
+} from "./ModsSyncTable.types";
+
+const STATUS_ORDER: Record<SevenDtoDModFileStatus, number> = {
   NEW: 1,
   MODIFIED: 2,
   DELETED: 3,
@@ -33,7 +41,10 @@ const STATUS_ORDER = {
   UNCHANGED: 5,
 };
 
-const columnAccessors = {
+const columnAccessors: Record<
+  SortKey,
+  (mod: SevenDtoDModFileDiff) => string | number
+> = {
   status: (mod) => STATUS_ORDER[mod.status] || 99,
   oldPath: (mod) => mod.oldPath || "",
   newPath: (mod) => mod.newPath || "",
@@ -41,7 +52,12 @@ const columnAccessors = {
   hashOnline: (mod) => mod.hashOnline || "",
 };
 
-const comparator = (a, b, orderBy, order) => {
+const comparator = (
+  a: SevenDtoDModFileDiff,
+  b: SevenDtoDModFileDiff,
+  orderBy: SortKey,
+  order: SortDirection,
+) => {
   const accessor = columnAccessors[orderBy];
   if (!accessor) return 0;
 
@@ -51,7 +67,7 @@ const comparator = (a, b, orderBy, order) => {
   let comparison = 0;
 
   if (orderBy === "status") {
-    comparison = valueA - valueB;
+    comparison = (valueA as number) - (valueB as number);
   } else {
     comparison = String(valueA).localeCompare(String(valueB), undefined, {
       sensitivity: "base",
@@ -65,23 +81,23 @@ const ModsSyncTable = ({
   modsToDisplay: initialMods = [],
   theme,
   themeStyles,
-}) => {
+}: ModsSyncTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("status");
-  const [sortDirection, setSortDirection] = useState("asc");
+  const [sortBy, setSortBy] = useState<SortKey>("status");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(100);
   const [isPending, startTransition] = useTransition();
 
   // Reset de la page quand on cherche ou qu'on trie
-  const handleSearchChange = (val) => {
+  const handleSearchChange = (val: string) => {
     startTransition(() => {
       setSearchTerm(val);
       setPage(0);
     });
   };
 
-  const handleRequestSort = (property) => {
+  const handleRequestSort = (property: SortKey) => {
     const isAsc = sortBy === property && sortDirection === "asc";
     const newOrder = isAsc ? "desc" : "asc";
 
@@ -117,7 +133,7 @@ const ModsSyncTable = ({
   }, [deferredMods, searchTerm, sortBy, sortDirection]);
 
   const headCells = useMemo(
-    () => [
+    (): HeadCell[] => [
       { id: "status", label: "Statut", width: "100px" },
       { id: "oldPath", label: "Chemin Local" },
       { id: "newPath", label: "Chemin Distant" },

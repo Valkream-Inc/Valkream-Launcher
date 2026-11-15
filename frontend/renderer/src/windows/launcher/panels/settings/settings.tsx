@@ -9,6 +9,7 @@ import SpecialPanel from "../../component/special-panel/special-panel";
 
 import { useGames } from "../../context/games.context";
 import SevenDtoDSettings from "./SevenDtoD/SevenDtoD-Settings";
+import type { ModsTabHandle } from "./settings.types";
 import ValheimSettings from "./Valheim/Valheim-Settings";
 
 function Settings() {
@@ -19,7 +20,7 @@ function Settings() {
   const [isSpecialOptionVisible, setIsSpecialOptionVisible] = useState(false);
   const [isDevActive, setIsDevActive] = useState(false);
 
-  const modsTabRef = useRef();
+  const modsTabRef = useRef<ModsTabHandle>(null);
 
   const toogleSpecialOption = () => {
     enqueueSnackbar(
@@ -54,7 +55,7 @@ function Settings() {
   };
   if (isConfirmSpecialOptionVisible) return <EnabledSpecialOption />;
 
-  const changeTab = (tab) => {
+  const changeTab = (tab: string) => {
     if (modsTabRef?.current?.stop) {
       modsTabRef.current.stop();
     }

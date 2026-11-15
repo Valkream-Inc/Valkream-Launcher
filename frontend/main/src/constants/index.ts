@@ -3,12 +3,12 @@
  * @license MIT-NC
  */
 
-const baseUrl = require("./baseUrl");
-const serversInfos = require("./serversInfos");
-const isDev = require("./isDev");
-const pkg = require("./pkg");
+import baseUrl from "./baseUrl";
+import serversInfos from "./serversInfos";
+import isDev from "./isDev";
+import pkg from "./pkg";
 
-module.exports = {
+export {
   baseUrl,
   serversInfos,
   isDev,

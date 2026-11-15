@@ -3,22 +3,32 @@
  * @license MIT-NC
  */
 
-import React, { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext } from "react";
+import type { GameName } from "@shared/types";
 
-const GamesContext = createContext();
-export const useGames = () => useContext(GamesContext);
+import type {
+  GamesContextValue,
+  GamesProviderProps,
+} from "./games.context.types";
 
-export const GamesProvider = ({ children }) => {
-  const gamesList = ["Valheim", "SevenDtoD"];
-  const [actualGame, setActualGame] = useState("Valheim");
+const GamesContext = createContext<GamesContextValue | undefined>(undefined);
+export const useGames = (): GamesContextValue => {
+  const ctx = useContext(GamesContext);
+  if (!ctx) throw new Error("useGames doit être utilisé dans un GamesProvider");
+  return ctx;
+};
 
-  const changeActualGame = (newGame) => {
+export const GamesProvider = ({ children }: GamesProviderProps) => {
+  const gamesList: GameName[] = ["Valheim", "SevenDtoD"];
+  const [actualGame, setActualGame] = useState<GameName>("Valheim");
+
+  const changeActualGame = (newGame: GameName) => {
     if (!gamesList.includes(newGame)) throw new Error("Game not found");
 
     return setActualGame(newGame);
   };
 
-  const contextValue = {
+  const contextValue: GamesContextValue = {
     actualGame,
     changeActualGame,
   };

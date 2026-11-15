@@ -3,7 +3,9 @@
  * @license MIT-NC
  */
 
-const noCache = {
+import type { NoCacheConfig } from "../types/core";
+
+const noCache: NoCacheConfig = {
   headers: {
     "Cache-Control": "no-cache, no-store, must-revalidate",
     Pragma: "no-cache",
@@ -15,4 +17,4 @@ const noCache = {
   },
 };
 
-module.exports = noCache;
+export default noCache;

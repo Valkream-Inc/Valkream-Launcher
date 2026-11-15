@@ -4,8 +4,9 @@
  */
 
 import "./settings-box.css";
+import type { SettingsBoxProps } from "./settings-box.types";
 
-const SettingsBox = ({ text, children, warn, sx }) => {
+const SettingsBox = ({ text, children, warn, sx }: SettingsBoxProps) => {
   return (
     <div className={`settings-elements-box ${warn ? "warn" : ""}`} style={sx}>
       {text && <span className="setting-text">{text}</span>}

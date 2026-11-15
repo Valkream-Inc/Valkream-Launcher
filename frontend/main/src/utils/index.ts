@@ -3,21 +3,20 @@
  * @license MIT-NC
  */
 
-const createRateLimiter = require("./create-rate-limiter");
-const pLimit = require("./p-limit");
-const throttle = require("./throttle");
-const newDir = require("./new-dir");
-const isFolderPathSecured = require("./is-folder-path-secured");
-const toValidUrl = require("./to-valid-url");
-const { hasInternetConnection, isServerReachable } = require("./internet");
+import createRateLimiter from "./create-rate-limiter";
+import pLimit from "./p-limit";
+import throttle from "./throttle";
+import newDir from "./new-dir";
+import isFolderPathSecured from "./is-folder-path-secured";
+import toValidUrl from "./to-valid-url";
+import { hasInternetConnection, isServerReachable } from "./internet";
 
-const Database = require("./database");
+import Database from "./database";
 
-const dowloadMultiplefiles = require("./download-multiple-files");
-const unZipMultipleFiles = require("./unzip-multiple-zips");
+import dowloadMultiplefiles from "./download-multiple-files";
+import unZipMultipleFiles from "./unzip-multiple-zips";
 
-
-module.exports = {
+export {
   createRateLimiter,
   pLimit,
   throttle,

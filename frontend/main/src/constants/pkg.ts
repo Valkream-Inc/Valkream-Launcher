@@ -3,6 +3,9 @@
  * @license MIT-NC
  */
 
-const pkg = require("../../../package.json");
+import type { PackageJson } from "../types/core";
 
-module.exports = pkg;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pkg = require("../../../package.json") as PackageJson;
+
+export default pkg;

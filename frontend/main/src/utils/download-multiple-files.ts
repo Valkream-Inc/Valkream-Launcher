@@ -3,27 +3,39 @@
  * @license MIT-NC
  */
 
-const axios = require("axios");
-const fs = require("fs");
-const {
+import axios from "axios";
+import fs from "fs";
+import {
   downloadFile,
   isNetworkError,
   REQUEST_TIMEOUT,
-} = require("./function/dowloadFile");
+} from "./function/dowloadFile";
 
-const pLimit = require("./p-limit");
-const throttle = require("./throttle");
-const createRateLimiter = require("./create-rate-limiter");
+import type {
+  DownloadEntry,
+  DownloadProgressCallback,
+} from "../types/utils";
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import pLimit from "./p-limit";
+import throttle from "./throttle";
+import createRateLimiter from "./create-rate-limiter";
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+// Message (ou code) d'une erreur inconnue, pour les logs de retry
+const errorMessageOrCode = (err: unknown): string => {
+  const { message, code } = (err ?? {}) as { message?: string; code?: string };
+  return message || code || "";
+};
 
 const dowloadMultiplefiles = async (
-  files = [],
-  callback = async () => {},
+  files: DownloadEntry[] = [],
+  callback: DownloadProgressCallback = async () => {},
   maxParallelDownloads = 10,
   callbackTimeout = 100,
   maxDownloadsPerSecond = 100,
-) => {
+): Promise<void[]> => {
   const totalSizes = new Array(files.length).fill(0);
   const downloaded = new Array(files.length).fill(0);
   let totalGlobal = 0;
@@ -36,7 +48,7 @@ const dowloadMultiplefiles = async (
   const { signal } = abortController;
 
   // 🔸 Fonction utilitaire pour récupérer la taille avec le système de retry identique
-  const getFileSizeWithRetry = async (url) => {
+  const getFileSizeWithRetry = async (url: string): Promise<number> => {
     let otherRetryCount = 0;
     const MAX_OTHER_RETRIES = 5;
 
@@ -50,7 +62,7 @@ const dowloadMultiplefiles = async (
           signal,
           timeout: REQUEST_TIMEOUT,
         });
-        return parseInt(head.headers["content-length"], 10) || 0;
+        return parseInt(String(head.headers["content-length"]), 10) || 0;
       } catch (err) {
         // Pas de retry si c'est une annulation volontaire
         if (signal?.aborted /*|| err.message?.includes("aborted")*/) {
@@ -60,7 +72,7 @@ const dowloadMultiplefiles = async (
         // Retry infini sur erreur réseau
         if (isNetworkError(err)) {
           console.log(
-            `⚠️  Erreur réseau (HEAD) -> ${err.message || err.code} pour ${url}, reprise...`,
+            `⚠️  Erreur réseau (HEAD) -> ${errorMessageOrCode(err)} pour ${url}, reprise...`,
           );
           await sleep(1000); // Léger délai pour éviter de spammer en boucle fermée
           continue;
@@ -71,7 +83,7 @@ const dowloadMultiplefiles = async (
           otherRetryCount++;
           const delay = otherRetryCount * 1000;
           console.log(
-            `⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} (HEAD) -> ${err.message || err.code} pour ${url}...`,
+            `⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} (HEAD) -> ${errorMessageOrCode(err)} pour ${url}...`,
           );
           await sleep(delay);
           continue;
@@ -101,7 +113,7 @@ const dowloadMultiplefiles = async (
     // Si l'une des requêtes HEAD échoue définitivement (ex: 404), on annule tout le process
     console.error(
       "💥 Échec critique lors de la récupération des tailles:",
-      err.message,
+      err instanceof Error ? err.message : String(err),
     );
     abortController.abort();
     throw err;
@@ -175,4 +187,4 @@ const dowloadMultiplefiles = async (
   }
 };
 
-module.exports = dowloadMultiplefiles;
+export default dowloadMultiplefiles;

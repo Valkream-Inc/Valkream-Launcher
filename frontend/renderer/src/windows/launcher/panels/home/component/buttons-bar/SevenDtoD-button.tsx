@@ -9,10 +9,17 @@ import React, { useEffect, useState } from "react";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { ButtonBase, Stack } from "@mui/material";
 
-import Popup from "../../../../component/popup/popup.jsx";
+import Popup from "../../../../component/popup/popup";
 
-import { useAction } from "../../../../context/action.context.jsx";
-import { useInfos } from "../../../../context/infos.context.jsx";
+import { useAction } from "../../../../context/action.context";
+import { useInfos } from "../../../../context/infos.context";
+import type {
+  GamePathElectronAPI,
+  GamePathSevenDtoDElectronAPI,
+  SevenDtoDButtonAction,
+  SevenDtoDButtonProgress,
+} from "./sevendtod-button.types";
+import type { SevenDtoDInstallationStatut } from "@shared/types";
 
 function WelcomeMessage() {
   return (
@@ -28,16 +35,24 @@ function WelcomeMessage() {
 
 export default function SevenDtoDButton() {
   const { actionLoading, runAction } = useAction();
-  const { installationStatut, maintenance } = useInfos();
+  const { installationStatut: statut, maintenance } = useInfos();
+  // Le contexte expose le statut du jeu courant : ici, celui de 7 Days to Die
+  const installationStatut = statut as SevenDtoDInstallationStatut | null | undefined;
 
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
-  const [action, setAction] = useState({
+  const [action, setAction] = useState<SevenDtoDButtonAction>({
     text: "Loading...",
     Icon: null,
     onClick: () => {},
   });
 
-  const callback = ({ text, processedBytes, totalBytes, percent, speed }) => {
+  const callback = ({
+    text,
+    processedBytes,
+    totalBytes,
+    percent,
+    speed,
+  }: SevenDtoDButtonProgress) => {
     const existProgress = processedBytes && totalBytes && percent && speed;
     setAction({
       text: existProgress
@@ -48,7 +63,7 @@ export default function SevenDtoDButton() {
     });
   };
 
-  const error = (actionName, err) => {
+  const error = (actionName: string, err: unknown) => {
     console.error(actionName, err);
     enqueueSnackbar(`Erreur lors de ${actionName} !`, {
       variant: "error",
@@ -57,23 +72,26 @@ export default function SevenDtoDButton() {
 
   const selectGamePath = async () => {
     try {
-      const actualGamePath = await window.electron_API.getSettings(
+      // Réglage et méthode absents des types partagés : typés localement
+      const electronAPI = window.electron_API as unknown as GamePathElectronAPI;
+      const sevenDtoDAPI =
+        window.electron_SevenDtoD_API as GamePathSevenDtoDElectronAPI;
+
+      const actualGamePath = await electronAPI.getSettings(
         "gamePathWithSevenDtoD",
       );
-      const result = await window.electron_API.chooseFolder();
+      const result = await electronAPI.chooseFolder();
       if (!result || result === actualGamePath) return;
 
-      if (
-        await window.electron_SevenDtoD_API.testIsSteamGamePathValid(result)
-      ) {
+      if (await sevenDtoDAPI.testIsSteamGamePathValid(result)) {
         // On sauvegarde le nouveau chemin
-        await window.electron_API.setSettings("gamePathWithSevenDtoD", result);
+        await electronAPI.setSettings("gamePathWithSevenDtoD", result);
         enqueueSnackbar("Chemin de jeu sauvegardé !", { variant: "info" });
       } else {
         enqueueSnackbar("Chemin invalide !", { variant: "error" });
       }
-    } catch (error) {
-      error("la sélection du chemin de jeu", error);
+    } catch (err) {
+      error("la sélection du chemin de jeu", err);
     }
   };
   const handleSelectGamePath = () =>

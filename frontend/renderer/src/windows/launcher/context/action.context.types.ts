@@ -1,0 +1,23 @@
+/**
+ * @author Valkream Team
+ * @license MIT-NC
+ */
+
+import type { ReactNode } from "react";
+
+export interface ActionProviderProps {
+  children: ReactNode;
+}
+
+/** Valeur exposée par `useAction()`. */
+export interface ActionContextValue {
+  /** Vrai tant qu'une action longue est en cours. */
+  actionLoading: boolean;
+  /** Identifiant de l'action en cours (`null` si aucune). */
+  currentKey: string | null;
+  /** Démarre une action ; retourne son id, ou `null` si une action est déjà en cours. */
+  startAction: (id?: string) => string | null;
+  finishAction: () => void;
+  /** Exécute `fn` en marquant l'action comme en cours (lève si une action est déjà active). */
+  runAction: <T>(fn: () => T | Promise<T>, id?: string) => Promise<T>;
+}
