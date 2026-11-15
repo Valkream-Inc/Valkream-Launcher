@@ -1,0 +1,20 @@
+{
+  // Process main + preload (Electron). Compilé en CommonJS vers ../.tsbuild
+  // (même profondeur de dossiers qu'avant : les chemins relatifs __dirname restent valides).
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "rootDir": ".",
+    "outDir": "../.tsbuild",
+    "sourceMap": false,
+    "removeComments": false,
+    "paths": {
+      "@shared/types": ["../shared/types/index"],
+      "@shared/*": ["../shared/*"]
+    }
+  },
+  "include": ["app.ts", "src/**/*.ts", "src/**/*.d.ts", "../shared/**/*.d.ts", "../types/**/*.d.ts"]
+}

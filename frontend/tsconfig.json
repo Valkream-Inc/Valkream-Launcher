@@ -1,0 +1,13 @@
+{
+  // Scripts Node du frontend (vite.config.ts, build-script.ts, set-icon.ts).
+  // Les sources ont leur propre tsconfig : main/tsconfig.json et renderer/tsconfig.json.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["vite.config.ts", "build-script.ts", "set-icon.ts", "types/**/*.d.ts", "shared/**/*.d.ts"]
+}
