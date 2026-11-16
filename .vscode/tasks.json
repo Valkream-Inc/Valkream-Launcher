@@ -1,0 +1,211 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // ───────────────────────── Développement ─────────────────────────
+    {
+      "label": "Dev : tout (backend + launcher)",
+      "detail": "yarn dev — backend + Vite + esbuild (main) + Electron + typecheck en watch (via turbo)",
+      "type": "shell",
+      "command": "yarn dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    },
+    {
+      "label": "Dev : launcher",
+      "detail": "Vite + esbuild (main) + Electron + typecheck en watch (sans rebuild natif)",
+      "type": "shell",
+      "command": "yarn dev:front",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    },
+    {
+      "label": "Dev : backend (serveur de fichiers)",
+      "detail": "tsx watch — http://localhost:3000",
+      "type": "shell",
+      "command": "yarn dev:back",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    },
+    {
+      "label": "Dev : renderer (Vite)",
+      "detail": "http://localhost:8080",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher dev:react",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": { "regexp": "^__vite_jamais_utilise__$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE v",
+          "endsPattern": "Local:"
+        }
+      },
+      "presentation": { "panel": "dedicated", "reveal": "silent" }
+    },
+    {
+      "label": "Dev : main (esbuild)",
+      "detail": "Compile main/ vers frontend/.tsbuild/ (sans vérification de types)",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher dev:main",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "esbuild",
+        "pattern": { "regexp": "^__esbuild_jamais_utilise__$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "\\[dev-main\\] building",
+          "endsPattern": "\\[dev-main\\] (ready|\\d+ erreur)"
+        }
+      },
+      "presentation": { "panel": "dedicated", "reveal": "silent" }
+    },
+    {
+      "label": "Dev : types main (tsc --watch)",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher dev:types:main",
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$tsc-watch",
+        "fileLocation": ["relative", "${workspaceFolder}/frontend"]
+      },
+      "presentation": { "panel": "dedicated", "reveal": "never" }
+    },
+    {
+      "label": "Dev : types renderer (tsc --watch)",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher dev:types:renderer",
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$tsc-watch",
+        "fileLocation": ["relative", "${workspaceFolder}/frontend"]
+      },
+      "presentation": { "panel": "dedicated", "reveal": "never" }
+    },
+    {
+      "label": "Dev : prérequis du debug Electron",
+      "detail": "Vite + esbuild + typecheck en watch (utilisé par launch.json)",
+      "dependsOn": ["Dev : renderer (Vite)", "Dev : main (esbuild)", "Dev : types main (tsc --watch)", "Dev : types renderer (tsc --watch)"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+
+    // ───────────────────────── Qualité ─────────────────────────
+    {
+      "label": "Typecheck : tout",
+      "detail": "main + renderer + scripts + backend (via turbo)",
+      "type": "shell",
+      "command": "yarn typecheck",
+      "problemMatcher": {
+        "base": "$tsc",
+        "fileLocation": ["relative", "${workspaceFolder}/frontend"]
+      },
+      "group": "test",
+      "presentation": { "panel": "shared", "reveal": "always", "clear": true }
+    },
+    {
+      "label": "Typecheck : main (Electron)",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher typecheck:main",
+      "problemMatcher": {
+        "base": "$tsc",
+        "fileLocation": ["relative", "${workspaceFolder}/frontend"]
+      },
+      "group": "test",
+      "presentation": { "panel": "shared", "reveal": "always", "clear": true }
+    },
+    {
+      "label": "Typecheck : renderer (React)",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher typecheck:renderer",
+      "problemMatcher": {
+        "base": "$tsc",
+        "fileLocation": ["relative", "${workspaceFolder}/frontend"]
+      },
+      "group": "test",
+      "presentation": { "panel": "shared", "reveal": "always", "clear": true }
+    },
+    {
+      "label": "Lint",
+      "detail": "eslint .",
+      "type": "shell",
+      "command": "yarn lint",
+      "problemMatcher": "$eslint-stylish",
+      "group": "test",
+      "presentation": { "panel": "shared", "reveal": "always", "clear": true }
+    },
+
+    // ───────────────────────── Build ─────────────────────────
+    {
+      "label": "Build : launcher (installeurs)",
+      "detail": "Icônes + renderer + main + obfuscation + electron-builder",
+      "type": "shell",
+      "command": "yarn build",
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    },
+    {
+      "label": "Build : main (tsc)",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher build:main",
+      "problemMatcher": {
+        "base": "$tsc",
+        "fileLocation": ["relative", "${workspaceFolder}/frontend"]
+      },
+      "group": "build",
+      "presentation": { "panel": "shared", "reveal": "silent" }
+    },
+    {
+      "label": "Build : renderer (Vite)",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher build:react",
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": { "panel": "shared", "reveal": "silent" }
+    },
+    {
+      "label": "Générer les icônes",
+      "detail": "icon.png -> icon.ico / icon.icns",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher set-icon",
+      "problemMatcher": [],
+      "presentation": { "panel": "shared", "reveal": "silent" }
+    },
+
+    // ───────────────────────── Yarn ─────────────────────────
+    {
+      "label": "Yarn : install",
+      "type": "shell",
+      "command": "yarn install",
+      "problemMatcher": [],
+      "presentation": { "panel": "shared", "reveal": "always" }
+    },
+    {
+      "label": "Yarn : rebuild natif (electron-rebuild)",
+      "detail": "À relancer après un changement de version d'Electron / better-sqlite3 (ou « yarn dev:fresh »)",
+      "type": "shell",
+      "command": "yarn rebuild",
+      "problemMatcher": [],
+      "presentation": { "panel": "shared", "reveal": "always" }
+    },
+    {
+      "label": "Yarn : upgrade-interactive",
+      "type": "shell",
+      "command": "yarn upgrade-interactive",
+      "problemMatcher": [],
+      "presentation": { "panel": "shared", "reveal": "always", "focus": true }
+    },
+    {
+      "label": "Yarn : dedupe",
+      "type": "shell",
+      "command": "yarn dedupe",
+      "problemMatcher": [],
+      "presentation": { "panel": "shared", "reveal": "always" }
+    }
+  ]
+}

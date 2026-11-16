@@ -1,3 +1,5 @@
 {
-  "ignore": ["node_modules/", "dist/", "build/", "renderer/", "data/"]
+  "watch": [".tsbuild"],
+  "ext": "js,json",
+  "delay": 300
 }

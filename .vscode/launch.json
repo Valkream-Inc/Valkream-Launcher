@@ -1,0 +1,41 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Electron : main (debug)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/frontend",
+      "runtimeExecutable": "${workspaceFolder}/frontend/node_modules/.bin/electron",
+      "windows": {
+        "runtimeExecutable": "${workspaceFolder}/frontend/node_modules/.bin/electron.cmd"
+      },
+      "runtimeArgs": [".tsbuild/app.js"],
+      "env": { "NODE_ENV": "dev" },
+      "outFiles": ["${workspaceFolder}/frontend/.tsbuild/**/*.js"],
+      "sourceMaps": true,
+      "console": "integratedTerminal",
+      "preLaunchTask": "Dev : prérequis du debug Electron"
+    },
+    {
+      "name": "Backend : serveur de fichiers (debug)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/backend",
+      "runtimeExecutable": "${workspaceFolder}/backend/node_modules/.bin/tsx",
+      "windows": {
+        "runtimeExecutable": "${workspaceFolder}/backend/node_modules/.bin/tsx.cmd"
+      },
+      "args": ["./src/server.ts"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launcher + backend (debug)",
+      "configurations": ["Backend : serveur de fichiers (debug)", "Electron : main (debug)"],
+      "stopAll": true
+    }
+  ]
+}

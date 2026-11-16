@@ -1,0 +1,115 @@
+/**
+ * @author Valkream
+ * @license MIT
+ */
+
+import fs from "fs";
+import path from "path";
+import progress from "progress-stream";
+import { Throttle } from "stream-throttle";
+
+import type { CopyProgressCallback } from "../../types/utils";
+
+import { formatBytes } from "./formatBytes";
+import { consoleStreamAnswer } from "./consoleStreamAnswer";
+
+/**
+ * Copie un DOSSIER avec progression et throttling.
+ *
+ * @param {string} srcDir - Dossier source
+ * @param {string} destDir - Dossier destination
+ * @param {function} callback - (transferred, total, percent, speed) => {}
+ */
+const copyFolder = async (
+  srcDir: string,
+  destDir: string,
+  callback: CopyProgressCallback = ({ transferredBytes, totalBytes, percent, speed }) =>
+    consoleStreamAnswer(
+      `📁 Copie du dossier ${path.basename(srcDir)}: ${percent}% ` +
+        `(${formatBytes(transferredBytes)} / ${formatBytes(totalBytes)}) ` +
+        `à ${formatBytes(speed)}/s`
+    )
+) => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      // --- 1. Fonction pour calculer la taille totale du dossier ---
+      const getTotalSize = (dir: string): number => {
+        let total = 0;
+        const files = fs.readdirSync(dir, { withFileTypes: true });
+
+        for (const file of files) {
+          const filePath = path.join(dir, file.name);
+          if (file.isDirectory()) {
+            total += getTotalSize(filePath);
+          } else {
+            total += fs.statSync(filePath).size;
+          }
+        }
+        return total;
+      };
+
+      const totalSize = getTotalSize(srcDir);
+      let transferredBytes = 0;
+
+      // --- 2. Prépare le dossier destination ---
+      fs.mkdirSync(destDir, { recursive: true });
+
+      // --- 3. Fonction récursive pour copier ---
+      const copyRecursive = async (
+        source: string,
+        destination: string
+      ): Promise<void> => {
+        const entries = fs.readdirSync(source, { withFileTypes: true });
+
+        for (const entry of entries) {
+          const srcPath = path.join(source, entry.name);
+          const destPath = path.join(destination, entry.name);
+
+          if (entry.isDirectory()) {
+            fs.mkdirSync(destPath, { recursive: true });
+            await copyRecursive(srcPath, destPath);
+          } else {
+            await new Promise<void>((resolveFile, rejectFile) => {
+              const fileSize = fs.statSync(srcPath).size;
+
+              const progressStream = progress({
+                length: fileSize,
+                time: 100,
+              });
+
+              progressStream.on("progress", (p) => {
+                transferredBytes += p.delta; // Ajoute juste ce qui est transféré
+                const percent = Math.round(
+                  (transferredBytes / totalSize) * 100
+                );
+
+                callback({
+                  transferredBytes,
+                  totalBytes: totalSize,
+                  percent,
+                  speed: p.speed,
+                });
+              });
+
+              fs.createReadStream(srcPath)
+                .pipe(new Throttle({ rate: 1024 * 1024 * 1024 })) // 1024 Mo/s
+                .pipe(progressStream)
+                .pipe(fs.createWriteStream(destPath))
+                .on("finish", resolveFile)
+                .on("error", rejectFile);
+            });
+          }
+        }
+      };
+
+      // --- 4. Lance la copie ---
+      await copyRecursive(srcDir, destDir);
+
+      resolve();
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+export { copyFolder };

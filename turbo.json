@@ -1,0 +1,24 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  // Electron a besoin de l'environnement complet (APPDATA, HOME, DISPLAY...).
+  "envMode": "loose",
+  "tasks": {
+    // Dev : tâches longues lancées en parallèle (voir « dev » dans package.json).
+    "dev": { "cache": false, "persistent": true },
+    "dev:react": { "cache": false, "persistent": true },
+    "dev:main": { "cache": false, "persistent": true },
+    "dev:electron": { "cache": false, "persistent": true },
+    "dev:types:main": { "cache": false, "persistent": true },
+    "dev:types:renderer": { "cache": false, "persistent": true },
+
+    // Mis en cache : relancé seulement si les sources ont changé.
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "inputs": ["$TURBO_DEFAULT$", "!dist/**", "!build/**", "!.tsbuild/**", "!renderer/build/**"],
+      "outputs": []
+    },
+
+    "build": { "dependsOn": ["^build"], "cache": false }
+  }
+}

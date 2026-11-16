@@ -1,0 +1,20 @@
+{
+  // Renderer (React + Vite). Vérification de types uniquement : Vite/esbuild transpile.
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@shared/types": ["../shared/types/index"],
+      "@shared/*": ["../shared/*"]
+    }
+  },
+  "include": ["index.tsx", "src/**/*", "../shared/**/*.d.ts", "../types/**/*.d.ts"]
+}

@@ -95,9 +95,25 @@ yarn workspace Valkream-Launcher rebuild
 
 ## Utilisation (Développement)
 
+Le projet est entièrement en **TypeScript** (`.ts` / `.tsx`). Les types sont séparés du code :
+
+- `frontend/shared/types/` : types partagés entre le main, le preload et le renderer (contrat IPC, réglages, jeux...)
+- `frontend/main/src/types/` : types internes au process Electron (fichiers `.d.ts`)
+- `frontend/renderer/src/**/*.types.ts` : types des composants et contextes React, à côté du code
+
 ```bash
-yarn dev
+yarn dev          # backend + launcher : Vite, esbuild (main), Electron, typecheck en watch (turbo)
+yarn dev:fast     # idem sans les typecheck en watch (le plus léger)
+yarn dev:fresh    # electron-rebuild puis yarn dev (après un changement d'Electron / better-sqlite3)
+yarn dev:front    # launcher seul
+yarn dev:back     # serveur de fichiers seul (http://localhost:3000)
+yarn typecheck    # vérification des types (main, renderer, scripts, backend)
+yarn lint         # ESLint
+yarn build        # installeurs du launcher
+yarn rebuild      # recompilation des modules natifs (better-sqlite3) pour Electron
 ```
+
+Des tâches équivalentes sont disponibles dans VS Code (`Terminal > Exécuter la tâche...`) et un profil de debug Electron est fourni dans `.vscode/launch.json`.
 
 ### Fichiers Zip du jeu
 

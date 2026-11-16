@@ -1,0 +1,35 @@
+/**
+ * @author Valkream Team
+ * @license MIT-NC
+ */
+
+import { useState, useEffect } from "react";
+import "./wait.css";
+
+import type { WaitProps } from "./wait.types";
+
+export default function Wait({ isVisible, text }: WaitProps) {
+  const [shouldRender, setShouldRender] = useState(isVisible);
+
+  useEffect(() => {
+    if (isVisible) {
+      setShouldRender(true);
+    }
+
+    if (!isVisible) {
+      const timeoutId = setTimeout(() => {
+        setShouldRender(false);
+      }, 500); // This duration should match the 'transition' property in your CSS.
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isVisible]);
+
+  if (!shouldRender) return null;
+
+  return (
+    <div className={`wait-container ${!isVisible ? "hidden" : ""}`}>
+      <div className="spinner"></div>
+      {text && <div className="wait-text">{text}</div>}
+    </div>
+  );
+}
