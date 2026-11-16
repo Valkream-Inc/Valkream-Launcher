@@ -3,8 +3,8 @@
  * @license MIT-NC
  */
 
-import express from "express";
 import type { NextFunction, Request, Response } from "express";
+import express from "express";
 
 import log from "./components/log.component";
 
@@ -12,12 +12,13 @@ const app = express();
 
 //PORT
 const PORT = 3000;
+const DEBUG = false;
 
 // Midleware de debug
 const loggerMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   const remoteAddress = req.ip || req.socket.remoteAddress;
   const resourcePath = req.url;
-  log(remoteAddress, resourcePath);
+  if (DEBUG) log(remoteAddress, resourcePath);
 
   next();
 };

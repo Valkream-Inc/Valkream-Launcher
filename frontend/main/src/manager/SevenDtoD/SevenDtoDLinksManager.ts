@@ -9,7 +9,7 @@ import { platform } from "os";
 
 class SevenDtoDLinksManager {
   async gameVersionUrl(): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const SettingsManager = (
       require("../settingsManager") as typeof import("../settingsManager")
     ).default;
@@ -20,7 +20,7 @@ class SevenDtoDLinksManager {
   }
 
   async gameZipLink(): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const SevenDtoDVersionManager = (
       require("./SevenDtoDVersionManager") as typeof import("./SevenDtoDVersionManager")
     ).default;
@@ -37,7 +37,7 @@ class SevenDtoDLinksManager {
   }
 
   async modHashLink(): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const SevenDtoDVersionManager = (
       require("./SevenDtoDVersionManager") as typeof import("./SevenDtoDVersionManager")
     ).default;
@@ -50,7 +50,7 @@ class SevenDtoDLinksManager {
   }
 
   async modsFileBaseUrl(): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const SevenDtoDVersionManager = (
       require("./SevenDtoDVersionManager") as typeof import("./SevenDtoDVersionManager")
     ).default;

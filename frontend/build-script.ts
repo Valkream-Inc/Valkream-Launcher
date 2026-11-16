@@ -151,7 +151,7 @@ class LauncherBuilder {
             productName: name,
             copyright: "Copyright © 2026 Valkream Team",
             // Template electron-builder (résolu par electron-builder, pas par JS).
-            // eslint-disable-next-line no-template-curly-in-string
+             
             artifactName: `${name}-${build.type}-` + "${os}-${arch}.${ext}",
             extraMetadata: { main: "build/app.js" },
             files: ["build/**/*", "package.json", "LICENSE.md"],

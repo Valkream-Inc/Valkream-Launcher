@@ -4,6 +4,7 @@
 **/temp/
 **/dist/
 **/.yarn/
+**/.turbo/
 **/.tsbuild/
 **/*.tsbuildinfo
 
