@@ -1,0 +1,14 @@
+[
+  {
+    "id": "Valheim-Valkream-v2",
+    "enabled": {
+      "windows": true,
+      "linux": false,
+      "darwin": false
+    },
+    "event.config.link": "/relative path ou link ou data pour les events",
+    "maintenance.config.link": "/relative path ou link ou data pour la maintenance",
+    "contributor.config.link": "/relative path ou link ou data pour la maintenance",
+    "mods.config.link": "/relative path ou link ou data pour la maintenance"
+  }
+]

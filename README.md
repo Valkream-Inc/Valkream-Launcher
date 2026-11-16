@@ -71,8 +71,6 @@ Ce projet comprend :
 
 ### Install Requirement
 
--
-
 ```bash
 winget install Microsoft.VisualStudio.2022.BuildTools --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
 winget install Python.Python.3.15
