@@ -3,12 +3,12 @@
  * @license MIT-NC
  */
 
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
-function getAllFilesInAFolder(dirPath) {
+function getAllFilesInAFolder(dirPath: string): string[] {
   try {
-    let results = [];
+    let results: string[] = [];
     const list = fs.readdirSync(dirPath);
 
     list.forEach((file) => {
@@ -29,4 +29,4 @@ function getAllFilesInAFolder(dirPath) {
   }
 }
 
-module.exports = { getAllFilesInAFolder };
+export { getAllFilesInAFolder };

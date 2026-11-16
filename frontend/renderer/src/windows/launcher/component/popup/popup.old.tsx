@@ -14,10 +14,17 @@ import {
   Slide,
   Typography,
 } from "@mui/material";
+import type { CSSProperties } from "react";
 import { keyframes } from "@mui/system";
 
 import { typeConfig } from "./component/popup.config";
 import { createButtons } from "./component/popup.button";
+import type {
+  AnimatedRunesProps,
+  PopupProps,
+  PopupTransitionProps,
+  PopupType,
+} from "./popup.types";
 
 // Définition des animations en dehors du composant pour de meilleures performances
 const flicker = keyframes`
@@ -26,7 +33,7 @@ const flicker = keyframes`
   100% { opacity: 1; transform: scale(1) rotate(-5deg); }
 `;
 
-function getOldTypeConfig(type) {
+function getOldTypeConfig(type: PopupType) {
   const c = typeConfig[type] || typeConfig.info;
   return {
     color: c.color.old,
@@ -35,9 +42,9 @@ function getOldTypeConfig(type) {
 }
 
 // Composant pour les runes animées
-const AnimatedRunes = ({ type }) => {
+const AnimatedRunes = ({ type }: AnimatedRunesProps) => {
   const color = typeConfig[type]?.color?.old || typeConfig.info.color.old;
-  const commonStyle = {
+  const commonStyle: CSSProperties = {
     position: "absolute",
     width: 30,
     height: 30,
@@ -57,9 +64,11 @@ const AnimatedRunes = ({ type }) => {
 };
 
 // Transition Slide
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="down" ref={ref} timeout={500} {...props} />;
-});
+const Transition = React.forwardRef<unknown, PopupTransitionProps>(
+  function Transition(props, ref) {
+    return <Slide direction="down" ref={ref} timeout={500} {...props} />;
+  }
+);
 
 function OldPopup({
   open,
@@ -68,7 +77,7 @@ function OldPopup({
   type = "info",
   title = "Titre du popup",
   message = "Message du popup",
-}) {
+}: PopupProps) {
   const { color, icon } = getOldTypeConfig(type);
   const buttons = createButtons(onClose, onConfirm);
 

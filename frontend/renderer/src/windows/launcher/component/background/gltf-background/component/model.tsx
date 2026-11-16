@@ -4,17 +4,20 @@
  */
 
 import { useGLTF } from "@react-three/drei";
-import React from "react";
+import type { Material, Mesh } from "three";
 
-function Model({ modelPath }) {
+import type { ModelProps } from "./model.types";
+
+function Model({ modelPath }: ModelProps) {
   const { scene } = useGLTF(modelPath);
 
   scene.traverse((child) => {
-    if (child.isMesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
-      if (child.material) {
-        child.material.needsUpdate = true;
+    const mesh = child as Mesh;
+    if (mesh.isMesh) {
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      if (mesh.material) {
+        (mesh.material as Material).needsUpdate = true;
       }
     }
   });

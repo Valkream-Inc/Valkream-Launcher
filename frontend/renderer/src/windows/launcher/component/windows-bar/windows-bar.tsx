@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import React, { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import "./windows-bar.css";
 
 const WindowsBar = () => {

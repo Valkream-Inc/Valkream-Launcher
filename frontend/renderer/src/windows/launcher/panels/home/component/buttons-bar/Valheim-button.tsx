@@ -249,7 +249,7 @@ export default function ValheimButton() {
         if (isInstalled && isConnected && isUpToDate)
           return setAction({
             text: `Jouer à la v${gameVersion}${
-              maintenance?.enabled ? "\n (⚠️ Maintenance en cours.)" : ""
+              maintenance && maintenance.enabled ? "\n (⚠️ Maintenance en cours.)" : ""
             }${isAdminModsActive ? "\n (⚠️ Mods Admin activés.)" : ""}`,
             playIcon: true,
             onClick: handleStart,

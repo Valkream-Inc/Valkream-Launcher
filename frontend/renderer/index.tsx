@@ -10,7 +10,9 @@ import { SnackbarProvider } from "notistack";
 import App from "./src/App";
 
 // Crée la racine de l'application React.
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const container = document.getElementById("root");
+if (!container) throw new Error("Élément #root introuvable");
+const root = ReactDOM.createRoot(container);
 
 // Rend le composant <App /> dans le DOM.
 // Le "StrictMode" est un outil pour détecter les problèmes potentiels dans l'application.

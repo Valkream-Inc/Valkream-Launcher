@@ -7,7 +7,7 @@ import chalk from "chalk";
 
 const SHOW_QUERY_PARAMS = false;
 
-function resize_to(size, value) {
+function resize_to(size: number, value: string): string {
   // Si la chaîne est plus longue que la taille donnée, on la tronque
   if (value.length > size) {
     return value.slice(0, size); // Tronquer la chaîne
@@ -22,11 +22,11 @@ function resize_to(size, value) {
   return message;
 }
 
-const log = (user, processus) => {
+const log = (user: string | undefined, processus: string | undefined): void => {
   const currentDate = new Date();
 
   // Formatage pour un affichage en colonnes alignées
-  const dateColumn = chalk.yellow(currentDate.toGMTString()) + "     ";
+  const dateColumn = chalk.yellow(currentDate.toUTCString()) + "     ";
   const userColumn = chalk.blue(resize_to(20, user || "unknown")) + "     ";
 
   // Séparer le processus en deux parties : avant et après le "?"

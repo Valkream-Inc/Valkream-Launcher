@@ -46,11 +46,13 @@ export default defineConfig({
     host: true, // Permet d'accéder au serveur depuis le réseau local.
     // Permet d'accéder aux fichiers en dehors du répertoire 'root'.
     fs: {
-      allow: [path.resolve(__dirname, "renderer")],
+      allow: [
+        path.resolve(__dirname, "renderer"),
+        path.resolve(__dirname, "shared"),
+      ],
     },
-    // Redirige toutes les requêtes de routage (404) vers index.html,
-    // ce qui est nécessaire pour React Router.
-    historyApiFallback: true,
+    // Remarque : le repli des routes (404) vers index.html, nécessaire à React Router,
+    // est déjà le comportement par défaut de Vite (appType "spa").
   },
 
   optimizeDeps: {
@@ -64,6 +66,8 @@ export default defineConfig({
     alias: {
       // "@" pointe vers le répertoire racine de votre application.
       "@": path.resolve(__dirname, "renderer"),
+      // Types partagés main / preload / renderer (import type uniquement).
+      "@shared": path.resolve(__dirname, "shared"),
     },
   },
 });

@@ -6,6 +6,15 @@
  * Les types partagés (ValheimVersionConfig, ValheimBaseMod...) viennent de `@shared/types`.
  */
 
+/** Callback de progression dont seul le texte est toujours fourni (message simple, sans chiffres). */
+export type ValheimLooseProgressCallback = (
+  text: string,
+  processedBytes?: number,
+  totalBytes?: number,
+  percent?: number,
+  speed?: number
+) => void;
+
 /** Contenu du `manifest.json` Thunderstore du modpack. */
 export interface ValheimThunderstoreManifest {
   /** Mods au format `Auteur-Nom-Version`. */

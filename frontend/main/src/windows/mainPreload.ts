@@ -8,11 +8,17 @@
  * which would give your web app full access to the Node.js environment. Instead, we only expose
  * the functions we explicitly allow.
  */
-const { contextBridge, ipcRenderer } = require("electron");
+import { contextBridge, ipcRenderer } from "electron";
+
+import type {
+  ElectronAPI,
+  ElectronSevenDtoDAPI,
+  ElectronValheimAPI,
+} from "@shared/types";
 
 // Expose these window control functions to the renderer process (your React app).
 // They will be available in the renderer as `window.electron_API.close()`, `window.electron_API.minimize()`, etc.
-contextBridge.exposeInMainWorld("electron_API", {
+const electronAPI: ElectronAPI = {
   // general
   close: () => {
     ipcRenderer.send("main-window-close");
@@ -24,9 +30,9 @@ contextBridge.exposeInMainWorld("electron_API", {
   maximize: () => ipcRenderer.send("main-window-maximize"),
   isMaximized: () => ipcRenderer.invoke("get-is-maximized"),
   onMaximize: (callback) =>
-    ipcRenderer.on("on-maximize", (event, ...args) => callback(...args)),
+    ipcRenderer.on("on-maximize", () => callback()),
   onUnmaximize: (callback) =>
-    ipcRenderer.on("on-unmaximize", (event, ...args) => callback(...args)),
+    ipcRenderer.on("on-unmaximize", () => callback()),
   removeOnMaximize: (callback) =>
     ipcRenderer.removeListener("on-maximize", callback),
   removeOnUnmaximize: (callback) =>
@@ -44,11 +50,13 @@ contextBridge.exposeInMainWorld("electron_API", {
   openAppData: () => ipcRenderer.invoke("open-appdata"),
   uninstallLauncher: () => ipcRenderer.invoke("uninstall-launcher"),
   chooseFolder: () => ipcRenderer.invoke("choose-folder"),
-});
+};
+
+contextBridge.exposeInMainWorld("electron_API", electronAPI);
 
 // Expose these window control functions to the renderer process (your React app).
 // They will be available in the renderer as `window.electron_Valheim_API.install()`, `window.electron_Valheim_API.update()`, etc.
-contextBridge.exposeInMainWorld("electron_Valheim_API", {
+const electronValheimAPI: ElectronValheimAPI = {
   // infos
   versionGame: () => ipcRenderer.invoke("Valheim-get-version:game"),
   getInstallationStatut: () =>
@@ -112,11 +120,13 @@ contextBridge.exposeInMainWorld("electron_Valheim_API", {
     ipcRenderer.removeAllListeners("done-custom-mods-Valheim");
     ipcRenderer.removeAllListeners("error-custom-mods-Valheim");
   },
-});
+};
+
+contextBridge.exposeInMainWorld("electron_Valheim_API", electronValheimAPI);
 
 // Expose these window control functions to the renderer process (your React app).
 // They will be available in the renderer as `window.electron_SevenDtoD_API.install()`, `window.electron_SevenDtoD_API.update()`, etc.
-contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
+const electronSevenDtoDAPI: ElectronSevenDtoDAPI = {
   // infos
   getInstallationStatut: () =>
     ipcRenderer.invoke("SevenDtoD-get-installation-statut"),
@@ -197,4 +207,9 @@ contextBridge.exposeInMainWorld("electron_SevenDtoD_API", {
     ipcRenderer.removeAllListeners("done-fix-mods-SevenDtoD");
     ipcRenderer.removeAllListeners("error-fix-mods-SevenDtoD");
   },
-});
+};
+
+contextBridge.exposeInMainWorld(
+  "electron_SevenDtoD_API",
+  electronSevenDtoDAPI
+);

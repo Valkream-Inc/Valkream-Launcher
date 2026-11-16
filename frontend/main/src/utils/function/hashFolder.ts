@@ -3,12 +3,16 @@
  * @license MIT-NC
  */
 
-const fs = require("fs");
-const path = require("path");
-const crypto = require("crypto");
-const { getAllFilesInAFolder } = require("./getAllFilesInAFolder");
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+import { getAllFilesInAFolder } from "./getAllFilesInAFolder";
 
-const hashFolder = async (folderPath, algorithm = "sha256", percent = 100) => {
+const hashFolder = async (
+  folderPath: string,
+  algorithm = "sha256",
+  percent = 100
+): Promise<string> => {
   if (!fs.existsSync(folderPath)) {
     throw new Error(`Dossier non trouvé : ${folderPath}`);
   }
@@ -25,13 +29,13 @@ const hashFolder = async (folderPath, algorithm = "sha256", percent = 100) => {
       if (size === 0) continue;
       const tenPercent = Math.ceil(size * (percent / 100));
 
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         const stream = fs.createReadStream(file, {
           start: 0,
           end: tenPercent - 1,
         });
 
-        stream.on("data", (chunk) => hash.update(chunk));
+        stream.on("data", (chunk: string | Buffer) => hash.update(chunk));
         stream.on("end", resolve);
         stream.on("error", reject);
       });
@@ -43,4 +47,4 @@ const hashFolder = async (folderPath, algorithm = "sha256", percent = 100) => {
   return hash.digest("hex");
 };
 
-module.exports = { hashFolder };
+export { hashFolder };

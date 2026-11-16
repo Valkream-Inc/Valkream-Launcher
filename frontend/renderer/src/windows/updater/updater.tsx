@@ -7,8 +7,8 @@ import React, { useEffect, useRef, useState } from "react";
 import "./updater.css";
 
 export default function Updater() {
-  const preloadVideoRef = useRef(null);
-  const loadingSectionRef = useRef(null);
+  const preloadVideoRef = useRef<HTMLVideoElement>(null);
+  const loadingSectionRef = useRef<HTMLDivElement>(null);
   const [message, setMessage] = useState("⏳ Recherche de mise à jour...");
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function Updater() {
 
     const handleVideoEnd = () => {
       // Affiche le loader et masque la vidéo
-      loadingSection.style.opacity = 1;
+      loadingSection.style.opacity = "1";
       preloadVideo.style.display = "none";
 
       if (!window?.electron_API)

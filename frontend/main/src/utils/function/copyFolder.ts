@@ -3,12 +3,15 @@
  * @license MIT
  */
 
-const fs = require("fs");
-const path = require("path");
-const progress = require("progress-stream");
-const { Throttle } = require("stream-throttle");
-const { formatBytes } = require("./formatBytes");
-const { consoleStreamAnswer } = require("./consoleStreamAnswer");
+import fs from "fs";
+import path from "path";
+import progress from "progress-stream";
+import { Throttle } from "stream-throttle";
+
+import type { CopyProgressCallback } from "../../types/utils";
+
+import { formatBytes } from "./formatBytes";
+import { consoleStreamAnswer } from "./consoleStreamAnswer";
 
 /**
  * Copie un DOSSIER avec progression et throttling.
@@ -18,19 +21,19 @@ const { consoleStreamAnswer } = require("./consoleStreamAnswer");
  * @param {function} callback - (transferred, total, percent, speed) => {}
  */
 const copyFolder = async (
-  srcDir,
-  destDir,
-  callback = ({ transferredBytes, totalBytes, percent, speed }) =>
+  srcDir: string,
+  destDir: string,
+  callback: CopyProgressCallback = ({ transferredBytes, totalBytes, percent, speed }) =>
     consoleStreamAnswer(
       `📁 Copie du dossier ${path.basename(srcDir)}: ${percent}% ` +
         `(${formatBytes(transferredBytes)} / ${formatBytes(totalBytes)}) ` +
         `à ${formatBytes(speed)}/s`
     )
 ) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise<void>(async (resolve, reject) => {
     try {
       // --- 1. Fonction pour calculer la taille totale du dossier ---
-      const getTotalSize = (dir) => {
+      const getTotalSize = (dir: string): number => {
         let total = 0;
         const files = fs.readdirSync(dir, { withFileTypes: true });
 
@@ -52,7 +55,10 @@ const copyFolder = async (
       fs.mkdirSync(destDir, { recursive: true });
 
       // --- 3. Fonction récursive pour copier ---
-      const copyRecursive = async (source, destination) => {
+      const copyRecursive = async (
+        source: string,
+        destination: string
+      ): Promise<void> => {
         const entries = fs.readdirSync(source, { withFileTypes: true });
 
         for (const entry of entries) {
@@ -63,7 +69,7 @@ const copyFolder = async (
             fs.mkdirSync(destPath, { recursive: true });
             await copyRecursive(srcPath, destPath);
           } else {
-            await new Promise((resolveFile, rejectFile) => {
+            await new Promise<void>((resolveFile, rejectFile) => {
               const fileSize = fs.statSync(srcPath).size;
 
               const progressStream = progress({
@@ -106,4 +112,4 @@ const copyFolder = async (
   });
 };
 
-module.exports = { copyFolder };
+export { copyFolder };

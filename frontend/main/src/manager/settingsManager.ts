@@ -3,9 +3,14 @@
  * @license MIT-NC
  */
 
-const Database = require("../utils/database.js");
+import type { SettingKey, Settings } from "@shared/types";
+
+import Database from "../utils/database";
 
 class SettingsManager {
+  db: Database;
+  defaultSettings: Settings;
+
   constructor() {
     this.db = new Database();
     this.defaultSettings = {
@@ -26,26 +31,30 @@ class SettingsManager {
     };
   }
 
-  async init() {
-    let configData = await this.db.readData("configClient");
+  async init(): Promise<void> {
+    const configData = await this.db.readData("configClient");
     if (!configData) {
       await this.db.createData("configClient", this.defaultSettings);
     }
   }
 
-  async getSetting(setting) {
+  async getSetting<K extends SettingKey>(setting: K): Promise<Settings[K]> {
     if (this.defaultSettings[setting] === undefined)
       throw new Error(`Setting "${setting}" does not exist.`);
 
-    const config = await this.db.readData("configClient");
+    const config = await this.db.readData<Settings>("configClient");
     return config ? config[setting] : this.defaultSettings[setting];
   }
 
-  async setSetting(setting, value) {
+  async setSetting<K extends SettingKey>(
+    setting: K,
+    value: Settings[K]
+  ): Promise<boolean> {
     if (this.defaultSettings[setting] === undefined)
       throw new Error(`Setting "${setting}" does not exist.`);
 
-    const config = (await this.db.readData("configClient")) || {};
+    const config: Partial<Settings> =
+      (await this.db.readData<Settings>("configClient")) || {};
     config[setting] = value;
 
     await this.db.updateData("configClient", config);
@@ -55,4 +64,4 @@ class SettingsManager {
 
 const settingsManager = new SettingsManager();
 settingsManager.init();
-module.exports = settingsManager;
+export default settingsManager;

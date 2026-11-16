@@ -4,9 +4,11 @@
  */
 
 import type { IpcMainInvokeEvent } from "electron";
-import type { ProgressCallback } from "@shared/types";
-import type { SettingKey } from "@shared/types";
-import type { ValheimCustomModsCheck } from "../../../types/valheim";
+import type { BooleanSettingKey } from "@shared/types";
+import type {
+  ValheimCustomModsCheck,
+  ValheimLooseProgressCallback,
+} from "../../../types/valheim";
 
 import { formatBytes } from "../../../utils/function/formatBytes";
 
@@ -18,13 +20,13 @@ import ValheimVersionManager from "../../../manager/Valheim/ValheimVersionManage
 import ValheimGameManager from "../../../manager/Valheim/ValheimGameManager";
 
 async function ValheimCustomMods(event: IpcMainInvokeEvent) {
-  const callback: ProgressCallback = (text, processedBytes, totalBytes, percent, speed) => {
+  const callback: ValheimLooseProgressCallback = (text, processedBytes, totalBytes, percent, speed) => {
     event.sender.send("progress-custom-mods-Valheim", {
       text,
-      processedBytes: formatBytes(processedBytes),
-      totalBytes: formatBytes(totalBytes),
+      processedBytes: formatBytes(processedBytes ?? 0),
+      totalBytes: formatBytes(totalBytes ?? 0),
       percent,
-      speed: formatBytes(speed),
+      speed: formatBytes(speed ?? 0),
     });
   };
 
@@ -50,7 +52,7 @@ async function ValheimCustomMods(event: IpcMainInvokeEvent) {
     // --- 3. Gestion des mods ---
     const checkCustomMods = async (
       mods: string[] | undefined,
-      settingKey: SettingKey,
+      settingKey: BooleanSettingKey,
     ): Promise<ValheimCustomModsCheck> => {
       const active = await SettingsManager.getSetting(settingKey);
       const installed =

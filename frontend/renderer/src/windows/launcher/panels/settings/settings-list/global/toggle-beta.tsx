@@ -3,6 +3,7 @@
  * @license MIT-NC
  */
 
+import type { ToggleChangeEvent } from "../settings-list.types";
 import { Switch } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -22,7 +23,7 @@ function ToggleAdmin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleChange = async (event) => {
+  const handleChange = async (event: ToggleChangeEvent) => {
     const enabled = event.target.checked;
     if (enabled === checked) return;
     setChecked(enabled);

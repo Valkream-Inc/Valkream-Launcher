@@ -3,14 +3,13 @@
  * @license MIT-NC
  */
 
-import React from "react";
 import "./background.css";
-import GltfBackground from "./gltf-background/gltf-background.jsx";
-import ImgBackground from "./img-background/img-background.jsx";
-import VideoBackground from "./video-background/video-background.jsx";
+import GltfBackground from "./gltf-background/gltf-background";
+import ImgBackground from "./img-background/img-background";
+import VideoBackground from "./video-background/video-background";
 
-import { useBackground } from "../../context/background.context.jsx";
-import { useInfos } from "../../context/infos.context.jsx";
+import { useBackground } from "../../context/background.context";
+import { useInfos } from "../../context/infos.context";
 
 function Background() {
   const { backgroundType } = useBackground();

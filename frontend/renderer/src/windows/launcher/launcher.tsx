@@ -3,25 +3,28 @@
  * @license MIT-NC
  */
 
-import React from "react";
 import Box from "@mui/material/Box";
 
-import { BackgroundProvider } from "./context/background.context.jsx";
-import { InfosProvider } from "./context/infos.context.jsx";
-import { PanelsProvider, usePanels } from "./context/panels.context.jsx";
-import { ThemeProvider } from "./context/theme.context.jsx";
-import { ActionProvider } from "./context/action.context.jsx";
-import { GamesProvider } from "./context/games.context.jsx";
+import { BackgroundProvider } from "./context/background.context";
+import { InfosProvider } from "./context/infos.context";
+import { PanelsProvider, usePanels } from "./context/panels.context";
+import { ThemeProvider } from "./context/theme.context";
+import { ActionProvider } from "./context/action.context";
+import { GamesProvider } from "./context/games.context";
 
-import Background from "./component/background/background.jsx";
-import Copyright from "./component/copyright/copyright.jsx";
-import Panel from "./component/panel/panel.jsx";
-import SpecialPanel from "./component/special-panel/special-panel.jsx";
-import WindowsBar from "./component/windows-bar/windows-bar.jsx";
+import Background from "./component/background/background";
+import Copyright from "./component/copyright/copyright";
+import Panel from "./component/panel/panel";
+import SpecialPanel from "./component/special-panel/special-panel";
+import WindowsBar from "./component/windows-bar/windows-bar";
 
-import Home from "./panels/home/home.jsx";
-import Settings from "./panels/settings/settings.jsx";
-import ChooseGames from "./panels/choose-games/choose-games.jsx";
+import Home from "./panels/home/home";
+import Settings from "./panels/settings/settings";
+import ChooseGames from "./panels/choose-games/choose-games";
+import type {
+  LauncherBackgroundProps,
+  MainLauncherProvidersProps,
+} from "./launcher.types";
 
 function BetaEnabledPanel() {
   const { changePanel } = usePanels();
@@ -46,7 +49,7 @@ function BetaEnabledPanel() {
   );
 }
 
-function MainLauncherProviders({ children }) {
+function MainLauncherProviders({ children }: MainLauncherProvidersProps) {
   return (
     <ActionProvider>
       <GamesProvider>
@@ -56,7 +59,7 @@ function MainLauncherProviders({ children }) {
   );
 }
 
-function LauncherBackground({ children }) {
+function LauncherBackground({ children }: LauncherBackgroundProps) {
   const { activePanel } = usePanels();
   return (
     <BackgroundProvider>

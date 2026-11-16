@@ -3,25 +3,29 @@
  * @license MIT-NC
  */
 
-const { BrowserWindow, Menu, ipcMain } = require("electron");
-const path = require("path");
+import { BrowserWindow, Menu, ipcMain } from "electron";
+import path from "path";
 
 const rendererPath = path.join(__dirname, "../../../renderer");
 
-const { pkg, isDev } = require("../constants");
-let mainWindow = undefined;
+import { pkg, isDev } from "../constants";
+let mainWindow: BrowserWindow | undefined = undefined;
 
-function getWindow() {
+function getWindow(): BrowserWindow | undefined {
   return mainWindow;
 }
 
-function destroyWindow() {
+function destroyWindow(): void {
   if (!mainWindow) return;
   mainWindow.close();
   mainWindow = undefined;
 }
 
-function createWindow() {
+function isWindowOpen(): boolean {
+  return mainWindow !== undefined && !mainWindow.isDestroyed();
+}
+
+function createWindow(): void {
   destroyWindow();
   mainWindow = new BrowserWindow({
     title: pkg.name,
@@ -58,21 +62,22 @@ function createWindow() {
 
   // NEW: Handle the request for the window's maximization state
   ipcMain.handle("get-is-maximized", () => {
-    return mainWindow.isMaximized();
+    return (mainWindow as BrowserWindow).isMaximized();
   });
 
   // NEW: Send events to the renderer when the window state changes
   mainWindow.on("maximize", () => {
-    mainWindow.webContents.send("on-maximize");
+    (mainWindow as BrowserWindow).webContents.send("on-maximize");
   });
 
   mainWindow.on("unmaximize", () => {
-    mainWindow.webContents.send("on-unmaximize");
+    (mainWindow as BrowserWindow).webContents.send("on-unmaximize");
   });
 }
 
-module.exports = {
+export {
   getWindow,
+  isWindowOpen,
   createWindow,
   destroyWindow,
 };

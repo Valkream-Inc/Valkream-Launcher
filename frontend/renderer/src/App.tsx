@@ -5,12 +5,14 @@
 
 import React from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
-import Copyright from "./windows/launcher/component/copyright/copyright.jsx";
-import SpecialPanel from "./windows/launcher/component/special-panel/special-panel.jsx";
-import WindowsBar from "./windows/launcher/component/windows-bar/windows-bar.jsx";
-import { ThemeProvider } from "./windows/launcher/context/theme.context.jsx";
-import Launcher from "./windows/launcher/launcher.jsx";
-import Updater from "./windows/updater/updater.jsx";
+import type { ErrorInfo } from "react";
+import Copyright from "./windows/launcher/component/copyright/copyright";
+import SpecialPanel from "./windows/launcher/component/special-panel/special-panel";
+import WindowsBar from "./windows/launcher/component/windows-bar/windows-bar";
+import { ThemeProvider } from "./windows/launcher/context/theme.context";
+import Launcher from "./windows/launcher/launcher";
+import Updater from "./windows/updater/updater";
+import type { ErrorBoundaryProps, ErrorBoundaryState } from "./App.types";
 
 const ErrorPage = () => (
   <ThemeProvider>
@@ -20,17 +22,20 @@ const ErrorPage = () => (
   </ThemeProvider>
 );
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error, info) {
+  componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Erreur capturée par ErrorBoundary :", error, info);
   }
 

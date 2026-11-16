@@ -3,13 +3,13 @@
  * @license MIT-NC
  */
 
-const { app, session } = require("electron");
-const path = require("path");
-const fse = require("fs-extra");
+import { app } from "electron";
+import path from "path";
+import fse from "fs-extra";
 
-const UpdateWindow = require("./src/windows/updateWindow.js");
-const MainWindow = require("./src/windows/mainWindow.js");
-const IpcHandlers = require("./src/ipc/ipcHandlers.js");
+import * as UpdateWindow from "./src/windows/updateWindow";
+import * as MainWindow from "./src/windows/mainWindow";
+import IpcHandlers from "./src/ipc/ipcHandlers";
 
 const isDev = process.env.NODE_ENV === "dev";
 

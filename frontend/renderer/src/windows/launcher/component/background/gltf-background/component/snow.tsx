@@ -5,8 +5,11 @@
 
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
+import type { Points } from "three";
 
-function Snow({ count = 15000, area = 50 }) {
+import type { SnowProps } from "./snow.types";
+
+function Snow({ count = 15000, area = 50 }: SnowProps) {
   // positions et vitesses
   const { positions, velocities } = useMemo(() => {
     const pos = new Float32Array(count * 3);
@@ -20,11 +23,12 @@ function Snow({ count = 15000, area = 50 }) {
     return { positions: pos, velocities: vel };
   }, [count, area]);
 
-  const ref = useRef();
+  const ref = useRef<Points>(null);
 
   useFrame((state, delta) => {
     if (!ref.current) return;
-    const pos = ref.current.geometry.attributes.position.array;
+    const pos = ref.current.geometry.attributes.position
+      .array as Float32Array;
 
     for (let i = 0; i < count; i++) {
       // chute verticale avec vitesse individuelle

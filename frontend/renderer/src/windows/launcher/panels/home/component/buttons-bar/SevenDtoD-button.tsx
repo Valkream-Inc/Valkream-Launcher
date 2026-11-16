@@ -236,7 +236,7 @@ export default function SevenDtoDButton() {
         if (isInstalled && isConnected && isUpToDate)
           return setAction({
             text: `Jouer à la v${gameVersion}${
-              maintenance?.enabled ? "\n (⚠️ Maintenance en cours.)" : ""
+              maintenance && maintenance.enabled ? "\n (⚠️ Maintenance en cours.)" : ""
             }`,
             Icon: SportsEsportsIcon,
             onClick: handleStart,

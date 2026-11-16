@@ -3,18 +3,21 @@
  * @license MIT-NC
  */
 
-const fs = require("fs");
-const { unZip } = require("./function/unZip");
+import fs from "fs";
 
-const pLimit = require("./p-limit");
-const throttle = require("./throttle");
+import type { UnzipEntry, UnzipProgressCallback } from "../types/utils";
+
+import { unZip } from "./function/unZip";
+
+import pLimit from "./p-limit";
+import throttle from "./throttle";
 
 const unZipMultipleFiles = async (
-  zips = [],
-  callback = async () => {},
+  zips: UnzipEntry[] = [],
+  callback: UnzipProgressCallback = async () => {},
   maxParallelUnzips = 10,
   callbackTimeout = 100
-) => {
+): Promise<void[]> => {
   const count = zips.length;
   const totalSizes = new Array(count).fill(0);
   const decompressed = new Array(count).fill(0);
@@ -72,4 +75,4 @@ const unZipMultipleFiles = async (
   return await Promise.all(tasks);
 };
 
-module.exports = unZipMultipleFiles;
+export default unZipMultipleFiles;

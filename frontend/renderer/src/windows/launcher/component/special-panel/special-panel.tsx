@@ -38,7 +38,7 @@ const alertData: Record<
 function SpecialPanel(props: SpecialPanelProps) {
   const { theme } = useTheme();
 
-  const type = props.type;
+  const type = props.type ?? "info";
   const title = props.title || alertData[type].title;
   const paragraph = props.paragraph || alertData[type].paragraph;
 

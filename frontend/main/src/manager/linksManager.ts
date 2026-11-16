@@ -3,11 +3,13 @@
  * @license MIT-NC
  */
 
-const { baseUrl } = require("../constants");
+import type { GameName } from "@shared/types";
+
+import { baseUrl } from "../constants";
 
 class LinksManager {
-  maintenanceUrl = (game) => `${baseUrl}/configs/${game}/maintenance.json`;
-  eventUrl = (game) => `${baseUrl}/configs/${game}/event.json`;
+  maintenanceUrl = (game: GameName): string => `${baseUrl}/configs/${game}/maintenance.json`;
+  eventUrl = (game: GameName): string => `${baseUrl}/configs/${game}/event.json`;
 }
 
-module.exports = new LinksManager();
+export default new LinksManager();

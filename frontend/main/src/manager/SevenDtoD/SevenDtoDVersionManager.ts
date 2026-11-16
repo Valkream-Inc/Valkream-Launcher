@@ -84,7 +84,7 @@ class SevenDtoDVersionManager {
 
   async getLocalVersion(): Promise<string | null | undefined> {
     const [local] = await Promise.all([this.getLocalVersionConfig()]);
-    return this.getIsInstalled() ? local?.version : "0.0.0";
+    return (await this.getIsInstalled()) ? local?.version : "0.0.0";
   }
 
   async updateLocalVersionConfig(

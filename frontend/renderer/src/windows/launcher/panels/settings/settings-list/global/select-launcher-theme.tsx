@@ -4,6 +4,8 @@
  */
 
 
+import type { LauncherThemeChangeEvent } from "../settings-list.types";
+import type { LauncherTheme } from "@shared/types";
 import { enqueueSnackbar } from "notistack";
 import { useTheme } from "../../../../context/theme.context";
 import {
@@ -15,8 +17,8 @@ import SettingsBox from "../../component/settings-box/settings-box";
 function SelectLauncherTheme() {
   const { theme, changeTheme } = useTheme();
 
-  const handleChange = async (event) => {
-    const value = event.target.value;
+  const handleChange = async (event: LauncherThemeChangeEvent) => {
+    const value = event.target.value as LauncherTheme;
     if (value === theme) return;
 
     await changeTheme(value);

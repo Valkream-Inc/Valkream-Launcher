@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import * as THREE from "three";
 import { Sky, Stars } from "@react-three/drei";
 

@@ -3,23 +3,27 @@
  * @license MIT-NC
  */
 
-const fs = require("fs");
+import fs from "fs";
 
-const { autoUpdater } = require("electron-updater");
-const { formatBytes } = require("../../utils/function/formatBytes");
+import type { IpcMainEvent } from "electron";
+import { autoUpdater } from "electron-updater";
+import { formatBytes } from "../../utils/function/formatBytes";
 
-const { baseUrl } = require("../../constants");
-const SettingsManager = require("../../manager/settingsManager");
-const InfosManager = require("../../manager/infosManager");
-const FilesManager = require("../../manager/filesManager");
-const LauncherManager = require("../../manager/launcherManager");
+import { baseUrl } from "../../constants";
+import SettingsManager from "../../manager/settingsManager";
+import InfosManager from "../../manager/infosManager";
+import FilesManager from "../../manager/filesManager";
+import LauncherManager from "../../manager/launcherManager";
 
 class CheckForUpdates {
+  timeout: number;
+  event!: IpcMainEvent;
+
   constructor() {
     this.timeout = 1000;
   }
 
-  async init(event) {
+  async init(event: IpcMainEvent): Promise<void> {
     this.event = event;
 
     const isBeta = await SettingsManager.getSetting("betaEnabled");
@@ -46,7 +50,7 @@ class CheckForUpdates {
     }
   }
 
-  configureUpdater() {
+  configureUpdater(): void {
     autoUpdater.allowDowngrade = true;
     autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = false; // ⚠️ mieux pour les updates manuelles
@@ -60,7 +64,7 @@ class CheckForUpdates {
     autoUpdater.removeAllListeners();
   }
 
-  attachListeners() {
+  attachListeners(): void {
     autoUpdater.on("checking-for-update", () => {
       this.onMsg("🔍 Vérification des mises à jour...");
     });
@@ -76,7 +80,7 @@ class CheckForUpdates {
         })`
       );
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
         await autoUpdater.downloadUpdate();
       } catch (err) {
         this.onError(err, "❌ Échec du téléchargement de la mise à jour.");
@@ -109,7 +113,7 @@ class CheckForUpdates {
     });
   }
 
-  deleteUpdaterDetails() {
+  deleteUpdaterDetails(): void {
     try {
       if (!fs.existsSync(FilesManager.updaterDetailsPath())) return;
       fs.unlinkSync(FilesManager.updaterDetailsPath());
@@ -118,24 +122,24 @@ class CheckForUpdates {
     }
   }
 
-  onError = (err, msg) => {
+  onError = (err: unknown, msg: string): void => {
     console.error("Erreur mise à jour :", err);
     this.event.reply("update_status", msg);
     this.deleteUpdaterDetails();
     this.delayRedirect();
   };
 
-  onMsg = (msg, redirect = false) => {
+  onMsg = (msg: string, redirect = false): void => {
     this.event.reply("update_status", msg);
     this.deleteUpdaterDetails();
     if (redirect) this.delayRedirect();
   };
 
-  delayRedirect() {
+  delayRedirect(): void {
     setTimeout(() => {
       this.event.reply("launch_main_window");
     }, this.timeout);
   }
 }
 
-module.exports = CheckForUpdates;
+export default CheckForUpdates;

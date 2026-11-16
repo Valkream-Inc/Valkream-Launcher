@@ -1,105 +1,126 @@
 /**
  * @author Valkream Team
  * @license MIT-NC
+ *
+ * Build du launcher : obfuscation du main compilé (`.tsbuild/`), copie du renderer
+ * (Vite) puis génération des installeurs avec electron-builder.
+ *
+ * Prérequis (voir les scripts de package.json) :
+ *   - `yarn build:main`  -> compile `main/` en JavaScript dans `.tsbuild/`
+ *   - `yarn build:react` -> compile le renderer dans `renderer/build/`
  */
 
-const fs = require("fs");
-const fse = require("fs-extra");
-const path = require("path");
+import fs from "node:fs";
+import path from "node:path";
 
-const builder = require("electron-builder");
-const JavaScriptObfuscator = require("javascript-obfuscator");
-const { name } = require("./package.json");
+import * as builder from "electron-builder";
+import fse from "fs-extra";
+import JavaScriptObfuscator from "javascript-obfuscator";
 
-class Index {
-  async init() {
-    this.obf = true;
-    this.Fileslist = this.getFiles("main");
+import { name } from "./package.json";
+import type { BuildTarget } from "./types/build";
 
-    process.argv.forEach(async (val) => {
-      if (val.startsWith("--obf")) {
-        this.obf = JSON.parse(val.split("=")[1]);
-      }
-    });
+/** Sortie de `tsc -p main/tsconfig.json`. */
+const COMPILED_MAIN_DIR = ".tsbuild";
+/** Dossier embarqué par electron-builder (`extraMetadata.main = build/app.js`). */
+const BUILD_DIR = "build";
+
+class LauncherBuilder {
+  private obf = true;
+  private filesList: string[] = [];
+
+  async init(): Promise<void> {
+    const obfArg = process.argv.find((arg) => arg.startsWith("--obf="));
+    if (obfArg) this.obf = JSON.parse(obfArg.split("=")[1]) as boolean;
+
+    if (!fs.existsSync(COMPILED_MAIN_DIR)) {
+      throw new Error(
+        `Dossier "${COMPILED_MAIN_DIR}" introuvable : lance d'abord "yarn build:main".`
+      );
+    }
+    this.filesList = this.getFiles(COMPILED_MAIN_DIR);
 
     await this.cleanBuildAndDist();
-    await this.Obfuscate();
+    await this.obfuscate();
     await this.copyReact();
     await this.buildAll();
     await this.mergeBuilds();
     console.log("🎉 Build terminée !");
   }
 
-  async cleanBuildAndDist() {
+  async cleanBuildAndDist(): Promise<void> {
     console.log("🧹 Nettoyage du dossier build et dist...");
     if (fs.existsSync("./build")) fs.rmSync("./build", { recursive: true });
     if (fs.existsSync("./dist")) fs.rmSync("./dist", { recursive: true });
     console.log("✅ Nettoyage du dossier build et dist terminé !");
   }
 
-  getFiles(path, file = []) {
-    if (fs.existsSync(path)) {
-      let files = fs.readdirSync(path);
-      if (files.length === 0) file.push(path);
-      for (let i in files) {
-        let name = `${path}/${files[i]}`;
-        if (fs.statSync(name).isDirectory()) this.getFiles(name, file);
-        else file.push(name);
-      }
+  /** Liste récursivement les fichiers d'un dossier (chemins relatifs au cwd). */
+  getFiles(dir: string, files: string[] = []): string[] {
+    if (!fs.existsSync(dir)) return files;
+
+    for (const entry of fs.readdirSync(dir)) {
+      const entryPath = `${dir}/${entry}`;
+      if (fs.statSync(entryPath).isDirectory()) this.getFiles(entryPath, files);
+      else files.push(entryPath);
     }
-    return file;
+    return files;
   }
 
-  async Obfuscate() {
+  async obfuscate(): Promise<void> {
     console.log("🚀 Obfuscation des fichiers...");
 
-    for (let path of this.Fileslist) {
-      let fileName = path.split("/").pop();
-      let extFile = fileName.split(".").pop();
-      let folder = path.replace(`/${fileName}`, "").replace("main", "build");
+    for (const filePath of this.filesList) {
+      // Les source maps ne doivent pas être embarquées dans l'application.
+      if (filePath.endsWith(".map")) continue;
 
-      if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
+      const destination = path.join(
+        BUILD_DIR,
+        path.relative(COMPILED_MAIN_DIR, filePath)
+      );
+      fs.mkdirSync(path.dirname(destination), { recursive: true });
 
-      if (extFile === "js") {
-        let code = fs.readFileSync(path, "utf8");
+      if (path.extname(filePath) !== ".js") {
+        fs.copyFileSync(filePath, destination);
+        continue;
+      }
 
-        if (this.obf) {
-          console.log(`Obfuscate ${path}`);
-          let obf = JavaScriptObfuscator.obfuscate(code, {
-            optionsPreset: "medium-obfuscation",
-            target: "node",
-            disableConsoleOutput: false,
-            transformObjectKeys: false,
-            rotateStringArray: true,
-            stringArray: true,
-            identifierNamesGenerator: "mangled",
-          });
-          fs.writeFileSync(`${folder}/${fileName}`, obf.getObfuscatedCode(), {
-            encoding: "utf-8",
-          });
-        } else {
-          console.log(`Copy ${path}`);
-          fs.writeFileSync(`${folder}/${fileName}`, code, {
-            encoding: "utf-8",
-          });
-        }
+      const code = fs.readFileSync(filePath, "utf8");
+
+      if (this.obf) {
+        console.log(`Obfuscate ${filePath}`);
+        const obfuscated = JavaScriptObfuscator.obfuscate(code, {
+          optionsPreset: "medium-obfuscation",
+          target: "node",
+          disableConsoleOutput: false,
+          transformObjectKeys: false,
+          rotateStringArray: true,
+          stringArray: true,
+          identifierNamesGenerator: "mangled",
+        });
+        fs.writeFileSync(destination, obfuscated.getObfuscatedCode(), {
+          encoding: "utf-8",
+        });
       } else {
-        fs.copyFileSync(path, `${folder}/${fileName}`);
+        console.log(`Copy ${filePath}`);
+        fs.writeFileSync(destination, code, { encoding: "utf-8" });
       }
     }
     console.log("✅ Obfuscation terminée !");
   }
 
-  async copyReact() {
+  async copyReact(): Promise<void> {
     console.log("🚀 Copy React...");
-    if (fs.existsSync("./build/frontend")) fs.rmSync("./build/frontend");
+    if (fs.existsSync("./build/frontend")) {
+      fs.rmSync("./build/frontend", { recursive: true });
+    }
 
     fse.copySync("./renderer/build", "./build/frontend");
     console.log("✅ Copy React terminée !");
   }
 
-  async buildAll() {
-    const builds = [
+  async buildAll(): Promise<void> {
+    const builds: BuildTarget[] = [
       {
         type: "install",
         nsis: {
@@ -129,8 +150,9 @@ class Index {
             appId: name,
             productName: name,
             copyright: "Copyright © 2026 Valkream Team",
+            // Template electron-builder (résolu par electron-builder, pas par JS).
             // eslint-disable-next-line no-template-curly-in-string
-            artifactName: `${name}-${build.type}-${"${os}-${arch}.${ext}"}`,
+            artifactName: `${name}-${build.type}-` + "${os}-${arch}.${ext}",
             extraMetadata: { main: "build/app.js" },
             files: ["build/**/*", "package.json", "LICENSE.md"],
             directories: { output: outputDir },
@@ -188,13 +210,13 @@ class Index {
         .then(() => {
           console.log(`✅ Build ${build.type} terminé !`);
         })
-        .catch((err) => {
+        .catch((err: unknown) => {
           console.error(`❌ Erreur pendant le build ${build.type} !`, err);
         });
     }
   }
 
-  async mergeBuilds() {
+  async mergeBuilds(): Promise<void> {
     // step for local build
     console.log("\n🔀 Fusion des builds dans dist...");
 
@@ -228,4 +250,7 @@ class Index {
   }
 }
 
-new Index().init();
+new LauncherBuilder().init().catch((err: unknown) => {
+  console.error("❌ Build échouée :", err);
+  process.exit(1);
+});

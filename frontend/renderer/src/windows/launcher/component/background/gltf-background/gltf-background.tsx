@@ -6,6 +6,7 @@
 import "./gltf-background.css";
 
 import { Suspense, useMemo, memo, useState, useCallback } from "react";
+import type { MouseEvent } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
 
@@ -15,7 +16,8 @@ import Model from "./component/model";
 import PlayerControls from "./component/players-controls";
 import SunsetEnvironment from "./component/sunset-environement";
 
-import { useGames } from "../../../context/games.context.jsx";
+import { useGames } from "../../../context/games.context";
+import type { GltfGameData } from "./gltf-background.types";
 
 function GltfBackground() {
   const { actualGame } = useGames();
@@ -24,7 +26,7 @@ function GltfBackground() {
   // ✅ Toggle avec Ctrl + Maj + clic (listener React sur le wrapper :
   // plus besoin de document.querySelector("canvas"), qui pouvait être
   // null au moment du useEffect)
-  const handleClick = useCallback((e) => {
+  const handleClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
     if (e.ctrlKey && e.shiftKey) {
       e.preventDefault();
       setShowStats((prev) => !prev);
@@ -32,7 +34,7 @@ function GltfBackground() {
   }, []);
 
   // 📦 Données selon le jeu
-  const ValheimData = useMemo(
+  const ValheimData = useMemo<GltfGameData>(
     () => ({
       camera: { position: [0, 1.8, 4.5], fov: 75 },
       lights: { ambientIntensity: 0.4, color: "#ffffff" },
@@ -43,7 +45,7 @@ function GltfBackground() {
     [],
   );
 
-  const SevenDtoDData = useMemo(
+  const SevenDtoDData = useMemo<GltfGameData>(
     () => ({
       camera: { position: [60, 60, 60], fov: 75 },
       lights: { ambientIntensity: 30, color: "#ffffff" },
@@ -54,7 +56,7 @@ function GltfBackground() {
     [],
   );
 
-  const { camera, lights, fogArgs, environment, hasCampfire } = useMemo(() => {
+  const { camera, lights, fogArgs, environment, hasCampfire } = useMemo((): GltfGameData => {
     switch (actualGame) {
       case "SevenDtoD":
         return SevenDtoDData;

@@ -4,7 +4,9 @@
  */
 
 import express from "express";
-import log from "./components/log.component.js";
+import type { NextFunction, Request, Response } from "express";
+
+import log from "./components/log.component";
 
 const app = express();
 
@@ -12,7 +14,7 @@ const app = express();
 const PORT = 3000;
 
 // Midleware de debug
-const loggerMiddleware = (req, res, next) => {
+const loggerMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   const remoteAddress = req.ip || req.socket.remoteAddress;
   const resourcePath = req.url;
   log(remoteAddress, resourcePath);
@@ -28,12 +30,12 @@ app.use(
 );
 
 // Home page
-app.get("/", (req, res) => {
+app.get("/", (_req: Request, res: Response) => {
   res.send("Bienvenue sur le serveur statique de dev !");
 });
 
 // Erreur 404
-app.use((req, res, next) => {
+app.use((_req: Request, res: Response) => {
   res.status(404);
   res.type("txt").send("404 Not Found");
 });

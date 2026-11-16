@@ -3,19 +3,19 @@
  * @license MIT-NC
  */
 
-const { ipcMain } = require("electron");
+import { ipcMain } from "electron";
 
-const SevenDtoD_ModsDataHandler = require("./handlers/SevenDtoD/SevenDtoD-mods-data.js");
-const SevenDtoD_InstallationStatut = require("./handlers/SevenDtoD/SevenDtoD-installation-statut.js");
-const SevenDtoD_Install = require("./handlers/SevenDtoD/SevenDtoD-install.js");
-const SevenDtoD_Play = require("./handlers/SevenDtoD/SevenDtoD-play.js");
-const SevenDtoD_Update = require("./handlers/SevenDtoD/SevenDtoD-update.js");
-const SevenDtoD_FixMods = require("./handlers/SevenDtoD/SevenDtoD-fix-mods.js");
+import SevenDtoD_ModsDataHandler from "./handlers/SevenDtoD/SevenDtoD-mods-data";
+import SevenDtoD_InstallationStatut from "./handlers/SevenDtoD/SevenDtoD-installation-statut";
+import SevenDtoD_Install from "./handlers/SevenDtoD/SevenDtoD-install";
+import SevenDtoD_Play from "./handlers/SevenDtoD/SevenDtoD-play";
+import SevenDtoD_Update from "./handlers/SevenDtoD/SevenDtoD-update";
+import SevenDtoD_FixMods from "./handlers/SevenDtoD/SevenDtoD-fix-mods";
 
-const SevenDtoDHachManager = require("../manager/SevenDtoD/SevenDtoDHashManager.js");
-const SevenDtoDGameManager = require("../manager/SevenDtoD/SevenDtoDGameManager.js");
+import SevenDtoDHachManager from "../manager/SevenDtoD/SevenDtoDHashManager";
+import SevenDtoDGameManager from "../manager/SevenDtoD/SevenDtoDGameManager";
 
-function SevenDtoDIpcHandlers() {
+function SevenDtoDIpcHandlers(): void {
   // infos
   ipcMain.handle(
     "SevenDtoD-get-installation-statut",
@@ -59,4 +59,4 @@ function SevenDtoDIpcHandlers() {
   );
 }
 
-module.exports = SevenDtoDIpcHandlers;
+export default SevenDtoDIpcHandlers;

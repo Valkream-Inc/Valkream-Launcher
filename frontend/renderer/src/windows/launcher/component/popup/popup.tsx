@@ -3,14 +3,15 @@
  * @license MIT-NC
  */
 
-import React, { memo } from "react";
-import FuturisticPopup from "./popup.futuristic.jsx";
-import ModernPopup from "./popup.modern.jsx";
-import OldPopup from "./popup.old.jsx";
+import { memo } from "react";
+import FuturisticPopup from "./popup.futuristic";
+import ModernPopup from "./popup.modern";
+import OldPopup from "./popup.old";
 
-import { useTheme } from "../../context/theme.context.jsx";
+import { useTheme } from "../../context/theme.context";
+import type { PopupProps } from "./popup.types";
 
-const Popup = (props) => {
+const Popup = (props: PopupProps) => {
   const { theme } = useTheme();
   if (theme === "futuristic") return <FuturisticPopup {...props} />;
   if (theme === "old") return <OldPopup {...props} />;

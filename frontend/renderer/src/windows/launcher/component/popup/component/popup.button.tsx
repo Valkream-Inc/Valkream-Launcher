@@ -3,7 +3,12 @@
  * @license MIT-NC
  */
 
-export function createButtons(onClose, onConfirm) {
+import type { PopupButton, PopupConfirm } from "../popup.types";
+
+export function createButtons(
+  onClose: () => void,
+  onConfirm?: PopupConfirm
+): PopupButton[] {
   if (!onConfirm) {
     return [{ text: "OK", action: onClose, variant: "main" }];
   }

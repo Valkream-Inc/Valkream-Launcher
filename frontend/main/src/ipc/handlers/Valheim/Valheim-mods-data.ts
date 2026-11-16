@@ -90,13 +90,13 @@ class ValheimModsDataHandler {
       {
         mod: `ValheimValkream-Valkream-${localValkreamVersion}`,
         installed: true,
-        type: "special",
+        type: "special" as const,
         onlineVersion: onlineValkreamVersion,
       },
       {
         mod: `denikson-BepInExPack_Valheim-${localBepInExVersion}`,
         installed: true,
-        type: "special",
+        type: "special" as const,
         onlineVersion: onlineBepInExVersion,
       },
       // Mods installés

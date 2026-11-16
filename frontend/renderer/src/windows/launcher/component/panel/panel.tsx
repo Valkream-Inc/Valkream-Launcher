@@ -6,10 +6,11 @@
 import { Box, Fade } from "@mui/material";
 import { memo } from "react";
 
-import { usePanels } from "../../context/panels.context.jsx";
-import { useAction } from "../../context/action.context.jsx";
+import { usePanels } from "../../context/panels.context";
+import { useAction } from "../../context/action.context";
+import type { PanelProps } from "./panel.types";
 
-function Panel({ id, children }) {
+function Panel({ id, children }: PanelProps) {
   const { activePanel } = usePanels();
   const { actionLoading } = useAction();
 

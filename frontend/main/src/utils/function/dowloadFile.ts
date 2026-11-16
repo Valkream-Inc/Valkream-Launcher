@@ -3,14 +3,21 @@
  * @license MIT-NC
  */
 
-const axios = require("axios");
-const fs = require("fs");
-const path = require("path");
-const progress = require("progress-stream");
-const { Throttle } = require("stream-throttle");
+import axios from "axios";
+import type { AxiosResponse } from "axios";
+import fs from "fs";
+import path from "path";
+import type { Readable } from "stream";
+import progress from "progress-stream";
+import { Throttle } from "stream-throttle";
 
-const { formatBytes } = require("./formatBytes");
-const { consoleStreamAnswer } = require("./consoleStreamAnswer");
+import type {
+  FileProgressCallback,
+  NetworkErrorLike,
+} from "../../types/utils";
+
+import { formatBytes } from "./formatBytes";
+import { consoleStreamAnswer } from "./consoleStreamAnswer";
 
 const REQUEST_TIMEOUT = 10 * 1000;
 const MAX_OTHER_RETRIES = 5;
@@ -27,17 +34,19 @@ const NETWORK_ERROR_CODES = new Set([
   "ERR_NETWORK",
 ]);
 
-const isNetworkError = (error) => {
-  if (!error) return false;
-  if (NETWORK_ERROR_CODES.has(error.code)) return true;
+const isNetworkError = (err: unknown): boolean => {
+  if (!err) return false;
+  const error = err as NetworkErrorLike;
+  if (NETWORK_ERROR_CODES.has(error.code as string)) return true;
   if (error.message === "Network Error") return true;
   if (error.request && !error.response) return true;
   return false;
 };
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-const getExistingFileSize = async (destPath) => {
+const getExistingFileSize = async (destPath: string): Promise<number> => {
   try {
     const stat = await fs.promises.stat(destPath);
     return stat.isFile() ? stat.size : 0;
@@ -46,13 +55,16 @@ const getExistingFileSize = async (destPath) => {
   }
 };
 
-const removePartialFile = async (destPath) => {
+const removePartialFile = async (destPath: string): Promise<void> => {
   try {
     await fs.promises.unlink(destPath);
   } catch {}
 };
 
-const parseTotalSizeFromContentRange = (contentRange, fallback) => {
+const parseTotalSizeFromContentRange = (
+  contentRange: string | undefined,
+  fallback: number
+): number => {
   const match = contentRange?.match(/bytes \d+-\d+\/(\d+|\*)/);
   if (!match || match[1] === "*") return fallback;
   return parseInt(match[1], 10);
@@ -60,10 +72,15 @@ const parseTotalSizeFromContentRange = (contentRange, fallback) => {
 
 const downloadAxios = axios.create();
 
-const attemptDownload = (downloadUrl, destPath, callback, signal) => {
-  return new Promise(async (resolve, reject) => {
-    let writer;
-    let response;
+const attemptDownload = (
+  downloadUrl: string,
+  destPath: string,
+  callback: FileProgressCallback,
+  signal?: AbortSignal
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    let writer: fs.WriteStream | undefined;
+    let response: AxiosResponse<Readable> | undefined;
 
     // Gestionnaire d'annulation d'urgence
     const onAbort = () => {
@@ -74,7 +91,7 @@ const attemptDownload = (downloadUrl, destPath, callback, signal) => {
     const cleanup = () => {
       if (response && response.data) response.data.destroy();
       if (writer) writer.destroy(); // 🔑 Libère instantanément le descripteur de fichier (pas de lock)
-      signal.removeEventListener("abort", onAbort);
+      signal?.removeEventListener("abort", onAbort);
     };
 
     if (signal?.aborted) {
@@ -90,12 +107,12 @@ const attemptDownload = (downloadUrl, destPath, callback, signal) => {
       while (true) {
         if (signal?.aborted) throw new Error("Aborted");
 
-        const headers = { "Accept-Encoding": "identity" };
+        const headers: Record<string, string> = { "Accept-Encoding": "identity" };
         if (existingSize > 0) {
           headers.Range = `bytes=${existingSize}-`;
         }
 
-        response = await downloadAxios({
+        response = await downloadAxios<Readable>({
           url: downloadUrl,
           method: "GET",
           responseType: "stream",
@@ -124,7 +141,7 @@ const attemptDownload = (downloadUrl, destPath, callback, signal) => {
         }
 
         const remainingSize = parseInt(
-          response.headers["content-length"] || 0,
+          response.headers["content-length"] || "0",
           10,
         );
         const totalSize =
@@ -183,16 +200,16 @@ const attemptDownload = (downloadUrl, destPath, callback, signal) => {
 };
 
 const downloadFile = async (
-  downloadUrl,
-  destPath,
-  callback = (downloadedBytes, totalBytes, percent, speed) =>
+  downloadUrl: string,
+  destPath: string,
+  callback: FileProgressCallback = (downloadedBytes, totalBytes, percent, speed) =>
     consoleStreamAnswer(
       `📥 Téléchargement du fichier ${path.basename(destPath)} : ${percent}% ` +
         `(${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}) ` +
         `à ${formatBytes(speed)}/s`,
     ),
-  signal, // 👈 Ajouté aux arguments
-) => {
+  signal?: AbortSignal, // 👈 Ajouté aux arguments
+): Promise<void> => {
   let otherRetryCount = 0;
 
   while (true) {
@@ -205,6 +222,8 @@ const downloadFile = async (
     try {
       return await attemptDownload(downloadUrl, destPath, callback, signal);
     } catch (err) {
+      const { message, code } = err as NetworkErrorLike;
+
       // Si l'erreur provient d'une annulation volontaire, on ne fait PAS de retry
       if (signal?.aborted /*|| err.message?.includes("aborted")*/) {
         throw err;
@@ -212,8 +231,8 @@ const downloadFile = async (
 
       if (isNetworkError(err)) {
         console.log(
-          `⚠️  Erreur réseau -> ${err.message || err.code} pour ${downloadUrl}, reprise...`,
-          err.message || err.code,
+          `⚠️  Erreur réseau -> ${message || code} pour ${downloadUrl}, reprise...`,
+          message || code,
         );
         await sleep(1000); // Léger délai pour éviter de spammer en boucle fermée
         continue;
@@ -223,7 +242,7 @@ const downloadFile = async (
         otherRetryCount++;
         const delay = otherRetryCount * 1000;
         console.log(
-          `⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} -> ${err.message || err.code} pour ${downloadUrl}...`,
+          `⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} -> ${message || code} pour ${downloadUrl}...`,
         );
         await removePartialFile(destPath);
         callback(0, 0, 0, 0);
@@ -236,4 +255,4 @@ const downloadFile = async (
   }
 };
 
-module.exports = { downloadFile, isNetworkError, REQUEST_TIMEOUT };
+export { downloadFile, isNetworkError, REQUEST_TIMEOUT };

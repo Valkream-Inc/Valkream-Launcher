@@ -9,7 +9,7 @@
     "types": ["node"],
     "rootDir": ".",
     "outDir": "../.tsbuild",
-    "sourceMap": false,
+    "sourceMap": true,
     "removeComments": false,
     "paths": {
       "@shared/types": ["../shared/types/index"],

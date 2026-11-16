@@ -3,13 +3,13 @@
  * @license MIT-NC
  */
 
-const path = require("path");
-const { platform } = require("os");
+import path from "path";
+import { platform } from "os";
 
-const DirsManager = require("./dirsManager.js");
+import DirsManager from "./dirsManager";
 
 class FilesManager {
-  uninstallerPath = () => {
+  uninstallerPath = (): string => {
     const root = DirsManager.launcherRootPath();
     if (platform() === "win32") {
       return path.join(root, "Uninstall Valkream-Launcher.exe");
@@ -18,8 +18,8 @@ class FilesManager {
     return path.join(root, "uninstall.sh");
   };
 
-  updaterDetailsPath = () =>
+  updaterDetailsPath = (): string =>
     path.join(DirsManager.rootPath(), "updater-details.flag");
 }
 
-module.exports = new FilesManager();
+export default new FilesManager();

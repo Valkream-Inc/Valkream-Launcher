@@ -3,23 +3,25 @@
  * @license MIT-NC
  */
 
-import React, { useEffect, useState, memo } from "react";
+import { useEffect, useState, memo } from "react";
 import "./copyright.css";
 
 import { usePanels } from "../../context/panels.context";
+import type { PanelId } from "../../../../types/panels.types";
+import type { CopyrightProps } from "./copyright.types";
 
-function Copyright({ existPanels = true }) {
+function Copyright({ existPanels = true }: CopyrightProps) {
   const [versionLauncher, setVersionLauncher] = useState("");
-  let activePanel;
+  let activePanel: PanelId | undefined;
 
   if (!existPanels) {
-    activePanel = usePanels();
+    activePanel = usePanels().activePanel;
   }
 
   useEffect(() => {
     // Only access the Electron API after the component has mounted
     if (window.electron_API) {
-      setVersionLauncher(window.electron_API.versionLauncher());
+      window.electron_API.versionLauncher().then(setVersionLauncher);
     }
   }, []); // The empty dependency array ensures this effect runs only once
 

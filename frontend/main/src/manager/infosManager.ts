@@ -3,33 +3,46 @@
  * @license MIT-NC
  */
 
-const axios = require("axios");
-const dns = require("dns");
-const { GameDig } = require("gamedig");
+import axios from "axios";
+import dns from "dns";
+import { GameDig } from "gamedig";
 
-const { baseUrl, serversInfos } = require("../constants");
-const LinksManager = require("./linksManager");
-const noCache = require("../constants/noCaheHeader");
-const { toValidUrl } = require("../utils");
+import type {
+  GameEvent,
+  GameName,
+  Maintenance,
+  ServerInfos,
+} from "@shared/types";
+
+import { baseUrl, serversInfos } from "../constants";
+import LinksManager from "./linksManager";
+import noCache from "../constants/noCaheHeader";
+import { toValidUrl } from "../utils";
 
 class InfosManager {
+  isServerReachable: boolean | null;
+  isInternetConnected: boolean | null;
+
   constructor() {
     this.isServerReachable = null;
     this.isInternetConnected = null;
   }
 
-  async getIsInternetConnected(hostname = "google.com", force = false) {
+  async getIsInternetConnected(
+    hostname = "google.com",
+    force = false
+  ): Promise<boolean> {
     if (!force && this.isInternetConnected !== null)
       return this.isInternetConnected;
 
-    return new Promise((resolve) => {
+    return new Promise<boolean>((resolve) => {
       dns.lookup(hostname, (err) => {
         resolve(!(err && err.code === "ENOTFOUND"));
       });
     });
   }
 
-  async getIsServerReachable(url = baseUrl, force = false) {
+  async getIsServerReachable(url = baseUrl, force = false): Promise<boolean> {
     if (!force && this.isServerReachable !== null)
       return this.isServerReachable;
 
@@ -38,16 +51,19 @@ class InfosManager {
       this.isServerReachable = true;
       return true;
     } catch (error) {
-      console.error("Error checking server reachability:", error.message);
+      console.error(
+        "Error checking server reachability:",
+        error instanceof Error ? error.message : String(error)
+      );
       this.isServerReachable = false;
       return false;
     }
   }
 
-  async getEvent(game) {
+  async getEvent(game: GameName): Promise<GameEvent | false> {
     try {
       if (!(await this.getIsServerReachable())) return false;
-      const res = await axios.get(LinksManager.eventUrl(game), {
+      const res = await axios.get<GameEvent>(LinksManager.eventUrl(game), {
         timeout: 3000,
         ...noCache,
       });
@@ -58,26 +74,32 @@ class InfosManager {
           : toValidUrl(res.data.image),
       };
     } catch (err) {
-      console.error("Error getting Event:", err.message);
+      console.error(
+        "Error getting Event:",
+        err instanceof Error ? err.message : String(err)
+      );
       return false;
     }
   }
 
-  async getMaintenance(game) {
+  async getMaintenance(game: GameName): Promise<Maintenance | false> {
     try {
       if (!(await this.getIsServerReachable())) return false;
-      const res = await axios.get(LinksManager.maintenanceUrl(game), {
+      const res = await axios.get<Maintenance>(LinksManager.maintenanceUrl(game), {
         timeout: 3000,
         ...noCache,
       });
       return res.data;
     } catch (err) {
-      console.error("Error getting Maintenance:", err.message);
+      console.error(
+        "Error getting Maintenance:",
+        err instanceof Error ? err.message : String(err)
+      );
       return false;
     }
   }
 
-  async getServerInfos(game) {
+  async getServerInfos(game: GameName): Promise<ServerInfos> {
     try {
       const res = await GameDig.query(serversInfos[game]);
 
@@ -90,10 +112,13 @@ class InfosManager {
         ping: res.ping,
       };
     } catch (err) {
-      console.error("Error getting server infos:", err.message);
+      console.error(
+        "Error getting server infos:",
+        err instanceof Error ? err.message : String(err)
+      );
       return { status: "server offline" };
     }
   }
 }
 
-module.exports = new InfosManager();
+export default new InfosManager();

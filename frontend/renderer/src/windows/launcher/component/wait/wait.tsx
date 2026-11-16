@@ -3,10 +3,12 @@
  * @license MIT-NC
  */
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./wait.css";
 
-export default function Wait({ isVisible, text }) {
+import type { WaitProps } from "./wait.types";
+
+export default function Wait({ isVisible, text }: WaitProps) {
   const [shouldRender, setShouldRender] = useState(isVisible);
 
   useEffect(() => {

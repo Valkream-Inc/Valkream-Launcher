@@ -3,6 +3,7 @@
  * @license MIT-NC
  */
 
+import type { ToggleChangeEvent, ToggleDevProps } from "../settings-list.types";
 import { Switch } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -13,7 +14,7 @@ function ToggleDev({
   devActive = false,
   setDevActive = () => {},
   setTab = () => {},
-}) {
+}: ToggleDevProps) {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -21,7 +22,7 @@ function ToggleDev({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleChange = (event) => {
+  const handleChange = (event: ToggleChangeEvent) => {
     const enabled = event.target.checked;
     if (enabled === checked) return;
     setChecked(enabled);

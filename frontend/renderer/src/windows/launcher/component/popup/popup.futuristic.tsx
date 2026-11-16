@@ -14,10 +14,18 @@ import {
   Slide,
   Typography,
 } from "@mui/material";
+import type { CSSProperties } from "react";
 import { keyframes } from "@mui/system";
 
 import { typeConfig } from "./component/popup.config";
 import { createButtons } from "./component/popup.button";
+import type {
+  PopupDecorationProps,
+  PopupDecorations,
+  PopupProps,
+  PopupTransitionProps,
+  PopupType,
+} from "./popup.types";
 
 const flicker = keyframes`
   0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
@@ -25,7 +33,7 @@ const flicker = keyframes`
 `;
 
 // Configurations par type (alignées avec ton HTML)
-const decorationsConfig = {
+const decorationsConfig: Partial<Record<PopupType, PopupDecorations>> = {
   info: {
     lines: [
       { top: -20, left: "20%", width: "50%", height: 3 },
@@ -253,14 +261,14 @@ const decorationsConfig = {
   },
 };
 
-const baseLineStyle = (color) => ({
+const baseLineStyle = (color: string): CSSProperties => ({
   position: "absolute",
   background: color,
   boxShadow: `0 0 15px ${color}, 0 0 30px ${color}`,
   animation: `${flicker} 4s infinite`,
 });
 
-const baseNodeStyle = (color, size = 12) => ({
+const baseNodeStyle = (color: string, size = 12): CSSProperties => ({
   position: "absolute",
   background: color,
   boxShadow: `0 0 15px ${color}, 0 0 30px ${color}`,
@@ -270,7 +278,7 @@ const baseNodeStyle = (color, size = 12) => ({
   height: size,
 });
 
-function PopupDecoration({ type }) {
+function PopupDecoration({ type }: PopupDecorationProps) {
   const color =
     typeConfig[type]?.color?.futuristic || typeConfig.info.color.futuristic;
   const selectedDecorations = decorationsConfig[type] || {
@@ -280,7 +288,11 @@ function PopupDecoration({ type }) {
 
   // Ajuster la taille des nodes comme dans le CSS HTML
   const nodeSize =
-    type === "event" ? 14 : type === "tip" || type === "welcome" ? 12 : 0;
+    type === "event"
+      ? 14
+      : (type as string) === "tip" || type === "welcome"
+      ? 12
+      : 0;
 
   return (
     <Box>
@@ -297,7 +309,7 @@ function PopupDecoration({ type }) {
   );
 }
 
-function getFuturistTypeConfig(type) {
+function getFuturistTypeConfig(type: PopupType) {
   const c = typeConfig[type] || typeConfig.info;
   return {
     color: c.color.futuristic,
@@ -309,9 +321,11 @@ function getFuturistTypeConfig(type) {
 }
 
 // Transition Slide
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="down" ref={ref} timeout={500} {...props} />;
-});
+const Transition = React.forwardRef<unknown, PopupTransitionProps>(
+  function Transition(props, ref) {
+    return <Slide direction="down" ref={ref} timeout={500} {...props} />;
+  }
+);
 
 function FuturisticPopup({
   open,
@@ -320,7 +334,7 @@ function FuturisticPopup({
   title = "Titre du popup",
   message = "Message du popup",
   onConfirm,
-}) {
+}: PopupProps) {
   const { color, icon, iconSize, titleSize } = getFuturistTypeConfig(type);
   const buttons = createButtons(onClose, onConfirm);
 

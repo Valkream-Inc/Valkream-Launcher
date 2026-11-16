@@ -29,7 +29,7 @@ class SevenDtoDLinksManager {
 
     if (!urls) throw new Error("Game download URLs not found in config");
 
-    const url = urls[platform()];
+    const url = (urls as Partial<Record<NodeJS.Platform, string>>)[platform()];
     if (!url)
       throw new Error(`No game download URL found for platform: ${platform()}`);
 

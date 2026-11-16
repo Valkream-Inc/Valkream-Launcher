@@ -3,26 +3,28 @@
  * @license MIT-NC
  */
 
-const fs = require("fs");
-const path = require("path");
-const unzipper = require("unzipper");
+import fs from "fs";
+import path from "path";
+import unzipper from "unzipper";
 
-const { consoleStreamAnswer } = require("./consoleStreamAnswer");
-const { formatBytes } = require("./formatBytes");
+import type { FileProgressCallback } from "../../types/utils";
+
+import { consoleStreamAnswer } from "./consoleStreamAnswer";
+import { formatBytes } from "./formatBytes";
 
 const unZip = async (
-  zipPath,
-  outputPath,
-  callback = (processedBytes, totalBytes, percent, speed) =>
+  zipPath: string,
+  outputPath: string,
+  callback: FileProgressCallback = (processedBytes, totalBytes, percent, speed) =>
     consoleStreamAnswer(
       `📦 Décompression ${path.basename(zipPath)}: ${percent}% (${formatBytes(
         processedBytes
       )} / ${formatBytes(totalBytes)}) à ${formatBytes(speed)}/s`
     )
-) => {
+): Promise<void> => {
   const directory = await unzipper.Open.file(zipPath);
   const totalBytes = directory.files.reduce(
-    (acc, file) => acc + (file.uncompressedSize || 0),
+    (acc: number, file) => acc + (file.uncompressedSize || 0),
     0
   );
   let processedBytes = 0;
@@ -47,10 +49,10 @@ const unZip = async (
     fs.mkdirSync(path.dirname(fullPath), { recursive: true });
 
     // Décompression du fichier
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       file
         .stream()
-        .on("data", (chunk) => {
+        .on("data", (chunk: Buffer) => {
           processedBytes += chunk.length;
           const elapsed = (Date.now() - startTime) / 1000;
           const speed = elapsed > 0 ? processedBytes / elapsed : 0;
@@ -59,7 +61,7 @@ const unZip = async (
         })
         .pipe(fs.createWriteStream(fullPath))
         .on("finish", resolve)
-        .on("error", (err) => {
+        .on("error", (err: Error) => {
           console.error("\n❌ Erreur pendant la décompression :", err.message);
           reject(err);
         });
@@ -67,4 +69,4 @@ const unZip = async (
   }
 };
 
-module.exports = { unZip };
+export { unZip };

@@ -32,7 +32,7 @@ import type { GameSettingsProps } from "../settings.types";
 
 function Presentation() {
   return (
-    <SettingsBox warn={false} className="settings-elements-box">
+    <SettingsBox warn={false}>
       <ul>
         <li>
           Le partage et l’entraide sont des mots clés qui définissent bien

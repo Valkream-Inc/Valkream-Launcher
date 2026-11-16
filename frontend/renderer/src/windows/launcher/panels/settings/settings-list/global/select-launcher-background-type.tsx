@@ -4,6 +4,8 @@
  */
 
 
+import type { BackgroundTypeChangeEvent } from "../settings-list.types";
+import type { BackgroundType } from "@shared/types";
 import { enqueueSnackbar } from "notistack";
 import { useBackground } from "../../../../context/background.context";
 import {
@@ -15,8 +17,8 @@ import SettingsBox from "../../component/settings-box/settings-box";
 function SelectLauncherBackgroundType() {
   const { backgroundType, changeBackgroundType } = useBackground();
 
-  const handleChange = async (event) => {
-    const value = event.target.value;
+  const handleChange = async (event: BackgroundTypeChangeEvent) => {
+    const value = event.target.value as BackgroundType;
     if (value === backgroundType) return;
 
     await changeBackgroundType(value);

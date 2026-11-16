@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-const formatBytes = (bytes) => {
+const formatBytes = (bytes: number): string => {
   // au sens de nodejjs un bytes = un octet
   const sizes = ["o", "Ko", "Mo", "Go", "To"];
   if (bytes === 0) return "0 o";
@@ -11,4 +11,4 @@ const formatBytes = (bytes) => {
   return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
 };
 
-module.exports = { formatBytes };
+export { formatBytes };

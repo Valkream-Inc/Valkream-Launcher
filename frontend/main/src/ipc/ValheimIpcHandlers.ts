@@ -3,23 +3,25 @@
  * @license MIT-NC
  */
 
-const { ipcMain } = require("electron");
+import { ipcMain } from "electron";
 
-const ValheimInstall = require("./handlers/Valheim/Valheim-install.js");
-const ValheimUpdate = require("./handlers/Valheim/Valheim-update.js");
-const ValheimStart = require("./handlers/Valheim/Valheim-start.js");
-const ValheimCustomMods = require("./handlers/Valheim/Valheim-custom-mods.js");
-const ValheimInstallationStatut = require("./handlers/Valheim/Valheim-installation-statut.js");
-const ValheimModsData = require("./handlers/Valheim/Valheim-mods-data.js");
+import type { ValheimBaseMod } from "@shared/types";
 
-const ValheimGameManager = require("../manager/Valheim/ValheimGameManager.js");
-const ValheimVersionManager = require("../manager/Valheim/ValheimVersionManager.js");
+import ValheimInstall from "./handlers/Valheim/Valheim-install";
+import ValheimUpdate from "./handlers/Valheim/Valheim-update";
+import ValheimStart from "./handlers/Valheim/Valheim-start";
+import ValheimCustomMods from "./handlers/Valheim/Valheim-custom-mods";
+import ValheimInstallationStatut from "./handlers/Valheim/Valheim-installation-statut";
+import ValheimModsData from "./handlers/Valheim/Valheim-mods-data";
 
-function ValheimIpcHandlers() {
+import ValheimGameManager from "../manager/Valheim/ValheimGameManager";
+import ValheimVersionManager from "../manager/Valheim/ValheimVersionManager";
+
+function ValheimIpcHandlers(): void {
   // infos
   ipcMain.handle(
     "Valheim-get-version:game",
-    async () => (await ValheimVersionManager.getLocalVersionConfig()).version
+    async () => (await ValheimVersionManager.getLocalVersionConfig())!.version
   );
   ipcMain.handle(
     "Valheim-get-installation-statut",
@@ -37,10 +39,10 @@ function ValheimIpcHandlers() {
   );
 
   // mods data
-  ipcMain.handle("Valheim-get-mods-data", async (event, signal) => {
+  ipcMain.handle("Valheim-get-mods-data", async (event, signal?: AbortSignal) => {
     return await ValheimModsData.getModsData(signal);
   });
-  ipcMain.handle("Valheim-get-mods-details", async (event, baseMod) => {
+  ipcMain.handle("Valheim-get-mods-details", async (event, baseMod: ValheimBaseMod) => {
     return await ValheimModsData.getModDetails(baseMod);
   });
   ipcMain.handle("Valheim-get-hash-data", async (event) => {
@@ -60,4 +62,4 @@ function ValheimIpcHandlers() {
   );
 }
 
-module.exports = ValheimIpcHandlers;
+export default ValheimIpcHandlers;

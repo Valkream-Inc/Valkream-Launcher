@@ -4,6 +4,8 @@
 **/temp/
 **/dist/
 **/.yarn/
+**/.tsbuild/
+**/*.tsbuildinfo
 
 # backend/public/
 backend/public/launcher

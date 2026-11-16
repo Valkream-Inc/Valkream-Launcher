@@ -3,6 +3,8 @@
  * @license MIT-NC
  */
 
+import type { LauncherBehaviorChangeEvent } from "../settings-list.types";
+import type { LauncherBehavior } from "@shared/types";
 import { useEffect, useState } from "react";
 
 import { enqueueSnackbar } from "notistack";
@@ -13,7 +15,7 @@ import {
 import SettingsBox from "../../component/settings-box/settings-box";
 
 function Valheim_SelectLauncherBehavior() {
-  const [selected, setSelected] = useState("close");
+  const [selected, setSelected] = useState<LauncherBehavior>("close");
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -27,8 +29,8 @@ function Valheim_SelectLauncherBehavior() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleChange = async (event) => {
-    const value = event.target.value;
+  const handleChange = async (event: LauncherBehaviorChangeEvent) => {
+    const value = event.target.value as LauncherBehavior;
     if (value === selected) return;
     setSelected(value);
     await window.electron_API.setSettings("launcherBehaviorWithValheim", value);

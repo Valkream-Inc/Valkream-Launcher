@@ -3,9 +3,11 @@
  * @license MIT-NC
  */
 
-const InfosManager = require("../../manager/infosManager");
+import type { CheckInfosResult, GameName } from "@shared/types";
 
-async function CheckInfos(game) {
+import InfosManager from "../../manager/infosManager";
+
+async function CheckInfos(game: GameName): Promise<CheckInfosResult> {
   const [serverInfos, event, maintenance] = await Promise.all([
     InfosManager.getServerInfos(game),
     InfosManager.getEvent(game),
@@ -19,4 +21,4 @@ async function CheckInfos(game) {
   };
 }
 
-module.exports = CheckInfos;
+export default CheckInfos;

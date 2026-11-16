@@ -3,11 +3,14 @@
  * @license MIT-NC
  */
 
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
-const cleanGameFolder = (ValheimValkreamDataPath, foldersToClean) => {
-  for (let folderToClean of foldersToClean) {
+const cleanGameFolder = (
+  ValheimValkreamDataPath: string,
+  foldersToClean: string[]
+): void => {
+  for (const folderToClean of foldersToClean) {
     const folderToCleanPath = path.join(ValheimValkreamDataPath, folderToClean);
 
     if (fs.existsSync(folderToCleanPath)) {
@@ -16,4 +19,4 @@ const cleanGameFolder = (ValheimValkreamDataPath, foldersToClean) => {
   }
 };
 
-module.exports = { cleanGameFolder };
+export { cleanGameFolder };

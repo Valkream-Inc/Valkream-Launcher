@@ -17,8 +17,13 @@ import {
 
 import { typeConfig } from "./component/popup.config";
 import { createButtons } from "./component/popup.button";
+import type {
+  PopupProps,
+  PopupTransitionProps,
+  PopupType,
+} from "./popup.types";
 
-function getModernTypeConfig(type) {
+function getModernTypeConfig(type: PopupType) {
   const c = typeConfig[type] || typeConfig.info;
   return {
     color: c.color.modern,
@@ -27,9 +32,11 @@ function getModernTypeConfig(type) {
 }
 
 // Transition Slide
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="down" ref={ref} timeout={500} {...props} />;
-});
+const Transition = React.forwardRef<unknown, PopupTransitionProps>(
+  function Transition(props, ref) {
+    return <Slide direction="down" ref={ref} timeout={500} {...props} />;
+  }
+);
 
 export default memo(function ModernPopup({
   open,
@@ -38,7 +45,7 @@ export default memo(function ModernPopup({
   type = "info",
   title = "Titre du popup",
   message = "<p>Message du popup</p>",
-}) {
+}: PopupProps) {
   const { color, icon } = getModernTypeConfig(type);
   const buttons = createButtons(onClose, onConfirm);
 

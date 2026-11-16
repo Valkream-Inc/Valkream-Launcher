@@ -3,17 +3,23 @@
  * @license MIT-NC
  */
 
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import type { ComponentRef } from "react";
 import * as THREE from "three";
 
 import { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 
-function PlayerControls({ speed = 4, climbSpeed = 2 }) {
-  const controlsRef = useRef();
+import type {
+  PlayerControlsProps,
+  PlayerMoveState,
+} from "./players-controls.types";
+
+function PlayerControls({ speed = 4, climbSpeed = 2 }: PlayerControlsProps) {
+  const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null);
   const { camera, gl } = useThree();
 
-  const moveState = useRef({
+  const moveState = useRef<PlayerMoveState>({
     forward: false,
     backward: false,
     left: false,
@@ -22,11 +28,11 @@ function PlayerControls({ speed = 4, climbSpeed = 2 }) {
     down: false,
   });
 
-  const rotateState = useRef(false);
+  const rotateState = useRef<boolean>(false);
 
   // Déplacement clavier
   useEffect(() => {
-    const onKeyDown = (e) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       switch (e.code) {
         case "KeyW":
         case "ArrowUp":
@@ -53,7 +59,7 @@ function PlayerControls({ speed = 4, climbSpeed = 2 }) {
           break;
       }
     };
-    const onKeyUp = (e) => {
+    const onKeyUp = (e: KeyboardEvent) => {
       switch (e.code) {
         case "KeyW":
         case "ArrowUp":
@@ -91,10 +97,10 @@ function PlayerControls({ speed = 4, climbSpeed = 2 }) {
 
   // Activer rotation seulement avec clic gauche
   useEffect(() => {
-    const onMouseDown = (e) => {
+    const onMouseDown = (e: MouseEvent) => {
       if (e.button === 0) rotateState.current = true;
     };
-    const onMouseUp = (e) => {
+    const onMouseUp = (e: MouseEvent) => {
       if (e.button === 0) rotateState.current = false;
     };
     gl.domElement.addEventListener("mousedown", onMouseDown);

@@ -4,7 +4,7 @@
  */
 
 import { useMemo, memo } from "react";
-import { useGames } from "../../../context/games.context.jsx";
+import { useGames } from "../../../context/games.context";
 
 function ImgBackground() {
   const { actualGame } = useGames();

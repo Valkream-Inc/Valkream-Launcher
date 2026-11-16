@@ -3,12 +3,13 @@
  * @license MIT-NC
  */
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./css/loader.css";
 
 import { useGames } from "../../context/games.context";
+import type { LoaderProps } from "./loader.types";
 
-export default function Loader({ isVisible }) {
+export default function Loader({ isVisible }: LoaderProps) {
   const { actualGame } = useGames();
   const [shouldRender, setShouldRender] = useState(isVisible);
 

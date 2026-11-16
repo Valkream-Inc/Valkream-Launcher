@@ -3,20 +3,24 @@
  * @license MIT-NC
  */
 
-const fs = require("fs");
-const path = require("path");
-const crypto = require("crypto");
-const { getAllFilesInAFolder } = require("./getAllFilesInAFolder");
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+
+import type { SevenDtoDHashMap } from "@shared/types";
+import type { HashProgressCallback } from "../../types/utils";
+
+import { getAllFilesInAFolder } from "./getAllFilesInAFolder";
 
 /**
  * Hash un fichier (sha256)
  */
-function hashFile(filePath, algorithm = "sha256") {
+function hashFile(filePath: string, algorithm = "sha256"): Promise<string> {
   return new Promise((resolve, reject) => {
     const hash = crypto.createHash(algorithm);
     const stream = fs.createReadStream(filePath);
 
-    stream.on("data", (data) => hash.update(data));
+    stream.on("data", (data: string | Buffer) => hash.update(data));
     stream.on("end", () => resolve(hash.digest("hex")));
     stream.on("error", reject);
   });
@@ -33,10 +37,10 @@ function hashFile(filePath, algorithm = "sha256") {
  * }
  */
 async function hashFolderWithArborescence(
-  rootDir,
-  callback = null,
+  rootDir: string,
+  callback: HashProgressCallback = null,
   text = "Analyse..."
-) {
+): Promise<SevenDtoDHashMap> {
   try {
     const files = getAllFilesInAFolder(rootDir);
 
@@ -46,9 +50,9 @@ async function hashFolderWithArborescence(
       0
     );
 
-    const result = {};
+    const result: SevenDtoDHashMap = {};
     let processedBytes = 0;
-    let startTime = Date.now();
+    const startTime = Date.now();
 
     for (const filePath of files) {
       const relative = path.relative(rootDir, filePath).replace(/\\/g, "/");
@@ -58,7 +62,7 @@ async function hashFolderWithArborescence(
       processedBytes += fs.statSync(filePath).size;
 
       if (callback) {
-        const percent = ((processedBytes / totalBytes) * 100).toFixed(2);
+        const percent = Number(((processedBytes / totalBytes) * 100).toFixed(2));
         const elapsed = (Date.now() - startTime) / 1000;
         const speed = processedBytes / elapsed;
 
@@ -73,4 +77,4 @@ async function hashFolderWithArborescence(
   }
 }
 
-module.exports = { hashFolderWithArborescence, hashFile };
+export { hashFolderWithArborescence, hashFile };

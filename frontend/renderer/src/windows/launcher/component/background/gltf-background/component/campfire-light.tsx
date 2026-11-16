@@ -8,7 +8,7 @@ import { useRef, memo } from "react";
 import * as THREE from "three";
 
 function CampfireLight() {
-  const lightRef = useRef();
+  const lightRef = useRef<THREE.PointLight>(null);
   const colorRef = useRef(new THREE.Color("#ff4d00")); // couleur initiale
 
   useFrame((state) => {

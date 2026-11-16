@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import type { SettingKey, ValheimInstallationStatut } from "@shared/types";
+import type { BooleanSettingKey, ValheimInstallationStatut } from "@shared/types";
 import type { ValheimCustomModsCheck } from "../../../types/valheim";
 
 import SettingsManager from "../../../manager/settingsManager";
@@ -41,7 +41,7 @@ async function ValheimInstallationStatut(): Promise<ValheimInstallationStatut> {
   // --- 3. Gestion des mods ---
   const checkCustomMods = async (
     mods: string[] | undefined,
-    settingKey: SettingKey,
+    settingKey: BooleanSettingKey,
   ): Promise<ValheimCustomModsCheck> => {
     const active = await SettingsManager.getSetting(settingKey);
     const installed =

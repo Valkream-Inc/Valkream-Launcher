@@ -12,8 +12,13 @@ import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import WarningIcon from "@mui/icons-material/Warning";
 
+import type { PopupTypeConfigMap } from "../popup.types";
+
+// Taille historique du thème "old" (valeur hors union MUI, conservée telle quelle)
+const OLD_ICON_SIZE = "2cm" as "large";
+
 // Config classique, chaque thème peut surcharger ses valeurs
-export const typeConfig = {
+export const typeConfig: PopupTypeConfigMap = {
   info: {
     color: {
       old: "#3399ff",
@@ -21,7 +26,7 @@ export const typeConfig = {
       futuristic: "#33aaff",
     },
     icon: {
-      old: <InfoIcon fontSize="2cm" />,
+      old: <InfoIcon fontSize={OLD_ICON_SIZE} />,
       modern: <InfoIcon fontSize="large" />,
       futuristic: <InfoIcon fontSize="inherit" />,
     },
@@ -36,7 +41,7 @@ export const typeConfig = {
       futuristic: "#4dff88",
     },
     icon: {
-      old: <CheckCircleIcon fontSize="2cm" />,
+      old: <CheckCircleIcon fontSize={OLD_ICON_SIZE} />,
       modern: <CheckCircleIcon fontSize="large" />,
       futuristic: <CheckCircleIcon fontSize="inherit" />,
     },
@@ -51,7 +56,7 @@ export const typeConfig = {
       futuristic: "#ffbb33",
     },
     icon: {
-      old: <WarningIcon fontSize="2cm" />,
+      old: <WarningIcon fontSize={OLD_ICON_SIZE} />,
       modern: <WarningIcon fontSize="large" />,
       futuristic: <WarningIcon fontSize="inherit" />,
     },
@@ -66,7 +71,7 @@ export const typeConfig = {
       futuristic: "#ff4d4d",
     },
     icon: {
-      old: <ErrorIcon fontSize="2cm" />,
+      old: <ErrorIcon fontSize={OLD_ICON_SIZE} />,
       modern: <ErrorIcon fontSize="large" />,
       futuristic: <ErrorIcon fontSize="inherit" />,
     },
@@ -81,7 +86,7 @@ export const typeConfig = {
       futuristic: "#ff33cc",
     },
     icon: {
-      old: <EventIcon fontSize="2cm" />,
+      old: <EventIcon fontSize={OLD_ICON_SIZE} />,
       modern: <EventIcon fontSize="large" />,
       futuristic: <EventIcon fontSize="inherit" />,
     },
@@ -96,7 +101,7 @@ export const typeConfig = {
       futuristic: "#ffaa33",
     },
     icon: {
-      old: <LightbulbIcon fontSize="2cm" />,
+      old: <LightbulbIcon fontSize={OLD_ICON_SIZE} />,
       modern: <LightbulbIcon fontSize="large" />,
       futuristic: <LightbulbIcon fontSize="inherit" />,
     },
@@ -111,7 +116,7 @@ export const typeConfig = {
       futuristic: "#00eaff",
     },
     icon: {
-      old: <RocketLaunchIcon fontSize="2cm" />,
+      old: <RocketLaunchIcon fontSize={OLD_ICON_SIZE} />,
       modern: <RocketLaunchIcon fontSize="large" />,
       futuristic: <RocketLaunchIcon fontSize="inherit" />,
     },

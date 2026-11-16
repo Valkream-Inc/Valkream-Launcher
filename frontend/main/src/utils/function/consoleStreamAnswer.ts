@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-const consoleStreamAnswer = async (logToDisplay) => {
+const consoleStreamAnswer = async (logToDisplay: string): Promise<void> => {
   return new Promise((resolve) => {
     const log = `${logToDisplay}                      `;
     process.stdout.write(`\r${log}`);
@@ -11,4 +11,4 @@ const consoleStreamAnswer = async (logToDisplay) => {
   });
 };
 
-module.exports = { consoleStreamAnswer };
+export { consoleStreamAnswer };

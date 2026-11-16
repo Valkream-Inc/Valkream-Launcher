@@ -47,6 +47,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Yarn 4 (Berry) est fourni par corepack (champ packageManager de package.json).
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -55,7 +59,11 @@ jobs:
           cache-dependency-path: "./yarn.lock"
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
+        working-directory: ./
+
+      - name: Typecheck
+        run: yarn typecheck
         working-directory: ./
 
       - name: Build Electron launcher

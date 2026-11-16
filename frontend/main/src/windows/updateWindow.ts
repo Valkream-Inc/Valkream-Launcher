@@ -3,25 +3,25 @@
  * @license MIT-NC
  */
 
-const { BrowserWindow, Menu } = require("electron");
-const path = require("path");
+import { BrowserWindow, Menu } from "electron";
+import path from "path";
 
 const rendererPath = path.join(__dirname, "../../../renderer");
 
-const { isDev } = require("../constants");
-let updateWindow = undefined;
+import { isDev } from "../constants";
+let updateWindow: BrowserWindow | undefined = undefined;
 
-function getWindow() {
+function getWindow(): BrowserWindow | undefined {
   return updateWindow;
 }
 
-function destroyWindow() {
+function destroyWindow(): void {
   if (!updateWindow) return;
   updateWindow.close();
   updateWindow = undefined;
 }
 
-function createWindow() {
+function createWindow(): void {
   destroyWindow();
   updateWindow = new BrowserWindow({
     title: "Mise à jour",
@@ -59,7 +59,7 @@ function createWindow() {
   });
 }
 
-module.exports = {
+export {
   getWindow,
   createWindow,
   destroyWindow,

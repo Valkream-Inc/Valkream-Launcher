@@ -3,25 +3,30 @@
  * @license MIT-NC
  */
 
-const { ipcMain, app, dialog, shell } = require("electron");
+import fs from "fs";
+import path from "path";
+import { ipcMain, app, dialog, shell } from "electron";
+import type { BrowserWindow, IpcMainInvokeEvent } from "electron";
 
-const CheckForUpdates = require("./handlers/check-for-updates.js");
-const CheckInfos = require("./handlers/check-infos.js");
+import type { GameName, SettingKey, Settings } from "@shared/types";
 
-const SettingsManager = require("../manager/settingsManager.js");
-const LauncherManager = require("../manager/launcherManager.js");
+import CheckForUpdates from "./handlers/check-for-updates";
+import CheckInfos from "./handlers/check-infos";
 
-const MainWindow = require("../windows/mainWindow.js");
-const UpdateWindow = require("../windows/updateWindow.js");
+import SettingsManager from "../manager/settingsManager";
+import LauncherManager from "../manager/launcherManager";
 
-const ValheimIpcHandlers = require("./ValheimIpcHandlers.js");
-const SevenDtoDIpcHandlers = require("./SevenDtoDIpcHandlers.js");
+import * as MainWindow from "../windows/mainWindow";
+import * as UpdateWindow from "../windows/updateWindow";
+
+import ValheimIpcHandlers from "./ValheimIpcHandlers";
+import SevenDtoDIpcHandlers from "./SevenDtoDIpcHandlers";
+
+// Fenêtre principale (supposée ouverte quand les handlers sont appelés)
+const mainWindow = () => MainWindow.getWindow() as BrowserWindow;
 
 class IpcHandlers {
-  async openAppData() {
-    const path = require("path");
-    const fs = require("fs");
-
+  async openAppData(): Promise<string> {
     const appDataPath = path.join(app.getPath("appData"));
     const valkreamLauncherPath = path.join(appDataPath, "Valkream-Launcher");
 
@@ -30,7 +35,7 @@ class IpcHandlers {
     else throw new Error("Le dossier AppData n'existe pas !");
   }
 
-  async openLink(event, url = "") {
+  async openLink(event: IpcMainInvokeEvent, url = ""): Promise<void> {
     if (
       !(
         url.startsWith("http://") ||
@@ -42,8 +47,8 @@ class IpcHandlers {
     await shell.openExternal(url);
   }
 
-  async choseFolder() {
-    const result = await dialog.showOpenDialog(MainWindow.getWindow(), {
+  async choseFolder(): Promise<string | null> {
+    const result = await dialog.showOpenDialog(mainWindow(), {
       properties: ["openDirectory"],
       title: "Choisissez le dossier",
     });
@@ -52,7 +57,7 @@ class IpcHandlers {
   }
 
   /* Main Fucntions */
-  init() {
+  init(): void {
     // games ipc
     ValheimIpcHandlers();
     SevenDtoDIpcHandlers();
@@ -66,19 +71,19 @@ class IpcHandlers {
     // main windows
     ipcMain.on("main-window-open", () => MainWindow.createWindow());
     ipcMain.on("main-window-close", () => MainWindow.destroyWindow());
-    ipcMain.on("main-window-reload", () => MainWindow.getWindow().reload());
-    ipcMain.on("main-window-minimize", () => MainWindow.getWindow().minimize());
-    ipcMain.on("main-window-hide", () => MainWindow.getWindow().hide());
-    ipcMain.on("main-window-show", () => MainWindow.getWindow().show());
+    ipcMain.on("main-window-reload", () => mainWindow().reload());
+    ipcMain.on("main-window-minimize", () => mainWindow().minimize());
+    ipcMain.on("main-window-hide", () => mainWindow().hide());
+    ipcMain.on("main-window-show", () => mainWindow().show());
     ipcMain.handle("main-window-restart", () => {
       app.relaunch();
       app.exit(0);
     });
     ipcMain.on("main-window-maximize", () => {
-      if (MainWindow.getWindow().isMaximized()) {
-        MainWindow.getWindow().unmaximize();
+      if (mainWindow().isMaximized()) {
+        mainWindow().unmaximize();
       } else {
-        MainWindow.getWindow().maximize();
+        mainWindow().maximize();
       }
     });
 
@@ -90,23 +95,24 @@ class IpcHandlers {
 
     // infos
     ipcMain.handle("get-version:launcher", () => LauncherManager.getVersion());
-    ipcMain.handle("get-infos", async (event, game) => await CheckInfos(game));
+    ipcMain.handle("get-infos", async (event, game: GameName) => await CheckInfos(game));
 
     // utils
     ipcMain.handle("open-link", this.openLink.bind(this));
     ipcMain.handle(
       "get-settings",
-      async (event, setting) => await SettingsManager.getSetting(setting)
+      async (event, setting: SettingKey) =>
+        await SettingsManager.getSetting(setting)
     );
     ipcMain.handle(
       "set-settings",
-      async (event, setting, value) =>
+      async (event, setting: SettingKey, value: Settings[SettingKey]) =>
         await SettingsManager.setSetting(setting, value)
     );
     ipcMain.handle(
       "main-window-open-devTools",
       async () =>
-        await MainWindow.getWindow().webContents.openDevTools(/*{ mode: "detach" }*/)
+        await mainWindow().webContents.openDevTools(/*{ mode: "detach" }*/)
     );
     ipcMain.handle("open-appdata", this.openAppData.bind(this));
     ipcMain.handle(
@@ -119,4 +125,4 @@ class IpcHandlers {
   }
 }
 
-module.exports = IpcHandlers;
+export default IpcHandlers;

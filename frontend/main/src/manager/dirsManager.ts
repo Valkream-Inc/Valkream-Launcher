@@ -3,24 +3,24 @@
  * @license MIT-NC
  */
 
-const path = require("path");
-const { app } = require("electron");
-const newDir = require("../utils/new-dir.js");
+import path from "path";
+import { app } from "electron";
+import newDir from "../utils/new-dir";
 
-const isDev = require("../constants/isDev.js");
+import isDev from "../constants/isDev";
 
 class DirsManager {
-  launcherRootPath = () => process.cwd();
-  appDataPath = () => app.getPath("appData");
+  launcherRootPath = (): string => process.cwd();
+  appDataPath = (): string => app.getPath("appData");
 
-  launcherAppDataPath = () =>
+  launcherAppDataPath = (): string =>
     newDir({
       win32: path.join(this.appDataPath(), "Valkream-Launcher"),
       linux: path.join(this.appDataPath(), "Valkream-Launcher"),
       darwin: path.join(this.appDataPath(), "Valkream-Launcher"),
     });
 
-  rootPath = () =>
+  rootPath = (): string =>
     newDir(
       isDev
         ? {
@@ -44,7 +44,7 @@ class DirsManager {
           }
     );
 
-  dbPath = () => (isDev ? this.rootPath() : this.launcherAppDataPath());
+  dbPath = (): string => (isDev ? this.rootPath() : this.launcherAppDataPath());
 }
 
-module.exports = new DirsManager();
+export default new DirsManager();
