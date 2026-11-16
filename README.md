@@ -102,8 +102,10 @@ Le projet est entièrement en **TypeScript** (`.ts` / `.tsx`). Les types sont s�
 - `frontend/renderer/src/**/*.types.ts` : types des composants et contextes React, à côté du code
 
 ```bash
-yarn dev          # backend + launcher (Vite, tsc --watch, Electron) via turbo
-yarn dev:front    # launcher seul (avec electron-rebuild)
+yarn dev          # backend + launcher : Vite, esbuild (main), Electron, typecheck en watch (turbo)
+yarn dev:fast     # idem sans les typecheck en watch (le plus léger)
+yarn dev:fresh    # electron-rebuild puis yarn dev (après un changement d'Electron / better-sqlite3)
+yarn dev:front    # launcher seul
 yarn dev:back     # serveur de fichiers seul (http://localhost:3000)
 yarn typecheck    # vérification des types (main, renderer, scripts, backend)
 yarn lint         # ESLint

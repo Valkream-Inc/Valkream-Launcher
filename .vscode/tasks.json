@@ -4,7 +4,7 @@
     // ───────────────────────── Développement ─────────────────────────
     {
       "label": "Dev : tout (backend + launcher)",
-      "detail": "yarn dev — serveur de fichiers + Vite + tsc --watch + Electron (via turbo)",
+      "detail": "yarn dev — backend + Vite + esbuild (main) + Electron + typecheck en watch (via turbo)",
       "type": "shell",
       "command": "yarn dev",
       "isBackground": true,
@@ -14,18 +14,9 @@
     },
     {
       "label": "Dev : launcher",
-      "detail": "Rebuild natif + Vite + tsc --watch + Electron",
+      "detail": "Vite + esbuild (main) + Electron + typecheck en watch (sans rebuild natif)",
       "type": "shell",
       "command": "yarn dev:front",
-      "isBackground": true,
-      "problemMatcher": [],
-      "presentation": { "panel": "dedicated", "reveal": "always" }
-    },
-    {
-      "label": "Dev : launcher (sans rebuild natif)",
-      "detail": "Comme « Dev : launcher » mais sans electron-rebuild (plus rapide)",
-      "type": "shell",
-      "command": "yarn workspace Valkream-Launcher start",
       "isBackground": true,
       "problemMatcher": [],
       "presentation": { "panel": "dedicated", "reveal": "always" }
@@ -57,21 +48,48 @@
       "presentation": { "panel": "dedicated", "reveal": "silent" }
     },
     {
-      "label": "Dev : main (tsc --watch)",
-      "detail": "Compile main/ vers frontend/.tsbuild/",
+      "label": "Dev : main (esbuild)",
+      "detail": "Compile main/ vers frontend/.tsbuild/ (sans vérification de types)",
       "type": "shell",
       "command": "yarn workspace Valkream-Launcher dev:main",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "esbuild",
+        "pattern": { "regexp": "^__esbuild_jamais_utilise__$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "\\[dev-main\\] building",
+          "endsPattern": "\\[dev-main\\] (ready|\\d+ erreur)"
+        }
+      },
+      "presentation": { "panel": "dedicated", "reveal": "silent" }
+    },
+    {
+      "label": "Dev : types main (tsc --watch)",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher dev:types:main",
       "isBackground": true,
       "problemMatcher": {
         "base": "$tsc-watch",
         "fileLocation": ["relative", "${workspaceFolder}/frontend"]
       },
-      "presentation": { "panel": "dedicated", "reveal": "silent" }
+      "presentation": { "panel": "dedicated", "reveal": "never" }
+    },
+    {
+      "label": "Dev : types renderer (tsc --watch)",
+      "type": "shell",
+      "command": "yarn workspace Valkream-Launcher dev:types:renderer",
+      "isBackground": true,
+      "problemMatcher": {
+        "base": "$tsc-watch",
+        "fileLocation": ["relative", "${workspaceFolder}/frontend"]
+      },
+      "presentation": { "panel": "dedicated", "reveal": "never" }
     },
     {
       "label": "Dev : prérequis du debug Electron",
-      "detail": "Vite + tsc --watch (utilisé par launch.json)",
-      "dependsOn": ["Dev : renderer (Vite)", "Dev : main (tsc --watch)"],
+      "detail": "Vite + esbuild + typecheck en watch (utilisé par launch.json)",
+      "dependsOn": ["Dev : renderer (Vite)", "Dev : main (esbuild)", "Dev : types main (tsc --watch)", "Dev : types renderer (tsc --watch)"],
       "dependsOrder": "parallel",
       "problemMatcher": []
     },
@@ -169,7 +187,7 @@
     },
     {
       "label": "Yarn : rebuild natif (electron-rebuild)",
-      "detail": "À relancer après un changement de version d'Electron / better-sqlite3",
+      "detail": "À relancer après un changement de version d'Electron / better-sqlite3 (ou « yarn dev:fresh »)",
       "type": "shell",
       "command": "yarn rebuild",
       "problemMatcher": [],

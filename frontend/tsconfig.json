@@ -9,5 +9,5 @@
     "types": ["node"],
     "noEmit": true
   },
-  "include": ["vite.config.ts", "build-script.ts", "set-icon.ts", "types/**/*.d.ts", "shared/**/*.d.ts"]
+  "include": ["vite.config.ts", "build-script.ts", "set-icon.ts", "scripts/**/*.ts", "types/**/*.d.ts", "shared/**/*.d.ts"]
 }

@@ -42,6 +42,10 @@ export default defineConfig({
   server: {
     port: 8080,
     open: false,
+    // Pré-transforme les fichiers au démarrage : le premier affichage du launcher est plus rapide.
+    warmup: {
+      clientFiles: ["./index.tsx", "./src/**/*.tsx"],
+    },
     strictPort: true,
     host: true, // Permet d'accéder au serveur depuis le réseau local.
     // Permet d'accéder aux fichiers en dehors du répertoire 'root'.
