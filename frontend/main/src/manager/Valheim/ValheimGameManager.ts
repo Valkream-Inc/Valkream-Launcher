@@ -210,7 +210,10 @@ class ValheimGameManager {
 
       await fs.mkdir(this.gameRootDir, { recursive: true });
     } catch (err) {
-      throw new Error(`Échec de la désinstallation : ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(
+        `Échec de la désinstallation : ${err instanceof Error ? err.message : String(err)}`,
+        { cause: err },
+      );
     }
   }
 
@@ -264,7 +267,8 @@ class ValheimGameManager {
       await fse.ensureDir(this.preservedDir);
     } catch (err) {
       throw new Error(
-        `Impossible de restaurer le dossier du jeu : ${err instanceof Error ? err.message : String(err)}`
+        `Impossible de restaurer le dossier du jeu : ${err instanceof Error ? err.message : String(err)}`,
+        { cause: err },
       );
     }
   }

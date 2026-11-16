@@ -64,7 +64,7 @@ const comparator = (
   const valueA = accessor(a);
   const valueB = accessor(b);
 
-  let comparison = 0;
+  let comparison: number;
 
   if (orderBy === "status") {
     comparison = (valueA as number) - (valueB as number);

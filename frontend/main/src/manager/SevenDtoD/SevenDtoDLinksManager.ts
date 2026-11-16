@@ -4,15 +4,12 @@
  */
 
 import { baseUrl } from "../../constants";
+import SettingsManager from "../settingsManager";
 import { toValidUrl } from "../../utils";
 import { platform } from "os";
 
 class SevenDtoDLinksManager {
   async gameVersionUrl(): Promise<string> {
-     
-    const SettingsManager = (
-      require("../settingsManager") as typeof import("../settingsManager")
-    ).default;
     const isBeta = await SettingsManager.getSetting("betaEnabled");
     return `${baseUrl}/games/SevenDtoD/latest/latest${
       isBeta ? ".beta" : ""
@@ -20,10 +17,10 @@ class SevenDtoDLinksManager {
   }
 
   async gameZipLink(): Promise<string> {
-     
-    const SevenDtoDVersionManager = (
-      require("./SevenDtoDVersionManager") as typeof import("./SevenDtoDVersionManager")
-    ).default;
+    // Import différé : SevenDtoDVersionManager importe ce module (dépendance circulaire)
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const SevenDtoDVersionManager = require("./SevenDtoDVersionManager")
+      .default as typeof import("./SevenDtoDVersionManager").default;
     const config = await SevenDtoDVersionManager.getOnlineVersionConfig();
     const urls = config?.sevendtod?.download_url;
 
@@ -37,10 +34,10 @@ class SevenDtoDLinksManager {
   }
 
   async modHashLink(): Promise<string> {
-     
-    const SevenDtoDVersionManager = (
-      require("./SevenDtoDVersionManager") as typeof import("./SevenDtoDVersionManager")
-    ).default;
+    // Import différé : SevenDtoDVersionManager importe ce module (dépendance circulaire)
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const SevenDtoDVersionManager = require("./SevenDtoDVersionManager")
+      .default as typeof import("./SevenDtoDVersionManager").default;
     const config = await SevenDtoDVersionManager.getOnlineVersionConfig();
     const url = config?.modpack?.hashs_url;
 
@@ -50,10 +47,10 @@ class SevenDtoDLinksManager {
   }
 
   async modsFileBaseUrl(): Promise<string> {
-     
-    const SevenDtoDVersionManager = (
-      require("./SevenDtoDVersionManager") as typeof import("./SevenDtoDVersionManager")
-    ).default;
+    // Import différé : SevenDtoDVersionManager importe ce module (dépendance circulaire)
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const SevenDtoDVersionManager = require("./SevenDtoDVersionManager")
+      .default as typeof import("./SevenDtoDVersionManager").default;
     const config = await SevenDtoDVersionManager.getOnlineVersionConfig();
     const url = config?.modpack?.download_url;
 

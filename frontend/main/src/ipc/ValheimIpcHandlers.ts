@@ -45,7 +45,7 @@ function ValheimIpcHandlers(): void {
   ipcMain.handle("Valheim-get-mods-details", async (event, baseMod: ValheimBaseMod) => {
     return await ValheimModsData.getModDetails(baseMod);
   });
-  ipcMain.handle("Valheim-get-hash-data", async (event) => {
+  ipcMain.handle("Valheim-get-hash-data", async () => {
     return await ValheimVersionManager.getHash();
   });
 

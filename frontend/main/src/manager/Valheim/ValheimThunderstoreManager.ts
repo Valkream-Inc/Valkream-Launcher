@@ -115,7 +115,7 @@ class ValheimThunderstoreManager {
           fs.readFileSync(this.extractManifestPath, "utf-8"),
         ) as ValheimThunderstoreManifest;
       } catch (err) {
-        throw new Error("Manifest invalide ou corrompu");
+        throw new Error("Manifest invalide ou corrompu", { cause: err });
       }
     }
 

@@ -94,6 +94,8 @@ export default function SevenDtoDButton() {
       error("la sélection du chemin de jeu", err);
     }
   };
+  // Fonctionnalité pas encore branchée dans l'UI
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSelectGamePath = () =>
     runAction(selectGamePath, "SevenDtoD-select-game-path");
 
@@ -112,7 +114,7 @@ export default function SevenDtoDButton() {
       });
       await window.electron_SevenDtoD_API.install();
       return;
-    } catch (err) {
+    } catch {
       cleanup();
       return;
     }
@@ -134,7 +136,7 @@ export default function SevenDtoDButton() {
       await window.electron_SevenDtoD_API.play();
       await window.electron_API.close(); // Ferme le launcher pas de launcher behaviour pour le moment
       return;
-    } catch (err) {
+    } catch {
       cleanup();
       return;
     }
@@ -155,7 +157,7 @@ export default function SevenDtoDButton() {
       });
       await window.electron_SevenDtoD_API.update();
       return;
-    } catch (err) {
+    } catch {
       cleanup();
       return;
     }

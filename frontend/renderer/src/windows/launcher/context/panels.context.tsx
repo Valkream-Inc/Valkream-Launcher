@@ -29,7 +29,6 @@ export const PanelsProvider = ({ children }: PanelsProviderProps) => {
     };
 
     loadSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const changePanel = (PanelsId: PanelId) => {

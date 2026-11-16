@@ -13,20 +13,26 @@ import {
   LinearProgress,
   Alert,
 } from "@mui/material";
-import { Container, styled } from "@mui/system";
+import { Container } from "@mui/system";
 
 import type { ReactNode } from "react";
 import type { LegendItem, LegendProps } from "./mods-legend.types";
 import SettingsBox from "./settings-box/settings-box";
 
-const ColorBox = styled(Box)(({ color }) => ({
-  width: 16,
-  height: 16,
-  minWidth: 16,
-  minHeight: 16,
-  borderRadius: 4,
-  backgroundColor: color,
-}));
+function ColorBox({ color }: { color: string }) {
+  return (
+    <Box
+      sx={{
+        width: 16,
+        height: 16,
+        minWidth: 16,
+        minHeight: 16,
+        borderRadius: "4px",
+        backgroundColor: color,
+      }}
+    />
+  );
+}
 
 const legendItems: LegendItem[] = [
   { color: "#303f9f", label: "Mods spéciaux installés" },

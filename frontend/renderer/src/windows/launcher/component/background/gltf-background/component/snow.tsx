@@ -54,9 +54,7 @@ function Snow({ count = 15000, area = 50 }: SnowProps) {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
+          args={[positions, 3]}
         />
       </bufferGeometry>
       <pointsMaterial

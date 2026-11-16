@@ -136,10 +136,7 @@ function SevenDtoDSettings({
       {isSpecialOptionVisible && (
         <SettingsTab id="mods" activeTab={activeTab}>
           <SettingsTitle warn={false}>Mods</SettingsTitle>
-          <SecenDtoD_ModsTab
-            ref={modsTabRef}
-            isDevActive={isDevActive || isSpecialOptionVisible}
-          />
+          <SecenDtoD_ModsTab ref={modsTabRef} />
         </SettingsTab>
       )}
 

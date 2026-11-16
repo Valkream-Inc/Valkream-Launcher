@@ -14,13 +14,8 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import type { ReactNode } from "react";
 import type { ModCardProps } from "./mod-card.types";
 import SettingsBox from "./settings-box/settings-box";
-
-function CustomTableCell({ children }: { children: ReactNode }) {
-  return <TableCell sx={{ color: "white" }}>{children}</TableCell>;
-}
 
 function ModCard({
   isDevActive = false,
@@ -85,7 +80,11 @@ function ModCard({
     <SettingsBox warn={false} sx={{ backgroundColor, color }}>
       <Container>
         <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
-          <Avatar src={icon} sx={{ width: 64, height: 64 }} variant="rounded" />
+          <Avatar
+            src={icon ?? undefined}
+            sx={{ width: 64, height: 64 }}
+            variant="rounded"
+          />
           <Box>
             <Typography
               variant="h5"

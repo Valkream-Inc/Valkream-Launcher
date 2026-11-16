@@ -54,7 +54,6 @@ export const BackgroundProvider = ({ children }: BackgroundProviderProps) => {
     };
 
     loadSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkRef = (callback: () => void = () => {}): void => {
