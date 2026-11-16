@@ -1,0 +1,114 @@
+# ──────────────────────────────────────────────────────────────
+# NORME DE VERSIONNAGE : X0.X1.X2.X3
+# ──────────────────────────────────────────────────────────────
+# X0 → Indique la saison en cours. n'influence rien
+# X1 → Mise à jour majeure du game-base / de la version du jeu. influence la capacité a se connecté
+# X2 → Ajout ou suppression de mods ou autre (impacte la compatibilité). influence la capacité a se connecté
+# X3 → Modification de configuration ou autre (paramètres, options, équilibrage). n'influence pas la capacité a se connecté
+# ──────────────────────────────────────────────────────────────
+
+version: 0.0.0.0 # Display to user aucun effet si ce n'est visuel
+buildDate: 2025-09-18T19:00:00.929Z # For Admin Information Only
+
+game-base: # X1
+  valheim:
+    version: 0.0.0 # version (cela indique si ca doit etre mise ajour ou non)
+    gameFolderToRemove: # fichiers et dossiers à supprimer lors de la mise à jour (principalemnt pour les install de type  hash et api) (only subpath are accepted)
+    gameFolderToPreserve: # fichier et dossiers à conserver lors de la mise à jour qui peuvent etre restaurer via les paramétre si elles sont éronnés (principalemnt pour les install de type  hash et api)  (donnée client qui seront quand meme supprimer avec une grosse mise a jour x1)
+    hash:
+      f0c7a72372bba288cff438b73c9b2b34264c1370d90201902c7ceb65977d413a
+      # hash du dossier racine de cette install pour vérifier la validité global de l'installation
+      # les gameFolderToPreserve et gameFolderToRemove ne sont pas pris en compte dans le hash
+      # pour vérifier la cohérence des fichiers (le hash ne doit pas changer entre avant et après le lancement + modifications du jeu)
+    type: hash_url # url d'un zip dans content (on peut aussi spécifier une liste de fichier avec des hash et un chemin relatif dans le dossier de destination)
+    hash-folder: /games/Valheim/latest/hash/ # chemin relatif par rapport a la racine du serveur de fichier ou url distant
+    content:
+      win32: /games/Valheim/latest/hash.json # chemin relatif par rapport a la racine du serveur de fichier
+      linux: htpp://something # url distant
+      darwin:
+        "/toto/somethnig": "hash..."
+        "/toto/othersomething": "hash..." # donnée brut
+  bepinex:
+    version: 0.0.0 # version (cela indique si ca doit etre mise ajour ou non)
+    gameFolderToRemove: # fichiers et dossiers à supprimer lors de la mise à jour (principalemnt pour les install de type  hash et api) (only subpath are accepted)
+    gameFolderToPreserve: # fichier et dossiers à conserver lors de la mise à jour qui peuvent etre restaurer via les paramétre si elles sont éronnés (principalemnt pour les install de type  hash et api)  (donnée client qui seront quand meme supprimer avec une grosse mise a jour x1)
+    hash:
+      f0c7a72372bba288cff438b73c9b2b34264c1370d90201902c7ceb65977d413a
+      # hash du dossier racine de cette install pour vérifier la validité global de l'installation
+      # les gameFolderToPreserve et gameFolderToRemove ne sont pas pris en compte dans le hash
+      # pour vérifier la cohérence des fichiers (le hash ne doit pas changer entre avant et après le lancement + modifications du jeu)
+    type: zip_url # url d'un zip dans content (on peut aussi spécifier une liste de fichier avec des hash et un chemin relatif dans le dossier de destination)
+    folder_in_zip: / # dans le cas d'un zip mal fait ou avec plusieurs dossier
+    content:
+      win32: /games/Valheim/latest/BepInEx-5.4.2333.zip # chemin relatif par rapport a la racine du serveur de fichier
+      linux: htpp://something # url distant
+      darwin: "binary" # donnée brut
+
+game-breaking: # X2
+  mods-thunderstore:
+    version: 0.0.0 # version (cela indique si ca doit etre mise ajour ou non)
+    gameFolderToRemove: # fichiers et dossiers à supprimer lors de la mise à jour (principalemnt pour les install de type  hash et api) (only subpath are accepted)
+    gameFolderToPreserve: # fichier et dossiers à conserver lors de la mise à jour qui peuvent etre restaurer via les paramétre si elles sont éronnés (principalemnt pour les install de type  hash et api)  (donnée client qui seront quand meme supprimer avec une grosse mise a jour x1)
+    hash:
+      f0c7a72372bba288cff438b73c9b2b34264c1370d90201902c7ceb65977d413a
+      # hash du dossier racine de cette install pour vérifier la validité global de l'installation
+      # les gameFolderToPreserve et gameFolderToRemove ne sont pas pris en compte dans le hash
+      # pour vérifier la cohérence des fichiers (le hash ne doit pas changer entre avant et après le lancement + modifications du jeu)
+    type: thunderstore_modpack_url # permet au client de vérifier si c bien accord avec le type de param on peut aussi spécifier un zip ou des hash
+    api-url: https://thunderstore.io # permet de migrer en local si yhunderstore devient défaillant
+    content:
+      win32: /games/Valheim/latest/modpack.json # chemin relatif par rapport a la racine du serveur de fichier
+      linux: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.34.37/ # url distant
+      darwin: "binary" # donnée brut
+  mods-nexus:
+    version: 0.0.0 # version (cela indique si ca doit etre mise ajour ou non)
+    gameFolderToRemove: # fichiers et dossiers à supprimer lors de la mise à jour (principalemnt pour les install de type  hash et api) (only subpath are accepted)
+    gameFolderToPreserve: # fichier et dossiers à conserver lors de la mise à jour qui peuvent etre restaurer via les paramétre si elles sont éronnés (principalemnt pour les install de type  hash et api)  (donnée client qui seront quand meme supprimer avec une grosse mise a jour x1)
+    hash:
+      f0c7a72372bba288cff438b73c9b2b34264c1370d90201902c7ceb65977d413a
+      # hash du dossier racine de cette install pour vérifier la validité global de l'installation
+      # les gameFolderToPreserve et gameFolderToRemove ne sont pas pris en compte dans le hash
+      # pour vérifier la cohérence des fichiers (le hash ne doit pas changer entre avant et après le lancement + modifications du jeu)
+    type: nexus_modpack_url # permet au client de vérifier si c bien accord avec le type de param on peut aussi spécifier un zip ou des hash
+    api-url: https://nexus.io # permet de migrer en local si nexus devient défaillant
+    content:
+      win32: /games/Valheim/latest/nexus.json # chemin relatif par rapport a la racine du serveur de fichier
+      linux: https://nexus.io/package/download/ValheimValkream/Valkream/2.34.37/ # url distant
+      darwin: "binary" # donnée brut
+  mods-admin:
+    version: 0.0.0 # version (cela indique si ca doit etre mise ajour ou non)
+    gameFolderToRemove: # fichiers et dossiers à supprimer lors de la mise à jour (principalemnt pour les install de type  hash et api) (only subpath are accepted)
+    gameFolderToPreserve: # fichier et dossiers à conserver lors de la mise à jour qui peuvent etre restaurer via les paramétre si elles sont éronnés (principalemnt pour les install de type  hash et api)  (donnée client qui seront quand meme supprimer avec une grosse mise a jour x1)
+    hash:
+      f0c7a72372bba288cff438b73c9b2b34264c1370d90201902c7ceb65977d413a
+      # hash du dossier racine de cette install pour vérifier la validité global de l'installation
+      # les gameFolderToPreserve et gameFolderToRemove ne sont pas pris en compte dans le hash
+      # pour vérifier la cohérence des fichiers (le hash ne doit pas changer entre avant et après le lancement + modifications du jeu)
+    type: thunderstore_modpack_url # permet au client de vérifier si c bien accord avec le type de param on peut aussi spécifier un zip ou des hash
+    api-url: https://thunderstore.io # permet de migrer en local si yhunderstore devient défaillant
+    content:
+      win32: /games/Valheim/latest/modpack.json # chemin relatif par rapport a la racine du serveur de fichier
+      linux: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.34.37/ # url distant
+      darwin:
+        - "JereKuusela-Infinity_Hammer-1.79.0"
+        - "JereKuusela-Server_devcommands-1.106.0"
+        - "JereKuusela-Upgrade_World-1.80.0"
+        - "JereKuusela-World_Edit_Commands-1.70.0"
+        - "Astropilot-ValheimTooler-1.11.0" # donnée brut
+
+game-notbreacking: #X3
+  configs:
+    version: 0.0.0 # version (cela indique si ca doit etre mise ajour ou non)
+    gameFolderToRemove: # fichiers et dossiers à supprimer lors de la mise à jour (principalemnt pour les install de type  hash et api) (only subpath are accepted)
+    gameFolderToPreserve: # fichier et dossiers à conserver lors de la mise à jour qui peuvent etre restaurer via les paramétre si elles sont éronnés (principalemnt pour les install de type  hash et api)  (donnée client qui seront quand meme supprimer avec une grosse mise a jour x1)
+    hash:
+      f0c7a72372bba288cff438b73c9b2b34264c1370d90201902c7ceb65977d413a
+      # hash du dossier racine de cette install pour vérifier la validité global de l'installation
+      # les gameFolderToPreserve et gameFolderToRemove ne sont pas pris en compte dans le hash
+      # pour vérifier la cohérence des fichiers (le hash ne doit pas changer entre avant et après le lancement + modifications du jeu)
+    type: zip_url # permet au client de vérifier si c bien accord avec le type de param on peut aussi spécifier un zip ou des hash
+    folder_in_zip: /config # dans le cas d'un zip mal fait ou avec plusieurs dossier
+    content:
+      win32: /games/Valheim/latest/modpack.zip # chemin relatif par rapport a la racine du serveur de fichier
+      linux: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.34.37/ # url distant
+      darwin: "binary" # donnée brut
