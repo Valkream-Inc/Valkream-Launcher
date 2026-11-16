@@ -33,7 +33,7 @@ async function isServerReachable(url: string = baseUrl): Promise<boolean> {
   try {
     await axios.get(url, { timeout: 3000 });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

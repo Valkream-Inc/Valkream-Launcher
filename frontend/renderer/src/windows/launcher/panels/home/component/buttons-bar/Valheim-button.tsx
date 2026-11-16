@@ -86,7 +86,7 @@ export default function ValheimButton() {
 
       await window.electron_Valheim_API.install();
       return;
-    } catch (err) {
+    } catch {
       cleanup();
       return;
     }
@@ -127,7 +127,7 @@ export default function ValheimButton() {
 
       await window.electron_Valheim_API.update();
       return;
-    } catch (err) {
+    } catch {
       cleanup();
       return;
     }
@@ -155,11 +155,10 @@ export default function ValheimButton() {
       });
 
       await window.electron_Valheim_API.customMods();
-    } catch (err) {
+    } catch {
       cleanup();
     } finally {
       modsRunningRef.current = false;
-      return;
     }
   };
   const handleCustomMods = () => runAction(customMods, "Valheim-custom-mods");

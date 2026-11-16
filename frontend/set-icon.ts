@@ -6,7 +6,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { Jimp } from "jimp";
+import Jimp from "jimp";
 import * as png2icons from "png2icons";
 
 async function iconSet(): Promise<void> {

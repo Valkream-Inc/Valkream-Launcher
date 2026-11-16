@@ -22,7 +22,6 @@ function Valheim_ToggleLaunchSteam() {
     };
 
     loadSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = async (event: ToggleChangeEvent) => {

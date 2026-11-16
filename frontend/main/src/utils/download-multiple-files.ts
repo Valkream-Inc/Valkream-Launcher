@@ -165,7 +165,9 @@ const dowloadMultiplefiles = async (
           try {
             const stat = await fs.promises.stat(file.destPath);
             downloaded[index] = stat.size;
-          } catch {}
+          } catch {
+            // Fichier illisible : on garde la taille déjà connue (0)
+          }
         }
 
         downloadedGlobal = downloaded.reduce((a, b) => a + b, 0);
@@ -179,12 +181,8 @@ const dowloadMultiplefiles = async (
   );
 
   // 🔸 Étape 6 : Attendre la fin ou intercepter la PREMIÈRE erreur qui crash
-  try {
-    return await Promise.all(downloads);
-  } catch (error) {
-    // On propage l'erreur au launcher pour la gestion d'UI (Bouton "reprendre")
-    throw error;
-  }
+  // L'erreur est propagée au launcher pour la gestion d'UI (Bouton "reprendre")
+  return await Promise.all(downloads);
 };
 
 export default dowloadMultiplefiles;

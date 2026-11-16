@@ -21,6 +21,25 @@ declare module "png2icons" {
   ): Buffer | null;
 }
 
+declare module "gamedig" {
+  export interface GameDigQueryOptions {
+    type: string;
+    host: string;
+    port?: number;
+    timeout?: number;
+  }
+
+  export interface GameDigState {
+    numplayers: number;
+    maxplayers: number;
+    ping: number;
+  }
+
+  export class GameDig {
+    static query(options: GameDigQueryOptions): Promise<GameDigState>;
+  }
+}
+
 declare module "stream-throttle" {
   import type { Transform } from "node:stream";
 

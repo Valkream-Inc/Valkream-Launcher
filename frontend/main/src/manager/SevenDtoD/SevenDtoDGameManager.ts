@@ -114,7 +114,10 @@ class SevenDtoDGameManager {
 
       await fs.mkdir(this.gameRootDir, { recursive: true });
     } catch (err) {
-      throw new Error(`Échec de la désinstallation : ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(
+        `Échec de la désinstallation : ${err instanceof Error ? err.message : String(err)}`,
+        { cause: err },
+      );
     }
   }
 

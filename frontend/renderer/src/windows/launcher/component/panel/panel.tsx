@@ -20,7 +20,6 @@ function Panel({ id, children }: PanelProps) {
       timeout={500}
       unmountOnExit={id !== "settings" && !actionLoading} // exclude settings for applying settings on launch
       mountOnEnter={id !== "settings" && !actionLoading} // exclude settings for applying settings on launch
-      sx={{ PointerEvents: "none" }}
     >
       <Box
         sx={{

@@ -35,7 +35,10 @@ class SevenDtoDModsManager {
       await fse.remove(this.gameModsDir);
       await fse.ensureDir(this.gameModsDir);
     } catch (err) {
-      throw new Error(`Échec de la désinstallation : ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(
+        `Échec de la désinstallation : ${err instanceof Error ? err.message : String(err)}`,
+        { cause: err },
+      );
     }
   }
 
@@ -65,7 +68,7 @@ class SevenDtoDModsManager {
         )
       );
     } catch (err) {
-      throw new Error(`Échec de l'installation : ${err}`);
+      throw new Error(`Échec de l'installation : ${err}`, { cause: err });
     }
   }
 
@@ -281,13 +284,15 @@ class SevenDtoDModsManager {
         callback("Mise à jour terminée. Rien à télécharger.", 0, 0, 100, 0);
       }
     } catch (err) {
-      throw new Error(`Échec de la mise à jour des mods : ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(
+        `Échec de la mise à jour des mods : ${err instanceof Error ? err.message : String(err)}`,
+        { cause: err },
+      );
     }
   }
 
   async generateFix(
     callback: SevenDtoDTextCallback = () => {},
-    text = "Création d'un fix pour les mods ..."
   ): Promise<string> {
     this.init();
     try {
@@ -367,7 +372,10 @@ class SevenDtoDModsManager {
       await fs.access(modFixFolder);
       return shell.openPath(modFixFolder);
     } catch (err) {
-      throw new Error(`Échec de la génération du fix : ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(
+        `Échec de la génération du fix : ${err instanceof Error ? err.message : String(err)}`,
+        { cause: err },
+      );
     }
   }
 }

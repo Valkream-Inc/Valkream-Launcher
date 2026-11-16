@@ -51,7 +51,7 @@ function SevenDtoDIpcHandlers(): void {
   );
   ipcMain.handle(
     "SevenDtoD-play",
-    async (event) => await SevenDtoD_Play(event)
+    async () => await SevenDtoD_Play()
   );
   ipcMain.handle(
     "SevenDtoD-update",

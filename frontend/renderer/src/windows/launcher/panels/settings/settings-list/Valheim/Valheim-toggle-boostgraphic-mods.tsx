@@ -25,7 +25,6 @@ function Valheim_ToggleBoostGraphicsMods() {
     };
 
     loadSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = async (event: ToggleChangeEvent) => {

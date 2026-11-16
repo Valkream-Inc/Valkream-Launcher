@@ -58,7 +58,9 @@ const getExistingFileSize = async (destPath: string): Promise<number> => {
 const removePartialFile = async (destPath: string): Promise<void> => {
   try {
     await fs.promises.unlink(destPath);
-  } catch {}
+  } catch {
+    // Fichier déjà absent : rien à supprimer
+  }
 };
 
 const parseTotalSizeFromContentRange = (
@@ -78,7 +80,7 @@ const attemptDownload = (
   callback: FileProgressCallback,
   signal?: AbortSignal
 ): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     let writer: fs.WriteStream | undefined;
     let response: AxiosResponse<Readable> | undefined;
 
@@ -100,102 +102,104 @@ const attemptDownload = (
 
     signal?.addEventListener("abort", onAbort);
 
-    try {
-      await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
-      let existingSize = await getExistingFileSize(destPath);
+    void (async () => {
+      try {
+        await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
+        let existingSize = await getExistingFileSize(destPath);
 
-      while (true) {
-        if (signal?.aborted) throw new Error("Aborted");
+        while (true) {
+          if (signal?.aborted) throw new Error("Aborted");
 
-        const headers: Record<string, string> = { "Accept-Encoding": "identity" };
-        if (existingSize > 0) {
-          headers.Range = `bytes=${existingSize}-`;
-        }
+          const headers: Record<string, string> = { "Accept-Encoding": "identity" };
+          if (existingSize > 0) {
+            headers.Range = `bytes=${existingSize}-`;
+          }
 
-        response = await downloadAxios<Readable>({
-          url: downloadUrl,
-          method: "GET",
-          responseType: "stream",
-          timeout: REQUEST_TIMEOUT,
-          maxContentLength: Infinity,
-          maxBodyLength: Infinity,
-          headers,
-          signal, // Axios coupe automatiquement sa propre requête si le signal trigger
-          validateStatus: (status) =>
-            status === 200 || status === 206 || status === 416,
-        });
+          response = await downloadAxios<Readable>({
+            url: downloadUrl,
+            method: "GET",
+            responseType: "stream",
+            timeout: REQUEST_TIMEOUT,
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            headers,
+            signal, // Axios coupe automatiquement sa propre requête si le signal trigger
+            validateStatus: (status) =>
+              status === 200 || status === 206 || status === 416,
+          });
 
-        if (existingSize > 0 && response.status === 416) {
-          cleanup();
-          callback(existingSize, existingSize, 100, 0);
-          resolve();
+          if (existingSize > 0 && response.status === 416) {
+            cleanup();
+            callback(existingSize, existingSize, 100, 0);
+            resolve();
+            return;
+          }
+
+          if (existingSize > 0 && response.status === 200) {
+            response.data.destroy();
+            await removePartialFile(destPath);
+            callback(0, 0, 0, 0);
+            existingSize = 0;
+            continue;
+          }
+
+          const remainingSize = parseInt(
+            response.headers["content-length"] || "0",
+            10,
+          );
+          const totalSize =
+            response.status === 206
+              ? parseTotalSizeFromContentRange(
+                  response.headers["content-range"],
+                  existingSize + remainingSize,
+                )
+              : remainingSize;
+          const downloadedOffset = existingSize;
+
+          const progressStream = progress({
+            length: remainingSize || undefined,
+            time: 100,
+          });
+
+          progressStream.on("progress", (p) => {
+            const transferred = downloadedOffset + p.transferred;
+            const percent =
+              totalSize > 0
+                ? Math.round((transferred / totalSize) * 100)
+                : Math.round(p.percentage);
+            callback(transferred, totalSize, percent, p.speed);
+          });
+
+          writer = fs.createWriteStream(destPath, {
+            flags: downloadedOffset > 0 ? "a" : "w",
+          });
+
+          response.data
+            .pipe(new Throttle({ rate: 1024 * 1024 * 1024 }))
+            .pipe(progressStream)
+            .pipe(writer);
+
+          writer.on("finish", () => {
+            cleanup();
+            resolve();
+          });
+
+          writer.on("error", (err) => {
+            cleanup();
+            reject(err);
+          });
+
+          response.data.on("error", (err) => {
+            cleanup();
+            reject(err);
+          });
           return;
         }
-
-        if (existingSize > 0 && response.status === 200) {
-          response.data.destroy();
-          await removePartialFile(destPath);
-          callback(0, 0, 0, 0);
-          existingSize = 0;
-          continue;
-        }
-
-        const remainingSize = parseInt(
-          response.headers["content-length"] || "0",
-          10,
-        );
-        const totalSize =
-          response.status === 206
-            ? parseTotalSizeFromContentRange(
-                response.headers["content-range"],
-                existingSize + remainingSize,
-              )
-            : remainingSize;
-        const downloadedOffset = existingSize;
-
-        const progressStream = progress({
-          length: remainingSize || undefined,
-          time: 100,
-        });
-
-        progressStream.on("progress", (p) => {
-          const transferred = downloadedOffset + p.transferred;
-          const percent =
-            totalSize > 0
-              ? Math.round((transferred / totalSize) * 100)
-              : Math.round(p.percentage);
-          callback(transferred, totalSize, percent, p.speed);
-        });
-
-        writer = fs.createWriteStream(destPath, {
-          flags: downloadedOffset > 0 ? "a" : "w",
-        });
-
-        response.data
-          .pipe(new Throttle({ rate: 1024 * 1024 * 1024 }))
-          .pipe(progressStream)
-          .pipe(writer);
-
-        writer.on("finish", () => {
-          cleanup();
-          resolve();
-        });
-
-        writer.on("error", (err) => {
-          cleanup();
-          reject(err);
-        });
-
-        response.data.on("error", (err) => {
-          cleanup();
-          reject(err);
-        });
-        return;
+      } catch (err) {
+        cleanup();
+        reject(err);
       }
-    } catch (err) {
-      cleanup();
-      reject(err);
-    }
+    })();
   });
 };
 
