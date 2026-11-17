@@ -21,6 +21,7 @@ import * as UpdateWindow from "../windows/updateWindow";
 
 import ValheimIpcHandlers from "./ValheimIpcHandlers";
 import SevenDtoDIpcHandlers from "./SevenDtoDIpcHandlers";
+import InstanceIpcHandlers from "./InstanceIpcHandlers";
 
 // Fenêtre principale (supposée ouverte quand les handlers sont appelés)
 const mainWindow = () => MainWindow.getWindow() as BrowserWindow;
@@ -61,6 +62,9 @@ class IpcHandlers {
     // games ipc
     ValheimIpcHandlers();
     SevenDtoDIpcHandlers();
+
+    // instances (nouveau système)
+    InstanceIpcHandlers();
 
     // update  windows
     ipcMain.on("update-window-close", () => UpdateWindow.destroyWindow());

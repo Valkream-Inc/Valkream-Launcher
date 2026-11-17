@@ -1,0 +1,192 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { describe, it } from "node:test";
+
+import yaml from "yaml";
+
+import { validateReleaseConfig, validateRemoteIndex } from "./validate";
+
+const backendPublic = path.resolve(__dirname, "../../../../backend/public");
+const readJson = (file: string) => JSON.parse(fs.readFileSync(path.join(backendPublic, file), "utf8"));
+const readYaml = (file: string) => yaml.parse(fs.readFileSync(path.join(backendPublic, file), "utf8"));
+
+const validIndex = () => ({
+  schemaVersion: 1,
+  instances: [{ id: "Valheim-v2", enabled: { win32: true } }],
+});
+
+const validEntry = () => ({
+  version: "1.0.0",
+  path: "game",
+  type: "zip_url",
+  content: "/games/x/game.zip",
+});
+
+const validRelease = () => ({
+  version: "0.1.2.3",
+  "game-base": { valheim: validEntry() },
+});
+
+const errorsOf = (result: { ok: boolean; errors: string[] }) => result.errors.join("\n");
+
+describe("fichiers d'exemple du backend", () => {
+  it("l'index d'exemple est valide", () => {
+    const result = validateRemoteIndex(readJson("index.config.json"));
+    assert.equal(result.ok, true, errorsOf(result));
+  });
+
+  it("le latest.yml d'exemple est valide pour les chemins de la config main", () => {
+    const result = validateReleaseConfig(readYaml("games/Valheim-Valkream-v2/latest.yml"), ["game"]);
+    assert.equal(result.ok, true, errorsOf(result));
+  });
+});
+
+describe("validateRemoteIndex", () => {
+  it("accepte un index minimal", () => {
+    assert.equal(validateRemoteIndex(validIndex()).ok, true);
+  });
+
+  it("refuse un tableau à la racine (format du brouillon)", () => {
+    const result = validateRemoteIndex([{ id: "x", enabled: { windows: true } }]);
+    assert.equal(result.ok, false);
+  });
+
+  it("refuse une mauvaise schemaVersion", () => {
+    const index = { ...validIndex(), schemaVersion: 2 };
+    assert.match(errorsOf(validateRemoteIndex(index)), /schemaVersion/);
+  });
+
+  it("refuse la plateforme « windows » (la clé est win32)", () => {
+    const index = { schemaVersion: 1, instances: [{ id: "x", enabled: { windows: true } }] };
+    assert.match(errorsOf(validateRemoteIndex(index)), /windows : plateforme inconnue/);
+  });
+
+  it("refuse un id dangereux et les doublons", () => {
+    const index = {
+      schemaVersion: 1,
+      instances: [
+        { id: "../etc", enabled: {} },
+        { id: "a", enabled: {} },
+        { id: "a", enabled: {} },
+      ],
+    };
+    const errors = errorsOf(validateRemoteIndex(index));
+    assert.match(errors, /instances\[0\]\.id/);
+    assert.match(errors, /doublon « a »/);
+  });
+
+  it("valide les liens des canaux et des paramètres", () => {
+    const index = {
+      schemaVersion: 1,
+      instances: [
+        {
+          id: "a",
+          enabled: { win32: true },
+          channels: { stable: "/ok.yml", beta: "pas-un-lien", nightly: "/x" },
+          event: "binary",
+          mods: [{ icon: "x" }],
+          contributors: [{ name: "ok" }],
+        },
+      ],
+    };
+    const errors = errorsOf(validateRemoteIndex(index));
+    assert.match(errors, /channels\.beta : lien invalide/);
+    assert.match(errors, /channels\.nightly : canal inconnu/);
+    assert.match(errors, /\.event : lien invalide/);
+    assert.match(errors, /mods\[0\] : « name » requis/);
+    assert.doesNotMatch(errors, /contributors/);
+  });
+
+  it("accepte des paramètres inline", () => {
+    const index = {
+      schemaVersion: 1,
+      instances: [{ id: "a", enabled: {}, event: { name: "e" }, mods: [{ name: "m" }] }],
+    };
+    assert.equal(validateRemoteIndex(index).ok, true);
+  });
+});
+
+describe("validateReleaseConfig", () => {
+  it("accepte une release minimale", () => {
+    assert.equal(validateReleaseConfig(validRelease(), ["game"]).ok, true);
+  });
+
+  it("refuse une version globale mal formée", () => {
+    assert.match(errorsOf(validateReleaseConfig({ ...validRelease(), version: "1.2.3" })), /X0\.X1\.X2\.X3/);
+  });
+
+  it("attrape la faute « game-notbreacking » du brouillon", () => {
+    const release = { ...validRelease(), "game-notbreacking": { configs: validEntry() } };
+    assert.match(errorsOf(validateReleaseConfig(release)), /game-notbreacking : clé inconnue/);
+  });
+
+  it("refuse un path hors liste blanche ou qui sort de la racine", () => {
+    const outside = { ...validRelease(), "game-base": { valheim: { ...validEntry(), path: "other" } } };
+    assert.match(errorsOf(validateReleaseConfig(outside, ["game"])), /n'est pas autorisé/);
+
+    const escape = { ...validRelease(), "game-base": { valheim: { ...validEntry(), path: "game/../../etc" } } };
+    assert.match(errorsOf(validateReleaseConfig(escape, ["game"])), /chemin relatif sûr/);
+  });
+
+  it("refuse un nom d'entrée dupliqué entre niveaux", () => {
+    const release = {
+      version: "0.0.0.0",
+      "game-base": { configs: validEntry() },
+      "game-notbreaking": { configs: validEntry() },
+    };
+    assert.match(errorsOf(validateReleaseConfig(release)), /déjà utilisé dans game-base/);
+  });
+
+  it("refuse les contenus du brouillon qui ne sont pas des liens", () => {
+    const release = {
+      version: "0.0.0.0",
+      "game-base": {
+        bepinex: { ...validEntry(), content: { win32: "/ok.zip", linux: "htpp://something", darwin: "binary" } },
+      },
+    };
+    const errors = errorsOf(validateReleaseConfig(release));
+    assert.match(errors, /content\.linux : lien invalide/);
+    assert.match(errors, /content\.darwin : lien invalide/);
+    assert.doesNotMatch(errors, /content\.win32/);
+  });
+
+  it("hash_url : exige hash-folder et accepte un manifeste inline", () => {
+    const entry = { ...validEntry(), type: "hash_url", content: { "/toto/x": "a".repeat(64) } };
+    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0.0", "game-base": { v: entry } })), /hash-folder/);
+
+    const withFolder = { ...entry, "hash-folder": "/games/x/hash/" };
+    assert.equal(validateReleaseConfig({ version: "0.0.0.0", "game-base": { v: withFolder } }).ok, true);
+
+    const badHash = { ...withFolder, content: { "/toto/x": "pas-un-hash" } };
+    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0.0", "game-base": { v: badHash } })), /sha256 attendu/);
+  });
+
+  it("thunderstore : liste Auteur-Nom-Version et api-url https", () => {
+    const entry = {
+      ...validEntry(),
+      type: "thunderstore_modpack_url",
+      "api-url": "https://thunderstore.io",
+      content: ["JereKuusela-Infinity_Hammer-1.79.0", "mauvais"],
+    };
+    const errors = errorsOf(validateReleaseConfig({ version: "0.0.0.0", "game-breaking": { mods: entry } }));
+    assert.match(errors, /content\[1\] : « Auteur-Nom-Version » attendu/);
+    assert.doesNotMatch(errors, /api-url/);
+  });
+
+  it("champs réservés : folder_in_zip à zip_url, api-url à thunderstore/nexus", () => {
+    const entry = { ...validEntry(), type: "hash_url", "hash-folder": "/h/", folder_in_zip: "/x", "api-url": "https://a.b" };
+    const errors = errorsOf(validateReleaseConfig({ version: "0.0.0.0", "game-base": { v: entry } }));
+    assert.match(errors, /folder_in_zip : réservé à zip_url/);
+    assert.match(errors, /api-url : réservé/);
+  });
+
+  it("gameFolderToRemove/Preserve et optional sont contrôlés", () => {
+    const entry = { ...validEntry(), gameFolderToRemove: ["/BepInEx/cache", "../x"], gameFolderToPreserve: "pas-une-liste", optional: {} };
+    const errors = errorsOf(validateReleaseConfig({ version: "0.0.0.0", "game-base": { v: entry } }));
+    assert.match(errors, /gameFolderToRemove\[1\]/);
+    assert.doesNotMatch(errors, /gameFolderToRemove\[0\]/);
+    assert.match(errors, /gameFolderToPreserve : tableau attendu/);
+    assert.match(errors, /optional : \{ setting/);
+  });
+});

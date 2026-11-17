@@ -42,6 +42,9 @@ const electronAPI: ElectronAPI = {
   versionLauncher: () => ipcRenderer.invoke("get-version:launcher"),
   getInfos: (game) => ipcRenderer.invoke("get-infos", game),
 
+  // instances (nouveau système)
+  getInstances: () => ipcRenderer.invoke("instances:list"),
+
   // utils
   openLink: (url) => ipcRenderer.invoke("open-link", url),
   getSettings: (key) => ipcRenderer.invoke("get-settings", key),

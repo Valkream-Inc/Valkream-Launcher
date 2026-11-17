@@ -10,4 +10,5 @@ export * from "./settings";
 export * from "./infos";
 export * from "./valheim";
 export * from "./sevendtod";
+export * from "./instance";
 export * from "./ipc";
