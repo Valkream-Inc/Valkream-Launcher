@@ -1,0 +1,64 @@
+# ──────────────────────────────────────────────────────────────
+# Exemple de latest.yml du nouveau système d'instances.
+# Spécification d'origine commentée : doc/instance-system/draft-original/remote/latest.yml
+#
+# NORME DE VERSIONNAGE : X0.X1.X2.X3 (affichage seulement)
+#   X0 saison · X1 game-base · X2 game-breaking · X3 game-notbreaking
+# Le niveau d'une mise à jour se décide entrée par entrée (version + hash), pas sur cette chaîne.
+#
+# Chaque entrée :
+#   version   indique si elle doit être mise à jour
+#   path      relatif à la racine de l'instance, validé par allowedPaths (config main)
+#   type      zip_url | hash_url | thunderstore_modpack_url | nexus_modpack_url
+#   hash      sha256 du manifeste des fichiers de l'entrée (généré par le build backend ; absent ici)
+#   content   lien (/relatif ou https://…), liste, ou manifeste inline ; une valeur par plateforme
+#             (win32, linux, darwin, default) ou une valeur unique
+#   optional  { setting } : installée seulement si ce réglage d'instance est actif
+#   gameFolderToRemove / gameFolderToPreserve : relatifs à path
+# ──────────────────────────────────────────────────────────────
+
+version: 0.0.0.0
+buildDate: 2026-11-17T00:00:00.000Z
+
+game-base: # X1 : réinstallation complète
+  valheim:
+    version: 0.0.0
+    path: game
+    type: hash_url
+    hash-folder: /games/Valheim-Valkream-v2/hash/
+    content: /games/Valheim-Valkream-v2/hash.json
+  bepinex:
+    version: 5.4.2333
+    path: game
+    type: zip_url
+    folder_in_zip: /
+    content: /games/Valheim-Valkream-v2/BepInEx-5.4.2333.zip
+
+game-breaking: # X2
+  mods-thunderstore:
+    version: 0.0.0
+    path: game/BepInEx/plugins
+    type: thunderstore_modpack_url
+    api-url: https://thunderstore.io
+    content: /games/Valheim-Valkream-v2/modpack.json
+  mods-admin:
+    version: 0.0.0
+    optional:
+      setting: modsAdmin
+    path: game/BepInEx/plugins
+    type: thunderstore_modpack_url
+    api-url: https://thunderstore.io
+    content:
+      - JereKuusela-Infinity_Hammer-1.79.0
+      - JereKuusela-Server_devcommands-1.106.0
+      - JereKuusela-Upgrade_World-1.80.0
+      - JereKuusela-World_Edit_Commands-1.70.0
+      - Astropilot-ValheimTooler-1.11.0
+
+game-notbreaking: # X3
+  configs:
+    version: 0.0.0
+    path: game/BepInEx/config
+    type: zip_url
+    folder_in_zip: /config
+    content: /games/Valheim-Valkream-v2/modpack.zip

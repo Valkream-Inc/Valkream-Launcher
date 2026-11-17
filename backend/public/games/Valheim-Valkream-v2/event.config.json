@@ -1,0 +1,8 @@
+{
+  "name": "Exemple d'événement",
+  "enabled": false,
+  "date": "2026-01-01T00:00:00.000Z",
+  "description": "Description de l'événement.",
+  "image": "/games/Valheim-Valkream-v2/event.png",
+  "link": "https://valkream.com/"
+}
