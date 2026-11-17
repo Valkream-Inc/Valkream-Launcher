@@ -16,5 +16,7 @@
       "@shared/*": ["../shared/*"]
     }
   },
-  "include": ["app.ts", "src/**/*.ts", "src/**/*.d.ts", "../shared/**/*.d.ts", "../types/**/*.d.ts"]
+  "include": ["app.ts", "src/**/*.ts", "src/**/*.d.ts", "../shared/**/*.d.ts", "../types/**/*.d.ts"],
+  // Les tests (node:test, lancés via `yarn test`) ne sont ni compilés ni embarqués : voir tsconfig.test.json.
+  "exclude": ["src/**/*.test.ts"]
 }

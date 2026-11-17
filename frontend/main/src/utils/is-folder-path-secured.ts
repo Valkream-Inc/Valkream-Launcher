@@ -5,15 +5,14 @@
 
 import path from "path";
 
+import { isPathInside } from "../engine/paths";
+
 const isFolderPathSecured = (
   folderToCheck: string,
   autorizedRootPath: string,
   isAnAutorizedSubFolder: (relativePath: string) => boolean | void = () => {}
 ): boolean => {
-  const sanitizedFolder =
-    folderToCheck.startsWith("/") || folderToCheck.startsWith("\\")
-      ? folderToCheck.slice(1)
-      : folderToCheck;
+  const sanitizedFolder = folderToCheck.replace(/^[/\\]+/, "");
 
   const fullPath = path.resolve(autorizedRootPath, sanitizedFolder); // Chemin absolu final
   const relativePath = path.relative(autorizedRootPath, fullPath);
@@ -21,7 +20,8 @@ const isFolderPathSecured = (
     relativePath.replace(/\\/g, "/")
   );
 
-  const isSafe = fullPath.startsWith(autorizedRootPath);
+  // Comparaison par chemin relatif : "/data/game2" n'est pas dans "/data/game".
+  const isSafe = isPathInside(autorizedRootPath, fullPath);
   const isAutorized = isAnAutorizedSubFolder(normalizedRelativePath);
 
   return isSafe && Boolean(isAutorized);
