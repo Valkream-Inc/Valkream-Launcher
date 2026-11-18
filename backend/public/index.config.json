@@ -3,9 +3,14 @@
   "instances": [
     {
       "id": "Valheim-Valkream-v2",
-      "enabled": { "win32": true, "linux": false, "darwin": false },
+      "enabled": {
+        "win32": true,
+        "linux": false,
+        "darwin": false
+      },
       "channels": {
-        "stable": "/games/Valheim-Valkream-v2/latest.yml"
+        "stable": "/games/Valheim-Valkream-v2/latest.yml",
+        "beta": "/games/Valheim-Valkream-v2/latest.beta.yml"
       },
       "event": "/games/Valheim-Valkream-v2/event.config.json",
       "maintenance": "/games/Valheim-Valkream-v2/maintenance.config.json",

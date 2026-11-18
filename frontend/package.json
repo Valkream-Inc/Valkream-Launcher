@@ -15,6 +15,7 @@
     "test": "tsx --test \"main/src/**/*.test.ts\" \"renderer/src/**/*.test.ts\"",
     "typecheck:renderer": "tsc -p renderer/tsconfig.json",
     "typecheck:scripts": "tsc -p tsconfig.json",
+    "build:manifest": "tsx scripts/build-manifest.ts",
     "set-icon": "tsx set-icon.ts",
     "build": "yarn set-icon && yarn build:compile && yarn build:electron",
     "build:compile": "concurrently -n react,main \"yarn build:react\" \"yarn build:main\"",

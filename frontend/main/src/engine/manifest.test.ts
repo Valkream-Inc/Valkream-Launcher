@@ -5,7 +5,7 @@ import path from "node:path";
 import { describe, it } from "node:test";
 import { createHash } from "node:crypto";
 
-import { hashFile, manifestHash, verifyManifest } from "./manifest";
+import { hashFile, manifestHash, scanManifest, verifyManifest } from "./manifest";
 
 const sha = (text: string) => createHash("sha256").update(text).digest("hex");
 
@@ -54,6 +54,26 @@ describe("verifyManifest", () => {
       );
       assert.deepEqual(diff, { missing: ["gone.txt"], changed: ["edited.txt"] });
       assert.equal(await hashFile(path.join(dir, "ok.txt")), sha("ok"));
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("scanManifest", () => {
+  it("produit un manifeste cohérent avec manifestHash et verifyManifest", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "scan-"));
+    try {
+      fs.mkdirSync(path.join(dir, "bin"));
+      fs.writeFileSync(path.join(dir, "bin", "game.exe"), "exe");
+      fs.writeFileSync(path.join(dir, "a.txt"), "a");
+      fs.mkdirSync(path.join(dir, "logs"));
+      fs.writeFileSync(path.join(dir, "logs", "x.log"), "log");
+
+      const manifest = await scanManifest(dir, ["logs"]);
+      assert.deepEqual(manifest, { "a.txt": sha("a"), "bin/game.exe": sha("exe") });
+      assert.deepEqual(await verifyManifest(dir, manifest, ["logs"]), { missing: [], changed: [] });
+      assert.equal(manifestHash(manifest), manifestHash({ ...manifest, "logs/x.log": sha("log") }, ["logs"]));
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

@@ -23,35 +23,41 @@
 #                          nettoyage : fichiers locaux que l'entrée ne possède pas (logs, caches…)
 # ──────────────────────────────────────────────────────────────
 
-version: 0.0.0.0
-buildDate: 2026-11-17T00:00:00.000Z
+version: 2.34.37.1
+buildDate: 2025-09-18T19:00:00.929Z
+
+# Migré depuis games/Valheim/latest/latest.yml (ancien format : modpack / valheim / bepinex).
+# Les mods du modpack Thunderstore (dépendances de son manifest.json) sont attendus dans
+# /games/Valheim-Valkream-v2/modpack.json : un tableau "Auteur-Nom-Version", à générer
+# depuis le manifest.json du package ValheimValkream/Valkream à chaque release.
 
 game-base: # X1 : réinstallation complète
   valheim:
-    version: 0.0.0
+    version: 0.221.12
     path: game
-    type: hash_url
-    to_ignore:
-      - BepInEx/LogOutput.log
-      - BepInEx/cache
-    hash-folder: /games/Valheim-Valkream-v2/hash/
-    content: /games/Valheim-Valkream-v2/hash.json
+    type: zip_url
+    content:
+      win32: /games/Valheim/latest/build-game-win32.zip
+      linux: /games/Valheim/latest/build-game-linux.zip
+      darwin: /games/Valheim/latest/build-game-darwin.zip
   bepinex:
     version: 5.4.2333
     path: game
     type: zip_url
     folder_in_zip: /
-    content: /games/Valheim-Valkream-v2/BepInEx-5.4.2333.zip
+    content: /games/Valheim/latest/BepInEx-5.4.2333.zip
+    gameFolderToRemove:
+      - BepInEx/cache
 
-game-breaking: # X2
+game-breaking: # X2 : mods (impacte la compatibilité serveur)
   mods-thunderstore:
-    version: 0.0.0
+    version: 2.34.37
     path: game/BepInEx/plugins
     type: thunderstore_modpack_url
     api-url: https://thunderstore.io
     content: /games/Valheim-Valkream-v2/modpack.json
   mods-admin:
-    version: 0.0.0
+    version: 2.34.37
     optional:
       setting: modsAdmin
     path: game/BepInEx/plugins
@@ -63,15 +69,40 @@ game-breaking: # X2
       - JereKuusela-Upgrade_World-1.80.0
       - JereKuusela-World_Edit_Commands-1.70.0
       - Astropilot-ValheimTooler-1.11.0
+  mods-boostfps:
+    version: 2.34.37
+    optional:
+      setting: boostFps
+    path: game/BepInEx/plugins
+    type: thunderstore_modpack_url
+    api-url: https://thunderstore.io
+    content:
+      - castix-ValheimFPSBoost-1.0.0
+      - vaffle1-FPSPlus-1.1.4
+  mods-boostgraphic:
+    version: 2.34.37
+    optional:
+      setting: boostGraphic
+    path: game/BepInEx/plugins
+    type: thunderstore_modpack_url
+    api-url: https://thunderstore.io
+    content:
+      - Willybach-Willybachs_HD_Seasonality-3.5.6
+      - RustyMods-Seasonality-3.7.4
 
-game-notbreaking: # X3
+game-notbreaking: # X3 : configuration des mods
   configs:
-    version: 0.0.0
+    version: 2.34.37
     path: game/BepInEx/config
     type: zip_url
-    gameFolderToPreserve:
-      - Valkream.client.cfg # toujours conservé
-      - path: Valkream.graphics.cfg
-        from: ">=1.2.0" # conservé seulement si la config installée est en 1.2.0 ou plus
     folder_in_zip: /config
-    content: /games/Valheim-Valkream-v2/modpack.zip
+    content: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.34.37/
+    gameFolderToRemove:
+      - wackysDatabase/Cache
+      - Marketplace/SavedData
+    gameFolderToPreserve: # configs client conservées (chemins relatifs à `path`)
+      - Azumatt.MinimalUI.cfg
+      - WackyMole.EpicMMOSystemUI.cfg
+      - shudnal.ExtraSlots.cfg
+      - org.bepinex.plugins.groups.cfg
+      - randyknapp.mods.minimalstatuseffects.cfg

@@ -17,11 +17,15 @@ const instancesRenderConfig: InstanceRenderConfig[] = [
     // tipContent / descriptionContent : composants React à renseigner.
     customGamesSettings: [
       { type: "toggle", settingsName: "launchSteam", label: "Lancer via Steam" },
+      { type: "toggle", settingsName: "boostFps", label: "Mods boost FPS" },
+      { type: "toggle", settingsName: "boostGraphic", label: "Mods boost graphismes" },
       { type: "toggle", settingsName: "modsAdmin", label: "Mods admin" },
     ],
     debugContent: [
       { entry: "mods-thunderstore" },
       { entry: "mods-admin" },
+      { entry: "mods-boostfps" },
+      { entry: "mods-boostgraphic" },
       { entry: "configs" },
     ],
   },

@@ -11,6 +11,7 @@ import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
+import { listFiles } from "./fs-ops";
 import { matchesAny, normalizeRelative } from "./patterns";
 
 export type Manifest = Record<string, string>;
@@ -61,4 +62,17 @@ export const verifyManifest = async (
     else if ((await hashFile(fullPath)) !== expected.toLowerCase()) diff.changed.push(file);
   }
   return diff;
+};
+
+/** Manifeste des fichiers de `directory` (hors `to_ignore`), prêt pour le backend. */
+export const scanManifest = async (
+  directory: string,
+  toIgnore: readonly string[] = [],
+): Promise<Manifest> => {
+  const manifest: Manifest = {};
+  for (const file of listFiles(directory).sort()) {
+    if (matchesAny(file, toIgnore)) continue;
+    manifest[file] = await hashFile(path.join(directory, file));
+  }
+  return manifest;
 };

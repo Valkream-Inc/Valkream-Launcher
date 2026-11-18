@@ -12,8 +12,35 @@ Une **instance** = un jeu (ou une variante d'un jeu) décrit par trois couches r
 
 ## État
 
-- Fait : types partagés (`shared/types/instance.d.ts`), règle de lien, validation de l'index et du `latest.yml`, résolveur avec cache disque, registre d'instances, canal IPC `instances:list` (`window.electron_API.getInstances()`), confinement des chemins.
-- Pas encore branché : l'installation, la mise à jour et le lancement passent toujours par les managers `Valheim` et `SevenDtoD`. Aucune interface n'utilise encore `getInstances()`.
+- Fait : types partagés, règle de lien, validation de l'index et du `latest.yml`, résolveur avec cache disque, registre, confinement des chemins.
+- Fait : **installation par canal** (`instances/<id>/stable|beta/`) avec état (`instance.state.json`) et réglages (`instance.settings.json`) propres à chaque canal : la beta n'a aucun fichier en commun avec le stable.
+- Fait : **moteur d'installation** (`engine/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url` ; reprise par entrée ; une synchronisation à la fois par installation.
+- Fait : **rapport** (`instances:report`) : un statut par entrée + récapitulatif « fonctionne ou non ».
+- Fait : UI générique : choix du jeu (instances activées), accueil (installer / mettre à jour / jouer), réglages (General, Mods joueur, Debug admin).
+- Fait : instance `Valheim-Valkream-v2` migrée depuis les `latest.yml` historiques (stable + beta).
+- Pas encore : provider Nexus, dépendances transitives Thunderstore, migration de 7 Days to Die (jeu installé par le joueur hors de la racine du launcher), suppression des anciens managers `Valheim` / `SevenDtoD`.
+
+## Conservation et exclusion (par entrée du latest.yml)
+
+| Clé | Effet |
+| --- | --- |
+| `gameFolderToPreserve` | fichiers/dossiers (relatifs à `path`) gardés à la mise à jour. `"chemin"` : toujours. `{ path, from }` : seulement si la version **installée** satisfait `from` (`>=1.2.0`, `>=1.0.0 <2.0.0`, `1.x`, `*`), sinon la nouvelle version écrase. Un fichier conservé mais absent est fourni. |
+| `gameFolderToRemove` | supprimés avant la mise à jour, sauf ce qui est conservé ou ignoré |
+| `to_ignore` | motifs (`*`, `**`, `?`) exclus du hash, de la vérification et du nettoyage : fichiers locaux que l'entrée ne possède pas |
+
+## Hash
+
+Le hash d'une entrée `hash_url` est le sha256 du manifeste `{ fichier: sha256 }` (hors `to_ignore`). Le générer :
+
+```
+yarn build:manifest <dossier-source> <dossier-sortie> --ignore logs
+```
+
+Il écrit `hash.json` + `hash/` et affiche le `hash` à reporter dans le `latest.yml`. Le launcher refuse un manifeste qui ne correspond pas au hash déclaré et un fichier dont le hash est faux.
+
+## Mods Thunderstore
+
+Chaque mod est extrait dans son propre dossier `<Auteur>-<Nom>` : plusieurs entrées (mods normaux, admin, boost FPS…) peuvent partager `game/BepInEx/plugins` sans se gêner. `modpack.json` d'une instance (tableau `Auteur-Nom-Version`) est à générer depuis le `manifest.json` du modpack à chaque release.
 
 ## Règles de lien
 

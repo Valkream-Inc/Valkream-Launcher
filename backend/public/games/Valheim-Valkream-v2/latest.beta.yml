@@ -1,0 +1,109 @@
+# ──────────────────────────────────────────────────────────────
+# Exemple de latest.yml du nouveau système d'instances.
+# Spécification d'origine commentée : doc/instance-system/draft-original/remote/latest.yml
+#
+# NORME DE VERSIONNAGE : X0.X1.X2.X3 (affichage seulement)
+#   X0 saison · X1 game-base · X2 game-breaking · X3 game-notbreaking
+# Le niveau d'une mise à jour se décide entrée par entrée (version + hash), pas sur cette chaîne.
+#
+# Chaque entrée :
+#   version   indique si elle doit être mise à jour
+#   path      relatif à la racine de l'instance, validé par allowedPaths (config main)
+#   type      zip_url | hash_url | thunderstore_modpack_url | nexus_modpack_url
+#   hash      sha256 du manifeste des fichiers de l'entrée (généré par le build backend ; absent ici)
+#   content   lien (/relatif ou https://…), liste, ou manifeste inline ; une valeur par plateforme
+#             (win32, linux, darwin, default) ou une valeur unique
+#   optional  { setting } : installée seulement si ce réglage d'instance est actif
+#   gameFolderToRemove     relatifs à path, supprimés à la mise à jour de l'entrée
+#   gameFolderToPreserve   fichiers/dossiers relatifs à path conservés à la mise à jour (config client…).
+#                          "chemin" = toujours ; { path, from } = seulement si la version INSTALLÉE
+#                          satisfait `from` (>=1.2.0, >=1.0.0 <2.0.0, 1.x, *) : la config du joueur
+#                          est encore compatible. Sinon la nouvelle version l'écrase.
+#   to_ignore              motifs relatifs à path (*, **, ?) exclus du hash, de la vérification et du
+#                          nettoyage : fichiers locaux que l'entrée ne possède pas (logs, caches…)
+# ──────────────────────────────────────────────────────────────
+
+version: 2.33.36.0
+buildDate: 2025-09-18T19:00:00.929Z
+
+# BETA — migré depuis games/Valheim/latest/latest.beta.yml. Installée à part du stable
+# (instances/<id>/beta/) : aucun fichier, état ni réglage partagé.
+# Les mods du modpack Thunderstore (dépendances de son manifest.json) sont attendus dans
+# /games/Valheim-Valkream-v2/modpack.json : un tableau "Auteur-Nom-Version", à générer
+# depuis le manifest.json du package ValheimValkream/Valkream à chaque release.
+
+game-base: # X1 : réinstallation complète
+  valheim:
+    version: 0.221.12
+    path: game
+    type: zip_url
+    content:
+      win32: /games/Valheim/latest/build-game-win32.zip
+      linux: /games/Valheim/latest/build-game-linux.zip
+      darwin: /games/Valheim/latest/build-game-darwin.zip
+  bepinex:
+    version: 5.4.2333
+    path: game
+    type: zip_url
+    folder_in_zip: /
+    content: /games/Valheim/latest/BepInEx-5.4.2333.zip
+    gameFolderToRemove:
+      - BepInEx/cache
+
+game-breaking: # X2 : mods (impacte la compatibilité serveur)
+  mods-thunderstore:
+    version: 2.33.36
+    path: game/BepInEx/plugins
+    type: thunderstore_modpack_url
+    api-url: https://thunderstore.io
+    content: /games/Valheim-Valkream-v2/modpack.json
+  mods-admin:
+    version: 2.33.36
+    optional:
+      setting: modsAdmin
+    path: game/BepInEx/plugins
+    type: thunderstore_modpack_url
+    api-url: https://thunderstore.io
+    content:
+      - JereKuusela-Infinity_Hammer-1.79.0
+      - JereKuusela-Server_devcommands-1.106.0
+      - JereKuusela-Upgrade_World-1.80.0
+      - JereKuusela-World_Edit_Commands-1.70.0
+      - Astropilot-ValheimTooler-1.11.0
+  mods-boostfps:
+    version: 2.33.36
+    optional:
+      setting: boostFps
+    path: game/BepInEx/plugins
+    type: thunderstore_modpack_url
+    api-url: https://thunderstore.io
+    content:
+      - castix-ValheimFPSBoost-1.0.0
+      - vaffle1-FPSPlus-1.1.4
+  mods-boostgraphic:
+    version: 2.33.36
+    optional:
+      setting: boostGraphic
+    path: game/BepInEx/plugins
+    type: thunderstore_modpack_url
+    api-url: https://thunderstore.io
+    content:
+      - Willybach-Willybachs_HD_Seasonality-3.5.6
+      - RustyMods-Seasonality-3.7.4
+
+game-notbreaking: # X3 : configuration des mods
+  configs:
+    version: 2.33.36
+    path: game/BepInEx/config
+    type: zip_url
+    folder_in_zip: /config
+    content: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.33.36/
+    gameFolderToRemove:
+      - wackysDatabase/Cache
+      - Marketplace/SavedData
+    gameFolderToPreserve: # configs client conservées (chemins relatifs à `path`)
+      - Azumatt.MinimalUI.cfg
+      - WackyMole.EpicMMOSystemUI.cfg
+      - shudnal.ExtraSlots.cfg
+      - org.bepinex.plugins.groups.cfg
+      - randyknapp.mods.minimalstatuseffects.cfg

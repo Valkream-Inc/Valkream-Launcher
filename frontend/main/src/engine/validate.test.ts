@@ -36,6 +36,13 @@ describe("fichiers d'exemple du backend", () => {
     assert.equal(result.ok, true, errorsOf(result));
   });
 
+  it("le latest.beta.yml d'exemple est valide et le canal beta est déclaré dans l'index", () => {
+    const result = validateReleaseConfig(readYaml("games/Valheim-Valkream-v2/latest.beta.yml"), ["game"]);
+    assert.equal(result.ok, true, errorsOf(result));
+    const index = readJson("index.config.json");
+    assert.equal(index.instances[0].channels.beta, "/games/Valheim-Valkream-v2/latest.beta.yml");
+  });
+
   it("le latest.yml d'exemple est valide pour les chemins de la config main", () => {
     const result = validateReleaseConfig(readYaml("games/Valheim-Valkream-v2/latest.yml"), ["game"]);
     assert.equal(result.ok, true, errorsOf(result));
