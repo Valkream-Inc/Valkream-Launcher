@@ -18,12 +18,15 @@ import DirsManager from "../manager/dirsManager";
 import { createDiskCache } from "./disk-cache";
 import { httpFetchText } from "./http-fetcher";
 import { InstanceInspector } from "./InstanceInspector";
+import { InstanceInstaller } from "./InstanceInstaller";
+import { realInstallIO } from "./real-io";
 import { InstanceRegistry } from "./InstanceRegistry";
 import { ParamResolver } from "./ParamResolver";
 
 let resolver: ParamResolver | null = null;
 let registry: InstanceRegistry | null = null;
 let inspector: InstanceInspector | null = null;
+let installer: InstanceInstaller | null = null;
 
 const getResolver = (): ParamResolver => {
   if (!resolver) {
@@ -56,4 +59,14 @@ export const getInstanceInspector = (): InstanceInspector => {
     rootPath: () => DirsManager.rootPath(),
   });
   return inspector;
+};
+
+export const getInstanceInstaller = (): InstanceInstaller => {
+  installer ??= new InstanceInstaller({
+    inspector: getInstanceInspector(),
+    resolver: getResolver(),
+    platform: platform(),
+    io: realInstallIO,
+  });
+  return installer;
 };

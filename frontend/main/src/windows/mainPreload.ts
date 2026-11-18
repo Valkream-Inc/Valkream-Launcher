@@ -46,6 +46,12 @@ const electronAPI: ElectronAPI = {
   getInstances: () => ipcRenderer.invoke("instances:list"),
   getInstanceReport: (id, channel, options) =>
     ipcRenderer.invoke("instances:report", id, channel, options),
+  syncInstance: (id, channel) => ipcRenderer.invoke("instances:sync", id, channel),
+  launchInstance: (id, channel) => ipcRenderer.invoke("instances:launch", id, channel),
+  onInstanceProgress: (callback) =>
+    ipcRenderer.on("instances:progress", (_event, data) => callback(data)),
+  removeInstanceProgressListeners: () =>
+    ipcRenderer.removeAllListeners("instances:progress"),
   setInstanceSetting: (id, channel, name, value) =>
     ipcRenderer.invoke("instances:set-setting", id, channel, name, value),
 

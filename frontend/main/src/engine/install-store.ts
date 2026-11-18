@@ -16,6 +16,8 @@ import type { InstanceSettingValue } from "@shared/types";
 export interface InstalledEntry {
   version: string;
   hash?: string;
+  /** Dossiers de premier niveau possédés par l'entrée (ex : un dossier par mod Thunderstore). */
+  owned?: string[];
   installedAt: string;
 }
 
@@ -55,9 +57,13 @@ export const readInstallState = (installDir: string): InstallState => {
 
   for (const [name, entry] of Object.entries(raw.entries)) {
     if (isObject(entry) && typeof entry.version === "string") {
+      const owned = Array.isArray(entry.owned)
+        ? entry.owned.filter((item): item is string => typeof item === "string")
+        : undefined;
       state.entries[name] = {
         version: entry.version,
-        hash: typeof entry.hash === "string" ? entry.hash : undefined,
+        ...(typeof entry.hash === "string" ? { hash: entry.hash } : {}),
+        ...(owned ? { owned } : {}),
         installedAt: typeof entry.installedAt === "string" ? entry.installedAt : "",
       };
     }
@@ -72,7 +78,7 @@ export const writeInstallState = (installDir: string, state: InstallState): void
 export const recordInstalledEntry = (
   installDir: string,
   name: string,
-  entry: { version: string; hash?: string },
+  entry: { version: string; hash?: string; owned?: string[] },
   now: () => Date = () => new Date(),
 ): void => {
   const state = readInstallState(installDir);

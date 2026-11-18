@@ -241,3 +241,26 @@ export interface InstanceReport {
   /** Erreurs globales : index/latest injoignable ou invalide, canal absent… */
   errors: string[];
 }
+
+/* ------------------------------------------------------------------ */
+/* Installation / mise à jour (`instances:sync`)                       */
+/* ------------------------------------------------------------------ */
+
+export interface InstanceSyncProgress {
+  id: InstanceId;
+  channel: Channel;
+  /** Entrée en cours (absente pour les messages globaux). */
+  entry?: string;
+  /** Rang de l'entrée parmi celles à traiter. */
+  index: number;
+  total: number;
+  step: "start" | "download" | "extract" | "verify" | "done" | "error";
+  message?: string;
+}
+
+export interface InstanceSyncResult {
+  installed: string[];
+  failed: { name: string; error: string }[];
+  /** Le jeu est-il jouable après cette synchronisation ? */
+  works: boolean;
+}

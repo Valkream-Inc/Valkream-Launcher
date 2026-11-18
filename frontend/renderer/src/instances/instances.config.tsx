@@ -16,6 +16,7 @@ const instancesRenderConfig: InstanceRenderConfig[] = [
     icon: "./images/Valheim-name.png",
     // tipContent / descriptionContent : composants React à renseigner.
     customGamesSettings: [
+      { type: "toggle", settingsName: "launchSteam", label: "Lancer via Steam" },
       { type: "toggle", settingsName: "modsAdmin", label: "Mods admin" },
     ],
     debugContent: [

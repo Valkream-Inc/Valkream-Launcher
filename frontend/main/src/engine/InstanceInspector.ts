@@ -22,7 +22,7 @@ import type {
 } from "@shared/types";
 
 import type { InstanceMainConfig } from "../types/instances";
-import { entryDirectory, installLocations } from "./instance-paths";
+import { entryDirectory, installLocations, type InstallLocations } from "./instance-paths";
 import { loadRemoteIndex } from "./InstanceRegistry";
 import { readInstallState, readInstanceSettings } from "./install-store";
 import { contentForPlatform } from "./link";
@@ -39,7 +39,20 @@ export interface InspectorOptions {
   rootPath: () => string;
 }
 
-const TIERS: readonly ReleaseTier[] = ["game-base", "game-breaking", "game-notbreaking"];
+/** Ce que le remote déclare pour une installation, avant comparaison au disque. */
+export interface LoadedInstance {
+  config: InstanceMainConfig;
+  locations: InstallLocations;
+  release: ReleaseConfig | undefined;
+  /** Erreurs de validation du latest.yml (`latest.<niveau>.<entrée>.<champ> : …`). */
+  releaseErrors: string[];
+  releaseSource: "online" | "cache" | "none";
+  mods: ModDisplay[];
+  contributors: Contributor[];
+  errors: string[];
+}
+
+export const TIERS: readonly ReleaseTier[] = ["game-base", "game-breaking", "game-notbreaking"];
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -47,42 +60,22 @@ const messageOf = (error: unknown): string =>
 export class InstanceInspector {
   constructor(private readonly options: InspectorOptions) {}
 
-  async report(
-    id: string,
-    channel: Channel,
-    { verify = false }: { verify?: boolean } = {},
-  ): Promise<InstanceReport> {
+  /** Charge ce que le remote déclare pour un canal (index, latest.yml, mods, contributeurs). */
+  async load(id: string, channel: Channel): Promise<LoadedInstance> {
     const { configs, resolver, platform, rootPath } = this.options;
     const config = configs.find((item) => item.id === id);
     if (!config) throw new Error(`Instance inconnue : ${id}`);
 
     const locations = installLocations(rootPath(), config, channel, platform);
-    const settings = readInstanceSettings(locations.installDir);
     const errors: string[] = [];
-
-    const report: InstanceReport = {
-      id,
-      channel,
-      installDir: locations.installDir,
+    const loaded: LoadedInstance = {
+      config,
+      locations,
+      release: undefined,
+      releaseErrors: [],
       releaseSource: "none",
-      entries: [],
-      summary: {
-        total: 0,
-        upToDate: 0,
-        outdated: 0,
-        notInstalled: 0,
-        modified: 0,
-        skipped: 0,
-        invalid: 0,
-        blocking: [],
-        works: false,
-      },
       mods: [],
       contributors: [],
-      settings,
-      executable: locations.executable
-        ? { path: locations.executable, exists: fs.existsSync(locations.executable) }
-        : undefined,
       errors,
     };
 
@@ -101,8 +94,8 @@ export class InstanceInspector {
           errors.push(`instance désactivée pour la plateforme ${platform}`);
         }
         releaseLink = indexEntry.channels?.[channel] ?? releaseLink;
-        report.mods = await this.loadList<ModDisplay>(indexEntry.mods, "mods", errors);
-        report.contributors = await this.loadList<Contributor>(
+        loaded.mods = await this.loadList<ModDisplay>(indexEntry.mods, "mods", errors);
+        loaded.contributors = await this.loadList<Contributor>(
           indexEntry.contributors,
           "contributeurs",
           errors,
@@ -113,28 +106,62 @@ export class InstanceInspector {
     // 2. latest.yml du canal.
     if (!releaseLink) {
       errors.push(`le canal « ${channel} » n'est pas proposé par le remote`);
-      return finalize(report);
+      return loaded;
     }
 
-    let release: ReleaseConfig | undefined;
-    let releaseErrors: string[] = [];
     try {
-      const loaded = await resolver.getYaml<unknown>(releaseLink);
-      report.releaseSource = loaded.source === "cache" ? "cache" : "online";
-      const validation = validateReleaseConfig(loaded.value, config.allowedPaths);
-      release = loaded.value as ReleaseConfig;
-      releaseErrors = validation.errors; // erreurs par entrée, rattachées plus bas
+      const fetched = await resolver.getYaml<unknown>(releaseLink);
+      loaded.releaseSource = fetched.source === "cache" ? "cache" : "online";
+      loaded.releaseErrors = validateReleaseConfig(fetched.value, config.allowedPaths).errors;
+      loaded.release = fetched.value as ReleaseConfig;
     } catch (error) {
       errors.push(`latest : ${messageOf(error)}`);
-      return finalize(report);
     }
+    return loaded;
+  }
 
-    if (release && typeof release === "object") report.releaseVersion = String(release.version ?? "");
+  async report(
+    id: string,
+    channel: Channel,
+    { verify = false }: { verify?: boolean } = {},
+  ): Promise<InstanceReport> {
+    const loaded = await this.load(id, channel);
+    const { config, locations, release, releaseErrors } = loaded;
+    const settings = readInstanceSettings(locations.installDir);
+
+    const report: InstanceReport = {
+      id,
+      channel,
+      installDir: locations.installDir,
+      releaseSource: loaded.releaseSource,
+      entries: [],
+      summary: {
+        total: 0,
+        upToDate: 0,
+        outdated: 0,
+        notInstalled: 0,
+        modified: 0,
+        skipped: 0,
+        invalid: 0,
+        blocking: [],
+        works: false,
+      },
+      mods: loaded.mods,
+      contributors: loaded.contributors,
+      settings,
+      executable: locations.executable
+        ? { path: locations.executable, exists: fs.existsSync(locations.executable) }
+        : undefined,
+      errors: loaded.errors,
+    };
+
+    if (!release || typeof release !== "object") return finalize(report);
+    report.releaseVersion = String(release.version ?? "");
     const state = readInstallState(locations.installDir);
 
     // 3. Une ligne par entrée.
     for (const tier of TIERS) {
-      const entries = release?.[tier];
+      const entries = release[tier];
       if (!entries || typeof entries !== "object") continue;
 
       for (const [name, entry] of Object.entries(entries)) {
@@ -155,7 +182,7 @@ export class InstanceInspector {
     // Erreurs de validation qui ne portent sur aucune entrée (version, clé inconnue…).
     for (const error of releaseErrors) {
       if (!/^latest\.(game-base|game-breaking|game-notbreaking)\.[^.\s]+/.test(error)) {
-        errors.push(error);
+        report.errors.push(error);
       }
     }
 
@@ -201,7 +228,7 @@ export class InstanceInspector {
   }
 }
 
-const buildRow = (
+export const buildRow = (
   name: string,
   tier: ReleaseTier,
   entry: ReleaseEntry,

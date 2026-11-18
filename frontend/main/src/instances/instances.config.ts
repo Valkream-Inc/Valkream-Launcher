@@ -22,6 +22,9 @@ const instancesConfig: InstanceMainConfig[] = [
     indexUrl: "/index.config.json",
     gameUrl: "/games/Valheim-Valkream-v2/latest.yml",
     allowedPaths: ["game"],
+    // Relatifs à la racine de l'installation (`instances/<id>/<canal>/`).
+    executable: { win32: "game/valheim.exe", linux: "game/valheim.x86_64" },
+    steamAppId: 892970,
   },
 ];
 
