@@ -19,6 +19,7 @@ import type {
 
 import { classifyLink, isFetchableLink, isPerPlatformContent } from "./link";
 import { isPathAllowed, isSafeRelativePath, isSafeSegment } from "./paths";
+import { isValidRange } from "./version";
 
 export type ValidationResult<T> =
   | { ok: true; value: T; errors: [] }
@@ -207,6 +208,28 @@ const checkPathList = (value: unknown, where: string): string[] => {
   );
 };
 
+const checkPreserveList = (value: unknown, where: string): string[] => {
+  if (!Array.isArray(value)) return [`${where} : tableau attendu`];
+  return value.flatMap((item, index) => {
+    const at = `${where}[${index}]`;
+    if (typeof item === "string") {
+      return isSafeRelativePath(item) ? [] : [`${at} : chemin relatif sûr attendu`];
+    }
+    if (!isObject(item)) return [`${at} : chemin ou { path, from } attendu`];
+    const errors: string[] = [];
+    if (typeof item.path !== "string" || !isSafeRelativePath(item.path)) {
+      errors.push(`${at}.path : chemin relatif sûr attendu`);
+    }
+    if (item.from !== undefined && !isValidRange(item.from)) {
+      errors.push(`${at}.from : plage de versions invalide (ex : >=1.2.0, 1.x, *)`);
+    }
+    for (const key of Object.keys(item)) {
+      if (key !== "path" && key !== "from") errors.push(`${at}.${key} : clé inconnue (path, from)`);
+    }
+    return errors;
+  });
+};
+
 const checkEntry = (
   entry: unknown,
   where: string,
@@ -267,8 +290,12 @@ const checkEntry = (
     }
   }
 
-  for (const key of ["gameFolderToRemove", "gameFolderToPreserve"] as const) {
+  for (const key of ["gameFolderToRemove", "to_ignore"] as const) {
     if (entry[key] !== undefined) errors.push(...checkPathList(entry[key], `${where}.${key}`));
+  }
+
+  if (entry.gameFolderToPreserve !== undefined) {
+    errors.push(...checkPreserveList(entry.gameFolderToPreserve, `${where}.gameFolderToPreserve`));
   }
 
   if (entry.optional !== undefined) {

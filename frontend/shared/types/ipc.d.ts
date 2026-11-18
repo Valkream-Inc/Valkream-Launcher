@@ -8,7 +8,7 @@
 
 import type { ActionResult, ErrorData, GameName, ProgressData } from "./common";
 import type { CheckInfosResult } from "./infos";
-import type { InstanceSummary } from "./instance";
+import type { Channel, InstanceId, InstanceReport, InstanceSettingValue, InstanceSummary } from "./instance";
 import type { SettingKey, Settings } from "./settings";
 import type {
   SevenDtoDInstallationStatut,
@@ -52,6 +52,17 @@ export interface ElectronAPI {
 
   // instances (nouveau système)
   getInstances(): Promise<InstanceSummary[]>;
+  getInstanceReport(
+    id: InstanceId,
+    channel: Channel,
+    options?: { verify?: boolean }
+  ): Promise<InstanceReport>;
+  setInstanceSetting(
+    id: InstanceId,
+    channel: Channel,
+    name: string,
+    value: InstanceSettingValue
+  ): Promise<Record<string, InstanceSettingValue>>;
 
   // utils
   openLink(url: string): Promise<void>;

@@ -14,7 +14,13 @@
 #   content   lien (/relatif ou https://…), liste, ou manifeste inline ; une valeur par plateforme
 #             (win32, linux, darwin, default) ou une valeur unique
 #   optional  { setting } : installée seulement si ce réglage d'instance est actif
-#   gameFolderToRemove / gameFolderToPreserve : relatifs à path
+#   gameFolderToRemove     relatifs à path, supprimés à la mise à jour de l'entrée
+#   gameFolderToPreserve   fichiers/dossiers relatifs à path conservés à la mise à jour (config client…).
+#                          "chemin" = toujours ; { path, from } = seulement si la version INSTALLÉE
+#                          satisfait `from` (>=1.2.0, >=1.0.0 <2.0.0, 1.x, *) : la config du joueur
+#                          est encore compatible. Sinon la nouvelle version l'écrase.
+#   to_ignore              motifs relatifs à path (*, **, ?) exclus du hash, de la vérification et du
+#                          nettoyage : fichiers locaux que l'entrée ne possède pas (logs, caches…)
 # ──────────────────────────────────────────────────────────────
 
 version: 0.0.0.0
@@ -25,6 +31,9 @@ game-base: # X1 : réinstallation complète
     version: 0.0.0
     path: game
     type: hash_url
+    to_ignore:
+      - BepInEx/LogOutput.log
+      - BepInEx/cache
     hash-folder: /games/Valheim-Valkream-v2/hash/
     content: /games/Valheim-Valkream-v2/hash.json
   bepinex:
@@ -60,5 +69,9 @@ game-notbreaking: # X3
     version: 0.0.0
     path: game/BepInEx/config
     type: zip_url
+    gameFolderToPreserve:
+      - Valkream.client.cfg # toujours conservé
+      - path: Valkream.graphics.cfg
+        from: ">=1.2.0" # conservé seulement si la config installée est en 1.2.0 ou plus
     folder_in_zip: /config
     content: /games/Valheim-Valkream-v2/modpack.zip

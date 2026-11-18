@@ -91,6 +91,18 @@ export type EntryContentByPlatform =
   | EntryContent
   | Partial<Record<GamePlatform | "default", EntryContent>>;
 
+/**
+ * Règle de conservation. Une chaîne = toujours conservé.
+ * `from` = versions de l'entrée installée pour lesquelles le fichier reste compatible
+ * (ex : `>=1.2.0`, `>=1.0.0 <2.0.0`, `1.x`, `*`).
+ */
+export type PreserveItem = string | PreserveRule;
+
+export interface PreserveRule {
+  path: string;
+  from?: string;
+}
+
 export interface ReleaseEntry {
   version: string;
   /** Relatif à la racine de l'instance, ne sort jamais de celle-ci. */
@@ -105,9 +117,19 @@ export interface ReleaseEntry {
   folder_in_zip?: string;
   /** `thunderstore_modpack_url` et `nexus_modpack_url` : domaine de l'API. */
   "api-url"?: string;
-  /** Relatifs à `path`. */
+  /** Relatifs à `path`. Supprimés à la mise à jour de l'entrée. */
   gameFolderToRemove?: string[];
-  gameFolderToPreserve?: string[];
+  /**
+   * Fichiers ou dossiers (relatifs à `path`) conservés à la mise à jour de l'entrée :
+   * ni écrasés ni supprimés (ex : config client). Une règle avec `from` ne conserve
+   * que si la version installée la satisfait ; sinon la nouvelle version l'écrase.
+   */
+  gameFolderToPreserve?: PreserveItem[];
+  /**
+   * Motifs (relatifs à `path`) exclus du hash, de la vérification et du nettoyage :
+   * fichiers locaux que l'entrée ne possède pas (logs, caches, réglages joueur).
+   */
+  to_ignore?: string[];
   /** Entrée installée seulement si ce réglage d'instance est actif. */
   optional?: { setting: string };
 }
@@ -145,5 +167,77 @@ export interface InstanceSummary {
   channels: Channel[];
   /** D'où vient l'index utilisé. */
   indexSource: "online" | "cache" | "none";
+  errors: string[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Rapport d'une installation (`instances:report`) : onglets Mods/Debug */
+/* ------------------------------------------------------------------ */
+
+export type InstanceSettingValue = boolean | string;
+
+export type EntryStatus =
+  /** Version et hash installés = ceux du remote. */
+  | "up-to-date"
+  | "outdated"
+  | "not-installed"
+  /** Fichiers possédés modifiés ou manquants (vérification approfondie). */
+  | "modified"
+  /** Entrée `optional` dont le réglage est désactivé. */
+  | "skipped"
+  | "invalid";
+
+export interface EntryReport {
+  name: string;
+  tier: ReleaseTier;
+  type: EntryType | string;
+  /** Sous-chemin géré par l'entrée (relatif à la racine d'installation). */
+  path: string;
+  declaredVersion: string;
+  installedVersion?: string;
+  declaredHash?: string;
+  installedHash?: string;
+  status: EntryStatus;
+  /** Bloque le jeu tant que non à jour (game-base, game-breaking). */
+  blocking: boolean;
+  optionalSetting?: string;
+  /** Motifs réellement conservés pour une mise à jour depuis la version installée. */
+  preserved: string[];
+  toIgnore: string[];
+  /** Vérification approfondie (hash_url) : fichiers en écart. */
+  files?: { missing: string[]; changed: string[] };
+  errors: string[];
+}
+
+export interface InstanceReportSummary {
+  total: number;
+  upToDate: number;
+  outdated: number;
+  notInstalled: number;
+  modified: number;
+  skipped: number;
+  invalid: number;
+  /** Entrées bloquantes pas à jour. */
+  blocking: string[];
+  /** Le jeu est-il jouable en l'état ? (rien d'invalide ni de bloquant) */
+  works: boolean;
+}
+
+export interface InstanceReport {
+  id: InstanceId;
+  channel: Channel;
+  /** Racine locale de cette installation (stable et beta n'en partagent aucune). */
+  installDir: string;
+  releaseSource: "online" | "cache" | "none";
+  releaseVersion?: string;
+  entries: EntryReport[];
+  summary: InstanceReportSummary;
+  /** Mods et contributeurs affichés dans l'onglet Mods (config remote de l'instance). */
+  mods: ModDisplay[];
+  contributors: Contributor[];
+  /** Réglages propres à cette installation. */
+  settings: Record<string, InstanceSettingValue>;
+  executable?: { path: string; exists: boolean };
+  /** Erreurs globales : index/latest injoignable ou invalide, canal absent… */
   errors: string[];
 }

@@ -25,7 +25,7 @@ export interface InstanceRegistryOptions {
   platform: GamePlatform;
 }
 
-type IndexLoad =
+export type IndexLoad =
   | { kind: "ok"; index: RemoteIndex; source: "online" | "cache" }
   | { kind: "invalid"; errors: string[]; source: "online" | "cache" }
   | { kind: "unreachable"; errors: string[] };
@@ -42,7 +42,7 @@ export class InstanceRegistry {
     const loadIndex = (indexUrl: string): Promise<IndexLoad> => {
       let load = loads.get(indexUrl);
       if (!load) {
-        load = this.fetchIndex(resolver, indexUrl);
+        load = loadRemoteIndex(resolver, indexUrl);
         loads.set(indexUrl, load);
       }
       return load;
@@ -97,23 +97,24 @@ export class InstanceRegistry {
       }),
     );
   }
+}
 
-  private async fetchIndex(resolver: ParamResolver, indexUrl: string): Promise<IndexLoad> {
-    try {
-      const { value, source } = await resolver.getJson<unknown>(indexUrl);
-      if (source === "inline") {
-        return { kind: "unreachable", errors: ["indexUrl doit être un lien, pas une donnée"] };
-      }
-
-      const result = validateRemoteIndex(value);
-      return result.ok
-        ? { kind: "ok", index: result.value, source }
-        : { kind: "invalid", errors: result.errors, source };
-    } catch (error) {
-      return {
-        kind: "unreachable",
-        errors: [error instanceof Error ? error.message : String(error)],
-      };
+/** Télécharge et valide l'index remote. Ne lève jamais. */
+export async function loadRemoteIndex(resolver: ParamResolver, indexUrl: string): Promise<IndexLoad> {
+  try {
+    const { value, source } = await resolver.getJson<unknown>(indexUrl);
+    if (source === "inline") {
+      return { kind: "unreachable", errors: ["indexUrl doit être un lien, pas une donnée"] };
     }
+
+    const result = validateRemoteIndex(value);
+    return result.ok
+      ? { kind: "ok", index: result.value, source }
+      : { kind: "invalid", errors: result.errors, source };
+  } catch (error) {
+    return {
+      kind: "unreachable",
+      errors: [error instanceof Error ? error.message : String(error)],
+    };
   }
 }

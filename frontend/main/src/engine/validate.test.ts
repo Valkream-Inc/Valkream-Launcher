@@ -190,3 +190,41 @@ describe("validateReleaseConfig", () => {
     assert.match(errors, /optional : \{ setting/);
   });
 });
+
+describe("gameFolderToPreserve et to_ignore", () => {
+  const release = (extra: Record<string, unknown>) => ({
+    version: "0.1.2.3",
+    "game-base": { valheim: { ...validEntry(), ...extra } },
+  });
+
+  it("accepte chemins, règles { path, from } et motifs", () => {
+    const result = validateReleaseConfig(
+      release({
+        gameFolderToPreserve: ["saves", { path: "config/client.cfg", from: ">=1.2.0" }],
+        to_ignore: ["logs", "*.tmp"],
+      }),
+    );
+    assert.equal(result.ok, true, errorsOf(result));
+  });
+
+  it("refuse une plage de versions invalide, une clé inconnue et un chemin qui sort", () => {
+    const result = validateReleaseConfig(
+      release({
+        gameFolderToPreserve: [
+          { path: "a", from: "latest" },
+          { path: "b", fromm: "1.0.0" },
+          "../hors",
+          42,
+        ],
+        to_ignore: ["../logs"],
+      }),
+    );
+    assert.equal(result.ok, false);
+    const text = errorsOf(result);
+    assert.match(text, /gameFolderToPreserve\[0\]\.from/);
+    assert.match(text, /gameFolderToPreserve\[1\]\.fromm/);
+    assert.match(text, /gameFolderToPreserve\[2\]/);
+    assert.match(text, /gameFolderToPreserve\[3\]/);
+    assert.match(text, /to_ignore\[0\]/);
+  });
+});

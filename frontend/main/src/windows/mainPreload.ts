@@ -44,6 +44,10 @@ const electronAPI: ElectronAPI = {
 
   // instances (nouveau système)
   getInstances: () => ipcRenderer.invoke("instances:list"),
+  getInstanceReport: (id, channel, options) =>
+    ipcRenderer.invoke("instances:report", id, channel, options),
+  setInstanceSetting: (id, channel, name, value) =>
+    ipcRenderer.invoke("instances:set-setting", id, channel, name, value),
 
   // utils
   openLink: (url) => ipcRenderer.invoke("open-link", url),
