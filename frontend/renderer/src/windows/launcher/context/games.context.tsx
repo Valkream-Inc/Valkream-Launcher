@@ -21,16 +21,23 @@ export const useGames = (): GamesContextValue => {
 export const GamesProvider = ({ children }: GamesProviderProps) => {
   const gamesList: GameName[] = ["Valheim", "SevenDtoD"];
   const [actualGame, setActualGame] = useState<GameName>("Valheim");
+  const [actualInstanceId, setActualInstanceId] = useState<string | null>(null);
 
   const changeActualGame = (newGame: GameName) => {
     if (!gamesList.includes(newGame)) throw new Error("Game not found");
 
+    setActualInstanceId(null);
     return setActualGame(newGame);
   };
+
+  const changeActualInstance = (instanceId: string) =>
+    setActualInstanceId(instanceId);
 
   const contextValue: GamesContextValue = {
     actualGame,
     changeActualGame,
+    actualInstanceId,
+    changeActualInstance,
   };
 
   return (

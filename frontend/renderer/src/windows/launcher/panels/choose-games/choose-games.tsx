@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Card,
@@ -14,8 +14,10 @@ import {
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { LauncherTheme } from "@shared/types";
+import type { GameName, LauncherTheme } from "@shared/types";
 
+import instancesRenderConfig from "../../../../instances/instances.config";
+import { isSelectable } from "../../../../instances/instances.helpers";
 import { useGames } from "../../context/games.context";
 import { usePanels } from "../../context/panels.context";
 import { useTheme } from "../../context/theme.context";
@@ -28,7 +30,7 @@ import type {
 
 // 🧩 Tu peux mélanger icônes MUI et images personnalisées ici :
 // `name` sert à l'affichage (alt) et à la recherche.
-const games: GameEntry[] = [
+const legacyGames: GameEntry[] = [
   {
     id: "Valheim",
     name: "Valheim",
@@ -217,13 +219,43 @@ const searchColors = (theme: LauncherTheme): SearchColors => {
 };
 
 export default function ChooseGames() {
-  const { changeActualGame } = useGames();
+  const { changeActualGame, changeActualInstance } = useGames();
+  const [instanceGames, setInstanceGames] = useState<GameEntry[]>([]);
+
+  // Instances du nouveau système : activées par le remote ET décrites côté render.
+  useEffect(() => {
+    window.electron_API
+      .getInstances()
+      .then((summaries) => {
+        const renderIds = instancesRenderConfig.map((item) => item.id);
+        setInstanceGames(
+          summaries
+            .filter((summary) => isSelectable(summary, renderIds))
+            .map((summary) => ({
+              id: summary.id,
+              instanceId: summary.id,
+              name:
+                instancesRenderConfig.find((item) => item.id === summary.id)
+                  ?.name ?? summary.id,
+              icon: instancesRenderConfig.find((item) => item.id === summary.id)
+                ?.icon ?? "",
+            })),
+        );
+      })
+      .catch(console.error);
+  }, []);
+
+  const games = useMemo(
+    () => [...legacyGames, ...instanceGames],
+    [instanceGames],
+  );
   const { changePanel } = usePanels();
   const { theme } = useTheme();
   const [search, setSearch] = useState("");
 
-  const handleClick = (gameId: GameEntry["id"]) => {
-    changeActualGame(gameId);
+  const handleClick = (game: GameEntry) => {
+    if (game.instanceId) changeActualInstance(game.instanceId);
+    else changeActualGame(game.id as GameName);
     changePanel("home");
   };
 
@@ -264,7 +296,7 @@ export default function ChooseGames() {
           a.game.name.localeCompare(b.game.name),
       )
       .map(({ game }) => game);
-  }, [search]);
+  }, [search, games]);
 
   const colors = searchColors(theme);
 
@@ -370,7 +402,7 @@ export default function ChooseGames() {
             {filteredGames.map((game) => (
               <Grid key={game.id}>
                 <GameCard>
-                  <CardActionArea onClick={() => handleClick(game.id)}>
+                  <CardActionArea onClick={() => handleClick(game)}>
                     <Box
                       sx={{
                         p: 3,

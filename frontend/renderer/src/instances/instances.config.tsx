@@ -13,6 +13,7 @@ const instancesRenderConfig: InstanceRenderConfig[] = [
   {
     id: "Valheim-Valkream-v2",
     name: "Valheim",
+    icon: "./images/Valheim-name.png",
     // tipContent / descriptionContent : composants React à renseigner.
     customGamesSettings: [
       { type: "toggle", settingsName: "modsAdmin", label: "Mods admin" },

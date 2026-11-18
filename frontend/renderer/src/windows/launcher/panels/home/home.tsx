@@ -11,7 +11,9 @@ import Links from "./component/links/links";
 import ServerInfo from "./component/server-info/server-info";
 import Popup from "../../component/popup/popup";
 
+import { useGames } from "../../context/games.context";
 import { usePanels } from "../../context/panels.context";
+import InstanceHome from "./InstanceHome";
 
 function TipsMessage() {
   return (
@@ -29,7 +31,10 @@ function TipsMessage() {
 
 function Home() {
   const { changePanel } = usePanels();
+  const { actualInstanceId } = useGames();
   const [isTipsOpen, setIsTipsOpen] = useState(false);
+
+  if (actualInstanceId) return <InstanceHome instanceId={actualInstanceId} />;
 
   return (
     <Box sx={{ position: "absolute", inset: 0, maxWidth: 0 }}>

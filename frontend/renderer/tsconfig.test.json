@@ -1,0 +1,7 @@
+{
+  // Types du code ET des tests du renderer (node:test), sans rien émettre.
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "types": ["vite/client", "node"] },
+  "include": ["index.tsx", "src/**/*", "../shared/**/*.d.ts", "../types/**/*.d.ts"],
+  "exclude": []
+}

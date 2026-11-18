@@ -8,12 +8,13 @@ import { useRef, useState } from "react";
 import SpecialPanel from "../../component/special-panel/special-panel";
 
 import { useGames } from "../../context/games.context";
+import InstanceSettings from "./instance/InstanceSettings";
 import SevenDtoDSettings from "./SevenDtoD/SevenDtoD-Settings";
 import type { ModsTabHandle } from "./settings.types";
 import ValheimSettings from "./Valheim/Valheim-Settings";
 
 function Settings() {
-  const { actualGame } = useGames();
+  const { actualGame, actualInstanceId } = useGames();
   const [activeTab, setActiveTab] = useState("general");
   const [isConfirmSpecialOptionVisible, setIsConfirmSpecialOptionVisible] =
     useState(false);
@@ -86,7 +87,22 @@ function Settings() {
 
   return (
     <>
-      {actualGame === "Valheim" && (
+      {actualInstanceId && (
+        <InstanceSettings
+          instanceId={actualInstanceId}
+          returnToHome={returnToHome}
+          modsTabRef={modsTabRef}
+          changeTab={changeTab}
+          activeTab={activeTab}
+          ToggleIsConfirmSpecialOptionVisible={
+            ToggleIsConfirmSpecialOptionVisible
+          }
+          isSpecialOptionVisible={isSpecialOptionVisible}
+          setIsDevActive={setIsDevActive}
+          isDevActive={isDevActive}
+        />
+      )}
+      {!actualInstanceId && actualGame === "Valheim" && (
         <ValheimSettings
           returnToHome={returnToHome}
           modsTabRef={modsTabRef}
@@ -100,7 +116,7 @@ function Settings() {
           isDevActive={isDevActive}
         />
       )}
-      {actualGame === "SevenDtoD" && (
+      {!actualInstanceId && actualGame === "SevenDtoD" && (
         <SevenDtoDSettings
           returnToHome={returnToHome}
           modsTabRef={modsTabRef}

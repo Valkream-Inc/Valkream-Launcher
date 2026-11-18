@@ -4,11 +4,13 @@
  */
 
 import type { ReactNode } from "react";
-import type { GameName } from "@shared/types";
 
 /** Jeu affiché dans la grille de sélection. */
 export interface GameEntry {
-  id: GameName;
+  /** Jeu historique (`GameName`) ou id d'instance du nouveau système. */
+  id: string;
+  /** Renseigné pour une instance du nouveau système. */
+  instanceId?: string;
   /** Nom affiché (alt) et utilisé pour la recherche. */
   name: string;
   /** Chemin d'image ou élément React personnalisé. */

@@ -38,6 +38,8 @@ export interface InstanceRenderConfig {
   id: InstanceId;
   /** Nom affiché dans le choix du jeu. */
   name: string;
+  /** Image affichée dans le choix du jeu. */
+  icon?: string;
   tipContent?: ReactNode;
   descriptionContent?: ReactNode;
   links?: { discord?: string; topserver?: string; site?: string };
