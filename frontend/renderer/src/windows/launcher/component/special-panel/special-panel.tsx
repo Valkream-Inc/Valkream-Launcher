@@ -3,7 +3,6 @@
  * @license MIT-NC
  */
 
-import { memo } from "react";
 import SpecialPanelFuturistic from "./futuristic/special-panel.futuristic";
 import SpecialPanelModern from "./special-panel.modern";
 import SpecialPanelOld from "./special-panel.old";
@@ -53,4 +52,4 @@ function SpecialPanel(props: SpecialPanelProps) {
   return <SpecialPanelModern {...props} paragraph={paragraph} title={title} />;
 }
 
-export default memo(SpecialPanel);
+export default SpecialPanel;

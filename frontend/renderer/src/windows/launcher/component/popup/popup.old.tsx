@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import React, { memo } from "react";
+import React from "react";
 import {
   Box,
   Button,
@@ -207,4 +207,4 @@ function OldPopup({
   );
 }
 
-export default memo(OldPopup);
+export default OldPopup;

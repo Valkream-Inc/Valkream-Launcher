@@ -4,7 +4,6 @@
  */
 
 import { Box, Button, Paper, Stack, Typography } from "@mui/material";
-import { memo } from "react";
 import type {
   SpecialPanelThemeProps,
   SpecialPanelType,
@@ -131,4 +130,4 @@ function SpecialPanelOld({
   );
 }
 
-export default memo(SpecialPanelOld);
+export default SpecialPanelOld;

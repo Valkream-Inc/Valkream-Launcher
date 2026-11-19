@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import React, { memo } from "react";
+import React from "react";
 import Dialog from "@mui/material/Dialog";
 import Slide from "@mui/material/Slide";
 import {
@@ -38,7 +38,7 @@ const Transition = React.forwardRef<unknown, PopupTransitionProps>(
   }
 );
 
-export default memo(function ModernPopup({
+export default function ModernPopup({
   open,
   onClose,
   onConfirm,
@@ -88,7 +88,7 @@ export default memo(function ModernPopup({
       <DialogContent>
         <Typography
           variant="body1"
-          sx={{ color: "#e0e0e0", textAlign: "center" }}
+          sx={{ color: "text.secondary", textAlign: "center" }}
           component="div"
         >
           {message}
@@ -100,13 +100,12 @@ export default memo(function ModernPopup({
             key={index}
             onClick={button.action}
             sx={{
-              background: button.variant === "main" ? color : "#444",
-              color: "#fff",
-              borderRadius: "10px",
+              bgcolor: button.variant === "main" ? color : "grey.800",
+              color: "common.white",
               px: 3,
               "&:hover": {
                 opacity: 0.9,
-                background: button.variant === "main" ? color : "#555",
+                bgcolor: button.variant === "main" ? color : "grey.700",
               },
             }}
           >
@@ -116,4 +115,4 @@ export default memo(function ModernPopup({
       </DialogActions>
     </Dialog>
   );
-});
+}

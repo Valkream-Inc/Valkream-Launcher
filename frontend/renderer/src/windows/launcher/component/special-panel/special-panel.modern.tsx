@@ -4,7 +4,6 @@
  */
 
 import { Box, Button, Paper, Stack, Typography } from "@mui/material";
-import { memo } from "react";
 import type {
   SpecialPanelThemeProps,
   SpecialPanelType,
@@ -47,8 +46,8 @@ function SpecialPanelModern({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        bgcolor: "#121212",
-        color: "white",
+        bgcolor: "background.default",
+        color: "text.primary",
         overflow: "hidden",
       }}
     >
@@ -58,9 +57,10 @@ function SpecialPanelModern({
           p: 4,
           maxWidth: 600,
           borderRadius: 3,
-          bgcolor: "#1e1e1e",
-          borderLeft: (theme) => `6px solid ${theme.palette[data.color].main}`,
-          color: "white",
+          bgcolor: "background.paper",
+          borderLeft: 6,
+          borderColor: `${data.color}.main`,
+          color: "text.primary",
         }}
       >
         <Stack direction="row" spacing={2} alignItems="flex-start">
@@ -69,7 +69,7 @@ function SpecialPanelModern({
             sx={{
               fontSize: "2.5rem",
               lineHeight: 1,
-              color: (theme) => theme.palette[data.color].main,
+              color: `${data.color}.main`,
             }}
           >
             {data.icon}
@@ -79,11 +79,11 @@ function SpecialPanelModern({
             <Typography
               variant="h6"
               gutterBottom
-              sx={{ color: (theme) => theme.palette[data.color].main }}
+              sx={{ color: `${data.color}.main` }}
             >
               {data.title}
             </Typography>
-            <Typography variant="body1" sx={{ color: "rgba(255,255,255,0.8)" }}>
+            <Typography variant="body1" sx={{ color: "text.secondary" }}>
               {data.paragraph}
             </Typography>
 
@@ -108,4 +108,4 @@ function SpecialPanelModern({
   );
 }
 
-export default memo(SpecialPanelModern);
+export default SpecialPanelModern;

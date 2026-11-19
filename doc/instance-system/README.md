@@ -55,7 +55,7 @@ frontend/
 
 - Version globale `X0.X1.X2` (affichage seulement) : X0 saison, X1 `game-base`, X2 `game-details`.
 - Deux niveaux, **tous deux forcés** : `game-base` (le jeu, réinstallation complète si en retard) et `game-details` (mods, configs, détails, mise à jour incrémentale). Le jeu n'est jouable en ligne que lorsque tout ce qui est actif est à jour ; hors ligne, on joue ce qui est installé. Les anciens `game-breaking` / `game-notbreaking` sont réunis sous `game-details`.
-- **Toutes les options d'une entrée sauf `version`** (`path`, `type`, `hash`, `content`, `hash-folder`, `folder_in_zip`, `api-url`, `gameFolderToRemove`, `gameFolderToPreserve`, `to_ignore`, `optional`) :
+- **Toutes les options d'une entrée sauf `version`** (`path`, `type`, `hash`, `content`, `hash-folder`, `zip`, `folder_in_zip`, `api-url`, `gameFolderToRemove`, `gameFolderToPreserve`, `to_ignore`, `optional`) :
   - peuvent être déclinées par plateforme : `{ win32: …, linux: …, darwin: …, default: … }` ;
   - prennent une valeur **inline**, un **chemin relatif** (`/chemin`, racine du serveur de fichiers) ou une **URL** (`https://…`) vers un fichier JSON/YAML qui contient la valeur. Le fichier lié peut lui-même être décliné par plateforme.
   - Une chaîne qui commence par `/` est donc un lien : `path` et `folder_in_zip` s'écrivent sans `/` initial.
@@ -80,6 +80,14 @@ yarn build:manifest <dossier-source> <dossier-sortie> --ignore logs
 ```
 
 Il écrit `hash.json` + `hash/` et affiche le `hash` à reporter dans le `latest.yml`. Le launcher refuse un manifeste qui ne correspond pas au hash déclaré et un fichier dont le hash est faux.
+
+### Archive `zip` (installation complète)
+
+Une entrée `hash_url` peut déclarer `zip: <lien>` : une archive de **tous** les fichiers du manifeste (mêmes chemins relatifs, `folder_in_zip` si ils sont dans un sous-dossier). Quand plus de la moitié des fichiers est à récupérer (première installation), le launcher télécharge l'archive en une fois (compressée) au lieu des fichiers un par un. Chaque fichier extrait est quand même vérifié par son hash ; un fichier absent de l'archive ou au mauvais hash est repris individuellement via `hash-folder`. Pour une simple mise à jour, l'archive n'est pas utilisée. Exemple : `cd <dossier-source> && zip -r ../all.zip . -x 'logs/*'`, puis `zip: /games/<id>/latest/all.zip`.
+
+### Cache des hash
+
+Les hash des fichiers installés sont mémorisés dans `instance.hashes.json` (à côté de `instance.state.json`), avec la taille et la date de chaque fichier : la vérification d'une installation ne relit que les fichiers modifiés depuis. La réparation (`repair`) ignore ce cache et relit tout le disque.
 
 ## Mods Thunderstore
 

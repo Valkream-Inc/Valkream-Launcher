@@ -23,6 +23,7 @@ import { entryDirectory } from "../instance/instance-paths";
 import { buildRow, TIERS, type InstanceInspector } from "../instance/InstanceInspector";
 import { readInstallState, readInstanceSettings, recordInstalledEntry, removeInstalledEntry } from "./install-store";
 import { removeWithPlan } from "./fs-ops";
+import { HashCache } from "./hash-cache";
 import type { ParamResolver } from "../remote/ParamResolver";
 import { hashProvider } from "./providers/hash";
 import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore";
@@ -87,6 +88,7 @@ export class InstanceInstaller {
     this.running.add(lockKey);
 
     const result: InstanceSyncResult = { installed: [], failed: [], works: false };
+    const hashes = new HashCache(installDir);
     const tempDir = path.join(installDir, ".tmp");
 
     try {
@@ -97,7 +99,7 @@ export class InstanceInstaller {
       const state = readInstallState(installDir);
       const modified = repair
         ? new Set(
-            (await inspector.report(id, channel, { verify: true })).entries
+            (await inspector.report(id, channel, { verify: true, fresh: true })).entries
               .filter((row) => row.status === "modified")
               .map((row) => row.name),
           )
@@ -170,6 +172,7 @@ export class InstanceInstaller {
             platform,
             resolver,
             io,
+            hashes,
             previousOwned: previous?.owned ?? [],
             signal,
             report: (step, message, transfer) => emit({ ...common, step, message, transfer }),
@@ -191,6 +194,8 @@ export class InstanceInstaller {
         }
       }
     } finally {
+      hashes.prune();
+      hashes.save();
       fs.rmSync(tempDir, { recursive: true, force: true });
       this.running.delete(lockKey);
     }

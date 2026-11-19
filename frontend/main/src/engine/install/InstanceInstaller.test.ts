@@ -302,4 +302,74 @@ describe("InstanceInstaller", () => {
     await assert.rejects(() => installer.sync("g", "stable"), /déjà en cours/);
     await first;
   });
+
+  describe("hash_url avec archive `zip`", () => {
+    const zipRemote = () => {
+      const remote = baseRemote() as Record<string, any>;
+      remote["/stable.yml"]["game-base"].base.zip = "/base.zip";
+      return remote;
+    };
+    const zipFiles = (archive: Record<string, string>) => ({
+      ...files,
+      "/base.zip": JSON.stringify(archive),
+    });
+
+    it("installation complète : une archive, aucun fichier téléchargé un par un", async () => {
+      const { installer, downloads } = build(
+        zipRemote(),
+        zipFiles({ "bin/game.exe": "exe-v1", "data/a.txt": "a", "logs/run.log": "log" }),
+      );
+      const result = await installer.sync("g", "stable");
+
+      assert.deepEqual(result.failed, []);
+      assert.equal(read("stable", "game/bin/game.exe"), "exe-v1");
+      assert.equal(read("stable", "game/data/a.txt"), "a");
+      assert.equal(fs.existsSync(path.join(dir("stable"), "game/logs/run.log")), false); // to_ignore
+      assert.deepEqual(downloads.filter((url) => url.includes("/h/")), []);
+      assert.equal(downloads.filter((url) => url.endsWith("/base.zip")).length, 1);
+    });
+
+    it("fichier absent ou corrompu dans l'archive : repris via hash-folder", async () => {
+      const { installer, downloads } = build(
+        zipRemote(),
+        zipFiles({ "bin/game.exe": "CORROMPU" }), // data/a.txt manque dans l'archive
+      );
+      const result = await installer.sync("g", "stable");
+
+      assert.deepEqual(result.failed, []);
+      assert.equal(read("stable", "game/bin/game.exe"), "exe-v1");
+      assert.equal(read("stable", "game/data/a.txt"), "a");
+      assert.deepEqual(
+        downloads.filter((url) => url.includes("/h/")).sort(),
+        ["https://files.test/h/bin/game.exe", "https://files.test/h/data/a.txt"],
+      );
+    });
+
+    it("mise à jour d'un seul fichier : pas d'archive, seulement ce fichier", async () => {
+      const { installer, downloads } = build(zipRemote(), zipFiles({}));
+      await installer.sync("g", "stable");
+      fs.writeFileSync(path.join(dir("stable"), "game/data/a.txt"), "casse");
+      downloads.length = 0;
+
+      await installer.sync("g", "stable", { repair: true });
+      assert.equal(read("stable", "game/data/a.txt"), "a");
+      assert.equal(downloads.some((url) => url.endsWith(".zip")), false);
+    });
+  });
+
+  it("les hash vérifiés sont mémorisés dans instance.hashes.json", async () => {
+    const { installer, inspector } = build(baseRemote(), files);
+    await installer.sync("g", "stable");
+
+    const cache = JSON.parse(read("stable", "instance.hashes.json"));
+    assert.equal(cache.files["game/bin/game.exe"].hash, sha("exe-v1"));
+
+    // Vérification : fichier inchangé = hash du cache (même corrompu dans le cache, il est cru) ;
+    // `fresh` (réparation) relit vraiment le disque.
+    cache.files["game/data/a.txt"].hash = sha("faux");
+    fs.writeFileSync(path.join(dir("stable"), "instance.hashes.json"), JSON.stringify(cache));
+    assert.equal((await inspector.report("g", "stable", { verify: true })).entries[0].status, "modified");
+    const fresh = await inspector.report("g", "stable", { verify: true, fresh: true });
+    assert.equal(fresh.entries[0].status, "up-to-date");
+  });
 });

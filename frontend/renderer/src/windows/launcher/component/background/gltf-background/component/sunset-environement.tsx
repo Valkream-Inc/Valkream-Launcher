@@ -3,16 +3,15 @@
  * @license MIT-NC
  */
 
-import { useMemo } from "react";
 import * as THREE from "three";
 import { Sky, Stars } from "@react-three/drei";
 
 import Snow from "./snow";
 
-function SunsetEnvironment() {
-  // Position du soleil basse pour un coucher de soleil
-  const sunPosition = useMemo(() => new THREE.Vector3(-50, 0, 100), []);
+// Position du soleil basse pour un coucher de soleil
+const SUN_POSITION = new THREE.Vector3(-50, 0, 100);
 
+function SunsetEnvironment() {
   return (
     <>
       <directionalLight
@@ -23,7 +22,7 @@ function SunsetEnvironment() {
       />
 
       <Sky
-        sunPosition={sunPosition}
+        sunPosition={SUN_POSITION}
         inclination={0.01} // proche de l'horizon
         azimuth={0.25} // orientation
         turbidity={100} // ciel très chaud/orangé

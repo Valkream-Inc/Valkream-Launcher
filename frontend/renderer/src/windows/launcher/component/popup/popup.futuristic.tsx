@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import React, { memo } from "react";
+import React from "react";
 import {
   Box,
   Button,
@@ -451,4 +451,4 @@ function FuturisticPopup({
   );
 }
 
-export default memo(FuturisticPopup);
+export default FuturisticPopup;

@@ -144,11 +144,16 @@ describe("validateReleaseConfig", () => {
     assert.doesNotMatch(errors, /api-url/);
   });
 
-  it("champs réservés : folder_in_zip à zip_url, api-url à thunderstore/nexus", () => {
+  it("champs réservés : folder_in_zip à zip_url/hash_url, zip à hash_url, api-url à thunderstore/nexus", () => {
     const entry = { ...validEntry(), type: "hash_url", "hash-folder": "/h/", folder_in_zip: "x", "api-url": "https://a.b" };
     const errors = errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: entry } }));
-    assert.match(errors, /folder_in_zip : réservé à zip_url/);
+    assert.doesNotMatch(errors, /folder_in_zip/);
     assert.match(errors, /api-url : réservé/);
+
+    const other = { ...validEntry(), type: "zip_url", content: "/a.zip", zip: "/b.zip" };
+    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: other } })), /zip : réservé à hash_url/);
+    const bad = { ...entry, zip: "pas un lien" };
+    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: bad } })), /zip : lien de l'archive attendu/);
   });
 
   it("gameFolderToRemove/Preserve et optional sont contrôlés", () => {

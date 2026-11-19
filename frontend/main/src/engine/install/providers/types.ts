@@ -9,6 +9,7 @@
 import type { GamePlatform, ProgressData, ReleaseEntry } from "@shared/types";
 
 import type { ParamResolver } from "../../remote/ParamResolver";
+import type { HashCache } from "../hash-cache";
 import type { UpdatePlan } from "../preserve";
 
 /** Progression d'un téléchargement : valeurs déjà formatées pour l'affichage. */
@@ -45,6 +46,8 @@ export interface ProviderContext {
   platform: GamePlatform;
   resolver: ParamResolver;
   io: InstallIO;
+  /** Cache des hash de fichiers de l'installation. */
+  hashes: HashCache;
   /** Dossiers possédés enregistrés lors de la précédente installation de l'entrée. */
   previousOwned: string[];
   signal?: AbortSignal;

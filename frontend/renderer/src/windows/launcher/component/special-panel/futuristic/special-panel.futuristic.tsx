@@ -4,7 +4,6 @@
  */
 
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { memo } from "react";
 import type {
   SpecialPanelThemeProps,
   SpecialPanelType,
@@ -94,4 +93,4 @@ function SpecialPanelFuturistic({
   );
 }
 
-export default memo(SpecialPanelFuturistic);
+export default SpecialPanelFuturistic;

@@ -3,7 +3,6 @@
  * @license MIT-NC
  */
 
-import { memo } from "react";
 import FuturisticPopup from "./popup.futuristic";
 import ModernPopup from "./popup.modern";
 import OldPopup from "./popup.old";
@@ -18,4 +17,4 @@ const Popup = (props: PopupProps) => {
   return <ModernPopup {...props} />;
 };
 
-export default memo(Popup);
+export default Popup;

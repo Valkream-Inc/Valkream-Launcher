@@ -4,7 +4,6 @@
  */
 
 import { Box, Fade } from "@mui/material";
-import { memo } from "react";
 
 import { usePanels } from "../../context/panels.context";
 import { useAction } from "../../context/action.context";
@@ -33,4 +32,4 @@ function Panel({ id, children }: PanelProps) {
   );
 }
 
-export default memo(Panel);
+export default Panel;

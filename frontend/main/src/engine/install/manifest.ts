@@ -52,6 +52,7 @@ export const verifyManifest = async (
   directory: string,
   manifest: Manifest,
   toIgnore: readonly string[] = [],
+  hasher: (filePath: string) => Promise<string> = hashFile,
 ): Promise<ManifestDiff> => {
   const diff: ManifestDiff = { missing: [], changed: [] };
   for (const [rawFile, expected] of Object.entries(manifest)) {
@@ -59,7 +60,7 @@ export const verifyManifest = async (
     if (matchesAny(file, toIgnore)) continue;
     const fullPath = path.join(directory, file);
     if (!fs.existsSync(fullPath)) diff.missing.push(file);
-    else if ((await hashFile(fullPath)) !== expected.toLowerCase()) diff.changed.push(file);
+    else if ((await hasher(fullPath)) !== expected.toLowerCase()) diff.changed.push(file);
   }
   return diff;
 };

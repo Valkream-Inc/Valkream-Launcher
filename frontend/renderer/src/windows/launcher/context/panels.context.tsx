@@ -11,7 +11,7 @@ import type {
   PanelsProviderProps,
 } from "./panels.context.types";
 
-const PanelsContext = createContext<PanelsContextValue | undefined>(undefined);
+export const PanelsContext = createContext<PanelsContextValue | undefined>(undefined);
 export const usePanels = (): PanelsContextValue => {
   const ctx = useContext(PanelsContext);
   if (!ctx)

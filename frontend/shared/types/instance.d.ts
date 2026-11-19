@@ -132,7 +132,14 @@ export interface RawReleaseEntry {
   content: EntryContentByPlatform;
   /** `hash_url` : URL de base des fichiers du manifeste. */
   "hash-folder"?: RawOption<string>;
-  /** `zip_url` : dossier de l'archive à extraire. */
+  /**
+   * `hash_url` : archive de TOUS les fichiers du manifeste (mêmes chemins relatifs). Utilisée
+   * à la place des téléchargements fichier par fichier quand la majorité des fichiers manque
+   * (installation complète) : un seul téléchargement compressé ; chaque fichier est quand même
+   * vérifié par son hash, et ceux qui manquent ou diffèrent sont repris un par un.
+   */
+  zip?: RawOption<string>;
+  /** `zip_url` et `hash_url` (avec `zip`) : dossier de l'archive à extraire. */
   folder_in_zip?: RawOption<string>;
   /** `thunderstore_modpack_url` et `nexus_modpack_url` : domaine de l'API. */
   "api-url"?: RawOption<string>;
@@ -163,6 +170,7 @@ export interface ReleaseEntry {
   /** Lien, liste ou manifeste (jamais une table par plateforme). */
   content: EntryContent;
   "hash-folder"?: string;
+  zip?: string;
   folder_in_zip?: string;
   "api-url"?: string;
   gameFolderToRemove?: string[];

@@ -26,7 +26,8 @@
 #   type      zip_url | hash_url | thunderstore_modpack_url | nexus_modpack_url
 #   hash      sha256 du manifeste des fichiers de l'entrée (généré par `yarn build:manifest`)
 #   content   lien, liste, ou manifeste inline
-#   hash-folder / api-url / folder_in_zip   selon le type (voir la doc)
+#   hash-folder / zip / api-url / folder_in_zip   selon le type (voir la doc) ;
+#                                           zip = archive de tous les fichiers d'un hash_url (installation complète)
 #   optional  { setting } : installée seulement si ce réglage d'instance est actif
 #   gameFolderToRemove     relatifs au dossier de l'entrée, supprimés à la mise à jour de l'entrée
 #   gameFolderToPreserve   fichiers/dossiers relatifs au dossier de l'entrée conservés à la mise à jour (config client…).

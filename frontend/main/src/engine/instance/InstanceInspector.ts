@@ -25,6 +25,7 @@ import type { InstanceMainConfig } from "../../types/instances";
 import { entryDirectory, installLocations, type InstallLocations } from "./instance-paths";
 import { loadRemoteIndex } from "../remote/InstanceRegistry";
 import { readInstallState, readInstanceSettings } from "../install/install-store";
+import { HashCache } from "../install/hash-cache";
 import { verifyManifest, type Manifest } from "../install/manifest";
 import type { ParamResolver } from "../remote/ParamResolver";
 import { resolvePreserved } from "../install/preserve";
@@ -120,7 +121,7 @@ export class InstanceInspector {
   async report(
     id: string,
     channel: Channel,
-    { verify = false }: { verify?: boolean } = {},
+    { verify = false, fresh = false }: { verify?: boolean; fresh?: boolean } = {},
   ): Promise<InstanceReport> {
     const loaded = await this.load(id, channel);
     const { config, locations, release, releaseErrors } = loaded;
@@ -154,6 +155,8 @@ export class InstanceInspector {
     };
 
     const state = readInstallState(locations.installDir);
+    // Les hash déjà calculés sont réutilisés tant que le fichier n'a pas changé (`fresh` : tout relire).
+    const hashes = verify ? new HashCache(locations.installDir) : undefined;
     report.installedCount = Object.keys(state.entries).length;
     if (!release || typeof release !== "object") return finalize(report);
     report.releaseVersion = String(release.version ?? "");
@@ -172,7 +175,7 @@ export class InstanceInspector {
         const row = buildRow(name, tier, entry, entryErrors, state.entries[name], settings);
 
         if (verify && row.status === "up-to-date" && entry?.type === "hash_url") {
-          await this.verifyEntry(row, entry, locations.installDir, config);
+          await this.verifyEntry(row, entry, locations.installDir, hashes!, fresh);
         }
         report.entries.push(row);
       }
@@ -185,6 +188,7 @@ export class InstanceInspector {
       }
     }
 
+    hashes?.save();
     return finalize(report);
   }
 
@@ -211,14 +215,17 @@ export class InstanceInspector {
     row: EntryReport,
     entry: ReleaseEntry,
     installDir: string,
-    config: InstanceMainConfig,
+    hashes: HashCache,
+    fresh: boolean,
   ): Promise<void> {
     try {
       const content = entry.content;
       if (content === undefined || Array.isArray(content)) return;
       const { value: manifest } = await this.options.resolver.getJson<Manifest>(content as string | Manifest);
       const directory = entryDirectory(installDir, entry.path);
-      const diff = await verifyManifest(directory, manifest, entry.to_ignore ?? []);
+      const diff = await verifyManifest(directory, manifest, entry.to_ignore ?? [], (file) =>
+        hashes.hash(file, { fresh }),
+      );
       row.files = diff;
       if (diff.missing.length > 0 || diff.changed.length > 0) row.status = "modified";
     } catch (error) {

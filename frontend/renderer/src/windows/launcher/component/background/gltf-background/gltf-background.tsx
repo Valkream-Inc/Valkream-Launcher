@@ -5,7 +5,7 @@
 
 import "./gltf-background.css";
 
-import { Suspense, useMemo, memo, useState, useCallback } from "react";
+import { Suspense, memo, useState, useCallback } from "react";
 import type { MouseEvent } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
@@ -16,6 +16,10 @@ import Model from "./component/model";
 import PlayerControls from "./component/players-controls";
 
 import { useGames } from "../../../context/games.context";
+
+/** Vitesses du joueur (marche / escalade). */
+const SPEED = 4;
+const CLIMB_SPEED = 2;
 
 function GltfBackground() {
   const { actualInstance } = useGames();
@@ -35,8 +39,6 @@ function GltfBackground() {
   // 📦 Données de la scène : décrites par la config render de l'instance
   const { camera, lights, fogArgs, environment, hasCampfire } = scene;
 
-  const [speed, climbSpeed] = useMemo(() => [4, 2], []);
-
   return (
     <div className="background" onClick={handleClick}>
       {/* "percentage" = PCFShadowMap : évite le warning PCFSoftShadowMap */}
@@ -53,7 +55,7 @@ function GltfBackground() {
           <Model key={model} modelPath={model} />
         </Suspense>
         {hasCampfire && <CampfireLight />}
-        <PlayerControls speed={speed} climbSpeed={climbSpeed} />
+        <PlayerControls speed={SPEED} climbSpeed={CLIMB_SPEED} />
         {showStats && <Stats className="stats" />}
       </Canvas>
 

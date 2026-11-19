@@ -277,9 +277,15 @@ const checkEntry = (entry: unknown, where: string): string[] => {
     errors.push(`${where}.hash-folder : URL de base des fichiers requise`);
   }
 
+  if (entry.zip !== undefined) {
+    if (type !== "hash_url") errors.push(`${where}.zip : réservé à hash_url`);
+    else if (!isFetchableLink(entry.zip)) errors.push(`${where}.zip : lien de l'archive attendu`);
+  }
+
   if (entry.folder_in_zip !== undefined && !isDataLink(entry.folder_in_zip)) {
-    if (type !== "zip_url") errors.push(`${where}.folder_in_zip : réservé à zip_url`);
-    else if (typeof entry.folder_in_zip !== "string" || !isSafeRelativePath(entry.folder_in_zip)) {
+    if (type !== "zip_url" && type !== "hash_url") {
+      errors.push(`${where}.folder_in_zip : réservé à zip_url et hash_url`);
+    } else if (typeof entry.folder_in_zip !== "string" || !isSafeRelativePath(entry.folder_in_zip)) {
       errors.push(`${where}.folder_in_zip : chemin relatif sûr attendu`);
     }
   }
