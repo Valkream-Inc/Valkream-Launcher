@@ -1,11 +1,11 @@
-# Système d'instances (en cours)
+# Système d'instances
 
 Une **instance** = un jeu (ou une variante d'un jeu) décrit par trois couches reliées par un `id` unique (ex : `Valheim-Valkream-v2`).
 
 | Couche | Fichier | Contient |
 | --- | --- | --- |
 | Main | `frontend/main/src/instances/instances.config.ts` | serveur de jeu, lien de l'index, `allowedPaths` (liste blanche des chemins d'installation) |
-| Render | `frontend/renderer/src/instances/instances.config.tsx` | nom, textes, liens, réglages, tableaux Debug |
+| Render | `frontend/renderer/src/instances/instances.config.tsx` | nom, préfixe des assets, scène 3D, textes, liens, réglages (`customGamesSettings`, niveaux normal / special / danger), tableaux Debug |
 | Remote | `backend/public/index.config.json` + `games/<id>/latest.yml` | activation par plateforme, versions, sources, hash, mods, contributeurs |
 
 `draft-original/` garde le brouillon de départ, commenté (spécification des champs de `latest.yml`).
@@ -16,9 +16,17 @@ Une **instance** = un jeu (ou une variante d'un jeu) décrit par trois couches r
 - Fait : **installation par canal** (`instances/<id>/stable|beta/`) avec état (`instance.state.json`) et réglages (`instance.settings.json`) propres à chaque canal : la beta n'a aucun fichier en commun avec le stable.
 - Fait : **moteur d'installation** (`engine/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url` ; reprise par entrée ; une synchronisation à la fois par installation.
 - Fait : **rapport** (`instances:report`) : un statut par entrée + récapitulatif « fonctionne ou non ».
-- Fait : UI générique : choix du jeu (instances activées), accueil (installer / mettre à jour / jouer), réglages (General, Mods joueur, Debug admin).
-- Fait : instance `Valheim-Valkream-v2` migrée depuis les `latest.yml` historiques (stable + beta).
-- Pas encore : provider Nexus, dépendances transitives Thunderstore, migration de 7 Days to Die (jeu installé par le joueur hors de la racine du launcher), suppression des anciens managers `Valheim` / `SevenDtoD`.
+- Fait : **UI 100 % générique** : choix du jeu, accueil (un seul `InstanceButton` : installer / réinstaller / mettre à jour / jouer, avec progression), réglages General / Launcher / Game / Mods (affichage joueur) / Dev (outils + Debug admin avec « Réparer »). Fonds image / vidéo / 3D, loader, liens et infos serveur lisent la config render de l'instance active.
+- Fait : instances `Valheim-Valkream-v2` et `SevenDtoD-Valkream-v2` (7 Days to Die installé entièrement dans le launcher, comme Valheim).
+- Fait : **une seule API** `window.electron_API` (`getInstances`, `getInstanceInfos`, `getInstanceStatus`, `getInstanceReport`, `syncInstance`, `launchInstance`, `openInstanceFolder`, `uninstallInstance`, `setInstanceSetting`, `onInstanceProgress`…). Les anciens managers, IPC, panneaux et API par jeu (`electron_Valheim_API`, `electron_SevenDtoD_API`) sont supprimés.
+- Pas de migration des anciennes installations : réinstallation propre dans `instances/<id>/<canal>/` (les anciens dossiers ne sont pas touchés).
+- Pas encore : provider Nexus (signalé comme échec), dépendances transitives Thunderstore.
+
+## Ajouter un jeu
+
+1. Une entrée dans `main/src/instances/instances.config.ts` (serveur, chemins, exécutable, `steamAppId`).
+2. Une entrée dans `renderer/src/instances/instances.config.tsx` (assets dans `public/`, 3D, textes, réglages).
+3. Une entrée dans `backend/public/index.config.json` et un `games/<id>/latest.yml`.
 
 ## Conservation et exclusion (par entrée du latest.yml)
 

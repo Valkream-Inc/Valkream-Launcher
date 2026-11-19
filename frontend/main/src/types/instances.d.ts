@@ -5,7 +5,7 @@
  * Types internes au process main pour le système d'instances.
  */
 
-import type { GamePlatform, InstanceId } from "@shared/types";
+import type { GamePlatform, InstanceId, InstanceSettingValue } from "@shared/types";
 
 import type { ServerQueryConfig } from "./core";
 
@@ -31,4 +31,6 @@ export interface InstanceMainConfig {
   executable?: Partial<Record<GamePlatform, string>>;
   /** App Steam, pour le lancement via Steam. */
   steamAppId?: number;
+  /** Valeurs des réglages tant que le joueur n'en a pas choisi une (`launchSteam`, `launcherBehavior`…). */
+  defaultSettings?: Readonly<Record<string, InstanceSettingValue>>;
 }

@@ -17,10 +17,13 @@ import {
   Typography,
 } from "@mui/material";
 
+import { enqueueSnackbar } from "notistack";
 import type { EntryReport, EntryStatus, InstanceReport } from "@shared/types";
 
 import { groupEntriesByPath, overlappingPaths } from "../../../../../instances/instances.helpers";
 import type { DebugContent } from "../../../../../instances/instances.types";
+import Wait from "../../../component/wait/wait";
+import { useAction } from "../../../context/action.context";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-tittle/settings-title";
 
@@ -44,7 +47,7 @@ interface Props {
   /** Titres personnalisés par entrée (config render). */
   debugContent?: DebugContent[];
   loading: boolean;
-  onReload: (verify?: boolean) => void;
+  onReload: (verify?: boolean) => void | Promise<void>;
 }
 
 export default function InstanceDebugTab({ report, debugContent = [], loading, onReload }: Props) {
@@ -53,9 +56,38 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
   const tables = groupEntriesByPath(report.entries);
   const overlaps = overlappingPaths(report.entries);
   const { summary } = report;
+  const { actionLoading, runAction } = useAction();
+
+  // Réparer = synchroniser en retéléchargeant aussi les fichiers modifiés ou manquants
+  const repair = () =>
+    runAction(async () => {
+      try {
+        const result = await window.electron_API.syncInstance(
+          report.id,
+          report.channel,
+          { repair: true }
+        );
+        if (result.failed.length > 0) {
+          enqueueSnackbar(
+            `Réparation incomplète : ${result.failed
+              .map((item) => `${item.name} (${item.error})`)
+              .join(", ")}`,
+            { variant: "error" }
+          );
+        } else {
+          enqueueSnackbar("Installation réparée !", { variant: "success" });
+        }
+      } catch (error) {
+        console.error(error);
+        enqueueSnackbar("Réparation impossible !", { variant: "error" });
+      } finally {
+        await onReload(true);
+      }
+    }, "repair-instance");
 
   return (
     <>
+      <Wait isVisible={actionLoading} />
       <SettingsTitle warn={true}>Debug — {report.id} ({report.channel})</SettingsTitle>
 
       <SettingsBox warn={false}>
@@ -70,6 +102,9 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
         )}
         <Button disabled={loading} onClick={() => onReload(false)}>Recharger</Button>
         <Button disabled={loading} onClick={() => onReload(true)}>Vérifier les fichiers</Button>
+        <Button disabled={loading || actionLoading} color="warning" onClick={repair}>
+          Réparer
+        </Button>
       </SettingsBox>
 
       {report.errors.length > 0 && (

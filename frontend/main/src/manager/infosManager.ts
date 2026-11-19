@@ -7,17 +7,11 @@ import axios from "axios";
 import dns from "dns";
 import { GameDig } from "gamedig";
 
-import type {
-  GameEvent,
-  GameName,
-  Maintenance,
-  ServerInfos,
-} from "@shared/types";
+import type { ServerInfos } from "@shared/types";
 
-import { baseUrl, serversInfos } from "../constants";
-import LinksManager from "./linksManager";
+import { baseUrl } from "../constants";
 import noCache from "../constants/noCaheHeader";
-import { toValidUrl } from "../utils";
+import type { ServerQueryConfig } from "../types/core";
 
 class InfosManager {
   isServerReachable: boolean | null;
@@ -60,48 +54,10 @@ class InfosManager {
     }
   }
 
-  async getEvent(game: GameName): Promise<GameEvent | false> {
+  /** Interroge le serveur de jeu (GameDig). Ne lève jamais : « server offline » en cas d'échec. */
+  async getServerInfos(server: ServerQueryConfig): Promise<ServerInfos> {
     try {
-      if (!(await this.getIsServerReachable())) return false;
-      const res = await axios.get<GameEvent>(LinksManager.eventUrl(game), {
-        timeout: 3000,
-        ...noCache,
-      });
-      return {
-        ...res.data,
-        image: res.data.image.startsWith("data:")
-          ? res.data.image
-          : toValidUrl(res.data.image),
-      };
-    } catch (err) {
-      console.error(
-        "Error getting Event:",
-        err instanceof Error ? err.message : String(err)
-      );
-      return false;
-    }
-  }
-
-  async getMaintenance(game: GameName): Promise<Maintenance | false> {
-    try {
-      if (!(await this.getIsServerReachable())) return false;
-      const res = await axios.get<Maintenance>(LinksManager.maintenanceUrl(game), {
-        timeout: 3000,
-        ...noCache,
-      });
-      return res.data;
-    } catch (err) {
-      console.error(
-        "Error getting Maintenance:",
-        err instanceof Error ? err.message : String(err)
-      );
-      return false;
-    }
-  }
-
-  async getServerInfos(game: GameName): Promise<ServerInfos> {
-    try {
-      const res = await GameDig.query(serversInfos[game]);
+      const res = await GameDig.query(server);
 
       return {
         status: "server online",

@@ -21,12 +21,12 @@ import type {
 
 import { entryDirectory } from "./instance-paths";
 import { buildRow, TIERS, type InstanceInspector } from "./InstanceInspector";
-import { readInstallState, readInstanceSettings, recordInstalledEntry } from "./install-store";
+import { readInstallState, readInstanceSettings, recordInstalledEntry, removeInstalledEntry } from "./install-store";
 import { removeWithPlan } from "./fs-ops";
 import type { ParamResolver } from "./ParamResolver";
 import { hashProvider } from "./providers/hash";
-import { thunderstoreProvider } from "./providers/thunderstore";
-import type { InstallIO, Provider } from "./providers/types";
+import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore";
+import type { InstallIO, Provider, Uninstaller } from "./providers/types";
 import { zipProvider } from "./providers/zip";
 import { planEntryUpdate } from "./preserve";
 
@@ -37,15 +37,23 @@ export const DEFAULT_PROVIDERS: Record<string, Provider> = {
   // nexus_modpack_url : pas encore implémenté (l'entrée est signalée en échec).
 };
 
+export const DEFAULT_UNINSTALLERS: Record<string, Uninstaller> = {
+  thunderstore_modpack_url: thunderstoreUninstall,
+  // Les autres types ne savent pas quels fichiers leur appartiennent : seul l'état est oublié.
+};
+
 export interface InstallerOptions {
   inspector: InstanceInspector;
   resolver: ParamResolver;
   platform: GamePlatform;
   io: InstallIO;
   providers?: Record<string, Provider>;
+  uninstallers?: Record<string, Uninstaller>;
 }
 
 export interface SyncOptions {
+  /** Retélécharge aussi les fichiers modifiés ou manquants des entrées `hash_url`. */
+  repair?: boolean;
   onProgress?: (progress: InstanceSyncProgress) => void;
   signal?: AbortSignal;
 }
@@ -59,7 +67,12 @@ export class InstanceInstaller {
 
   constructor(private readonly options: InstallerOptions) {}
 
-  async sync(id: string, channel: Channel, { onProgress, signal }: SyncOptions = {}): Promise<InstanceSyncResult> {
+  /** Une synchronisation est-elle en cours dans ce dossier d'installation ? */
+  isBusy(installDir: string): boolean {
+    return this.running.has(path.resolve(installDir));
+  }
+
+  async sync(id: string, channel: Channel, { onProgress, signal, repair = false }: SyncOptions = {}): Promise<InstanceSyncResult> {
     const { inspector, resolver, platform, io } = this.options;
     const providers = this.options.providers ?? DEFAULT_PROVIDERS;
 
@@ -80,11 +93,24 @@ export class InstanceInstaller {
       fs.rmSync(tempDir, { recursive: true, force: true }); // reste d'une synchro interrompue
       fs.mkdirSync(tempDir, { recursive: true });
 
-      const settings = readInstanceSettings(installDir);
+      const settings = { ...loaded.config.defaultSettings, ...readInstanceSettings(installDir) };
       const state = readInstallState(installDir);
+      const modified = repair
+        ? new Set(
+            (await inspector.report(id, channel, { verify: true })).entries
+              .filter((row) => row.status === "modified")
+              .map((row) => row.name),
+          )
+        : new Set<string>();
 
       // Entrées à traiter, dans l'ordre.
-      const todo: { name: string; entry: ReleaseEntry; tier: (typeof TIERS)[number]; error?: string }[] = [];
+      const todo: {
+        name: string;
+        entry: ReleaseEntry;
+        tier: (typeof TIERS)[number];
+        error?: string;
+        remove?: boolean;
+      }[] = [];
       for (const tier of TIERS) {
         for (const [name, entry] of Object.entries(loaded.release[tier] ?? {})) {
           const prefix = `latest.${tier}.${name}`;
@@ -94,7 +120,9 @@ export class InstanceInstaller {
           const row = buildRow(name, tier, entry, entryErrors, state.entries[name], settings);
           if (row.status === "invalid") {
             todo.push({ name, entry, tier, error: entryErrors.join(" ; ") });
-          } else if (row.status === "outdated" || row.status === "not-installed") {
+          } else if (row.pendingRemoval) {
+            todo.push({ name, entry, tier, remove: true });
+          } else if (row.status === "outdated" || row.status === "not-installed" || modified.has(name)) {
             todo.push({ name, entry, tier });
           }
         }
@@ -111,6 +139,19 @@ export class InstanceInstaller {
 
         try {
           if (item.error) throw new Error(`entrée invalide : ${item.error}`);
+
+          if (item.remove) {
+            // Entrée optionnelle désactivée par le joueur : on retire ses mods puis on l'oublie.
+            const uninstall = (this.options.uninstallers ?? DEFAULT_UNINSTALLERS)[String(item.entry.type)];
+            await uninstall?.({
+              entryDir: entryDirectory(installDir, item.entry.path, loaded.config.allowedPaths),
+              previousOwned: state.entries[item.name]?.owned ?? [],
+            });
+            removeInstalledEntry(installDir, item.name);
+            result.installed.push(item.name);
+            emit({ ...common, step: "done", message: `${item.name} retiré` });
+            continue;
+          }
           const provider = providers[String(item.entry.type)];
           if (!provider) throw new Error(`type « ${item.entry.type} » non pris en charge`);
 
@@ -131,7 +172,7 @@ export class InstanceInstaller {
             io,
             previousOwned: previous?.owned ?? [],
             signal,
-            report: (step, message) => emit({ ...common, step, message }),
+            report: (step, message, transfer) => emit({ ...common, step, message, transfer }),
           });
 
           recordInstalledEntry(installDir, item.name, {

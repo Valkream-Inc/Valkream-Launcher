@@ -1,0 +1,29 @@
+# Instance SevenDtoD-Valkream-v2 — canal stable.
+# Migré depuis games/SevenDtoD/latest/latest.yml (ancien format : modpack / sevendtod).
+# Les fichiers de l'ancien dossier restent en place : les anciennes versions du launcher les lisent encore.
+#
+# Entrées (voir doc/instance-system/draft-original pour la spécification) :
+#   game-base      réinstallation complète (le jeu)
+#   game-breaking  mods (impacte la compatibilité serveur) : manifeste de hash, seuls les fichiers modifiés sont téléchargés
+
+version: 1.0.0.0
+buildDate: 2025-07-03T19:20:08.929Z
+
+game-base:
+  sevendtod:
+    version: 0.220.5
+    path: game
+    type: zip_url
+    content:
+      win32: /games/SevenDtoD/latest/build-game-win32.zip
+      linux: /games/SevenDtoD/latest/build-game-linux.zip
+      darwin: /games/SevenDtoD/latest/build-game-darwin.zip
+
+game-breaking:
+  modpack:
+    version: 1.0.0
+    path: game/Mods
+    type: hash_url
+    hash: ace10f3403df67afe9d34aeb2481159a89c1b6e0b72ed09ffe299d50cc74a075
+    content: /games/SevenDtoD-Valkream-v2/hash.json
+    hash-folder: /games/SevenDtoD/latest/files/

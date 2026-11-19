@@ -15,7 +15,7 @@ import path from "path";
 
 import { contentForPlatform } from "../link";
 import { resolveInside } from "../paths";
-import type { Provider } from "./types";
+import type { Provider, Uninstaller } from "./types";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
 
@@ -53,7 +53,9 @@ export const thunderstoreProvider: Provider = async (context) => {
     const url = resolver.urlOf(
       `${apiUrl}/package/download/${encodeURIComponent(mod.author)}/${encodeURIComponent(mod.name)}/${encodeURIComponent(mod.version)}/`,
     );
-    await io.download(url, zipPath, signal);
+    await io.download(url, zipPath, signal, (transfer) =>
+      context.report("download", `${mod.folder} ${mod.version} (${done}/${mods.length})`, transfer),
+    );
 
     const destination = resolveInside(entryDir, mod.folder);
     fs.rmSync(destination, { recursive: true, force: true }); // version propre, pas de résidus
@@ -64,4 +66,11 @@ export const thunderstoreProvider: Provider = async (context) => {
 
   const hash = createHash("sha256").update([...list].sort().join("\n")).digest("hex");
   return { hash: entry.hash ?? hash, owned };
+};
+
+/** Retire les dossiers des mods installés par cette entrée (et eux seuls). */
+export const thunderstoreUninstall: Uninstaller = async ({ entryDir, previousOwned }) => {
+  for (const folder of previousOwned) {
+    fs.rmSync(resolveInside(entryDir, folder), { recursive: true, force: true });
+  }
 };

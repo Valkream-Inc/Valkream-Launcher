@@ -32,7 +32,7 @@ export interface ServerOfflineInfos {
 
 export type ServerInfos = ServerOnlineInfos | ServerOfflineInfos;
 
-/** Réponse de `electron_API.getInfos(game)`. `false` si indisponible. */
+/** Réponse de `electron_API.getInstanceInfos(id)`. `false` si indisponible. */
 export interface CheckInfosResult {
   serverInfos: ServerInfos;
   event: GameEvent | false;

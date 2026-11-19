@@ -57,7 +57,9 @@ export const hashProvider: Provider = async (context) => {
 
     context.report("download", `${name} : ${file} (${++done}/${wanted.length})`);
     const partial = path.join(tempDir, `${name}.part`);
-    await io.download(resolver.urlOf(baseUrl + encodePath(file)), partial, signal);
+    await io.download(resolver.urlOf(baseUrl + encodePath(file)), partial, signal, (transfer) =>
+      context.report("download", `${name} : ${file} (${done}/${wanted.length})`, transfer),
+    );
 
     context.report("verify", `${name} : vérification de ${file}`);
     if ((await hashFile(partial)) !== expected) {

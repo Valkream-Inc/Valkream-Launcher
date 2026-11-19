@@ -19,7 +19,7 @@ function ServerInfo() {
   // Le contexte peut renvoyer `false` quand l'info est indisponible
   const serverInfos = rawServerInfos || null;
   const maintenance = rawMaintenance || null;
-  const { actualGame } = useGames();
+  const { actualInstance } = useGames();
   const [isMaintenancePopupOpen, setIsMaintenancePopupOpen] = useState(false);
 
   // Determine the display based on the state
@@ -80,7 +80,7 @@ function ServerInfo() {
             alt="logo"
           />
           <span className="logo-text">
-            {actualGame === "Valheim" ? "Valheim" : "7 Days"}
+            {actualInstance.serverLabel ?? actualInstance.name}
           </span>
           <span className="server-players">{statusText}</span>
         </div>

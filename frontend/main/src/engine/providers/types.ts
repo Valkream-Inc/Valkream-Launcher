@@ -6,14 +6,22 @@
  * Les accès réseau et zip sont injectés (`InstallIO`) pour tester sans réseau.
  */
 
-import type { GamePlatform, ReleaseEntry } from "@shared/types";
+import type { GamePlatform, ProgressData, ReleaseEntry } from "@shared/types";
 
 import type { ParamResolver } from "../ParamResolver";
 import type { UpdatePlan } from "../preserve";
 
+/** Progression d'un téléchargement : valeurs déjà formatées pour l'affichage. */
+export type TransferProgress = Pick<ProgressData, "processedBytes" | "totalBytes" | "percent" | "speed">;
+
 export interface InstallIO {
   /** Télécharge `url` vers `destination` (crée les dossiers parents). */
-  download(url: string, destination: string, signal?: AbortSignal): Promise<void>;
+  download(
+    url: string,
+    destination: string,
+    signal?: AbortSignal,
+    onProgress?: (progress: TransferProgress) => void,
+  ): Promise<void>;
   /**
    * Extrait `zipPath` dans `outDir`. `folderInZip` limite l'extraction à ce dossier de
    * l'archive (son contenu arrive à la racine de `outDir`). `accept` reçoit le chemin
@@ -40,7 +48,7 @@ export interface ProviderContext {
   /** Dossiers possédés enregistrés lors de la précédente installation de l'entrée. */
   previousOwned: string[];
   signal?: AbortSignal;
-  report: (step: "download" | "extract" | "verify", message: string) => void;
+  report: (step: "download" | "extract" | "verify", message: string, transfer?: TransferProgress) => void;
 }
 
 export interface ProviderResult {
@@ -50,3 +58,6 @@ export interface ProviderResult {
 }
 
 export type Provider = (context: ProviderContext) => Promise<ProviderResult>;
+
+/** Retire ce qu'une entrée a installé (entrée optionnelle désactivée). Absent = rien à retirer sur le disque. */
+export type Uninstaller = (context: Pick<ProviderContext, "entryDir" | "previousOwned">) => Promise<void>;

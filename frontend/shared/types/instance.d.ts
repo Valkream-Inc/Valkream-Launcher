@@ -7,8 +7,10 @@
  * Ce dossier ne contient QUE des types (fichiers .d.ts) : aucun code exécutable.
  */
 
-import type { GamePlatform } from "./common";
+import type { GamePlatform, ProgressData } from "./common";
 import type { GameEvent, Maintenance } from "./infos";
+
+import type { CheckInfosResult } from "./infos";
 
 /** Clé commune aux trois couches (main, render, remote). Ex : `Valheim-Valkream-v2`. */
 export type InstanceId = string;
@@ -201,6 +203,8 @@ export interface EntryReport {
   /** Bloque le jeu tant que non à jour (game-base, game-breaking). */
   blocking: boolean;
   optionalSetting?: string;
+  /** Entrée optionnelle désactivée mais encore installée : la prochaine synchro la retire. */
+  pendingRemoval?: boolean;
   /** Motifs réellement conservés pour une mise à jour depuis la version installée. */
   preserved: string[];
   toIgnore: string[];
@@ -235,6 +239,8 @@ export interface InstanceReport {
   /** Mods et contributeurs affichés dans l'onglet Mods (config remote de l'instance). */
   mods: ModDisplay[];
   contributors: Contributor[];
+  /** Nombre d'entrées enregistrées comme installées (connu même sans accès au remote). */
+  installedCount: number;
   /** Réglages propres à cette installation. */
   settings: Record<string, InstanceSettingValue>;
   executable?: { path: string; exists: boolean };
@@ -256,6 +262,8 @@ export interface InstanceSyncProgress {
   total: number;
   step: "start" | "download" | "extract" | "verify" | "done" | "error";
   message?: string;
+  /** Progression du fichier en cours de téléchargement (valeurs formatées, ex : "12.3 Mo"). */
+  transfer?: Pick<ProgressData, "processedBytes" | "totalBytes" | "percent" | "speed">;
 }
 
 export interface InstanceSyncResult {
@@ -264,3 +272,29 @@ export interface InstanceSyncResult {
   /** Le jeu est-il jouable après cette synchronisation ? */
   works: boolean;
 }
+
+/* ------------------------------------------------------------------ */
+/* Statut affiché sur l'accueil (`instances:status`)                    */
+/* ------------------------------------------------------------------ */
+
+export interface InstanceStatus {
+  isInternetConnected: boolean;
+  isServerReachable: boolean;
+  /** Le jeu (entrées `game-base`) est installé. */
+  isInstalled: boolean;
+  /** Tout ce qui est actif est à jour. */
+  isUpToDate: boolean;
+  /** Une entrée `game-base` est en retard : réinstallation complète. */
+  isMajorUpdate: boolean;
+  /** Version affichée (`version` du latest.yml, à titre d'information). */
+  gameVersion: string | null;
+  /** Entrées optionnelles actives (ex : mods admin) : sert aux avertissements. */
+  activeOptionalSettings: string[];
+  /** Peut-on lancer le jeu maintenant ? */
+  canPlay: boolean;
+  /** Erreurs de configuration remote (affichées dans Debug). */
+  errors: string[];
+}
+
+/** Infos serveur / événement / maintenance d'une instance (`instances:infos`). */
+export interface InstanceInfos extends CheckInfosResult {}

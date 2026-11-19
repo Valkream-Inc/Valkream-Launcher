@@ -127,7 +127,7 @@ export class InstanceInspector {
   ): Promise<InstanceReport> {
     const loaded = await this.load(id, channel);
     const { config, locations, release, releaseErrors } = loaded;
-    const settings = readInstanceSettings(locations.installDir);
+    const settings = { ...config.defaultSettings, ...readInstanceSettings(locations.installDir) };
 
     const report: InstanceReport = {
       id,
@@ -146,6 +146,7 @@ export class InstanceInspector {
         blocking: [],
         works: false,
       },
+      installedCount: 0,
       mods: loaded.mods,
       contributors: loaded.contributors,
       settings,
@@ -155,9 +156,10 @@ export class InstanceInspector {
       errors: loaded.errors,
     };
 
+    const state = readInstallState(locations.installDir);
+    report.installedCount = Object.keys(state.entries).length;
     if (!release || typeof release !== "object") return finalize(report);
     report.releaseVersion = String(release.version ?? "");
-    const state = readInstallState(locations.installDir);
 
     // 3. Une ligne par entrée.
     for (const tier of TIERS) {
@@ -242,6 +244,7 @@ export const buildRow = (
 
   let status: EntryReport["status"];
   if (entryErrors.length > 0) status = "invalid";
+  else if (skipped && installed) status = "outdated"; // désactivée mais encore installée : à retirer
   else if (skipped) status = "skipped";
   else if (!installed) status = "not-installed";
   else if (
@@ -263,6 +266,7 @@ export const buildRow = (
     status,
     blocking: tier !== "game-notbreaking",
     optionalSetting,
+    pendingRemoval: skipped && installed ? true : undefined,
     preserved: resolvePreserved(
       Array.isArray(entry?.gameFolderToPreserve) ? entry.gameFolderToPreserve : undefined,
       installed?.version,

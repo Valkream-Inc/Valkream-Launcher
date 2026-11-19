@@ -40,7 +40,7 @@ export const NavSettings = ({
   onToogleSpecialOption,
 }: NavSettingsProps) => {
   const { changePanel } = usePanels();
-  const { actualGame } = useGames();
+  const { actualInstance } = useGames();
 
   const handleToogleSpecialOptionClick = (e: MouseEvent<HTMLImageElement>) => {
     // ctrl + shift click pour rendre les options spéciaux visibles
@@ -63,7 +63,7 @@ export const NavSettings = ({
       {/* Header */}
       <img
         onClick={handleToogleSpecialOptionClick}
-        src={`./images/${actualGame}-icon-with-name.png`}
+        src={`./images/${actualInstance.assets}-icon-with-name.png`}
         alt="Logo Valkream"
         className="menu-header"
       />

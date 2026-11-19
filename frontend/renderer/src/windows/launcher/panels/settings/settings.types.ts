@@ -3,21 +3,11 @@
  * @license MIT-NC
  */
 
-import type { Dispatch, RefObject, SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 
-/** Méthodes exposées (via `useImperativeHandle`) par les onglets de mods. */
-export interface ModsTabHandle {
-  reload: () => void | Promise<void>;
-  /** Uniquement pour Valheim. */
-  stop?: () => void;
-  /** Uniquement pour Valheim. */
-  freeze?: () => void;
-}
-
-/** Props communes aux panneaux de paramètres de chaque jeu. */
+/** Props du panneau de paramètres d'une instance. */
 export interface GameSettingsProps {
   returnToHome: () => void;
-  modsTabRef: RefObject<ModsTabHandle | null>;
   changeTab: (tab: string) => void;
   activeTab: string;
   ToggleIsConfirmSpecialOptionVisible: () => void;

@@ -7,18 +7,11 @@
  * selon la fenêtre chargée : on expose donc l'union des deux contrats.
  */
 
-import type {
-  ElectronAPI,
-  ElectronSevenDtoDAPI,
-  ElectronUpdaterAPI,
-  ElectronValheimAPI,
-} from "@shared/types";
+import type { ElectronAPI, ElectronUpdaterAPI } from "@shared/types";
 
 declare global {
   interface Window {
     electron_API: ElectronAPI & ElectronUpdaterAPI;
-    electron_Valheim_API: ElectronValheimAPI;
-    electron_SevenDtoD_API: ElectronSevenDtoDAPI;
   }
 }
 

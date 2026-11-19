@@ -21,12 +21,6 @@ export interface ServerQueryConfig {
   timeout: number;
 }
 
-/** Configuration des serveurs interrogés, par jeu. */
-export interface ServersInfosConfig {
-  Valheim: ServerQueryConfig;
-  SevenDtoD: ServerQueryConfig;
-}
-
 /** Options axios pour désactiver le cache HTTP. */
 export interface NoCacheConfig {
   headers: {

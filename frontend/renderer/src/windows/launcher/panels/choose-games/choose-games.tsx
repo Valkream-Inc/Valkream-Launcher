@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { GameName, LauncherTheme } from "@shared/types";
+import type { LauncherTheme } from "@shared/types";
 
 import instancesRenderConfig from "../../../../instances/instances.config";
 import { isSelectable } from "../../../../instances/instances.helpers";
@@ -27,21 +27,6 @@ import type {
   GameEntry,
   SearchColors,
 } from "./choose-games.types";
-
-// 🧩 Tu peux mélanger icônes MUI et images personnalisées ici :
-// `name` sert à l'affichage (alt) et à la recherche.
-const legacyGames: GameEntry[] = [
-  {
-    id: "Valheim",
-    name: "Valheim",
-    icon: "./images/Valheim-name.png",
-  },
-  {
-    id: "SevenDtoD",
-    name: "7 Days to Die",
-    icon: "./images/SevenDtoD-name.png",
-  },
-];
 
 // Normalise : minuscules, sans accents, sans espaces
 const normalize = (str: string): string =>
@@ -219,8 +204,8 @@ const searchColors = (theme: LauncherTheme): SearchColors => {
 };
 
 export default function ChooseGames() {
-  const { changeActualGame, changeActualInstance } = useGames();
-  const [instanceGames, setInstanceGames] = useState<GameEntry[]>([]);
+  const { changeActualInstance } = useGames();
+  const [games, setGames] = useState<GameEntry[]>([]);
 
   // Instances du nouveau système : activées par le remote ET décrites côté render.
   useEffect(() => {
@@ -228,12 +213,11 @@ export default function ChooseGames() {
       .getInstances()
       .then((summaries) => {
         const renderIds = instancesRenderConfig.map((item) => item.id);
-        setInstanceGames(
+        setGames(
           summaries
             .filter((summary) => isSelectable(summary, renderIds))
             .map((summary) => ({
               id: summary.id,
-              instanceId: summary.id,
               name:
                 instancesRenderConfig.find((item) => item.id === summary.id)
                   ?.name ?? summary.id,
@@ -245,17 +229,12 @@ export default function ChooseGames() {
       .catch(console.error);
   }, []);
 
-  const games = useMemo(
-    () => [...legacyGames, ...instanceGames],
-    [instanceGames],
-  );
   const { changePanel } = usePanels();
   const { theme } = useTheme();
   const [search, setSearch] = useState("");
 
   const handleClick = (game: GameEntry) => {
-    if (game.instanceId) changeActualInstance(game.instanceId);
-    else changeActualGame(game.id as GameName);
+    changeActualInstance(game.id);
     changePanel("home");
   };
 

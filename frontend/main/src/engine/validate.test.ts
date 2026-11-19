@@ -5,6 +5,7 @@ import { describe, it } from "node:test";
 
 import yaml from "yaml";
 
+import { manifestHash } from "./manifest";
 import { validateReleaseConfig, validateRemoteIndex } from "./validate";
 
 const backendPublic = path.resolve(__dirname, "../../../../backend/public");
@@ -234,4 +235,35 @@ describe("gameFolderToPreserve et to_ignore", () => {
     assert.match(text, /gameFolderToPreserve\[3\]/);
     assert.match(text, /to_ignore\[0\]/);
   });
+});
+
+describe("backend/public : toutes les instances de l'index", () => {
+  const index = readJson("index.config.json");
+  const local = (link: string) => path.join(backendPublic, link.replace(/^\//, ""));
+
+  for (const instance of index.instances) {
+    it(`${instance.id} : canaux valides, hash du manifeste cohérent, fichiers liés présents`, () => {
+      for (const [channel, link] of Object.entries<string>(instance.channels)) {
+        const release = readYaml(link);
+        const result = validateReleaseConfig(release, ["game"]);
+        assert.equal(result.ok, true, `${instance.id}@${channel} : ${result.errors.join(" | ")}`);
+
+        for (const tier of ["game-base", "game-breaking", "game-notbreaking"]) {
+          for (const [name, entry] of Object.entries<any>(release[tier] ?? {})) {
+            // Manifeste présent dans le repo : le hash déclaré doit être celui du manifeste.
+            if (entry.type === "hash_url" && typeof entry.content === "string" && fs.existsSync(local(entry.content))) {
+              const manifest = JSON.parse(fs.readFileSync(local(entry.content), "utf8"));
+              assert.equal(entry.hash, manifestHash(manifest, entry.to_ignore ?? []), `${instance.id}@${channel}.${name}`);
+            }
+          }
+        }
+      }
+      for (const key of ["event", "maintenance", "contributors", "mods"]) {
+        if (instance[key] !== undefined) {
+          assert.ok(fs.existsSync(local(instance[key])), `${instance.id}.${key} : fichier absent`);
+          JSON.parse(fs.readFileSync(local(instance[key]), "utf8"));
+        }
+      }
+    });
+  }
 });

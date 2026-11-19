@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 import type { InstanceMainConfig } from "../types/instances";
 import { InstanceInspector } from "./InstanceInspector";
 import { InstanceInstaller } from "./InstanceInstaller";
-import { readInstallState } from "./install-store";
+import { readInstallState, writeInstanceSetting } from "./install-store";
 import { manifestHash } from "./manifest";
 import { instanceRootPath } from "./paths";
 import type { ParamResolver } from "./ParamResolver";
@@ -161,6 +161,21 @@ describe("InstanceInstaller", () => {
     assert.equal(read("stable", "game/config/graphics.cfg"), "default-gfx");
   });
 
+  it("réparation : un fichier supprimé ou modifié est retéléchargé seulement avec repair", async () => {
+    const { installer } = build(baseRemote(), files);
+    await installer.sync("g", "stable");
+    fs.rmSync(path.join(dir("stable"), "game/bin/game.exe"));
+    fs.writeFileSync(path.join(dir("stable"), "game/data/a.txt"), "abîmé");
+
+    await installer.sync("g", "stable");
+    assert.equal(fs.existsSync(path.join(dir("stable"), "game/bin/game.exe")), false); // statut « à jour » : rien à faire
+
+    const result = await installer.sync("g", "stable", { repair: true });
+    assert.deepEqual(result.installed, ["base"]);
+    assert.equal(read("stable", "game/bin/game.exe"), "exe-v1");
+    assert.equal(read("stable", "game/data/a.txt"), "a");
+  });
+
   it("hash_url : un fichier corrompu est refusé et l'entrée n'est pas enregistrée", async () => {
     const { installer } = build(baseRemote(), { ...files, "/h/data/a.txt": "CORROMPU" });
     const result = await installer.sync("g", "stable");
@@ -232,6 +247,41 @@ describe("InstanceInstaller", () => {
     assert.equal(fs.existsSync(path.join(dir("stable"), "game/plugins/Au-ModA")), false);
     assert.equal(read("stable", "game/plugins/Au-ModB/plugin.dll"), "B3");
     assert.equal(read("stable", "game/plugins/Autre-Mod/x.dll"), "autre");
+  });
+
+  it("entrée optionnelle désactivée : ses mods sont retirés, ceux des autres entrées restent", async () => {
+    const remote: Record<string, any> = {
+      "/index.json": index({ stable: "/stable.yml" }),
+      "/stable.yml": {
+        version: "1.0.0.0",
+        "game-breaking": {
+          normal: { version: "1", path: "game/plugins", type: "thunderstore_modpack_url", content: ["Au-Normal-1.0.0"] },
+          admin: { version: "1", path: "game/plugins", type: "thunderstore_modpack_url", content: ["Au-Admin-1.0.0"], optional: { setting: "modsAdmin" } },
+        },
+      },
+    };
+    const body = JSON.stringify({ "plugin.dll": "x" });
+    const w = makeWorld(remote, {});
+    w.io.download = async (_url, dest) => {
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.writeFileSync(dest, body);
+    };
+    const inspector = new InstanceInspector({ configs: [config], resolver: w.resolver, platform: "win32", rootPath: () => root });
+    const installer = new InstanceInstaller({ inspector, resolver: w.resolver, platform: "win32", io: w.io });
+
+    writeInstanceSetting(dir("stable"), "modsAdmin", true);
+    await installer.sync("g", "stable");
+    assert.equal(fs.existsSync(path.join(dir("stable"), "game/plugins/Au-Admin/plugin.dll")), true);
+
+    writeInstanceSetting(dir("stable"), "modsAdmin", false);
+    const status = await inspector.report("g", "stable");
+    assert.equal(status.entries[1].pendingRemoval, true); // proposé à l'utilisateur comme une mise à jour
+    await installer.sync("g", "stable");
+
+    assert.equal(fs.existsSync(path.join(dir("stable"), "game/plugins/Au-Admin")), false);
+    assert.equal(fs.existsSync(path.join(dir("stable"), "game/plugins/Au-Normal/plugin.dll")), true);
+    assert.equal("admin" in readInstallState(dir("stable")).entries, false);
+    assert.equal((await inspector.report("g", "stable")).entries[1].status, "skipped");
   });
 
   it("type non pris en charge (nexus) : échec signalé, pas d'exception", async () => {

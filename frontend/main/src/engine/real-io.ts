@@ -11,15 +11,27 @@ import path from "path";
 import unzipper from "unzipper";
 
 import { downloadFile } from "../utils/function/dowloadFile";
+import { formatBytes } from "../utils/function/formatBytes";
 import { isPathInside } from "./paths";
 import { normalizeRelative } from "./patterns";
 import type { InstallIO } from "./providers/types";
 
 export const realInstallIO: InstallIO = {
-  async download(url, destination, signal) {
+  async download(url, destination, signal, onProgress) {
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.rmSync(destination, { force: true }); // jamais de reprise sur un fichier d'une autre synchro
-    await downloadFile(url, destination, () => undefined, signal);
+    await downloadFile(
+      url,
+      destination,
+      (processed, total, percent, speed) =>
+        onProgress?.({
+          processedBytes: formatBytes(processed),
+          totalBytes: formatBytes(total),
+          percent,
+          speed: formatBytes(speed),
+        }),
+      signal
+    );
   },
 
   async extract(zipPath, outDir, { folderInZip, accept }) {

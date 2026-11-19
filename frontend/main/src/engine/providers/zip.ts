@@ -23,7 +23,9 @@ export const zipProvider: Provider = async (context) => {
 
   const zipPath = path.join(tempDir, `${name}.zip`);
   context.report("download", `Téléchargement de ${name}`);
-  await io.download(resolver.urlOf(content), zipPath, signal);
+  await io.download(resolver.urlOf(content), zipPath, signal, (transfer) =>
+      context.report("download", `Téléchargement de ${name}`, transfer),
+    );
 
   context.report("extract", `Extraction de ${name}`);
   fs.mkdirSync(entryDir, { recursive: true });

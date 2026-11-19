@@ -7,10 +7,8 @@ import type { ReactNode } from "react";
 
 /** Jeu affiché dans la grille de sélection. */
 export interface GameEntry {
-  /** Jeu historique (`GameName`) ou id d'instance du nouveau système. */
+  /** Id de l'instance (ex : `Valheim-Valkream-v2`). */
   id: string;
-  /** Renseigné pour une instance du nouveau système. */
-  instanceId?: string;
   /** Nom affiché (alt) et utilisé pour la recherche. */
   name: string;
   /** Chemin d'image ou élément React personnalisé. */

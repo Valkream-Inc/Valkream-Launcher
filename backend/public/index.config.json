@@ -5,8 +5,8 @@
       "id": "Valheim-Valkream-v2",
       "enabled": {
         "win32": true,
-        "linux": false,
-        "darwin": false
+        "linux": true,
+        "darwin": true
       },
       "channels": {
         "stable": "/games/Valheim-Valkream-v2/latest.yml",
@@ -16,6 +16,22 @@
       "maintenance": "/games/Valheim-Valkream-v2/maintenance.config.json",
       "contributors": "/games/Valheim-Valkream-v2/contributor.config.json",
       "mods": "/games/Valheim-Valkream-v2/mods.config.json"
+    },
+    {
+      "id": "SevenDtoD-Valkream-v2",
+      "enabled": {
+        "win32": true,
+        "linux": true,
+        "darwin": true
+      },
+      "channels": {
+        "stable": "/games/SevenDtoD-Valkream-v2/latest.yml",
+        "beta": "/games/SevenDtoD-Valkream-v2/latest.beta.yml"
+      },
+      "event": "/games/SevenDtoD-Valkream-v2/event.config.json",
+      "maintenance": "/games/SevenDtoD-Valkream-v2/maintenance.config.json",
+      "contributors": "/games/SevenDtoD-Valkream-v2/contributor.config.json",
+      "mods": "/games/SevenDtoD-Valkream-v2/mods.config.json"
     }
   ]
 }

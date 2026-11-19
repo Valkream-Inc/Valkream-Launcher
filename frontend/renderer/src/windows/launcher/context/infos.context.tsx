@@ -10,14 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type {
-  ElectronSevenDtoDAPI,
-  ElectronValheimAPI,
-  GameEvent,
-  GameName,
-  Maintenance,
-  ServerInfos,
-} from "@shared/types";
+import type { GameEvent, Maintenance, ServerInfos } from "@shared/types";
 
 import Loader from "../component/loader/loader";
 import { useAction } from "./action.context";
@@ -43,7 +36,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
     installationStatusLoaded: false,
   });
   const { actionLoading } = useAction();
-  const { actualGame } = useGames();
+  const { actualInstanceId, actualChannel } = useGames();
   const { activePanel } = usePanels();
 
   const [event, setEvent] = useState<GameEvent | false | null>(null);
@@ -66,15 +59,16 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
     loadingState.infosLoaded && loadingState.installationStatusLoaded
   );
 
-  const actualGameRef = useRef<GameName | null>(null); // Pour vérifier si le jeu a changé
+  // Pour vérifier si le jeu (ou son canal) a changé
+  const actualGameRef = useRef<string | null>(null);
   const actionLoadingRef = useRef<boolean | null>(null); // Pour vérifier si une nouvelle action est en cours
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null); // Pour lancer une fois à blanc avant de lancer la boucle
   const isLoadingRef = useRef(false); // Pour empêcher les appels parallèles
 
   useEffect(() => {
     if (
-      !window.electron_Valheim_API?.getInstallationStatut ||
-      !window.electron_API?.getInfos
+      !window.electron_API?.getInstanceStatus ||
+      !window.electron_API?.getInstanceInfos
     ) {
       console.warn(
         "L'API Electron n'est pas disponible. Vérification des infos impossible."
@@ -85,8 +79,9 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
     if (actionLoadingRef.current !== actionLoading)
       actionLoadingRef.current = actionLoading;
 
-    if (actualGameRef.current !== actualGame) {
-      actualGameRef.current = actualGame;
+    const gameKey = `${actualInstanceId}@${actualChannel}`;
+    if (actualGameRef.current !== gameKey) {
+      actualGameRef.current = gameKey;
 
       // Reset complet
       setEvent(null);
@@ -94,17 +89,10 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
       setServerInfos(null);
       setLoadingState({
         infosLoaded: false,
-        installationStatusLoaded: actualGame !== "Valheim",
+        installationStatusLoaded: false,
       });
+      setInstallationStatut(null);
     }
-
-    const GAMES_APIS: Record<
-      GameName,
-      ElectronValheimAPI | ElectronSevenDtoDAPI
-    > = {
-      Valheim: window.electron_Valheim_API,
-      SevenDtoD: window.electron_SevenDtoD_API,
-    };
 
     const getAllInfos = async () => {
       // Empêcher les appels parallèles
@@ -113,9 +101,12 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
 
       try {
         // get installation statut
-        if (!actionLoading && GAMES_APIS[actualGame]) {
-          const statut = await GAMES_APIS[actualGame].getInstallationStatut();
-          if (actualGameRef.current !== actualGame) {
+        if (!actionLoading) {
+          const statut = await window.electron_API.getInstanceStatus(
+            actualInstanceId,
+            actualChannel
+          );
+          if (actualGameRef.current !== gameKey) {
             isLoadingRef.current = false;
             return; // Récupération des infos uniquement si le jeu n'a pas changé
           }
@@ -133,8 +124,10 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
         }
 
         // get other infos
-        const infos = await window.electron_API.getInfos(actualGame);
-        if (actualGameRef.current !== actualGame) {
+        const infos = await window.electron_API.getInstanceInfos(
+          actualInstanceId
+        );
+        if (actualGameRef.current !== gameKey) {
           isLoadingRef.current = false;
           return; // Récupération des infos uniquement si le jeu n'a pas changé
         }
@@ -170,7 +163,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
         intervalRef.current = null;
       }
     };
-  }, [actionLoading, actualGame]);
+  }, [actionLoading, actualInstanceId, actualChannel]);
 
   const contextValue: InfosContextValue = {
     isLoading,

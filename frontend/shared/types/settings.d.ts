@@ -14,17 +14,6 @@ export interface Settings {
   betaEnabled: boolean;
   launcherTheme: LauncherTheme;
   backgroundType: BackgroundType;
-  // Valheim
-  launchSteamWithValheim: boolean;
-  launcherBehaviorWithValheim: LauncherBehavior;
-  boostfpsModsEnabledWithValheim: boolean;
-  boostgraphicModsEnabledWithValheim: boolean;
-  adminModsEnabledWithValheim: boolean;
-  // SevenDtoD
-  launchSteamWithSevenDtoD: boolean;
-  launcherBehaviorWithSevenDtoD: LauncherBehavior;
-  /** Chemin du jeu 7 Days to Die choisi par le joueur (absent tant qu'il n'est pas défini). */
-  gamePathWithSevenDtoD?: string;
 }
 
 export type SettingKey = keyof Settings;

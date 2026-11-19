@@ -9,7 +9,7 @@
 import os from "os";
 import path from "path";
 
-import type { GamePlatform } from "@shared/types";
+import type { Channel, GamePlatform } from "@shared/types";
 
 import baseUrl from "../constants/baseUrl";
 import isDev from "../constants/isDev";
@@ -17,11 +17,14 @@ import instancesConfig from "../instances/instances.config";
 import DirsManager from "../manager/dirsManager";
 import { createDiskCache } from "./disk-cache";
 import { httpFetchText } from "./http-fetcher";
+import InfosManager from "../manager/infosManager";
+import { InstanceInfos } from "./InstanceInfos";
 import { InstanceInspector } from "./InstanceInspector";
 import { InstanceInstaller } from "./InstanceInstaller";
 import { realInstallIO } from "./real-io";
 import { InstanceRegistry } from "./InstanceRegistry";
 import { ParamResolver } from "./ParamResolver";
+import { computeStatus } from "./status";
 
 let resolver: ParamResolver | null = null;
 let registry: InstanceRegistry | null = null;
@@ -69,4 +72,26 @@ export const getInstanceInstaller = (): InstanceInstaller => {
     io: realInstallIO,
   });
   return installer;
+};
+
+let infos: InstanceInfos | null = null;
+
+export const getInstanceInfos = (): InstanceInfos => {
+  infos ??= new InstanceInfos({
+    configs: instancesConfig,
+    resolver: getResolver(),
+    platform: platform(),
+    queryServer: (server) => InfosManager.getServerInfos(server),
+  });
+  return infos;
+};
+
+/** Statut d'accueil : rapport + connexion internet / serveur de fichiers. */
+export const getInstanceStatus = async (id: string, channel: Channel) => {
+  const [report, isInternetConnected, isServerReachable] = await Promise.all([
+    getInstanceInspector().report(id, channel),
+    InfosManager.getIsInternetConnected(),
+    InfosManager.getIsServerReachable(),
+  ]);
+  return computeStatus(report, { isInternetConnected, isServerReachable });
 };

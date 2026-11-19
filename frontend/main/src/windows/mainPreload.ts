@@ -10,11 +10,7 @@
  */
 import { contextBridge, ipcRenderer } from "electron";
 
-import type {
-  ElectronAPI,
-  ElectronSevenDtoDAPI,
-  ElectronValheimAPI,
-} from "@shared/types";
+import type { ElectronAPI } from "@shared/types";
 
 // Expose these window control functions to the renderer process (your React app).
 // They will be available in the renderer as `window.electron_API.close()`, `window.electron_API.minimize()`, etc.
@@ -40,14 +36,21 @@ const electronAPI: ElectronAPI = {
 
   // infos
   versionLauncher: () => ipcRenderer.invoke("get-version:launcher"),
-  getInfos: (game) => ipcRenderer.invoke("get-infos", game),
 
-  // instances (nouveau système)
+  // jeux : une seule API pour toutes les instances
   getInstances: () => ipcRenderer.invoke("instances:list"),
+  getInstanceInfos: (id) => ipcRenderer.invoke("instances:infos", id),
+  getInstanceStatus: (id, channel) =>
+    ipcRenderer.invoke("instances:status", id, channel),
   getInstanceReport: (id, channel, options) =>
     ipcRenderer.invoke("instances:report", id, channel, options),
-  syncInstance: (id, channel) => ipcRenderer.invoke("instances:sync", id, channel),
+  syncInstance: (id, channel, options) =>
+    ipcRenderer.invoke("instances:sync", id, channel, options),
   launchInstance: (id, channel) => ipcRenderer.invoke("instances:launch", id, channel),
+  openInstanceFolder: (id, channel) =>
+    ipcRenderer.invoke("instances:open-folder", id, channel),
+  uninstallInstance: (id, channel) =>
+    ipcRenderer.invoke("instances:uninstall", id, channel),
   onInstanceProgress: (callback) =>
     ipcRenderer.on("instances:progress", (_event, data) => callback(data)),
   removeInstanceProgressListeners: () =>
@@ -66,163 +69,3 @@ const electronAPI: ElectronAPI = {
 };
 
 contextBridge.exposeInMainWorld("electron_API", electronAPI);
-
-// Expose these window control functions to the renderer process (your React app).
-// They will be available in the renderer as `window.electron_Valheim_API.install()`, `window.electron_Valheim_API.update()`, etc.
-const electronValheimAPI: ElectronValheimAPI = {
-  // infos
-  versionGame: () => ipcRenderer.invoke("Valheim-get-version:game"),
-  getInstallationStatut: () =>
-    ipcRenderer.invoke("Valheim-get-installation-statut"),
-
-  // utils
-  openGameFolder: () => ipcRenderer.invoke("Valheim-open-game-folder"),
-  uninstallGame: () => ipcRenderer.invoke("Valheim-uninstall-game"),
-
-  // mods data
-  getModsData: (signal) => ipcRenderer.invoke("Valheim-get-mods-data", signal),
-  getModDetails: (baseMod) =>
-    ipcRenderer.invoke("Valheim-get-mods-details", baseMod),
-  getHashData: () => ipcRenderer.invoke("Valheim-get-hash-data"),
-
-  // installation
-  install: () => ipcRenderer.invoke("Valheim-install"),
-  onInstallProgress: (callback) =>
-    ipcRenderer.on("progress-install-Valheim", (event, data) => callback(data)),
-  onInstallDone: (callback) =>
-    ipcRenderer.on("done-install-Valheim", (event, data) => callback(data)),
-  onInstallError: (callback) =>
-    ipcRenderer.on("error-install-Valheim", (event, data) => callback(data)),
-  removeInstallListeners: () => {
-    ipcRenderer.removeAllListeners("progress-install-Valheim");
-    ipcRenderer.removeAllListeners("done-install-Valheim");
-    ipcRenderer.removeAllListeners("error-install-Valheim");
-  },
-
-  // play
-  start: () => ipcRenderer.invoke("Valheim-start"),
-
-  // update
-  update: () => ipcRenderer.invoke("Valheim-update"),
-  onUpdateProgress: (callback) =>
-    ipcRenderer.on("progress-update-Valheim", (event, data) => callback(data)),
-  onUpdateDone: (callback) =>
-    ipcRenderer.on("done-update-Valheim", (event, data) => callback(data)),
-  onUpdateError: (callback) =>
-    ipcRenderer.on("error-update-Valheim", (event, data) => callback(data)),
-  removeUpdateListeners: () => {
-    ipcRenderer.removeAllListeners("progress-update-Valheim");
-    ipcRenderer.removeAllListeners("done-update-Valheim");
-    ipcRenderer.removeAllListeners("error-update-Valheim");
-  },
-
-  // custom mods
-  customMods: () => ipcRenderer.invoke("Valheim-custom-mods"),
-  onCustomModsProgress: (callback) =>
-    ipcRenderer.on("progress-custom-mods-Valheim", (event, data) =>
-      callback(data),
-    ),
-  onCustomModsDone: (callback) =>
-    ipcRenderer.on("done-custom-mods-Valheim", (event, data) => callback(data)),
-  onCustomModsError: (callback) =>
-    ipcRenderer.on("error-custom-mods-Valheim", (event, data) =>
-      callback(data),
-    ),
-  removeCustomModsListeners: () => {
-    ipcRenderer.removeAllListeners("progress-custom-mods-Valheim");
-    ipcRenderer.removeAllListeners("done-custom-mods-Valheim");
-    ipcRenderer.removeAllListeners("error-custom-mods-Valheim");
-  },
-};
-
-contextBridge.exposeInMainWorld("electron_Valheim_API", electronValheimAPI);
-
-// Expose these window control functions to the renderer process (your React app).
-// They will be available in the renderer as `window.electron_SevenDtoD_API.install()`, `window.electron_SevenDtoD_API.update()`, etc.
-const electronSevenDtoDAPI: ElectronSevenDtoDAPI = {
-  // infos
-  getInstallationStatut: () =>
-    ipcRenderer.invoke("SevenDtoD-get-installation-statut"),
-
-  // utils
-  openGameFolder: () => ipcRenderer.invoke("SevenDtoD-open-game-folder"),
-  uninstallGame: () => ipcRenderer.invoke("SevenDtoD-uninstall-game"),
-
-  // mods data
-  getModsData: () => ipcRenderer.invoke("SevenDtoD-get-mods-data"),
-  onModsDataProgress: (callback) =>
-    ipcRenderer.on("progress-mods-data-SevenDtoD", (event, data) =>
-      callback(data),
-    ),
-  removeModsDataListeners: () =>
-    ipcRenderer.removeAllListeners("progress-mods-data-SevenDtoD"),
-
-  getLocalHashData: () => ipcRenderer.invoke("SevenDtoD-get-local-hash-data"),
-
-  // installation
-  install: () => ipcRenderer.invoke("SevenDtoD-install"),
-  onInstallProgress: (callback) =>
-    ipcRenderer.on("progress-install-SevenDtoD", (event, data) =>
-      callback(data),
-    ),
-  onInstallDone: (callback) =>
-    ipcRenderer.on("done-install-SevenDtoD", (event, data) => callback(data)),
-  onInstallError: (callback) =>
-    ipcRenderer.on("error-install-SevenDtoD", (event, data) => callback(data)),
-  removeInstallListeners: () => {
-    ipcRenderer.removeAllListeners("progress-install-SevenDtoD");
-    ipcRenderer.removeAllListeners("done-install-SevenDtoD");
-    ipcRenderer.removeAllListeners("error-install-SevenDtoD");
-  },
-
-  // play
-  play: () => ipcRenderer.invoke("SevenDtoD-play"),
-  onPlayProgress: (callback) =>
-    ipcRenderer.on("progress-play-SevenDtoD", (event, data) => callback(data)),
-  onPlayDone: (callback) =>
-    ipcRenderer.on("done-play-SevenDtoD", (event, data) => callback(data)),
-  onPlayError: (callback) =>
-    ipcRenderer.on("error-play-SevenDtoD", (event, data) => callback(data)),
-  removePlayListeners: () => {
-    ipcRenderer.removeAllListeners("progress-play-SevenDtoD");
-    ipcRenderer.removeAllListeners("done-play-SevenDtoD");
-    ipcRenderer.removeAllListeners("error-play-SevenDtoD");
-  },
-
-  // update
-  update: () => ipcRenderer.invoke("SevenDtoD-update"),
-  onUpdateProgress: (callback) =>
-    ipcRenderer.on("progress-update-SevenDtoD", (event, data) =>
-      callback(data),
-    ),
-  onUpdateDone: (callback) =>
-    ipcRenderer.on("done-update-SevenDtoD", (event, data) => callback(data)),
-  onUpdateError: (callback) =>
-    ipcRenderer.on("error-update-SevenDtoD", (event, data) => callback(data)),
-  removeUpdateListeners: () => {
-    ipcRenderer.removeAllListeners("progress-update-SevenDtoD");
-    ipcRenderer.removeAllListeners("done-update-SevenDtoD");
-    ipcRenderer.removeAllListeners("error-update-SevenDtoD");
-  },
-
-  // generate fix
-  fixMods: () => ipcRenderer.invoke("SevenDtoD-fix-mods"),
-  onFixModsProgress: (callback) =>
-    ipcRenderer.on("progress-fix-mods-SevenDtoD", (event, data) =>
-      callback(data),
-    ),
-  onFixModsDone: (callback) =>
-    ipcRenderer.on("done-fix-mods-SevenDtoD", (event, data) => callback(data)),
-  onFixModsError: (callback) =>
-    ipcRenderer.on("error-fix-mods-SevenDtoD", (event, data) => callback(data)),
-  removeFixModsListeners: () => {
-    ipcRenderer.removeAllListeners("progress-fix-mods-SevenDtoD");
-    ipcRenderer.removeAllListeners("done-fix-mods-SevenDtoD");
-    ipcRenderer.removeAllListeners("error-fix-mods-SevenDtoD");
-  },
-};
-
-contextBridge.exposeInMainWorld(
-  "electron_SevenDtoD_API",
-  electronSevenDtoDAPI
-);

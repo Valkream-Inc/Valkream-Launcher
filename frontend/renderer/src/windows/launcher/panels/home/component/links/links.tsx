@@ -8,6 +8,7 @@ import "./css/links.css";
 import { DiscordIcon, WebIcon, TopServerIcon } from "./svgs";
 import type { LinkProps } from "./links.types";
 import { ButtonBase } from "@mui/material";
+import { useGames } from "../../../../context/games.context";
 
 function Link({ url, icon }: LinkProps) {
   if (!window.electron_API.openLink) return null;
@@ -23,19 +24,22 @@ function Link({ url, icon }: LinkProps) {
 }
 
 function Links() {
+  // Liens décrits par la config render de l'instance : un lien absent n'est pas affiché
+  const { actualInstance } = useGames();
+  const { discord, site, topserver } = actualInstance.links ?? {};
+
   return (
     <div className="links">
-      <Link
-        url="https://discord.com/invite/zn3TsumtyG"
-        icon={<DiscordIcon />}
-      />
-      <Link url="https://valkream.com" icon={<WebIcon />} />
-      <Link
-        url="https://top-serveurs.net/Valheim/vote/Valheim-valkream"
-        icon={
-          <TopServerIcon sx={{ transform: "scale(2.4) translate(0,30%)" }} />
-        }
-      />
+      {discord && <Link url={discord} icon={<DiscordIcon />} />}
+      {site && <Link url={site} icon={<WebIcon />} />}
+      {topserver && (
+        <Link
+          url={topserver}
+          icon={
+            <TopServerIcon sx={{ transform: "scale(2.4) translate(0,30%)" }} />
+          }
+        />
+      )}
     </div>
   );
 }

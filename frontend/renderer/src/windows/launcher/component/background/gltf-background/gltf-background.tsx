@@ -14,13 +14,12 @@ import CampfireLight from "./component/campfire-light";
 import LoaderFallback from "./component/loader-fallback";
 import Model from "./component/model";
 import PlayerControls from "./component/players-controls";
-import SunsetEnvironment from "./component/sunset-environement";
 
 import { useGames } from "../../../context/games.context";
-import type { GltfGameData } from "./gltf-background.types";
 
 function GltfBackground() {
-  const { actualGame } = useGames();
+  const { actualInstance } = useGames();
+  const { assets, gltf } = actualInstance;
   const [showStats, setShowStats] = useState(false);
 
   // ✅ Toggle avec Ctrl + Maj + clic (listener React sur le wrapper :
@@ -33,38 +32,8 @@ function GltfBackground() {
     }
   }, []);
 
-  // 📦 Données selon le jeu
-  const ValheimData = useMemo<GltfGameData>(
-    () => ({
-      camera: { position: [0, 1.8, 4.5], fov: 75 },
-      lights: { ambientIntensity: 0.4, color: "#ffffff" },
-      fogArgs: ["#202030", 0, 50],
-      environment: <SunsetEnvironment />,
-      hasCampfire: true,
-    }),
-    [],
-  );
-
-  const SevenDtoDData = useMemo<GltfGameData>(
-    () => ({
-      camera: { position: [60, 60, 60], fov: 75 },
-      lights: { ambientIntensity: 30, color: "#ffffff" },
-      fogArgs: ["#202030", 0, 200],
-      environment: null,
-      hasCampfire: false,
-    }),
-    [],
-  );
-
-  const { camera, lights, fogArgs, environment, hasCampfire } = useMemo((): GltfGameData => {
-    switch (actualGame) {
-      case "SevenDtoD":
-        return SevenDtoDData;
-      case "Valheim":
-      default:
-        return ValheimData;
-    }
-  }, [actualGame, ValheimData, SevenDtoDData]);
+  // 📦 Données de la scène : décrites par la config render de l'instance
+  const { camera, lights, fogArgs, environment, hasCampfire } = gltf;
 
   const [speed, climbSpeed] = useMemo(() => [4, 2], []);
 
@@ -81,7 +50,7 @@ function GltfBackground() {
         {/* Fallback = null : rien de DOM dans le Canvas, c'est ça qui
             faisait planter React (unmount de root pendant un render) */}
         <Suspense fallback={null}>
-          <Model key={actualGame} modelPath={`./models/${actualGame}-3d.glb`} />
+          <Model key={assets} modelPath={`./models/${assets}-3d.glb`} />
         </Suspense>
         {hasCampfire && <CampfireLight />}
         <PlayerControls speed={speed} climbSpeed={climbSpeed} />

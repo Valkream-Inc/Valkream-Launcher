@@ -8,10 +8,9 @@ import path from "path";
 import { ipcMain, app, dialog, shell } from "electron";
 import type { BrowserWindow, IpcMainInvokeEvent } from "electron";
 
-import type { GameName, SettingKey, Settings } from "@shared/types";
+import type { SettingKey, Settings } from "@shared/types";
 
 import CheckForUpdates from "./handlers/check-for-updates";
-import CheckInfos from "./handlers/check-infos";
 
 import SettingsManager from "../manager/settingsManager";
 import LauncherManager from "../manager/launcherManager";
@@ -19,8 +18,6 @@ import LauncherManager from "../manager/launcherManager";
 import * as MainWindow from "../windows/mainWindow";
 import * as UpdateWindow from "../windows/updateWindow";
 
-import ValheimIpcHandlers from "./ValheimIpcHandlers";
-import SevenDtoDIpcHandlers from "./SevenDtoDIpcHandlers";
 import InstanceIpcHandlers from "./InstanceIpcHandlers";
 
 // Fenêtre principale (supposée ouverte quand les handlers sont appelés)
@@ -59,11 +56,7 @@ class IpcHandlers {
 
   /* Main Fucntions */
   init(): void {
-    // games ipc
-    ValheimIpcHandlers();
-    SevenDtoDIpcHandlers();
-
-    // instances (nouveau système)
+    // jeux : un seul canal IPC pour toutes les instances
     InstanceIpcHandlers();
 
     // update  windows
@@ -99,7 +92,6 @@ class IpcHandlers {
 
     // infos
     ipcMain.handle("get-version:launcher", () => LauncherManager.getVersion());
-    ipcMain.handle("get-infos", async (event, game: GameName) => await CheckInfos(game));
 
     // utils
     ipcMain.handle("open-link", this.openLink.bind(this));

@@ -86,6 +86,14 @@ export const recordInstalledEntry = (
   writeInstallState(installDir, state);
 };
 
+/** Oublie une entrée (retirée ou désactivée). */
+export const removeInstalledEntry = (installDir: string, name: string): void => {
+  const state = readInstallState(installDir);
+  if (!(name in state.entries)) return;
+  delete state.entries[name];
+  writeInstallState(installDir, state);
+};
+
 export const readInstanceSettings = (
   installDir: string,
 ): Record<string, InstanceSettingValue> => {
