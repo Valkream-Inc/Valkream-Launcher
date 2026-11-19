@@ -11,8 +11,8 @@ import fs from "fs";
 import path from "path";
 
 import { hashFile, manifestHash, type Manifest } from "../manifest";
-import { resolveInside } from "../paths";
-import { matchesAny, normalizeRelative } from "../patterns";
+import { resolveInside } from "../../lib/paths";
+import { matchesAny, normalizeRelative } from "../../lib/patterns";
 import { shouldWriteFile } from "../preserve";
 import type { Provider } from "./types";
 

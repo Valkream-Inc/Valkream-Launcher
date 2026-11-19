@@ -3,7 +3,7 @@
  * @license MIT-NC
  *
  * Génère, pour une entrée `hash_url` du latest.yml, le manifeste de hash et les
- * fichiers à servir. Utilise le MÊME algorithme que le launcher (engine/manifest).
+ * fichiers à servir. Utilise le MÊME algorithme que le launcher (engine/install/manifest).
  *
  *   yarn tsx scripts/build-manifest.ts <dossier-source> <dossier-sortie> [--ignore <motif>]...
  *
@@ -16,7 +16,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { manifestHash, scanManifest } from "../main/src/engine/manifest";
+import { manifestHash, scanManifest } from "../main/src/engine/install/manifest";
 
 const main = async (): Promise<void> => {
   const args = process.argv.slice(2);

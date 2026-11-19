@@ -9,7 +9,7 @@ import type { IpcMainEvent } from "electron";
 import { autoUpdater } from "electron-updater";
 import { formatBytes } from "../../utils/function/formatBytes";
 
-import { baseUrl } from "../../constants";
+import { baseUrl } from "../../constants/index";
 import SettingsManager from "../../manager/settingsManager";
 import InfosManager from "../../manager/infosManager";
 import FilesManager from "../../manager/filesManager";

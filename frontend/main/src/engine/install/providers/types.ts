@@ -8,7 +8,7 @@
 
 import type { GamePlatform, ProgressData, ReleaseEntry } from "@shared/types";
 
-import type { ParamResolver } from "../ParamResolver";
+import type { ParamResolver } from "../../remote/ParamResolver";
 import type { UpdatePlan } from "../preserve";
 
 /** Progression d'un téléchargement : valeurs déjà formatées pour l'affichage. */

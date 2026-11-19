@@ -10,10 +10,10 @@ import fs from "fs";
 import path from "path";
 import unzipper from "unzipper";
 
-import { downloadFile } from "../utils/function/dowloadFile";
-import { formatBytes } from "../utils/function/formatBytes";
-import { isPathInside } from "./paths";
-import { normalizeRelative } from "./patterns";
+import { downloadFile } from "../../utils/function/downloadFile";
+import { formatBytes } from "../../utils/function/formatBytes";
+import { isPathInside } from "../lib/paths";
+import { normalizeRelative } from "../lib/patterns";
 import type { InstallIO } from "./providers/types";
 
 export const realInstallIO: InstallIO = {

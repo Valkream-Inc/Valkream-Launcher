@@ -9,7 +9,7 @@
 import fs from "fs";
 import path from "path";
 
-import { resolveInside } from "./paths";
+import { resolveInside } from "../lib/paths";
 import { canDeleteFile, type UpdatePlan } from "./preserve";
 
 const toPosix = (value: string): string => value.split(path.sep).join("/");

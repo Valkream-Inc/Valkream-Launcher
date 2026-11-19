@@ -11,7 +11,7 @@ import { Avatar, Box, Link, Typography } from "@mui/material";
 import type { InstanceReport } from "@shared/types";
 
 import SettingsBox from "../component/settings-box/settings-box";
-import SettingsTitle from "../component/settings-tittle/settings-title";
+import SettingsTitle from "../component/settings-title/settings-title";
 
 const open = (url: string) => window.electron_API.openLink(url).catch(console.error);
 

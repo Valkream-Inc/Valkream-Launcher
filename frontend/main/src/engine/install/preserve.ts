@@ -11,8 +11,8 @@
 
 import type { PreserveItem, ReleaseEntry } from "@shared/types";
 
-import { matchesAny } from "./patterns";
-import { versionSatisfies } from "./version";
+import { matchesAny } from "../lib/patterns";
+import { versionSatisfies } from "../lib/version";
 
 /**
  * Motifs à conserver pour une mise à jour depuis `installedVersion`.

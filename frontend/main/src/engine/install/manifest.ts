@@ -12,7 +12,7 @@ import fs from "fs";
 import path from "path";
 
 import { listFiles } from "./fs-ops";
-import { matchesAny, normalizeRelative } from "./patterns";
+import { matchesAny, normalizeRelative } from "../lib/patterns";
 
 export type Manifest = Record<string, string>;
 

@@ -12,16 +12,16 @@ import { ipcMain, shell } from "electron";
 import type { Channel, GamePlatform, InstanceSettingValue } from "@shared/types";
 
 import instancesConfig from "../instances/instances.config";
-import { installLocations } from "../engine/instance-paths";
-import { readInstanceSettings, writeInstanceSetting } from "../engine/install-store";
-import { planLaunch } from "../engine/launch";
+import { installLocations } from "../engine/instance/instance-paths";
+import { readInstanceSettings, writeInstanceSetting } from "../engine/install/install-store";
+import { planLaunch } from "../engine/instance/launch";
 import {
   getInstanceInfos,
   getInstanceInspector,
   getInstanceInstaller,
   getInstanceRegistry,
   getInstanceStatus,
-} from "../engine/registry-factory";
+} from "../engine/services";
 import DirsManager from "../manager/dirsManager";
 import LauncherManager from "../manager/launcherManager";
 

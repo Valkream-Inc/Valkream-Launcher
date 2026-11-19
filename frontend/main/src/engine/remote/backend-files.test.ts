@@ -6,8 +6,8 @@ import { describe, it } from "node:test";
 import yaml from "yaml";
 
 import type { GamePlatform, ReleaseEntry } from "@shared/types";
-import instancesConfig from "../instances/instances.config";
-import { manifestHash } from "./manifest";
+import instancesConfig from "../../instances/instances.config";
+import { manifestHash } from "../install/manifest";
 import { ParamResolver } from "./ParamResolver";
 import { flattenRelease, RELEASE_TIERS } from "./release-options";
 import { validateReleaseConfig, validateRemoteIndex } from "./validate";
@@ -18,7 +18,7 @@ import { validateReleaseConfig, validateRemoteIndex } from "./validate";
  * pour chaque entrée, des hash de manifeste cohérents et des fichiers liés présents.
  */
 
-const backendPublic = path.resolve(__dirname, "../../../../backend/public");
+const backendPublic = path.resolve(__dirname, "../../../../../backend/public");
 const local = (link: string) => path.join(backendPublic, link.replace(/^\//, ""));
 const readJson = (link: string) => JSON.parse(fs.readFileSync(local(link), "utf8"));
 

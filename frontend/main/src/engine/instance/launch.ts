@@ -10,7 +10,7 @@ import path from "path";
 
 import type { InstanceSettingValue } from "@shared/types";
 
-import type { InstanceMainConfig } from "../types/instances";
+import type { InstanceMainConfig } from "../../types/instances";
 import type { InstallLocations } from "./instance-paths";
 
 export type LaunchPlan =

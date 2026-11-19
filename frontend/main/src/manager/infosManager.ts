@@ -9,7 +9,7 @@ import { GameDig } from "gamedig";
 
 import type { ServerInfos } from "@shared/types";
 
-import { baseUrl } from "../constants";
+import { baseUrl } from "../constants/index";
 import noCache from "../constants/noCaheHeader";
 import type { ServerQueryConfig } from "../types/core";
 

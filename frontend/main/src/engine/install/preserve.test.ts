@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { matchesAny, matchesPattern } from "./patterns";
+import { matchesAny, matchesPattern } from "../lib/patterns";
 import { canDeleteFile, planEntryUpdate, resolvePreserved, shouldWriteFile } from "./preserve";
-import { compareVersions, isValidRange, versionSatisfies } from "./version";
+import { compareVersions, isValidRange, versionSatisfies } from "../lib/version";
 
 describe("version", () => {
   it("compare numériquement, pas en texte", () => {

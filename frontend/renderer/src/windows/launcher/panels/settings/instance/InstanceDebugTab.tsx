@@ -25,7 +25,7 @@ import type { DebugContent } from "../../../../../instances/instances.types";
 import Wait from "../../../component/wait/wait";
 import { useAction } from "../../../context/action.context";
 import SettingsBox from "../component/settings-box/settings-box";
-import SettingsTitle from "../component/settings-tittle/settings-title";
+import SettingsTitle from "../component/settings-title/settings-title";
 
 const STATUS: Record<EntryStatus, { label: string; color: "success" | "warning" | "error" | "default" | "info" }> = {
   "up-to-date": { label: "À jour", color: "success" },

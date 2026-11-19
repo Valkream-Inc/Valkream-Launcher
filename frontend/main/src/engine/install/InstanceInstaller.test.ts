@@ -5,13 +5,13 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import type { InstanceMainConfig } from "../types/instances";
-import { InstanceInspector } from "./InstanceInspector";
+import type { InstanceMainConfig } from "../../types/instances";
+import { InstanceInspector } from "../instance/InstanceInspector";
 import { InstanceInstaller } from "./InstanceInstaller";
 import { readInstallState, writeInstanceSetting } from "./install-store";
 import { manifestHash } from "./manifest";
-import { instanceRootPath } from "./paths";
-import type { ParamResolver } from "./ParamResolver";
+import { instanceRootPath } from "../lib/paths";
+import type { ParamResolver } from "../remote/ParamResolver";
 import type { InstallIO } from "./providers/types";
 
 const sha = (text: string) => createHash("sha256").update(text).digest("hex");

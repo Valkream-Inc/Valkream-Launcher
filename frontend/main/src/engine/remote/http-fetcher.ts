@@ -7,7 +7,7 @@
 
 import axios from "axios";
 
-import noCache from "../constants/noCaheHeader";
+import noCache from "../../constants/noCaheHeader";
 
 export const httpFetchText = async (url: string): Promise<string> => {
   const response = await axios.get<string>(url, {

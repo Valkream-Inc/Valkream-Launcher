@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import type { ServerInfos } from "@shared/types";
-import type { InstanceMainConfig } from "../types/instances";
+import type { InstanceMainConfig } from "../../types/instances";
 import { InstanceInfos } from "./InstanceInfos";
-import type { ParamResolver } from "./ParamResolver";
+import type { ParamResolver } from "../remote/ParamResolver";
 
 const config: InstanceMainConfig = {
   id: "g", server: { type: "valheim", host: "h", port: 1, timeout: 1 }, indexUrl: "/index.json", entryPaths: {},

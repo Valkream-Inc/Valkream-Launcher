@@ -21,15 +21,15 @@ import type {
   ReleaseTier,
 } from "@shared/types";
 
-import type { InstanceMainConfig } from "../types/instances";
+import type { InstanceMainConfig } from "../../types/instances";
 import { entryDirectory, installLocations, type InstallLocations } from "./instance-paths";
-import { loadRemoteIndex } from "./InstanceRegistry";
-import { readInstallState, readInstanceSettings } from "./install-store";
-import { verifyManifest, type Manifest } from "./manifest";
-import type { ParamResolver } from "./ParamResolver";
-import { resolvePreserved } from "./preserve";
-import { flattenRelease, RELEASE_TIERS } from "./release-options";
-import { validateReleaseConfig } from "./validate";
+import { loadRemoteIndex } from "../remote/InstanceRegistry";
+import { readInstallState, readInstanceSettings } from "../install/install-store";
+import { verifyManifest, type Manifest } from "../install/manifest";
+import type { ParamResolver } from "../remote/ParamResolver";
+import { resolvePreserved } from "../install/preserve";
+import { flattenRelease, RELEASE_TIERS } from "../remote/release-options";
+import { validateReleaseConfig } from "../remote/validate";
 
 export interface InspectorOptions {
   configs: readonly InstanceMainConfig[];

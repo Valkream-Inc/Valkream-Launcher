@@ -9,7 +9,7 @@
 
 import type { Channel, GamePlatform, InstanceSummary, RemoteIndex } from "@shared/types";
 
-import type { InstanceMainConfig } from "../types/instances";
+import type { InstanceMainConfig } from "../../types/instances";
 import { isFetchableLink } from "./link";
 import type { ParamResolver } from "./ParamResolver";
 import { validateRemoteIndex } from "./validate";

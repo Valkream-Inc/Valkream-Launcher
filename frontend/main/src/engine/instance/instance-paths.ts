@@ -10,8 +10,8 @@ import path from "path";
 
 import type { Channel, GamePlatform } from "@shared/types";
 
-import type { InstanceMainConfig } from "../types/instances";
-import { instanceRootPath, resolveInside } from "./paths";
+import type { InstanceMainConfig } from "../../types/instances";
+import { instanceRootPath, resolveInside } from "../lib/paths";
 
 export interface InstallLocations {
   /** `<racine>/instances/<id>/<canal>` */

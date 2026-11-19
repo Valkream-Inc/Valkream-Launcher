@@ -13,7 +13,7 @@ import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
-import { resolveInside } from "../paths";
+import { resolveInside } from "../../lib/paths";
 import type { Provider, Uninstaller } from "./types";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;

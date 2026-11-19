@@ -19,8 +19,8 @@ import type {
 
 import { classifyLink, isFetchableLink, isPerPlatformContent } from "./link";
 import { RELEASE_TIERS } from "./release-options";
-import { isSafeRelativePath, isSafeSegment } from "./paths";
-import { isValidRange } from "./version";
+import { isSafeRelativePath, isSafeSegment } from "../lib/paths";
+import { isValidRange } from "../lib/version";
 
 export type ValidationResult<T> =
   | { ok: true; value: T; errors: [] }

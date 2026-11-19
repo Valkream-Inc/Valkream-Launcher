@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import type { InstanceMainConfig } from "../types/instances";
+import type { InstanceMainConfig } from "../../types/instances";
 import { InstanceRegistry } from "./InstanceRegistry";
 import type { ParamResolver } from "./ParamResolver";
 

@@ -8,7 +8,7 @@ import path from "path";
 
 const rendererPath = path.join(__dirname, "../../../renderer");
 
-import { isDev } from "../constants";
+import { isDev } from "../constants/index";
 let updateWindow: BrowserWindow | undefined = undefined;
 
 function getWindow(): BrowserWindow | undefined {

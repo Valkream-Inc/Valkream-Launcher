@@ -9,7 +9,7 @@ import path from "path";
 
 import type { DatabaseRecord, DatabaseRow } from "../types/utils";
 
-import { isDev } from "../constants";
+import { isDev } from "../constants/index";
 import DirsManager from "../manager/dirsManager";
 
 class Database {

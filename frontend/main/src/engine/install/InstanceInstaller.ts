@@ -19,11 +19,11 @@ import type {
   ReleaseEntry,
 } from "@shared/types";
 
-import { entryDirectory } from "./instance-paths";
-import { buildRow, TIERS, type InstanceInspector } from "./InstanceInspector";
+import { entryDirectory } from "../instance/instance-paths";
+import { buildRow, TIERS, type InstanceInspector } from "../instance/InstanceInspector";
 import { readInstallState, readInstanceSettings, recordInstalledEntry, removeInstalledEntry } from "./install-store";
 import { removeWithPlan } from "./fs-ops";
-import type { ParamResolver } from "./ParamResolver";
+import type { ParamResolver } from "../remote/ParamResolver";
 import { hashProvider } from "./providers/hash";
 import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore";
 import type { InstallIO, Provider, Uninstaller } from "./providers/types";

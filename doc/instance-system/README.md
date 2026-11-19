@@ -2,11 +2,34 @@
 
 Une **instance** = un jeu (ou une variante d'un jeu) décrit par trois couches reliées par un `id` unique (ex : `Valheim-Valkream-v2`).
 
-| Couche | Fichier | Contient |
+| Couche | Fichier | Décide |
 | --- | --- | --- |
-| Main | `frontend/main/src/instances/instances.config.ts` | serveur de jeu, lien de l'index, `allowedPaths` (liste blanche des chemins d'installation) |
-| Render | `frontend/renderer/src/instances/instances.config.tsx` | nom, préfixe des assets, scène 3D, textes, liens, réglages (`customGamesSettings`, niveaux normal / special / danger), tableaux Debug |
-| Remote | `backend/public/index.config.json` + `games/<id>/latest.yml` | activation par plateforme, versions, sources, hash, mods, contributeurs |
+| Main | `frontend/main/src/instances/instances.config.ts` | serveur de jeu, lien de l'`index.config.json` du jeu (`indexUrl`), **dossier d'installation de chaque entrée** (`entryPaths`, par nom d'entrée, déclinable par plateforme), exécutable, Steam |
+| Render | `frontend/renderer/src/instances/instances.config.tsx` | nom, images, **fonds** (image, vidéo, audio, modèle 3D + scène), textes, liens, réglages (`customGamesSettings`, niveaux normal / special / danger), tableaux Debug |
+| Remote | `backend/public/games/<id>/` | `index.config.json` (plateformes, **liens des latest stable / beta**, événement, maintenance, mods, contributeurs) et `latest.yml` / `latest.beta.yml` (versions, sources, hash) |
+
+Le remote ne décide jamais où le launcher écrit : `path` est interdit dans le `latest.yml`.
+
+## Organisation du code
+
+```
+backend/public/games/<id>/        index.config.json, latest*.yml, hash*.json, *.config.json
+frontend/
+  shared/types/                   types partagés main / renderer (.d.ts seulement)
+  main/src/
+    engine/
+      lib/                        utilitaires purs : paths, patterns, version
+      remote/                     lien, résolveur + cache, validation, options par plateforme / lien, registre, index
+      install/                    installation : providers (zip, hash, thunderstore), conservation, hash, état
+      instance/                   rapport (inspector), infos d'accueil, statut, lancement
+      services.ts                 assemble les services avec les dépendances réelles
+    instances/                    config main des instances
+    ipc/ windows/ manager/ utils/ constants/   application Electron
+  renderer/src/
+    instances/                    config render des instances + helpers
+    windows/launcher/             contexts, composants, panneaux (home, settings, choose-games)
+  scripts/                        build-manifest, dev-main
+```
 
 `draft-original/` garde le brouillon de départ, commenté (spécification des champs de `latest.yml`).
 
@@ -14,7 +37,7 @@ Une **instance** = un jeu (ou une variante d'un jeu) décrit par trois couches r
 
 - Fait : types partagés, règle de lien, validation de l'index et du `latest.yml`, résolveur avec cache disque, registre, confinement des chemins.
 - Fait : **installation par canal** (`instances/<id>/stable|beta/`) avec état (`instance.state.json`) et réglages (`instance.settings.json`) propres à chaque canal : la beta n'a aucun fichier en commun avec le stable.
-- Fait : **moteur d'installation** (`engine/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url` ; reprise par entrée ; une synchronisation à la fois par installation.
+- Fait : **moteur d'installation** (`engine/install/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url` ; reprise par entrée ; une synchronisation à la fois par installation.
 - Fait : **rapport** (`instances:report`) : un statut par entrée + récapitulatif « fonctionne ou non ».
 - Fait : **UI 100 % générique** : choix du jeu, accueil (un seul `InstanceButton` : installer / réinstaller / mettre à jour / jouer, avec progression), réglages General / Launcher / Game / Mods (affichage joueur) / Dev (outils + Debug admin avec « Réparer »). Fonds image / vidéo / 3D, loader, liens et infos serveur lisent la config render de l'instance active.
 - Fait : instances `Valheim-Valkream-v2` et `SevenDtoD-Valkream-v2` (7 Days to Die installé entièrement dans le launcher, comme Valheim).
@@ -26,7 +49,7 @@ Une **instance** = un jeu (ou une variante d'un jeu) décrit par trois couches r
 
 1. Une entrée dans `main/src/instances/instances.config.ts` (serveur, chemins, exécutable, `steamAppId`).
 2. Une entrée dans `renderer/src/instances/instances.config.tsx` (assets dans `public/`, 3D, textes, réglages).
-3. Une entrée dans `backend/public/index.config.json` et un `games/<id>/latest.yml`.
+3. Un dossier `backend/public/games/<id>/` avec son `index.config.json` (liens des latest stable / beta) et son `latest.yml`.
 
 ## Format du latest.yml
 
@@ -38,7 +61,7 @@ Une **instance** = un jeu (ou une variante d'un jeu) décrit par trois couches r
   - Une chaîne qui commence par `/` est donc un lien : `path` et `folder_in_zip` s'écrivent sans `/` initial.
   - Exceptions : `content` (archive, manifeste, liste), `hash-folder` et `api-url` sont déjà des liens vers ce que le provider télécharge : seule leur plateforme est choisie.
   - Une entrée dont `path`, `type` ou `content` n'a pas de valeur pour la plateforme (ni `default`) n'est pas proposée dessus (aucune erreur).
-- Pipeline (`engine/release-options.ts`) : latest.yml → choix de la plateforme → lecture des liens (mis en cache pour le hors ligne) → validation de l'entrée résolue → rapport / installation. Un lien illisible invalide l'entrée (`latest.<niveau>.<entrée>.<option> : lien illisible`), jamais le launcher.
+- Pipeline (`engine/remote/release-options.ts`) : latest.yml → choix de la plateforme → lecture des liens (mis en cache pour le hors ligne) → validation de l'entrée résolue → rapport / installation. Un lien illisible invalide l'entrée (`latest.<niveau>.<entrée>.<option> : lien illisible`), jamais le launcher.
 
 ## Conservation et exclusion (par entrée du latest.yml)
 
@@ -73,4 +96,4 @@ yarn test              # node:test via tsx
 yarn typecheck:tests   # types du code et des tests
 ```
 
-Le test `validate.test.ts` vérifie aussi que les fichiers d'exemple de `backend/public` restent valides.
+Le test `engine/remote/backend-files.test.ts` recoupe la config main et `backend/public` pour chaque jeu, canal et plateforme : index valide, dossier d'installation pour chaque entrée, hash des manifestes cohérents, fichiers liés présents.

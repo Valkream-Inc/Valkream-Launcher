@@ -18,7 +18,7 @@ import { useGames } from "../../../context/games.context";
 import { NavButton, NavSettings } from "../component/nav-settings/nav-settings";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTab from "../component/settings-tab/settings-tab";
-import SettingsTitle from "../component/settings-tittle/settings-title";
+import SettingsTitle from "../component/settings-title/settings-title";
 import ButtonDebug from "../settings-list/global/button-debug";
 import ButtonOpenAppData from "../settings-list/global/button-open-appdata";
 import ButtonUninstallGlobal from "../settings-list/global/button-uninstall-global";
