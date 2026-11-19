@@ -16,7 +16,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { manifestHash, scanManifest } from "../main/src/engine/install/manifest";
+import { manifestHash, scanManifest } from "../main/src/instances/install/manifest";
 
 const main = async (): Promise<void> => {
   const args = process.argv.slice(2);

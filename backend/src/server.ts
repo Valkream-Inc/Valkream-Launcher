@@ -3,58 +3,23 @@
  * @license MIT-NC
  */
 
-import type { NextFunction, Request, Response } from "express";
-import express from "express";
+import { createApp } from "./app";
 
-import log from "./components/log.component";
-
-const app = express();
-
-//PORT
 const PORT = 3000;
-const DEBUG = false;
 
-// Midleware de debug
-const loggerMiddleware = (req: Request, _res: Response, next: NextFunction) => {
-  const remoteAddress = req.ip || req.socket.remoteAddress;
-  const resourcePath = req.url;
-  if (DEBUG) log(remoteAddress, resourcePath);
-
-  next();
-};
-
-app.use(loggerMiddleware);
-app.use(
-  express.static("public", {
-    dotfiles: "allow",
-  }),
-);
-
-// Home page
-app.get("/", (_req: Request, res: Response) => {
-  res.send("Bienvenue sur le serveur statique de dev !");
-});
-
-// Erreur 404
-app.use((_req: Request, res: Response) => {
-  res.status(404);
-  res.type("txt").send("404 Not Found");
-});
-
-// Démarrer le serveur
-app.listen(PORT, () => {
+createApp().listen(PORT, () => {
   console.log(
     `\n\n[${new Date().toLocaleString()}] 🚀 Serveur de mise à jour en écoute sur  http://localhost:${PORT}`,
   );
 });
 
-process.on("uncaughtException", function (err) {
+process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
   console.error("Stack:", err.stack);
   process.exit(1);
 });
 
-process.on("unhandledRejection", function (reason, promise) {
+process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
   process.exit(1);
 });

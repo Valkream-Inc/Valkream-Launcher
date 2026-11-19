@@ -53,5 +53,5 @@ game-details:
     version: 1.0.0
     type: hash_url
     hash: 1022d39a3df897d9fcb40dc2da522bb8faed88b63fba1bd573004c60829c34a0
-    content: /games/SevenDtoD-Valkream-v2/hash.beta.json
+    content: /games/SevenDtoD-Valkream-v2/hash/beta.json
     hash-folder: /games/SevenDtoD/latest/files-beta/

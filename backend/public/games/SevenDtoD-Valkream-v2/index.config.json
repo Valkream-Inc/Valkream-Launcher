@@ -10,8 +10,8 @@
     "stable": "/games/SevenDtoD-Valkream-v2/latest.yml",
     "beta": "/games/SevenDtoD-Valkream-v2/latest.beta.yml"
   },
-  "event": "/games/SevenDtoD-Valkream-v2/event.config.json",
-  "maintenance": "/games/SevenDtoD-Valkream-v2/maintenance.config.json",
-  "contributors": "/games/SevenDtoD-Valkream-v2/contributor.config.json",
-  "mods": "/games/SevenDtoD-Valkream-v2/mods.config.json"
+  "event": "/games/SevenDtoD-Valkream-v2/config/event.json",
+  "maintenance": "/games/SevenDtoD-Valkream-v2/config/maintenance.json",
+  "contributors": "/games/SevenDtoD-Valkream-v2/config/contributors.json",
+  "mods": "/games/SevenDtoD-Valkream-v2/config/mods.json"
 }

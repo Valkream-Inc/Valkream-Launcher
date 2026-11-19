@@ -9,7 +9,7 @@ import fse from "fs-extra";
 
 import * as UpdateWindow from "./src/windows/updateWindow";
 import * as MainWindow from "./src/windows/mainWindow";
-import IpcHandlers from "./src/ipc/ipcHandlers";
+import IpcHandlers from "./src/ipc/launcher-ipc";
 
 const isDev = process.env.NODE_ENV === "dev";
 

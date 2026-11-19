@@ -13,22 +13,31 @@ Le remote ne décide jamais où le launcher écrit : `path` est interdit dans le
 ## Organisation du code
 
 ```
-backend/public/games/<id>/        index.config.json, latest*.yml, hash*.json, *.config.json
+backend/
+  src/                            serveur statique (server.ts, app.ts, lib/request-log.ts)
+  public/                         voir backend/public/README.md
+    games/<id>-v2/                index.config.json, latest*.yml, config/, hash/
 frontend/
   shared/types/                   types partagés main / renderer (.d.ts seulement)
-  main/src/
-    engine/
-      lib/                        utilitaires purs : paths, patterns, version
-      remote/                     lien, résolveur + cache, validation, options par plateforme / lien, registre, index
-      install/                    installation : providers (zip, hash, thunderstore), conservation, hash, état
-      instance/                   rapport (inspector), infos d'accueil, statut, lancement
-      services.ts                 assemble les services avec les dépendances réelles
-    instances/                    config main des instances
-    ipc/ windows/ manager/ utils/ constants/   application Electron
+  scripts/                        build-manifest, dev-main
+  main/
+    app.ts                        point d'entrée Electron
+    src/
+      core/                       services du launcher : constants, dirs, files, settings, launcher, server-infos
+      lib/                        helpers techniques sans logique métier : database, download-file, platform-dir,
+                                  format-bytes, console-stream, paths, patterns, version
+      windows/                    fenêtres (main, update) et preloads
+      ipc/                        handlers IPC : launcher-ipc, instance-ipc, check-for-updates
+      instances/                  tout ce qui concerne les jeux
+        instances.config.ts       config main des instances (+ instances.types.d.ts)
+        remote/                   lien, résolveur + cache, validation, options par plateforme / lien, registre, index
+        install/                  installation : providers (zip, hash, thunderstore), conservation, hash, cache, état
+        local/                    état local : rapport (inspector), infos d'accueil, statut, lancement, chemins
+        services.ts               assemble les services avec les dépendances réelles
+      types/                      types du main (core, utils)
   renderer/src/
     instances/                    config render des instances + helpers
-    windows/launcher/             contexts, composants, panneaux (home, settings, choose-games)
-  scripts/                        build-manifest, dev-main
+    windows/launcher/             contexts, composants, panneaux (home, settings, choose-games), theme/ (thèmes MUI)
 ```
 
 `draft-original/` garde le brouillon de départ, commenté (spécification des champs de `latest.yml`).
@@ -37,7 +46,7 @@ frontend/
 
 - Fait : types partagés, règle de lien, validation de l'index et du `latest.yml`, résolveur avec cache disque, registre, confinement des chemins.
 - Fait : **installation par canal** (`instances/<id>/stable|beta/`) avec état (`instance.state.json`) et réglages (`instance.settings.json`) propres à chaque canal : la beta n'a aucun fichier en commun avec le stable.
-- Fait : **moteur d'installation** (`engine/install/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url` ; reprise par entrée ; une synchronisation à la fois par installation.
+- Fait : **moteur d'installation** (`instances/install/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url` ; reprise par entrée ; une synchronisation à la fois par installation.
 - Fait : **rapport** (`instances:report`) : un statut par entrée + récapitulatif « fonctionne ou non ».
 - Fait : **UI 100 % générique** : choix du jeu, accueil (un seul `InstanceButton` : installer / réinstaller / mettre à jour / jouer, avec progression), réglages General / Launcher / Game / Mods (affichage joueur) / Dev (outils + Debug admin avec « Réparer »). Fonds image / vidéo / 3D, loader, liens et infos serveur lisent la config render de l'instance active.
 - Fait : instances `Valheim-Valkream-v2` et `SevenDtoD-Valkream-v2` (7 Days to Die installé entièrement dans le launcher, comme Valheim).
@@ -61,7 +70,7 @@ frontend/
   - Une chaîne qui commence par `/` est donc un lien : `path` et `folder_in_zip` s'écrivent sans `/` initial.
   - Exceptions : `content` (archive, manifeste, liste), `hash-folder` et `api-url` sont déjà des liens vers ce que le provider télécharge : seule leur plateforme est choisie.
   - Une entrée dont `path`, `type` ou `content` n'a pas de valeur pour la plateforme (ni `default`) n'est pas proposée dessus (aucune erreur).
-- Pipeline (`engine/remote/release-options.ts`) : latest.yml → choix de la plateforme → lecture des liens (mis en cache pour le hors ligne) → validation de l'entrée résolue → rapport / installation. Un lien illisible invalide l'entrée (`latest.<niveau>.<entrée>.<option> : lien illisible`), jamais le launcher.
+- Pipeline (`instances/remote/release-options.ts`) : latest.yml → choix de la plateforme → lecture des liens (mis en cache pour le hors ligne) → validation de l'entrée résolue → rapport / installation. Un lien illisible invalide l'entrée (`latest.<niveau>.<entrée>.<option> : lien illisible`), jamais le launcher.
 
 ## Conservation et exclusion (par entrée du latest.yml)
 
@@ -104,4 +113,4 @@ yarn test              # node:test via tsx
 yarn typecheck:tests   # types du code et des tests
 ```
 
-Le test `engine/remote/backend-files.test.ts` recoupe la config main et `backend/public` pour chaque jeu, canal et plateforme : index valide, dossier d'installation pour chaque entrée, hash des manifestes cohérents, fichiers liés présents.
+Le test `instances/remote/backend-files.test.ts` recoupe la config main et `backend/public` pour chaque jeu, canal et plateforme : index valide, dossier d'installation pour chaque entrée, hash des manifestes cohérents, fichiers liés présents.
