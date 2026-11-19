@@ -28,7 +28,7 @@ export type InstanceKey = `${InstanceId}@${Channel}`;
 export type LinkOrData<T> = string | T;
 
 /* ------------------------------------------------------------------ */
-/* Remote : index.config.json                                         */
+/* Remote : games/<id>/index.config.json (un par jeu)                 */
 /* ------------------------------------------------------------------ */
 
 /** Contributeur affiché dans l'onglet Mods (`contributor.config.json`). */
@@ -49,21 +49,23 @@ export interface ModDisplay {
   link?: string;
 }
 
-export interface RemoteIndexEntry {
+/**
+ * `games/<id>/index.config.json` : tout ce que le remote déclare pour UN jeu.
+ * Le lien vers ce fichier est dans la config main de l'instance (`indexUrl`) ;
+ * les liens des `latest*.yml` (stable, beta) ne sont écrits qu'ici.
+ */
+export interface RemoteIndex {
+  schemaVersion: 1;
+  /** Doit être l'id de l'instance qui charge ce fichier. */
   id: InstanceId;
   /** Plateformes sur lesquelles l'instance est proposée (clés = `os.platform()`). */
   enabled: Partial<Record<GamePlatform, boolean>>;
-  /** Liens vers les `latest*.yml` de chaque canal. */
+  /** Liens vers les `latest*.yml` de chaque canal (un canal absent n'est pas proposé). */
   channels?: Partial<Record<Channel, string>>;
   event?: LinkOrData<GameEvent>;
   maintenance?: LinkOrData<Maintenance>;
   contributors?: LinkOrData<Contributor[]>;
   mods?: LinkOrData<ModDisplay[]>;
-}
-
-export interface RemoteIndex {
-  schemaVersion: 1;
-  instances: RemoteIndexEntry[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -114,6 +116,8 @@ export type PlatformTable<T> = Partial<Record<GamePlatform | "default", T>>;
  * - ou un lien (`https://…` ou `/chemin` relatif au serveur de fichiers) vers un
  *   fichier JSON / YAML qui la contient ;
  * - et chacune de ces deux formes peut être déclinée par plateforme.
+ * Le dossier d'installation (`path`) n'est PAS une option du remote : il est décidé par la
+ * config main, par nom d'entrée (le remote ne choisit jamais où le launcher écrit).
  * Les options qui sont elles-mêmes des liens (`content` d'un zip, `hash-folder`,
  * `api-url`) gardent leur lien tel quel : le provider s'en sert directement.
  */
@@ -122,8 +126,6 @@ export type RawOption<T> = T | string | PlatformTable<T | string>;
 /** Entrée telle qu'écrite dans le latest.yml (avant choix de la plateforme et lecture des liens). */
 export interface RawReleaseEntry {
   version: string | number;
-  /** Relatif à la racine de l'instance (sans « / » initial : une chaîne en « / » est un lien). */
-  path: RawOption<string>;
   type: RawOption<EntryType>;
   /** sha256 du manifeste des fichiers que possède l'entrée. */
   hash?: RawOption<string>;
@@ -154,6 +156,7 @@ export interface RawReleaseEntry {
 /** Entrée résolue pour la plateforme courante : plus de table par plateforme, liens de données lus. */
 export interface ReleaseEntry {
   version: string;
+  /** Dossier d'installation, relatif à la racine de l'instance : vient de la config main. */
   path: string;
   type: EntryType;
   hash?: string;
@@ -191,12 +194,10 @@ export interface RawReleaseConfig {
 /* ------------------------------------------------------------------ */
 
 export type InstanceAvailability =
-  /** Dans l'index et activée pour cette plateforme. */
+  /** Index valide et instance activée pour cette plateforme. */
   | "enabled"
-  /** Dans l'index mais désactivée pour cette plateforme. */
+  /** Index valide mais instance désactivée pour cette plateforme. */
   | "disabled"
-  /** Absente de l'index remote. */
-  | "not-in-index"
   /** Index injoignable et aucune copie locale. */
   | "unreachable"
   /** Index reçu mais invalide. */

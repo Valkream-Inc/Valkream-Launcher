@@ -64,23 +64,3 @@ export const instanceRootPath = (
   }
   return path.join(rootPath, "instances", instanceId, channel);
 };
-
-/**
- * Le `path` d'une entrée est-il autorisé ? Il doit être l'un des `allowedPaths`
- * de la config main, ou un de leurs sous-dossiers.
- */
-export const isPathAllowed = (
-  entryPath: string,
-  allowedPaths: readonly string[],
-): boolean => {
-  if (!isSafeRelativePath(entryPath)) return false;
-  const root = path.resolve("/virtual-root");
-  const full = path.resolve(root, entryPath.replace(/^[/\\]+/, ""));
-  return allowedPaths.some((allowed) => {
-    if (!isSafeRelativePath(allowed)) return false;
-    return isPathInside(
-      path.resolve(root, allowed.replace(/^[/\\]+/, "")),
-      full,
-    );
-  });
-};

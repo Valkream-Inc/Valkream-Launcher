@@ -13,7 +13,7 @@ import type {
 
 function VideoBackground({ style }: VideoBackgroundProps) {
   const { actualInstance } = useGames();
-  const { assets } = actualInstance;
+  const { video, audio } = actualInstance.background;
   const { VideoBackgroundRef, backgroundType, isMuted } = useBackground();
 
   // Calcule dynamiquement le chemin source selon le type et le jeu
@@ -24,17 +24,17 @@ function VideoBackground({ style }: VideoBackgroundProps) {
   } => {
     if (backgroundType === "video") {
       return {
-        src: `./videos/${assets}-trailer.mp4`,
+        src: video,
         type: "video/mp4",
         Tag: "video",
       };
     }
     return {
-      src: `./audios/${assets}-song.mp3`,
+      src: audio,
       type: "audio/mpeg",
       Tag: "audio",
     };
-  }, [backgroundType, assets]);
+  }, [backgroundType, video, audio]);
 
   // Options communes pour les balises <video> et <audio>
   const commonProps = useMemo(

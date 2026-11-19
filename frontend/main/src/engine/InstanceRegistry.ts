@@ -2,17 +2,12 @@
  * @author Valkream Team
  * @license MIT-NC
  *
- * Registre des instances : croise les configs main avec l'index remote.
- * Le main est la source de vérité de la liste ; le renderer rattache sa propre
- * config (affichage) par `id`.
+ * Registre des instances : croise les configs main avec l'`index.config.json` de
+ * chaque jeu (`games/<id>/index.config.json`). Le main est la source de vérité de la
+ * liste ; le renderer rattache sa propre config (affichage) par `id`.
  */
 
-import type {
-  Channel,
-  GamePlatform,
-  InstanceSummary,
-  RemoteIndex,
-} from "@shared/types";
+import type { Channel, GamePlatform, InstanceSummary, RemoteIndex } from "@shared/types";
 
 import type { InstanceMainConfig } from "../types/instances";
 import { isFetchableLink } from "./link";
@@ -37,59 +32,25 @@ export class InstanceRegistry {
   async list(): Promise<InstanceSummary[]> {
     const { configs, resolver, platform } = this.options;
 
-    // Plusieurs instances partagent le plus souvent le même index : un seul téléchargement.
-    const loads = new Map<string, Promise<IndexLoad>>();
-    const loadIndex = (indexUrl: string): Promise<IndexLoad> => {
-      let load = loads.get(indexUrl);
-      if (!load) {
-        load = loadRemoteIndex(resolver, indexUrl);
-        loads.set(indexUrl, load);
-      }
-      return load;
-    };
-
     return Promise.all(
       configs.map(async (config): Promise<InstanceSummary> => {
-        const load = await loadIndex(config.indexUrl);
+        const load = await loadRemoteIndex(resolver, config.indexUrl, config.id);
 
         if (load.kind === "unreachable") {
-          return {
-            id: config.id,
-            availability: "unreachable",
-            channels: [],
-            indexSource: "none",
-            errors: load.errors,
-          };
+          return { id: config.id, availability: "unreachable", channels: [], indexSource: "none", errors: load.errors };
         }
-
         if (load.kind === "invalid") {
-          return {
-            id: config.id,
-            availability: "invalid",
-            channels: [],
-            indexSource: load.source,
-            errors: load.errors,
-          };
+          return { id: config.id, availability: "invalid", channels: [], indexSource: load.source, errors: load.errors };
         }
 
-        const entry = load.index.instances.find((item) => item.id === config.id);
-        if (!entry) {
-          return {
-            id: config.id,
-            availability: "not-in-index",
-            channels: [],
-            indexSource: load.source,
-            errors: [`« ${config.id} » est absent de l'index remote`],
-          };
-        }
-
+        const { index } = load;
         const channels: Channel[] = [];
-        if (isFetchableLink(entry.channels?.stable) || config.gameUrl) channels.push("stable");
-        if (isFetchableLink(entry.channels?.beta)) channels.push("beta");
+        if (isFetchableLink(index.channels?.stable)) channels.push("stable");
+        if (isFetchableLink(index.channels?.beta)) channels.push("beta");
 
         return {
           id: config.id,
-          availability: entry.enabled[platform] === true ? "enabled" : "disabled",
+          availability: index.enabled[platform] === true ? "enabled" : "disabled",
           channels,
           indexSource: load.source,
           errors: [],
@@ -99,15 +60,19 @@ export class InstanceRegistry {
   }
 }
 
-/** Télécharge et valide l'index remote. Ne lève jamais. */
-export async function loadRemoteIndex(resolver: ParamResolver, indexUrl: string): Promise<IndexLoad> {
+/** Télécharge et valide l'`index.config.json` d'un jeu. Ne lève jamais. */
+export async function loadRemoteIndex(
+  resolver: ParamResolver,
+  indexUrl: string,
+  expectedId: string,
+): Promise<IndexLoad> {
   try {
     const { value, source } = await resolver.getJson<unknown>(indexUrl);
     if (source === "inline") {
       return { kind: "unreachable", errors: ["indexUrl doit être un lien, pas une donnée"] };
     }
 
-    const result = validateRemoteIndex(value);
+    const result = validateRemoteIndex(value, expectedId);
     return result.ok
       ? { kind: "ok", index: result.value, source }
       : { kind: "invalid", errors: result.errors, source };

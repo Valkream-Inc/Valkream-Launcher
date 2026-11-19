@@ -7,7 +7,7 @@ import { InstanceInfos } from "./InstanceInfos";
 import type { ParamResolver } from "./ParamResolver";
 
 const config: InstanceMainConfig = {
-  id: "g", server: { type: "valheim", host: "h", port: 1, timeout: 1 }, indexUrl: "/index.json", allowedPaths: ["game"],
+  id: "g", server: { type: "valheim", host: "h", port: 1, timeout: 1 }, indexUrl: "/index.json", entryPaths: {},
 };
 
 const make = (remote: Record<string, unknown>, now = () => 0) => {
@@ -26,7 +26,7 @@ const make = (remote: Record<string, unknown>, now = () => 0) => {
   return { infos, loads: () => indexLoads, online };
 };
 
-const index = (extra: object) => ({ schemaVersion: 1, instances: [{ id: "g", enabled: { win32: true }, channels: { stable: "/s.yml" }, ...extra }] });
+const index = (extra: object) => ({ schemaVersion: 1, id: "g", enabled: { win32: true }, channels: { stable: "/s.yml" }, ...extra });
 
 describe("InstanceInfos", () => {
   it("serveur + événement (image relative résolue) + maintenance", async () => {

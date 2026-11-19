@@ -11,7 +11,7 @@ import path from "path";
 import type { Channel, GamePlatform } from "@shared/types";
 
 import type { InstanceMainConfig } from "../types/instances";
-import { instanceRootPath, isPathAllowed, resolveInside } from "./paths";
+import { instanceRootPath, resolveInside } from "./paths";
 
 export interface InstallLocations {
   /** `<racine>/instances/<id>/<canal>` */
@@ -35,19 +35,11 @@ export const installLocations = (
 };
 
 /**
- * Dossier d'une entrée, après contrôle par la liste blanche `allowedPaths`.
- * Lève si le `path` n'est pas autorisé ou sort de l'installation.
+ * Dossier d'une entrée (son `path` vient de la config main).
+ * Lève si le chemin sort de l'installation.
  */
-export const entryDirectory = (
-  installDir: string,
-  entryPath: string,
-  allowedPaths: readonly string[],
-): string => {
-  if (!isPathAllowed(entryPath, allowedPaths)) {
-    throw new Error(`Chemin non autorisé pour cette instance : ${entryPath}`);
-  }
-  return resolveInside(installDir, entryPath);
-};
+export const entryDirectory = (installDir: string, entryPath: string): string =>
+  resolveInside(installDir, entryPath);
 
 /** Les deux canaux d'une instance ne doivent jamais se recouvrir. */
 export const channelsAreIsolated = (

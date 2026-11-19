@@ -9,11 +9,14 @@
  *   JSON / YAML qui la contient.
  * `content`, `hash-folder` et `api-url` sont déjà des liens vers ce que télécharge le
  * provider : seule leur plateforme est choisie, le lien reste tel quel.
- * Une entrée dont `path`, `type` ou `content` n'a pas de valeur pour la plateforme
- * n'est pas proposée sur celle-ci (elle disparaît du rapport, sans erreur).
+ * Le dossier d'installation (`path`) n'est jamais lu du remote : il vient de la config
+ * main (`entryPaths`, par nom d'entrée) et est injecté ici. Un `path` écrit dans le
+ * latest.yml est une erreur.
+ * Une entrée dont `type`, `content` ou dossier d'installation n'a pas de valeur pour la
+ * plateforme n'est pas proposée sur celle-ci (elle disparaît du rapport, sans erreur).
  */
 
-import type { GamePlatform, ReleaseConfig } from "@shared/types";
+import type { GamePlatform, RawOption, ReleaseConfig } from "@shared/types";
 
 import { isFetchableLink } from "./link";
 import type { ParamResolver } from "./ParamResolver";
@@ -24,7 +27,6 @@ const PLATFORM_KEYS: readonly string[] = ["win32", "linux", "darwin", "default"]
 
 /** Options dont une chaîne « lien » désigne un fichier contenant la valeur. */
 const DATA_OPTIONS = [
-  "path",
   "type",
   "hash",
   "folder_in_zip",
@@ -35,7 +37,7 @@ const DATA_OPTIONS = [
 ] as const;
 
 /** Sans valeur pour la plateforme, l'entrée n'est pas proposée. */
-const REQUIRED_OPTIONS = ["path", "type", "content"] as const;
+const REQUIRED_OPTIONS = ["type", "content"] as const;
 
 type RawRecord = Record<string, unknown>;
 
@@ -125,6 +127,7 @@ export const flattenRelease = async (
   raw: unknown,
   platform: GamePlatform,
   resolver: ParamResolver,
+  entryPaths: Readonly<Record<string, RawOption<string>>>,
 ): Promise<FlatRelease> => {
   if (!isRecord(raw)) return { release: raw as ReleaseConfig, errors: [] };
 
@@ -138,9 +141,23 @@ export const flattenRelease = async (
     const flat: RawRecord = {};
     await Promise.all(
       Object.entries(entries).map(async ([name, entry]) => {
+        const prefix = `latest.${tier}.${name}`;
         const selected = selectEntryPlatform(entry, platform);
         if (selected === null) return; // non proposée sur cette plateforme
-        const result = await resolveEntryLinks(selected, platform, resolver, `latest.${tier}.${name}`);
+
+        // Le dossier d'installation est décidé par le main, jamais par le remote.
+        const declaredPath = isRecord(entry) ? entry.path : undefined;
+        if (declaredPath !== undefined) {
+          errors.push(`${prefix}.path : interdit dans le latest.yml (le dossier est décidé par la config main, entryPaths)`);
+        }
+        delete selected.path;
+        if (name in entryPaths) {
+          const installPath = pickPlatform(entryPaths[name], platform);
+          if (installPath === undefined || installPath === null) return; // pas de dossier pour cette plateforme
+          selected.path = installPath;
+        }
+
+        const result = await resolveEntryLinks(selected, platform, resolver, prefix);
         flat[name] = result.entry;
         errors.push(...result.errors);
       }),

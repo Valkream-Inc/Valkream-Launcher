@@ -16,7 +16,7 @@ export interface GamesProviderProps {
 export interface GamesContextValue {
   /** Instance (jeu) active. */
   actualInstanceId: InstanceId;
-  /** Config render de l'instance active (assets, 3D, textes, réglages…). */
+  /** Config render de l'instance active (images, fonds, 3D, textes, réglages…). */
   actualInstance: InstanceRenderConfig;
   /** Change l'instance active (lève si elle n'a pas de config render). */
   changeActualInstance: (instanceId: InstanceId) => void;

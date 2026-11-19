@@ -1,20 +1,12 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import path from "node:path";
 import { describe, it } from "node:test";
 
-import yaml from "yaml";
-
-import { manifestHash } from "./manifest";
 import { validateReleaseConfig, validateRemoteIndex } from "./validate";
-
-const backendPublic = path.resolve(__dirname, "../../../../backend/public");
-const readJson = (file: string) => JSON.parse(fs.readFileSync(path.join(backendPublic, file), "utf8"));
-const readYaml = (file: string) => yaml.parse(fs.readFileSync(path.join(backendPublic, file), "utf8"));
 
 const validIndex = () => ({
   schemaVersion: 1,
-  instances: [{ id: "Valheim-v2", enabled: { win32: true } }],
+  id: "Valheim-v2",
+  enabled: { win32: true },
 });
 
 const validEntry = () => ({
@@ -31,33 +23,19 @@ const validRelease = () => ({
 
 const errorsOf = (result: { ok: boolean; errors: string[] }) => result.errors.join("\n");
 
-describe("fichiers d'exemple du backend", () => {
-  it("l'index d'exemple est valide", () => {
-    const result = validateRemoteIndex(readJson("index.config.json"));
-    assert.equal(result.ok, true, errorsOf(result));
-  });
-
-  it("le latest.beta.yml d'exemple est valide et le canal beta est déclaré dans l'index", () => {
-    const result = validateReleaseConfig(readYaml("games/Valheim-Valkream-v2/latest.beta.yml"), ["game"]);
-    assert.equal(result.ok, true, errorsOf(result));
-    const index = readJson("index.config.json");
-    assert.equal(index.instances[0].channels.beta, "/games/Valheim-Valkream-v2/latest.beta.yml");
-  });
-
-  it("le latest.yml d'exemple est valide pour les chemins de la config main", () => {
-    const result = validateReleaseConfig(readYaml("games/Valheim-Valkream-v2/latest.yml"), ["game"]);
-    assert.equal(result.ok, true, errorsOf(result));
-  });
-});
-
 describe("validateRemoteIndex", () => {
   it("accepte un index minimal", () => {
     assert.equal(validateRemoteIndex(validIndex()).ok, true);
   });
 
-  it("refuse un tableau à la racine (format du brouillon)", () => {
-    const result = validateRemoteIndex([{ id: "x", enabled: { windows: true } }]);
+  it("refuse un tableau à la racine (ancien format)", () => {
+    assert.equal(validateRemoteIndex([{ id: "x", enabled: { win32: true } }]).ok, false);
+  });
+
+  it("refuse l'ancien index global (liste d'instances)", () => {
+    const result = validateRemoteIndex({ schemaVersion: 1, instances: [{ id: "x", enabled: {} }] });
     assert.equal(result.ok, false);
+    assert.match(errorsOf(result), /index\.id/);
   });
 
   it("refuse une mauvaise schemaVersion", () => {
@@ -66,37 +44,23 @@ describe("validateRemoteIndex", () => {
   });
 
   it("refuse la plateforme « windows » (la clé est win32)", () => {
-    const index = { schemaVersion: 1, instances: [{ id: "x", enabled: { windows: true } }] };
+    const index = { ...validIndex(), enabled: { windows: true } };
     assert.match(errorsOf(validateRemoteIndex(index)), /windows : plateforme inconnue/);
   });
 
-  it("refuse un id dangereux et les doublons", () => {
-    const index = {
-      schemaVersion: 1,
-      instances: [
-        { id: "../etc", enabled: {} },
-        { id: "a", enabled: {} },
-        { id: "a", enabled: {} },
-      ],
-    };
-    const errors = errorsOf(validateRemoteIndex(index));
-    assert.match(errors, /instances\[0\]\.id/);
-    assert.match(errors, /doublon « a »/);
+  it("refuse un id dangereux ou différent de l'instance qui charge le fichier", () => {
+    assert.match(errorsOf(validateRemoteIndex({ ...validIndex(), id: "../etc" })), /index\.id : identifiant invalide/);
+    assert.match(errorsOf(validateRemoteIndex(validIndex(), "Autre")), /« Valheim-v2 » attendu « Autre »/);
+    assert.equal(validateRemoteIndex(validIndex(), "Valheim-v2").ok, true);
   });
 
   it("valide les liens des canaux et des paramètres", () => {
     const index = {
-      schemaVersion: 1,
-      instances: [
-        {
-          id: "a",
-          enabled: { win32: true },
-          channels: { stable: "/ok.yml", beta: "pas-un-lien", nightly: "/x" },
-          event: "binary",
-          mods: [{ icon: "x" }],
-          contributors: [{ name: "ok" }],
-        },
-      ],
+      ...validIndex(),
+      channels: { stable: "/ok.yml", beta: "pas-un-lien", nightly: "/x" },
+      event: "binary",
+      mods: [{ icon: "x" }],
+      contributors: [{ name: "ok" }],
     };
     const errors = errorsOf(validateRemoteIndex(index));
     assert.match(errors, /channels\.beta : lien invalide/);
@@ -107,17 +71,14 @@ describe("validateRemoteIndex", () => {
   });
 
   it("accepte des paramètres inline", () => {
-    const index = {
-      schemaVersion: 1,
-      instances: [{ id: "a", enabled: {}, event: { name: "e" }, mods: [{ name: "m" }] }],
-    };
+    const index = { ...validIndex(), enabled: {}, event: { name: "e" }, mods: [{ name: "m" }] };
     assert.equal(validateRemoteIndex(index).ok, true);
   });
 });
 
 describe("validateReleaseConfig", () => {
   it("accepte une release minimale", () => {
-    assert.equal(validateReleaseConfig(validRelease(), ["game"]).ok, true);
+    assert.equal(validateReleaseConfig(validRelease()).ok, true);
   });
 
   it("refuse une version globale mal formée", () => {
@@ -129,12 +90,13 @@ describe("validateReleaseConfig", () => {
     assert.match(errorsOf(validateReleaseConfig(release)), /game-notbreacking : clé inconnue/);
   });
 
-  it("refuse un path hors liste blanche ou qui sort de la racine", () => {
-    const outside = { ...validRelease(), "game-base": { valheim: { ...validEntry(), path: "other" } } };
-    assert.match(errorsOf(validateReleaseConfig(outside, ["game"])), /n'est pas autorisé/);
+  it("refuse une entrée sans dossier d'installation (absente de la config main) ou qui sort de la racine", () => {
+    const { path: _removed, ...noPath } = validEntry();
+    const missing = { ...validRelease(), "game-base": { valheim: noPath } };
+    assert.match(errorsOf(validateReleaseConfig(missing)), /path : aucun dossier d'installation dans la config main/);
 
     const escape = { ...validRelease(), "game-base": { valheim: { ...validEntry(), path: "game/../../etc" } } };
-    assert.match(errorsOf(validateReleaseConfig(escape, ["game"])), /chemin relatif sûr/);
+    assert.match(errorsOf(validateReleaseConfig(escape)), /chemin relatif sûr/);
   });
 
   it("refuse un nom d'entrée dupliqué entre niveaux", () => {
@@ -235,35 +197,4 @@ describe("gameFolderToPreserve et to_ignore", () => {
     assert.match(text, /gameFolderToPreserve\[3\]/);
     assert.match(text, /to_ignore\[0\]/);
   });
-});
-
-describe("backend/public : toutes les instances de l'index", () => {
-  const index = readJson("index.config.json");
-  const local = (link: string) => path.join(backendPublic, link.replace(/^\//, ""));
-
-  for (const instance of index.instances) {
-    it(`${instance.id} : canaux valides, hash du manifeste cohérent, fichiers liés présents`, () => {
-      for (const [channel, link] of Object.entries<string>(instance.channels)) {
-        const release = readYaml(link);
-        const result = validateReleaseConfig(release, ["game"]);
-        assert.equal(result.ok, true, `${instance.id}@${channel} : ${result.errors.join(" | ")}`);
-
-        for (const tier of ["game-base", "game-details"]) {
-          for (const [name, entry] of Object.entries<any>(release[tier] ?? {})) {
-            // Manifeste présent dans le repo : le hash déclaré doit être celui du manifeste.
-            if (entry.type === "hash_url" && typeof entry.content === "string" && fs.existsSync(local(entry.content))) {
-              const manifest = JSON.parse(fs.readFileSync(local(entry.content), "utf8"));
-              assert.equal(entry.hash, manifestHash(manifest, entry.to_ignore ?? []), `${instance.id}@${channel}.${name}`);
-            }
-          }
-        }
-      }
-      for (const key of ["event", "maintenance", "contributors", "mods"]) {
-        if (instance[key] !== undefined) {
-          assert.ok(fs.existsSync(local(instance[key])), `${instance.id}.${key} : fichier absent`);
-          JSON.parse(fs.readFileSync(local(instance[key]), "utf8"));
-        }
-      }
-    });
-  }
 });

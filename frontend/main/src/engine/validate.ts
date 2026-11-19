@@ -19,7 +19,7 @@ import type {
 
 import { classifyLink, isFetchableLink, isPerPlatformContent } from "./link";
 import { RELEASE_TIERS } from "./release-options";
-import { isPathAllowed, isSafeRelativePath, isSafeSegment } from "./paths";
+import { isSafeRelativePath, isSafeSegment } from "./paths";
 import { isValidRange } from "./version";
 
 export type ValidationResult<T> =
@@ -89,72 +89,66 @@ const checkMods = (data: unknown, where: string): string[] => {
 const checkObject = (data: unknown, where: string): string[] =>
   isObject(data) ? [] : [`${where} : objet attendu`];
 
-export const validateRemoteIndex = (raw: unknown): ValidationResult<RemoteIndex> => {
+/**
+ * Valide le `index.config.json` d'UN jeu.
+ * @param expectedId id de l'instance qui charge ce fichier (doit être identique).
+ */
+export const validateRemoteIndex = (
+  raw: unknown,
+  expectedId?: string,
+): ValidationResult<RemoteIndex> => {
   const errors: string[] = [];
 
   if (!isObject(raw)) return { ok: false, errors: ["index : objet attendu"] };
   if (raw.schemaVersion !== 1) {
     errors.push(`index.schemaVersion : 1 attendu, reçu ${String(raw.schemaVersion)}`);
   }
-  if (!Array.isArray(raw.instances)) {
-    errors.push("index.instances : tableau attendu");
-    return { ok: false, errors };
+
+  const where = "index";
+
+  if (!isNonEmptyString(raw.id) || !isSafeSegment(raw.id)) {
+    errors.push(`${where}.id : identifiant invalide (lettres, chiffres, . _ -)`);
+  } else if (expectedId !== undefined && raw.id !== expectedId) {
+    errors.push(`${where}.id : « ${raw.id} » attendu « ${expectedId} »`);
   }
 
-  const ids = new Set<string>();
-  raw.instances.forEach((entry: unknown, index) => {
-    const where = `index.instances[${index}]`;
-    if (!isObject(entry)) {
-      errors.push(`${where} : objet attendu`);
-      return;
+  if (!isObject(raw.enabled)) {
+    errors.push(`${where}.enabled : objet attendu (win32, linux, darwin)`);
+  } else {
+    for (const [platform, value] of Object.entries(raw.enabled)) {
+      if (!PLATFORMS.includes(platform)) {
+        errors.push(`${where}.enabled.${platform} : plateforme inconnue (win32, linux, darwin)`);
+      } else if (typeof value !== "boolean") {
+        errors.push(`${where}.enabled.${platform} : booléen attendu`);
+      }
     }
+  }
 
-    if (!isNonEmptyString(entry.id) || !isSafeSegment(entry.id)) {
-      errors.push(`${where}.id : identifiant invalide (lettres, chiffres, . _ -)`);
-    } else if (ids.has(entry.id)) {
-      errors.push(`${where}.id : doublon « ${entry.id} »`);
+  if (raw.channels !== undefined) {
+    if (!isObject(raw.channels)) {
+      errors.push(`${where}.channels : objet attendu`);
     } else {
-      ids.add(entry.id);
-    }
-
-    if (!isObject(entry.enabled)) {
-      errors.push(`${where}.enabled : objet attendu (win32, linux, darwin)`);
-    } else {
-      for (const [platform, value] of Object.entries(entry.enabled)) {
-        if (!PLATFORMS.includes(platform)) {
-          errors.push(`${where}.enabled.${platform} : plateforme inconnue (win32, linux, darwin)`);
-        } else if (typeof value !== "boolean") {
-          errors.push(`${where}.enabled.${platform} : booléen attendu`);
+      for (const [channel, link] of Object.entries(raw.channels)) {
+        if (!CHANNELS.includes(channel)) {
+          errors.push(`${where}.channels.${channel} : canal inconnu (stable, beta)`);
+        } else if (!isFetchableLink(link)) {
+          errors.push(`${where}.channels.${channel} : lien invalide`);
         }
       }
     }
+  }
 
-    if (entry.channels !== undefined) {
-      if (!isObject(entry.channels)) {
-        errors.push(`${where}.channels : objet attendu`);
-      } else {
-        for (const [channel, link] of Object.entries(entry.channels)) {
-          if (!CHANNELS.includes(channel)) {
-            errors.push(`${where}.channels.${channel} : canal inconnu (stable, beta)`);
-          } else if (!isFetchableLink(link)) {
-            errors.push(`${where}.channels.${channel} : lien invalide`);
-          }
-        }
-      }
+  const optionalParams: [string, (data: unknown, where: string) => string[]][] = [
+    ["event", checkObject],
+    ["maintenance", checkObject],
+    ["contributors", checkContributors],
+    ["mods", checkMods],
+  ];
+  for (const [key, checkData] of optionalParams) {
+    if (raw[key] !== undefined) {
+      errors.push(...checkLinkOrData(raw[key], `${where}.${key}`, checkData));
     }
-
-    const optionalParams: [string, (data: unknown, where: string) => string[]][] = [
-      ["event", checkObject],
-      ["maintenance", checkObject],
-      ["contributors", checkContributors],
-      ["mods", checkMods],
-    ];
-    for (const [key, checkData] of optionalParams) {
-      if (entry[key] !== undefined) {
-        errors.push(...checkLinkOrData(entry[key], `${where}.${key}`, checkData));
-      }
-    }
-  });
+  }
 
   return finish<RemoteIndex>(raw, errors);
 };
@@ -238,11 +232,7 @@ const checkPreserveList = (value: unknown, where: string): string[] => {
  */
 const isDataLink = (value: unknown): boolean => typeof value === "string" && isFetchableLink(value);
 
-const checkEntry = (
-  entry: unknown,
-  where: string,
-  allowedPaths: readonly string[] | undefined,
-): string[] => {
+const checkEntry = (entry: unknown, where: string): string[] => {
   if (!isObject(entry)) return [`${where} : objet attendu`];
   const errors: string[] = [];
 
@@ -250,12 +240,11 @@ const checkEntry = (
     errors.push(`${where}.version : requise`);
   }
 
-  if (isDataLink(entry.path)) {
-    // lu avant la validation
+  // Injecté depuis la config main (entryPaths) par `flattenRelease`.
+  if (entry.path === undefined) {
+    errors.push(`${where}.path : aucun dossier d'installation dans la config main (entryPaths) pour cette entrée`);
   } else if (!isNonEmptyString(entry.path) || !isSafeRelativePath(entry.path)) {
     errors.push(`${where}.path : chemin relatif sûr requis (sans « .. », ni lecteur)`);
-  } else if (allowedPaths && !isPathAllowed(entry.path, allowedPaths)) {
-    errors.push(`${where}.path : « ${entry.path} » n'est pas autorisé pour cette instance`);
   }
 
   const type = typeof entry.type === "string" ? entry.type : "";
@@ -323,13 +312,9 @@ const checkEntry = (
 
 /**
  * Valide un `latest.yml` déjà parsé ET passé par `flattenRelease` (plateforme choisie,
- * liens de données lus).
- * @param allowedPaths `allowedPaths` de la config main de l'instance (liste blanche des `path`).
+ * liens de données lus, dossier d'installation injecté depuis la config main).
  */
-export const validateReleaseConfig = (
-  raw: unknown,
-  allowedPaths?: readonly string[],
-): ValidationResult<ReleaseConfig> => {
+export const validateReleaseConfig = (raw: unknown): ValidationResult<ReleaseConfig> => {
   const errors: string[] = [];
 
   if (!isObject(raw)) return { ok: false, errors: ["latest : objet attendu"] };
@@ -361,7 +346,7 @@ export const validateReleaseConfig = (
         errors.push(`latest.${tier}.${name} : nom déjà utilisé dans ${seen.get(name)}`);
       }
       seen.set(name, tier);
-      errors.push(...checkEntry(entry, `latest.${tier}.${name}`, allowedPaths));
+      errors.push(...checkEntry(entry, `latest.${tier}.${name}`));
     }
   }
 

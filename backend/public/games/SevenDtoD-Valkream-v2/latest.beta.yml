@@ -10,28 +10,30 @@
 #   game-base      le jeu lui-même : réinstallation complète si en retard
 #   game-details   mods, configuration, détails : mise à jour incrémentale
 #
-# Chaque entrée. TOUTES les options sauf `version` peuvent :
+# Chaque entrée (le nom de l'entrée est la clé qui relie au dossier d'installation du main).
+# TOUTES les options sauf `version` peuvent :
 #   - être déclinées par plateforme : { win32: …, linux: …, darwin: …, default: … } ;
 #   - prendre une valeur inline, ou un lien (/chemin relatif au serveur de fichiers, ou https://…)
 #     vers un fichier JSON/YAML qui contient la valeur (une chaîne qui commence par « / » est donc
 #     un lien : écrire les chemins sans « / » initial).
-#   Une entrée dont path, type ou content n'a pas de valeur pour la plateforme n'est pas proposée dessus.
+#   Une entrée dont type ou content n'a pas de valeur pour la plateforme n'est pas proposée dessus.
 #   Exceptions : content (zip), hash-folder et api-url sont déjà des liens vers ce que télécharge
 #   le provider ; seule leur plateforme est choisie.
 #
 #   version   indique si elle doit être mise à jour
-#   path      relatif à la racine de l'instance, validé par allowedPaths (config main)
+#   (pas de `path` : le dossier d'installation de chaque entrée est décidé par le launcher,
+#    dans la config main `entryPaths`, jamais par le remote)
 #   type      zip_url | hash_url | thunderstore_modpack_url | nexus_modpack_url
 #   hash      sha256 du manifeste des fichiers de l'entrée (généré par `yarn build:manifest`)
 #   content   lien, liste, ou manifeste inline
 #   hash-folder / api-url / folder_in_zip   selon le type (voir la doc)
 #   optional  { setting } : installée seulement si ce réglage d'instance est actif
-#   gameFolderToRemove     relatifs à path, supprimés à la mise à jour de l'entrée
-#   gameFolderToPreserve   fichiers/dossiers relatifs à path conservés à la mise à jour (config client…).
+#   gameFolderToRemove     relatifs au dossier de l'entrée, supprimés à la mise à jour de l'entrée
+#   gameFolderToPreserve   fichiers/dossiers relatifs au dossier de l'entrée conservés à la mise à jour (config client…).
 #                          "chemin" = toujours ; { path, from } = seulement si la version INSTALLÉE
 #                          satisfait `from` (>=1.2.0, >=1.0.0 <2.0.0, 1.x, *) : la config du joueur
 #                          est encore compatible. Sinon la nouvelle version l'écrase.
-#   to_ignore              motifs relatifs à path (*, **, ?) exclus du hash, de la vérification et du
+#   to_ignore              motifs relatifs au dossier de l'entrée (*, **, ?) exclus du hash, de la vérification et du
 #                          nettoyage : fichiers locaux que l'entrée ne possède pas (logs, caches…)
 
 version: 1.0.0
@@ -40,7 +42,6 @@ buildDate: 2025-07-03T19:20:08.929Z
 game-base:
   sevendtod:
     version: 2.5b27
-    path: game
     type: zip_url
     content:
       win32: /games/SevenDtoD/latest/build-game-win32.zip
@@ -50,7 +51,6 @@ game-base:
 game-details:
   modpack:
     version: 1.0.0
-    path: game/Mods
     type: hash_url
     hash: 1022d39a3df897d9fcb40dc2da522bb8faed88b63fba1bd573004c60829c34a0
     content: /games/SevenDtoD-Valkream-v2/hash.beta.json

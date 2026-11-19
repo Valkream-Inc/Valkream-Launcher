@@ -19,7 +19,7 @@ import { useGames } from "../../../context/games.context";
 
 function GltfBackground() {
   const { actualInstance } = useGames();
-  const { assets, gltf } = actualInstance;
+  const { model, scene } = actualInstance.background;
   const [showStats, setShowStats] = useState(false);
 
   // ✅ Toggle avec Ctrl + Maj + clic (listener React sur le wrapper :
@@ -33,7 +33,7 @@ function GltfBackground() {
   }, []);
 
   // 📦 Données de la scène : décrites par la config render de l'instance
-  const { camera, lights, fogArgs, environment, hasCampfire } = gltf;
+  const { camera, lights, fogArgs, environment, hasCampfire } = scene;
 
   const [speed, climbSpeed] = useMemo(() => [4, 2], []);
 
@@ -50,7 +50,7 @@ function GltfBackground() {
         {/* Fallback = null : rien de DOM dans le Canvas, c'est ça qui
             faisait planter React (unmount de root pendant un render) */}
         <Suspense fallback={null}>
-          <Model key={assets} modelPath={`./models/${assets}-3d.glb`} />
+          <Model key={model} modelPath={model} />
         </Suspense>
         {hasCampfire && <CampfireLight />}
         <PlayerControls speed={speed} climbSpeed={climbSpeed} />

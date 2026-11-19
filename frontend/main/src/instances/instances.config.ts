@@ -4,7 +4,7 @@
  *
  * Config main de chaque instance (ex-brouillon `temp-for-new-system/main/config.js`).
  * Ajouter une instance = ajouter une entrée ici, une dans `renderer/src/instances`
- * et une dans l'index remote (`backend/public/index.config.json`).
+ * et un dossier `backend/public/games/<id>/` avec son `index.config.json`.
  */
 
 import type { InstanceMainConfig } from "../types/instances";
@@ -21,9 +21,17 @@ const instancesConfig: InstanceMainConfig[] = [
       port: 2457,
       timeout: 2000,
     },
-    indexUrl: "/index.config.json",
-    gameUrl: "/games/Valheim-Valkream-v2/latest.yml",
-    allowedPaths: ["game"],
+    indexUrl: "/games/Valheim-Valkream-v2/index.config.json",
+    // Où chaque entrée du latest.yml s'installe (relatif à la racine de l'installation).
+    entryPaths: {
+      valheim: "game",
+      bepinex: "game",
+      "mods-thunderstore": "game/BepInEx/plugins",
+      "mods-admin": "game/BepInEx/plugins",
+      "mods-boostfps": "game/BepInEx/plugins",
+      "mods-boostgraphic": "game/BepInEx/plugins",
+      configs: "game/BepInEx/config",
+    },
     // Relatifs à la racine de l'installation (`instances/<id>/<canal>/`).
     executable: { win32: "game/valheim.exe", linux: "game/valheim.x86_64" },
     steamAppId: 892970,
@@ -37,9 +45,11 @@ const instancesConfig: InstanceMainConfig[] = [
       port: 26900,
       timeout: 2000,
     },
-    indexUrl: "/index.config.json",
-    gameUrl: "/games/SevenDtoD-Valkream-v2/latest.yml",
-    allowedPaths: ["game"],
+    indexUrl: "/games/SevenDtoD-Valkream-v2/index.config.json",
+    entryPaths: {
+      sevendtod: "game",
+      modpack: "game/Mods",
+    },
     executable: { win32: "game/7DaysToDie.exe" },
     steamAppId: 251570,
     defaultSettings: DEFAULT_SETTINGS,

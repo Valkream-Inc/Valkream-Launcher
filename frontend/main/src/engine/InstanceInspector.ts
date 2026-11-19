@@ -79,28 +79,20 @@ export class InstanceInspector {
       errors,
     };
 
-    // 1. Index remote : activation, lien du canal, mods et contributeurs.
-    const load = await loadRemoteIndex(resolver, config.indexUrl);
-    let releaseLink: string | undefined = channel === "stable" ? config.gameUrl : undefined;
+    // 1. index.config.json du jeu : activation, lien du canal, mods et contributeurs.
+    const load = await loadRemoteIndex(resolver, config.indexUrl, id);
+    let releaseLink: string | undefined;
 
     if (load.kind !== "ok") {
       errors.push(...load.errors.map((error) => `index : ${error}`));
     } else {
-      const indexEntry = load.index.instances.find((item) => item.id === id);
-      if (!indexEntry) {
-        errors.push(`« ${id} » est absent de l'index remote`);
-      } else {
-        if (indexEntry.enabled[platform] !== true) {
-          errors.push(`instance désactivée pour la plateforme ${platform}`);
-        }
-        releaseLink = indexEntry.channels?.[channel] ?? releaseLink;
-        loaded.mods = await this.loadList<ModDisplay>(indexEntry.mods, "mods", errors);
-        loaded.contributors = await this.loadList<Contributor>(
-          indexEntry.contributors,
-          "contributeurs",
-          errors,
-        );
+      const { index } = load;
+      if (index.enabled[platform] !== true) {
+        errors.push(`instance désactivée pour la plateforme ${platform}`);
       }
+      releaseLink = index.channels?.[channel];
+      loaded.mods = await this.loadList<ModDisplay>(index.mods, "mods", errors);
+      loaded.contributors = await this.loadList<Contributor>(index.contributors, "contributeurs", errors);
     }
 
     // 2. latest.yml du canal.
@@ -113,10 +105,10 @@ export class InstanceInspector {
       const fetched = await resolver.getYaml<unknown>(releaseLink);
       loaded.releaseSource = fetched.source === "cache" ? "cache" : "online";
       // Plateforme choisie et liens de données lus, puis validation de ce qui sera réellement installé.
-      const flat = await flattenRelease(fetched.value, platform, resolver);
+      const flat = await flattenRelease(fetched.value, platform, resolver, config.entryPaths);
       loaded.releaseErrors = [
         ...flat.errors,
-        ...validateReleaseConfig(flat.release, config.allowedPaths).errors,
+        ...validateReleaseConfig(flat.release).errors,
       ];
       loaded.release = flat.release;
     } catch (error) {
@@ -225,7 +217,7 @@ export class InstanceInspector {
       const content = entry.content;
       if (content === undefined || Array.isArray(content)) return;
       const { value: manifest } = await this.options.resolver.getJson<Manifest>(content as string | Manifest);
-      const directory = entryDirectory(installDir, entry.path, config.allowedPaths);
+      const directory = entryDirectory(installDir, entry.path);
       const diff = await verifyManifest(directory, manifest, entry.to_ignore ?? []);
       row.files = diff;
       if (diff.missing.length > 0 || diff.changed.length > 0) row.status = "modified";

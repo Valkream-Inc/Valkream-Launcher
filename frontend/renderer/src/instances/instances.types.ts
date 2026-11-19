@@ -12,6 +12,30 @@ import type { InstanceId } from "@shared/types";
 
 import type { GltfGameData } from "../windows/launcher/component/background/gltf-background/gltf-background.types";
 
+/** Images du jeu (chemins relatifs à `renderer/public`). */
+export interface InstanceImages {
+  /** Logo carré : loader. */
+  icon: string;
+  /** Logo avec le nom : en-tête des réglages. */
+  iconWithName: string;
+  /** Nom du jeu : carte du choix du jeu. */
+  name: string;
+}
+
+/** Fonds du launcher d'un jeu (chemins relatifs à `renderer/public`). */
+export interface InstanceBackground {
+  /** Fond « image ». */
+  image: string;
+  /** Fond « vidéo ». */
+  video: string;
+  /** Musique, quand le fond est « audio ». */
+  audio: string;
+  /** Modèle 3D (.glb) du fond « 3d ». */
+  model: string;
+  /** Réglages de la scène 3D autour du modèle. */
+  scene: GltfGameData;
+}
+
 /**
  * Visibilité d'un réglage dans l'onglet Game :
  * - `normal` : toujours visible ;
@@ -53,14 +77,12 @@ export interface InstanceRenderConfig {
   id: InstanceId;
   /** Nom affiché dans le choix du jeu. */
   name: string;
-  /** Image affichée dans le choix du jeu. */
-  icon?: string;
-  /** Préfixe des fichiers `public/` du jeu (`./images/<assets>-background.png`, `./models/<assets>-3d.glb`…). */
-  assets: string;
+  /** Images du jeu (chemins relatifs à `renderer/public`). */
+  images: InstanceImages;
+  /** Fonds du launcher pour ce jeu : image, vidéo, musique, scène 3D. */
+  background: InstanceBackground;
   /** Nom court affiché sur l'accueil à côté du nombre de joueurs. */
   serverLabel?: string;
-  /** Réglages de la scène 3D (fond « 3d »). */
-  gltf: GltfGameData;
   /** Contenu de la popup « Astuces du jour ». */
   tipContent?: ReactNode;
   /** Contenu de la popup de bienvenue avant la première installation. */

@@ -4,7 +4,6 @@ import { describe, it } from "node:test";
 
 import {
   instanceRootPath,
-  isPathAllowed,
   isPathInside,
   isSafeRelativePath,
   isSafeSegment,
@@ -80,21 +79,5 @@ describe("instanceRootPath", () => {
 
   it("refuse un id qui pourrait sortir de la racine", () => {
     assert.throws(() => instanceRootPath("/root", "../etc", "stable"), /invalide/);
-  });
-});
-
-describe("isPathAllowed", () => {
-  const allowed = ["game"];
-
-  it("accepte le chemin autorisé et ses sous-dossiers", () => {
-    assert.equal(isPathAllowed("game", allowed), true);
-    assert.equal(isPathAllowed("/game/BepInEx/plugins", allowed), true);
-  });
-
-  it("refuse tout le reste", () => {
-    assert.equal(isPathAllowed("game2", allowed), false);
-    assert.equal(isPathAllowed("other", allowed), false);
-    assert.equal(isPathAllowed("game/../other", allowed), false);
-    assert.equal(isPathAllowed("game", []), false);
   });
 });

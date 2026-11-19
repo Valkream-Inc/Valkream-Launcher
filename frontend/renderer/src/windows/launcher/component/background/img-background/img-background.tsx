@@ -9,9 +9,7 @@ import { useGames } from "../../../context/games.context";
 function ImgBackground() {
   const { actualInstance } = useGames();
 
-  const backgroundSrc = useMemo(() => {
-    return `./images/${actualInstance.assets}-background.png`;
-  }, [actualInstance.assets]);
+  const backgroundSrc = actualInstance.background.image;
 
   const altText = useMemo(() => `${actualInstance.name} background`, [actualInstance.name]);
 

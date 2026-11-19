@@ -222,7 +222,7 @@ export default function ChooseGames() {
                 instancesRenderConfig.find((item) => item.id === summary.id)
                   ?.name ?? summary.id,
               icon: instancesRenderConfig.find((item) => item.id === summary.id)
-                ?.icon ?? "",
+                ?.images.name ?? "",
             })),
         );
       })

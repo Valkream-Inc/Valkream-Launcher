@@ -60,8 +60,8 @@ export class InstanceInfos {
     const cached = this.cache.get(config.id);
     if (cached && now() - cached.at < ttlMs) return cached;
 
-    const load = await loadRemoteIndex(resolver, config.indexUrl);
-    const entry = load.kind === "ok" ? load.index.instances.find((item) => item.id === config.id) : undefined;
+    const load = await loadRemoteIndex(resolver, config.indexUrl, config.id);
+    const entry = load.kind === "ok" ? load.index : undefined;
 
     const fresh: Cached = {
       at: now(),

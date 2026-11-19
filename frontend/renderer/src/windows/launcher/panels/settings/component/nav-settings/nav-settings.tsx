@@ -63,7 +63,7 @@ export const NavSettings = ({
       {/* Header */}
       <img
         onClick={handleToogleSpecialOptionClick}
-        src={`./images/${actualInstance.assets}-icon-with-name.png`}
+        src={actualInstance.images.iconWithName}
         alt="Logo Valkream"
         className="menu-header"
       />

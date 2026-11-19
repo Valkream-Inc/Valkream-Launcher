@@ -144,7 +144,7 @@ export class InstanceInstaller {
             // Entrée optionnelle désactivée par le joueur : on retire ses mods puis on l'oublie.
             const uninstall = (this.options.uninstallers ?? DEFAULT_UNINSTALLERS)[String(item.entry.type)];
             await uninstall?.({
-              entryDir: entryDirectory(installDir, item.entry.path, loaded.config.allowedPaths),
+              entryDir: entryDirectory(installDir, item.entry.path),
               previousOwned: state.entries[item.name]?.owned ?? [],
             });
             removeInstalledEntry(installDir, item.name);
@@ -155,7 +155,7 @@ export class InstanceInstaller {
           const provider = providers[String(item.entry.type)];
           if (!provider) throw new Error(`type « ${item.entry.type} » non pris en charge`);
 
-          const entryDir = entryDirectory(installDir, item.entry.path, loaded.config.allowedPaths);
+          const entryDir = entryDirectory(installDir, item.entry.path);
           const previous = state.entries[item.name];
           const plan = planEntryUpdate(item.entry, previous?.version);
 

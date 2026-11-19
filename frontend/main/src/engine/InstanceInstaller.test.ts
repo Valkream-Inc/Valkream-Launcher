@@ -19,7 +19,7 @@ const config: InstanceMainConfig = {
   id: "g",
   server: { type: "valheim", host: "h", port: 1, timeout: 1 },
   indexUrl: "/index.json",
-  allowedPaths: ["game"],
+  entryPaths: { base: "game", cfg: "game/config", mods: "game/plugins", normal: "game/plugins", admin: "game/plugins", n: "game" },
 };
 
 /** Réseau simulé : URL → contenu texte. Les « zips » sont de simples JSON { fichier: contenu }. */
@@ -76,7 +76,9 @@ const build = (remote: Record<string, unknown>, files: Record<string, string>) =
 
 const index = (channels: Record<string, string>) => ({
   schemaVersion: 1,
-  instances: [{ id: "g", enabled: { win32: true }, channels }],
+  id: "g",
+  enabled: { win32: true },
+  channels,
 });
 const dir = (channel: "stable" | "beta") => instanceRootPath(root, "g", channel);
 const read = (channel: "stable" | "beta", file: string) =>
@@ -90,13 +92,13 @@ describe("InstanceInstaller", () => {
       version: "1.0.0",
       "game-base": {
         base: {
-          version: "1.0.0", path: "game", type: "hash_url", "hash-folder": "/h/",
+          version: "1.0.0", type: "hash_url", "hash-folder": "/h/",
           content: "/manifest.json", to_ignore: ["logs"], hash: manifestHash(manifest, ["logs"]),
         },
       },
       "game-details": {
         cfg: {
-          version: "1.0.0", path: "game/config", type: "zip_url", content: "/cfg.zip", folder_in_zip: "config",
+          version: "1.0.0", type: "zip_url", content: "/cfg.zip", folder_in_zip: "config",
           gameFolderToPreserve: ["client.cfg", { path: "graphics.cfg", from: ">=1.0.0" }],
         },
       },
@@ -198,7 +200,7 @@ describe("InstanceInstaller", () => {
     remote["/index.json"] = index({ stable: "/stable.yml", beta: "/beta.yml" });
     remote["/beta.yml"] = {
       version: "1.1.0",
-      "game-details": { cfg: { version: "9.0.0", path: "game/config", type: "zip_url", content: "/cfg.zip", folder_in_zip: "config" } },
+      "game-details": { cfg: { version: "9.0.0", type: "zip_url", content: "/cfg.zip", folder_in_zip: "config" } },
     };
     const { installer } = build(remote, files);
     await installer.sync("g", "stable");
@@ -215,7 +217,7 @@ describe("InstanceInstaller", () => {
       "/stable.yml": {
         version: "1.0.0",
         "game-details": {
-          mods: { version: "1", path: "game/plugins", type: "thunderstore_modpack_url", "api-url": "https://thunderstore.io", content: ["Au-ModA-1.0.0", "Au-ModB-2.0.0"] },
+          mods: { version: "1", type: "thunderstore_modpack_url", "api-url": "https://thunderstore.io", content: ["Au-ModA-1.0.0", "Au-ModB-2.0.0"] },
         },
       },
     };
@@ -255,8 +257,8 @@ describe("InstanceInstaller", () => {
       "/stable.yml": {
         version: "1.0.0",
         "game-details": {
-          normal: { version: "1", path: "game/plugins", type: "thunderstore_modpack_url", content: ["Au-Normal-1.0.0"] },
-          admin: { version: "1", path: "game/plugins", type: "thunderstore_modpack_url", content: ["Au-Admin-1.0.0"], optional: { setting: "modsAdmin" } },
+          normal: { version: "1", type: "thunderstore_modpack_url", content: ["Au-Normal-1.0.0"] },
+          admin: { version: "1", type: "thunderstore_modpack_url", content: ["Au-Admin-1.0.0"], optional: { setting: "modsAdmin" } },
         },
       },
     };
@@ -287,7 +289,7 @@ describe("InstanceInstaller", () => {
   it("type non pris en charge (nexus) : échec signalé, pas d'exception", async () => {
     const remote: Record<string, any> = {
       "/index.json": index({ stable: "/stable.yml" }),
-      "/stable.yml": { version: "1.0.0", "game-details": { n: { version: "1", path: "game", type: "nexus_modpack_url", content: "/x.json" } } },
+      "/stable.yml": { version: "1.0.0", "game-details": { n: { version: "1", type: "nexus_modpack_url", content: "/x.json" } } },
     };
     const { installer } = build(remote, {});
     const result = await installer.sync("g", "stable");

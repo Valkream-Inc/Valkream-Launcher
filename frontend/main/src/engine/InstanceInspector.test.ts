@@ -18,39 +18,35 @@ const config: InstanceMainConfig = {
   id: "game-v2",
   server,
   indexUrl: "/index.json",
-  allowedPaths: ["game"],
+  entryPaths: { base: "game", admin: "game", cfg: "game/config" },
   executable: { win32: "game/run.exe" },
 };
 
 const remote: Record<string, unknown> = {
   "/index.json": {
     schemaVersion: 1,
-    instances: [
-      {
-        id: "game-v2",
-        enabled: { win32: true },
-        channels: { stable: "/stable.yml", beta: "/beta.yml" },
-        mods: [{ name: "Mod A" }],
-        contributors: [{ name: "Alice" }],
-      },
-    ],
+    id: "game-v2",
+    enabled: { win32: true },
+    channels: { stable: "/stable.yml", beta: "/beta.yml" },
+    mods: [{ name: "Mod A" }],
+    contributors: [{ name: "Alice" }],
   },
   "/stable.yml": {
     version: "1.0.0",
     "game-base": {
-      base: { version: "1.0.0", path: "game", type: "zip_url", content: "/b.zip" },
+      base: { version: "1.0.0", type: "zip_url", content: "/b.zip" },
     },
     "game-details": {
       admin: {
         version: "1.0.0",
-        path: "game",
+       
         type: "zip_url",
         content: "/a.zip",
         optional: { setting: "modsAdmin" },
       },
       cfg: {
         version: "2.0.0",
-        path: "game/config",
+       
         type: "zip_url",
         content: "/c.zip",
         gameFolderToPreserve: [{ path: "client.cfg", from: ">=1.0.0" }],
@@ -61,7 +57,7 @@ const remote: Record<string, unknown> = {
   "/beta.yml": {
     version: "1.1.0",
     "game-base": {
-      base: { version: "1.1.0", path: "game", type: "zip_url", content: "/b.zip" },
+      base: { version: "1.1.0", type: "zip_url", content: "/b.zip" },
     },
   },
 };
@@ -175,7 +171,7 @@ describe("InstanceInspector", () => {
 
     const hashRemote = structuredClone(remote) as Record<string, any>;
     hashRemote["/stable.yml"]["game-base"].base = {
-      version: "1.0.0", path: "game", type: "hash_url", "hash-folder": "/h/",
+      version: "1.0.0", type: "hash_url", "hash-folder": "/h/",
       content: { "a.txt": sha("remote"), "logs/x.log": sha("attendu") },
       to_ignore: ["logs"],
     };
