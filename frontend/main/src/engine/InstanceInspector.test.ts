@@ -36,11 +36,11 @@ const remote: Record<string, unknown> = {
     ],
   },
   "/stable.yml": {
-    version: "1.0.0.0",
+    version: "1.0.0",
     "game-base": {
       base: { version: "1.0.0", path: "game", type: "zip_url", content: "/b.zip" },
     },
-    "game-breaking": {
+    "game-details": {
       admin: {
         version: "1.0.0",
         path: "game",
@@ -48,8 +48,6 @@ const remote: Record<string, unknown> = {
         content: "/a.zip",
         optional: { setting: "modsAdmin" },
       },
-    },
-    "game-notbreaking": {
       cfg: {
         version: "2.0.0",
         path: "game/config",
@@ -61,7 +59,7 @@ const remote: Record<string, unknown> = {
     },
   },
   "/beta.yml": {
-    version: "1.1.0.0",
+    version: "1.1.0",
     "game-base": {
       base: { version: "1.1.0", path: "game", type: "zip_url", content: "/b.zip" },
     },
@@ -98,19 +96,19 @@ describe("InstanceInspector", () => {
       report.entries.map((e) => [e.name, e.status]),
       [["base", "not-installed"], ["admin", "skipped"], ["cfg", "not-installed"]],
     );
-    assert.deepEqual(report.summary.blocking, ["base"]);
+    assert.deepEqual(report.summary.blocking, ["base", "cfg"]);
     assert.equal(report.summary.works, false);
     assert.equal(report.mods[0].name, "Mod A");
     assert.equal(report.contributors[0].name, "Alice");
   });
 
-  it("tout à jour : jouable ; une entrée non bloquante en retard n'empêche pas de jouer", async () => {
+  it("tout à jour : jouable ; une entrée game-details en retard force la mise à jour", async () => {
     recordInstalledEntry(dir("stable"), "base", { version: "1.0.0" });
     recordInstalledEntry(dir("stable"), "cfg", { version: "1.9.0" });
     const report = await inspector().report("game-v2", "stable");
     assert.equal(report.entries[2].status, "outdated");
-    assert.equal(report.entries[2].blocking, false);
-    assert.equal(report.summary.works, true);
+    assert.deepEqual(report.summary.blocking, ["cfg"]);
+    assert.equal(report.summary.works, false);
     // config installée en 1.9.0 : la règle >=1.0.0 conserve client.cfg
     assert.deepEqual(report.entries[2].preserved, ["client.cfg"]);
     assert.deepEqual(report.entries[2].toIgnore, ["*.log"]);
@@ -120,7 +118,7 @@ describe("InstanceInspector", () => {
     writeInstanceSetting(dir("stable"), "modsAdmin", true);
     const report = await inspector().report("game-v2", "stable");
     assert.equal(report.entries[1].status, "not-installed");
-    assert.deepEqual(report.summary.blocking, ["base", "admin"]);
+    assert.deepEqual(report.summary.blocking, ["base", "admin", "cfg"]);
   });
 
   it("beta : installation, état et réglages totalement séparés du stable", async () => {
@@ -129,7 +127,7 @@ describe("InstanceInspector", () => {
 
     const beta = await inspector().report("game-v2", "beta");
     assert.notEqual(beta.installDir, dir("stable"));
-    assert.equal(beta.releaseVersion, "1.1.0.0");
+    assert.equal(beta.releaseVersion, "1.1.0");
     assert.equal(beta.entries[0].status, "not-installed");
     assert.deepEqual(beta.settings, {});
 

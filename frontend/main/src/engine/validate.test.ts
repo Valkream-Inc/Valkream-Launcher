@@ -25,7 +25,7 @@ const validEntry = () => ({
 });
 
 const validRelease = () => ({
-  version: "0.1.2.3",
+  version: "0.1.2",
   "game-base": { valheim: validEntry() },
 });
 
@@ -121,7 +121,7 @@ describe("validateReleaseConfig", () => {
   });
 
   it("refuse une version globale mal formée", () => {
-    assert.match(errorsOf(validateReleaseConfig({ ...validRelease(), version: "1.2.3" })), /X0\.X1\.X2\.X3/);
+    assert.match(errorsOf(validateReleaseConfig({ ...validRelease(), version: "1.2.3.4" })), /X0\.X1\.X2 attendu/);
   });
 
   it("attrape la faute « game-notbreacking » du brouillon", () => {
@@ -139,16 +139,16 @@ describe("validateReleaseConfig", () => {
 
   it("refuse un nom d'entrée dupliqué entre niveaux", () => {
     const release = {
-      version: "0.0.0.0",
+      version: "0.0.0",
       "game-base": { configs: validEntry() },
-      "game-notbreaking": { configs: validEntry() },
+      "game-details": { configs: validEntry() },
     };
     assert.match(errorsOf(validateReleaseConfig(release)), /déjà utilisé dans game-base/);
   });
 
   it("refuse les contenus du brouillon qui ne sont pas des liens", () => {
     const release = {
-      version: "0.0.0.0",
+      version: "0.0.0",
       "game-base": {
         bepinex: { ...validEntry(), content: { win32: "/ok.zip", linux: "htpp://something", darwin: "binary" } },
       },
@@ -161,13 +161,13 @@ describe("validateReleaseConfig", () => {
 
   it("hash_url : exige hash-folder et accepte un manifeste inline", () => {
     const entry = { ...validEntry(), type: "hash_url", content: { "/toto/x": "a".repeat(64) } };
-    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0.0", "game-base": { v: entry } })), /hash-folder/);
+    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: entry } })), /hash-folder/);
 
     const withFolder = { ...entry, "hash-folder": "/games/x/hash/" };
-    assert.equal(validateReleaseConfig({ version: "0.0.0.0", "game-base": { v: withFolder } }).ok, true);
+    assert.equal(validateReleaseConfig({ version: "0.0.0", "game-base": { v: withFolder } }).ok, true);
 
     const badHash = { ...withFolder, content: { "/toto/x": "pas-un-hash" } };
-    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0.0", "game-base": { v: badHash } })), /sha256 attendu/);
+    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: badHash } })), /sha256 attendu/);
   });
 
   it("thunderstore : liste Auteur-Nom-Version et api-url https", () => {
@@ -177,21 +177,21 @@ describe("validateReleaseConfig", () => {
       "api-url": "https://thunderstore.io",
       content: ["JereKuusela-Infinity_Hammer-1.79.0", "mauvais"],
     };
-    const errors = errorsOf(validateReleaseConfig({ version: "0.0.0.0", "game-breaking": { mods: entry } }));
+    const errors = errorsOf(validateReleaseConfig({ version: "0.0.0", "game-details": { mods: entry } }));
     assert.match(errors, /content\[1\] : « Auteur-Nom-Version » attendu/);
     assert.doesNotMatch(errors, /api-url/);
   });
 
   it("champs réservés : folder_in_zip à zip_url, api-url à thunderstore/nexus", () => {
-    const entry = { ...validEntry(), type: "hash_url", "hash-folder": "/h/", folder_in_zip: "/x", "api-url": "https://a.b" };
-    const errors = errorsOf(validateReleaseConfig({ version: "0.0.0.0", "game-base": { v: entry } }));
+    const entry = { ...validEntry(), type: "hash_url", "hash-folder": "/h/", folder_in_zip: "x", "api-url": "https://a.b" };
+    const errors = errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: entry } }));
     assert.match(errors, /folder_in_zip : réservé à zip_url/);
     assert.match(errors, /api-url : réservé/);
   });
 
   it("gameFolderToRemove/Preserve et optional sont contrôlés", () => {
     const entry = { ...validEntry(), gameFolderToRemove: ["/BepInEx/cache", "../x"], gameFolderToPreserve: "pas-une-liste", optional: {} };
-    const errors = errorsOf(validateReleaseConfig({ version: "0.0.0.0", "game-base": { v: entry } }));
+    const errors = errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: entry } }));
     assert.match(errors, /gameFolderToRemove\[1\]/);
     assert.doesNotMatch(errors, /gameFolderToRemove\[0\]/);
     assert.match(errors, /gameFolderToPreserve : tableau attendu/);
@@ -201,7 +201,7 @@ describe("validateReleaseConfig", () => {
 
 describe("gameFolderToPreserve et to_ignore", () => {
   const release = (extra: Record<string, unknown>) => ({
-    version: "0.1.2.3",
+    version: "0.1.2",
     "game-base": { valheim: { ...validEntry(), ...extra } },
   });
 
@@ -248,7 +248,7 @@ describe("backend/public : toutes les instances de l'index", () => {
         const result = validateReleaseConfig(release, ["game"]);
         assert.equal(result.ok, true, `${instance.id}@${channel} : ${result.errors.join(" | ")}`);
 
-        for (const tier of ["game-base", "game-breaking", "game-notbreaking"]) {
+        for (const tier of ["game-base", "game-details"]) {
           for (const [name, entry] of Object.entries<any>(release[tier] ?? {})) {
             // Manifeste présent dans le repo : le hash déclaré doit être celui du manifeste.
             if (entry.type === "hash_url" && typeof entry.content === "string" && fs.existsSync(local(entry.content))) {

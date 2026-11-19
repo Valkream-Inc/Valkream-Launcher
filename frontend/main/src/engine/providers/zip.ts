@@ -9,14 +9,13 @@
 import fs from "fs";
 import path from "path";
 
-import { contentForPlatform } from "../link";
 import { shouldWriteFile } from "../preserve";
 import type { Provider } from "./types";
 
 export const zipProvider: Provider = async (context) => {
   const { entry, entryDir, tempDir, plan, platform, resolver, io, name, signal } = context;
 
-  const content = contentForPlatform(entry.content, platform);
+  const content = entry.content;
   if (typeof content !== "string") {
     throw new Error(`${name} : pas de lien d'archive pour la plateforme ${platform}`);
   }

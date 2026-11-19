@@ -2,17 +2,29 @@
 # Exemple de latest.yml du nouveau système d'instances.
 # Spécification d'origine commentée : doc/instance-system/draft-original/remote/latest.yml
 #
-# NORME DE VERSIONNAGE : X0.X1.X2.X3 (affichage seulement)
-#   X0 saison · X1 game-base · X2 game-breaking · X3 game-notbreaking
+# NORME DE VERSIONNAGE : X0.X1.X2 (affichage seulement)
+#   X0 saison · X1 game-base · X2 game-details
 # Le niveau d'une mise à jour se décide entrée par entrée (version + hash), pas sur cette chaîne.
 #
-# Chaque entrée :
+# Deux niveaux, tous deux forcés (le jeu n'est jouable en ligne que si tout est à jour) :
+#   game-base      le jeu lui-même : réinstallation complète si en retard
+#   game-details   mods, configuration, détails : mise à jour incrémentale
+#
+# Chaque entrée. TOUTES les options sauf `version` peuvent :
+#   - être déclinées par plateforme : { win32: …, linux: …, darwin: …, default: … } ;
+#   - prendre une valeur inline, ou un lien (/chemin relatif au serveur de fichiers, ou https://…)
+#     vers un fichier JSON/YAML qui contient la valeur (une chaîne qui commence par « / » est donc
+#     un lien : écrire les chemins sans « / » initial).
+#   Une entrée dont path, type ou content n'a pas de valeur pour la plateforme n'est pas proposée dessus.
+#   Exceptions : content (zip), hash-folder et api-url sont déjà des liens vers ce que télécharge
+#   le provider ; seule leur plateforme est choisie.
+#
 #   version   indique si elle doit être mise à jour
 #   path      relatif à la racine de l'instance, validé par allowedPaths (config main)
 #   type      zip_url | hash_url | thunderstore_modpack_url | nexus_modpack_url
-#   hash      sha256 du manifeste des fichiers de l'entrée (généré par le build backend ; absent ici)
-#   content   lien (/relatif ou https://…), liste, ou manifeste inline ; une valeur par plateforme
-#             (win32, linux, darwin, default) ou une valeur unique
+#   hash      sha256 du manifeste des fichiers de l'entrée (généré par `yarn build:manifest`)
+#   content   lien, liste, ou manifeste inline
+#   hash-folder / api-url / folder_in_zip   selon le type (voir la doc)
 #   optional  { setting } : installée seulement si ce réglage d'instance est actif
 #   gameFolderToRemove     relatifs à path, supprimés à la mise à jour de l'entrée
 #   gameFolderToPreserve   fichiers/dossiers relatifs à path conservés à la mise à jour (config client…).
@@ -23,7 +35,7 @@
 #                          nettoyage : fichiers locaux que l'entrée ne possède pas (logs, caches…)
 # ──────────────────────────────────────────────────────────────
 
-version: 2.34.37.1
+version: 2.34.37
 buildDate: 2025-09-18T19:00:00.929Z
 
 # Migré depuis games/Valheim/latest/latest.yml (ancien format : modpack / valheim / bepinex).
@@ -44,12 +56,11 @@ game-base: # X1 : réinstallation complète
     version: 5.4.2333
     path: game
     type: zip_url
-    folder_in_zip: /
     content: /games/Valheim/latest/BepInEx-5.4.2333.zip
     gameFolderToRemove:
       - BepInEx/cache
 
-game-breaking: # X2 : mods (impacte la compatibilité serveur)
+game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
   mods-thunderstore:
     version: 2.34.37
     path: game/BepInEx/plugins
@@ -90,12 +101,11 @@ game-breaking: # X2 : mods (impacte la compatibilité serveur)
       - Willybach-Willybachs_HD_Seasonality-3.5.6
       - RustyMods-Seasonality-3.7.4
 
-game-notbreaking: # X3 : configuration des mods
   configs:
     version: 2.34.37
     path: game/BepInEx/config
     type: zip_url
-    folder_in_zip: /config
+    folder_in_zip: config
     content: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.34.37/
     gameFolderToRemove:
       - wackysDatabase/Cache

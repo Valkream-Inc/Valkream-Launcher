@@ -3,7 +3,7 @@
  * @license MIT-NC
  *
  * Installation / mise à jour d'une instance (un canal) à partir du latest.yml :
- * une entrée = un provider, dans l'ordre game-base → game-breaking → game-notbreaking.
+ * une entrée = un provider, dans l'ordre game-base → game-details.
  * Chaque entrée réussie est enregistrée dans l'état de l'installation : une
  * synchronisation interrompue reprend où elle s'est arrêtée.
  */

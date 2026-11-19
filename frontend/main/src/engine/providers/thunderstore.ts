@@ -13,7 +13,6 @@ import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
-import { contentForPlatform } from "../link";
 import { resolveInside } from "../paths";
 import type { Provider, Uninstaller } from "./types";
 
@@ -28,7 +27,7 @@ export const parseDependency = (dependency: string) => {
 export const thunderstoreProvider: Provider = async (context) => {
   const { entry, entryDir, tempDir, platform, resolver, io, name, signal, previousOwned } = context;
 
-  const content = contentForPlatform(entry.content, platform);
+  const content = entry.content;
   if (content === undefined || (typeof content === "object" && !Array.isArray(content))) {
     throw new Error(`${name} : liste de mods absente pour la plateforme ${platform}`);
   }

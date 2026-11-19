@@ -18,6 +18,7 @@ import type {
 } from "@shared/types";
 
 import { classifyLink, isFetchableLink, isPerPlatformContent } from "./link";
+import { RELEASE_TIERS } from "./release-options";
 import { isPathAllowed, isSafeRelativePath, isSafeSegment } from "./paths";
 import { isValidRange } from "./version";
 
@@ -27,7 +28,7 @@ export type ValidationResult<T> =
 
 const PLATFORMS = ["win32", "linux", "darwin"];
 const CHANNELS = ["stable", "beta"];
-const TIERS = ["game-base", "game-breaking", "game-notbreaking"] as const;
+const TIERS = RELEASE_TIERS;
 const ENTRY_TYPES = [
   "zip_url",
   "hash_url",
@@ -230,6 +231,13 @@ const checkPreserveList = (value: unknown, where: string): string[] => {
   });
 };
 
+/**
+ * Une chaîne « lien » (`https://…`, `/chemin`) tient lieu de valeur pour les options de
+ * données : le fichier est lu avant la validation (`flattenRelease`). Si la lecture a
+ * échoué, l'erreur est déjà dans le rapport, inutile d'en ajouter une seconde ici.
+ */
+const isDataLink = (value: unknown): boolean => typeof value === "string" && isFetchableLink(value);
+
 const checkEntry = (
   entry: unknown,
   where: string,
@@ -242,18 +250,24 @@ const checkEntry = (
     errors.push(`${where}.version : requise`);
   }
 
-  if (!isNonEmptyString(entry.path) || !isSafeRelativePath(entry.path)) {
+  if (isDataLink(entry.path)) {
+    // lu avant la validation
+  } else if (!isNonEmptyString(entry.path) || !isSafeRelativePath(entry.path)) {
     errors.push(`${where}.path : chemin relatif sûr requis (sans « .. », ni lecteur)`);
   } else if (allowedPaths && !isPathAllowed(entry.path, allowedPaths)) {
     errors.push(`${where}.path : « ${entry.path} » n'est pas autorisé pour cette instance`);
   }
 
   const type = typeof entry.type === "string" ? entry.type : "";
-  if (!ENTRY_TYPES.includes(type)) {
+  if (!ENTRY_TYPES.includes(type) && !isDataLink(entry.type)) {
     errors.push(`${where}.type : ${ENTRY_TYPES.join(", ")} attendu`);
   }
 
-  if (entry.hash !== undefined && !(typeof entry.hash === "string" && SHA256.test(entry.hash))) {
+  if (
+    entry.hash !== undefined &&
+    !isDataLink(entry.hash) &&
+    !(typeof entry.hash === "string" && SHA256.test(entry.hash))
+  ) {
     errors.push(`${where}.hash : sha256 hexadécimal attendu`);
   }
 
@@ -274,7 +288,7 @@ const checkEntry = (
     errors.push(`${where}.hash-folder : URL de base des fichiers requise`);
   }
 
-  if (entry.folder_in_zip !== undefined) {
+  if (entry.folder_in_zip !== undefined && !isDataLink(entry.folder_in_zip)) {
     if (type !== "zip_url") errors.push(`${where}.folder_in_zip : réservé à zip_url`);
     else if (typeof entry.folder_in_zip !== "string" || !isSafeRelativePath(entry.folder_in_zip)) {
       errors.push(`${where}.folder_in_zip : chemin relatif sûr attendu`);
@@ -291,14 +305,14 @@ const checkEntry = (
   }
 
   for (const key of ["gameFolderToRemove", "to_ignore"] as const) {
-    if (entry[key] !== undefined) errors.push(...checkPathList(entry[key], `${where}.${key}`));
+    if (entry[key] !== undefined && !isDataLink(entry[key])) errors.push(...checkPathList(entry[key], `${where}.${key}`));
   }
 
-  if (entry.gameFolderToPreserve !== undefined) {
+  if (entry.gameFolderToPreserve !== undefined && !isDataLink(entry.gameFolderToPreserve)) {
     errors.push(...checkPreserveList(entry.gameFolderToPreserve, `${where}.gameFolderToPreserve`));
   }
 
-  if (entry.optional !== undefined) {
+  if (entry.optional !== undefined && !isDataLink(entry.optional)) {
     if (!isObject(entry.optional) || !isNonEmptyString(entry.optional.setting)) {
       errors.push(`${where}.optional : { setting: <nom du réglage> } attendu`);
     }
@@ -308,7 +322,8 @@ const checkEntry = (
 };
 
 /**
- * Valide un `latest.yml` déjà parsé.
+ * Valide un `latest.yml` déjà parsé ET passé par `flattenRelease` (plateforme choisie,
+ * liens de données lus).
  * @param allowedPaths `allowedPaths` de la config main de l'instance (liste blanche des `path`).
  */
 export const validateReleaseConfig = (
@@ -319,8 +334,8 @@ export const validateReleaseConfig = (
 
   if (!isObject(raw)) return { ok: false, errors: ["latest : objet attendu"] };
 
-  if (typeof raw.version !== "string" || !/^\d+\.\d+\.\d+\.\d+$/.test(raw.version)) {
-    errors.push("latest.version : format X0.X1.X2.X3 attendu (ex : 0.2.34.37)");
+  if (typeof raw.version !== "string" || !/^\d+\.\d+\.\d+$/.test(raw.version)) {
+    errors.push("latest.version : format X0.X1.X2 attendu (ex : 0.2.34)");
   }
 
   for (const key of Object.keys(raw)) {

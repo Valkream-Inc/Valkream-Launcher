@@ -64,12 +64,3 @@ export const isPerPlatformContent = (
   const keys = Object.keys(content);
   return keys.length > 0 && keys.every((key) => PLATFORM_KEYS.includes(key));
 };
-
-/** Contenu applicable à `platform` (clé exacte, sinon `default`), ou undefined. */
-export const contentForPlatform = (
-  content: EntryContentByPlatform,
-  platform: GamePlatform,
-): EntryContent | undefined => {
-  if (!isPerPlatformContent(content)) return content;
-  return content[platform] ?? content.default;
-};

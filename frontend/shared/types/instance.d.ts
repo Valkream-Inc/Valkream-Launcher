@@ -78,12 +78,12 @@ export type EntryType =
   | "nexus_modpack_url";
 
 /**
- * Niveau d'impact d'une entrée.
- * - `game-base` (X1) : réinstallation complète, jeu bloqué tant que non à jour ;
- * - `game-breaking` (X2) : compatibilité serveur, jeu bloqué tant que non à jour ;
- * - `game-notbreaking` (X3) : on peut jouer sans la mise à jour.
+ * Niveau d'une entrée (les deux forcent la mise à jour : le jeu n'est jouable
+ * en ligne que lorsque tout ce qui est actif est à jour) :
+ * - `game-base` (X1) : le jeu lui-même, réinstallation complète si en retard ;
+ * - `game-details` (X2) : mods, configs et autres détails, mise à jour incrémentale.
  */
-export type ReleaseTier = "game-base" | "game-breaking" | "game-notbreaking";
+export type ReleaseTier = "game-base" | "game-details";
 
 /** Contenu d'une entrée : lien, liste (mods) ou objet inline (manifeste de hash). */
 export type EntryContent = string | string[] | Record<string, unknown>;
@@ -105,46 +105,85 @@ export interface PreserveRule {
   from?: string;
 }
 
-export interface ReleaseEntry {
-  version: string;
-  /** Relatif à la racine de l'instance, ne sort jamais de celle-ci. */
-  path: string;
-  type: EntryType;
+/** Une valeur par plateforme (clé `default` pour les autres). */
+export type PlatformTable<T> = Partial<Record<GamePlatform | "default", T>>;
+
+/**
+ * Valeur déclarée d'une option du latest.yml (toutes sauf `version`) :
+ * - la donnée elle-même (inline) ;
+ * - ou un lien (`https://…` ou `/chemin` relatif au serveur de fichiers) vers un
+ *   fichier JSON / YAML qui la contient ;
+ * - et chacune de ces deux formes peut être déclinée par plateforme.
+ * Les options qui sont elles-mêmes des liens (`content` d'un zip, `hash-folder`,
+ * `api-url`) gardent leur lien tel quel : le provider s'en sert directement.
+ */
+export type RawOption<T> = T | string | PlatformTable<T | string>;
+
+/** Entrée telle qu'écrite dans le latest.yml (avant choix de la plateforme et lecture des liens). */
+export interface RawReleaseEntry {
+  version: string | number;
+  /** Relatif à la racine de l'instance (sans « / » initial : une chaîne en « / » est un lien). */
+  path: RawOption<string>;
+  type: RawOption<EntryType>;
   /** sha256 du manifeste des fichiers que possède l'entrée. */
-  hash?: string;
+  hash?: RawOption<string>;
   content: EntryContentByPlatform;
   /** `hash_url` : URL de base des fichiers du manifeste. */
-  "hash-folder"?: string;
+  "hash-folder"?: RawOption<string>;
   /** `zip_url` : dossier de l'archive à extraire. */
-  folder_in_zip?: string;
+  folder_in_zip?: RawOption<string>;
   /** `thunderstore_modpack_url` et `nexus_modpack_url` : domaine de l'API. */
-  "api-url"?: string;
+  "api-url"?: RawOption<string>;
   /** Relatifs à `path`. Supprimés à la mise à jour de l'entrée. */
-  gameFolderToRemove?: string[];
+  gameFolderToRemove?: RawOption<string[]>;
   /**
    * Fichiers ou dossiers (relatifs à `path`) conservés à la mise à jour de l'entrée :
    * ni écrasés ni supprimés (ex : config client). Une règle avec `from` ne conserve
    * que si la version installée la satisfait ; sinon la nouvelle version l'écrase.
    */
-  gameFolderToPreserve?: PreserveItem[];
+  gameFolderToPreserve?: RawOption<PreserveItem[]>;
   /**
    * Motifs (relatifs à `path`) exclus du hash, de la vérification et du nettoyage :
    * fichiers locaux que l'entrée ne possède pas (logs, caches, réglages joueur).
    */
-  to_ignore?: string[];
+  to_ignore?: RawOption<string[]>;
   /** Entrée installée seulement si ce réglage d'instance est actif. */
+  optional?: RawOption<{ setting: string }>;
+}
+
+/** Entrée résolue pour la plateforme courante : plus de table par plateforme, liens de données lus. */
+export interface ReleaseEntry {
+  version: string;
+  path: string;
+  type: EntryType;
+  hash?: string;
+  /** Lien, liste ou manifeste (jamais une table par plateforme). */
+  content: EntryContent;
+  "hash-folder"?: string;
+  folder_in_zip?: string;
+  "api-url"?: string;
+  gameFolderToRemove?: string[];
+  gameFolderToPreserve?: PreserveItem[];
+  to_ignore?: string[];
   optional?: { setting: string };
 }
 
 export type ReleaseEntries = Record<string, ReleaseEntry>;
 
 export interface ReleaseConfig {
-  /** `X0.X1.X2.X3` : affichage seulement. */
+  /** `X0.X1.X2` : affichage seulement. */
   version: string;
   buildDate?: string;
   "game-base"?: ReleaseEntries;
-  "game-breaking"?: ReleaseEntries;
-  "game-notbreaking"?: ReleaseEntries;
+  "game-details"?: ReleaseEntries;
+}
+
+/** latest.yml tel qu'écrit sur le serveur. */
+export interface RawReleaseConfig {
+  version: string;
+  buildDate?: string;
+  "game-base"?: Record<string, RawReleaseEntry>;
+  "game-details"?: Record<string, RawReleaseEntry>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -200,8 +239,6 @@ export interface EntryReport {
   declaredHash?: string;
   installedHash?: string;
   status: EntryStatus;
-  /** Bloque le jeu tant que non à jour (game-base, game-breaking). */
-  blocking: boolean;
   optionalSetting?: string;
   /** Entrée optionnelle désactivée mais encore installée : la prochaine synchro la retire. */
   pendingRemoval?: boolean;
@@ -221,7 +258,7 @@ export interface InstanceReportSummary {
   modified: number;
   skipped: number;
   invalid: number;
-  /** Entrées bloquantes pas à jour. */
+  /** Entrées actives pas à jour : le jeu n'est pas jouable en ligne tant qu'il en reste. */
   blocking: string[];
   /** Le jeu est-il jouable en l'état ? (rien d'invalide ni de bloquant) */
   works: boolean;

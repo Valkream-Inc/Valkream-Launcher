@@ -25,10 +25,10 @@ import type { InstanceMainConfig } from "../types/instances";
 import { entryDirectory, installLocations, type InstallLocations } from "./instance-paths";
 import { loadRemoteIndex } from "./InstanceRegistry";
 import { readInstallState, readInstanceSettings } from "./install-store";
-import { contentForPlatform } from "./link";
 import { verifyManifest, type Manifest } from "./manifest";
 import type { ParamResolver } from "./ParamResolver";
 import { resolvePreserved } from "./preserve";
+import { flattenRelease, RELEASE_TIERS } from "./release-options";
 import { validateReleaseConfig } from "./validate";
 
 export interface InspectorOptions {
@@ -52,7 +52,7 @@ export interface LoadedInstance {
   errors: string[];
 }
 
-export const TIERS: readonly ReleaseTier[] = ["game-base", "game-breaking", "game-notbreaking"];
+export const TIERS: readonly ReleaseTier[] = RELEASE_TIERS;
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -112,8 +112,13 @@ export class InstanceInspector {
     try {
       const fetched = await resolver.getYaml<unknown>(releaseLink);
       loaded.releaseSource = fetched.source === "cache" ? "cache" : "online";
-      loaded.releaseErrors = validateReleaseConfig(fetched.value, config.allowedPaths).errors;
-      loaded.release = fetched.value as ReleaseConfig;
+      // Plateforme choisie et liens de données lus, puis validation de ce qui sera réellement installé.
+      const flat = await flattenRelease(fetched.value, platform, resolver);
+      loaded.releaseErrors = [
+        ...flat.errors,
+        ...validateReleaseConfig(flat.release, config.allowedPaths).errors,
+      ];
+      loaded.release = flat.release;
     } catch (error) {
       errors.push(`latest : ${messageOf(error)}`);
     }
@@ -183,7 +188,7 @@ export class InstanceInspector {
 
     // Erreurs de validation qui ne portent sur aucune entrée (version, clé inconnue…).
     for (const error of releaseErrors) {
-      if (!/^latest\.(game-base|game-breaking|game-notbreaking)\.[^.\s]+/.test(error)) {
+      if (!new RegExp(`^latest\\.(${RELEASE_TIERS.join("|")})\\.[^.\\s]+`).test(error)) {
         report.errors.push(error);
       }
     }
@@ -217,7 +222,7 @@ export class InstanceInspector {
     config: InstanceMainConfig,
   ): Promise<void> {
     try {
-      const content = contentForPlatform(entry.content, this.options.platform);
+      const content = entry.content;
       if (content === undefined || Array.isArray(content)) return;
       const { value: manifest } = await this.options.resolver.getJson<Manifest>(content as string | Manifest);
       const directory = entryDirectory(installDir, entry.path, config.allowedPaths);
@@ -264,7 +269,6 @@ export const buildRow = (
     declaredHash: entry?.hash,
     installedHash: installed?.hash,
     status,
-    blocking: tier !== "game-notbreaking",
     optionalSetting,
     pendingRemoval: skipped && installed ? true : undefined,
     preserved: resolvePreserved(
@@ -302,7 +306,7 @@ const finalize = (report: InstanceReport): InstanceReport => {
         break;
     }
     const failing = !["up-to-date", "skipped"].includes(entry.status);
-    if (entry.blocking && failing) summary.blocking.push(entry.name);
+    if (failing) summary.blocking.push(entry.name);
   }
 
   summary.works =

@@ -3,7 +3,6 @@ import { describe, it } from "node:test";
 
 import {
   classifyLink,
-  contentForPlatform,
   isFetchableLink,
   isPerPlatformContent,
   resolveLinkUrl,
@@ -60,13 +59,5 @@ describe("contenu par plateforme", () => {
     assert.equal(isPerPlatformContent("/a"), false);
     assert.equal(isPerPlatformContent(["a-b-1"]), false);
     assert.equal(isPerPlatformContent({}), false);
-  });
-
-  it("choisit la plateforme, sinon default, sinon rien", () => {
-    const content = { win32: "/win", default: "/def" };
-    assert.equal(contentForPlatform(content, "win32"), "/win");
-    assert.equal(contentForPlatform(content, "linux"), "/def");
-    assert.equal(contentForPlatform({ win32: "/win" }, "darwin"), undefined);
-    assert.equal(contentForPlatform("/unique", "darwin"), "/unique");
   });
 });

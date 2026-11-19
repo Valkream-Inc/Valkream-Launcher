@@ -87,14 +87,14 @@ describe("InstanceInstaller", () => {
   const baseRemote = () => ({
     "/index.json": index({ stable: "/stable.yml" }),
     "/stable.yml": {
-      version: "1.0.0.0",
+      version: "1.0.0",
       "game-base": {
         base: {
           version: "1.0.0", path: "game", type: "hash_url", "hash-folder": "/h/",
           content: "/manifest.json", to_ignore: ["logs"], hash: manifestHash(manifest, ["logs"]),
         },
       },
-      "game-notbreaking": {
+      "game-details": {
         cfg: {
           version: "1.0.0", path: "game/config", type: "zip_url", content: "/cfg.zip", folder_in_zip: "config",
           gameFolderToPreserve: ["client.cfg", { path: "graphics.cfg", from: ">=1.0.0" }],
@@ -138,7 +138,7 @@ describe("InstanceInstaller", () => {
     fs.writeFileSync(path.join(dir("stable"), "game/config/graphics.cfg"), "perso-gfx");
 
     const remote = baseRemote() as Record<string, any>;
-    remote["/stable.yml"]["game-notbreaking"].cfg.version = "2.0.0";
+    remote["/stable.yml"]["game-details"].cfg.version = "2.0.0";
     const updated = build(remote, files);
     await updated.installer.sync("g", "stable");
 
@@ -197,8 +197,8 @@ describe("InstanceInstaller", () => {
     const remote = baseRemote() as Record<string, any>;
     remote["/index.json"] = index({ stable: "/stable.yml", beta: "/beta.yml" });
     remote["/beta.yml"] = {
-      version: "1.1.0.0",
-      "game-notbreaking": { cfg: { version: "9.0.0", path: "game/config", type: "zip_url", content: "/cfg.zip", folder_in_zip: "config" } },
+      version: "1.1.0",
+      "game-details": { cfg: { version: "9.0.0", path: "game/config", type: "zip_url", content: "/cfg.zip", folder_in_zip: "config" } },
     };
     const { installer } = build(remote, files);
     await installer.sync("g", "stable");
@@ -213,8 +213,8 @@ describe("InstanceInstaller", () => {
     const remote: Record<string, any> = {
       "/index.json": index({ stable: "/stable.yml" }),
       "/stable.yml": {
-        version: "1.0.0.0",
-        "game-breaking": {
+        version: "1.0.0",
+        "game-details": {
           mods: { version: "1", path: "game/plugins", type: "thunderstore_modpack_url", "api-url": "https://thunderstore.io", content: ["Au-ModA-1.0.0", "Au-ModB-2.0.0"] },
         },
       },
@@ -242,7 +242,7 @@ describe("InstanceInstaller", () => {
     fs.mkdirSync(path.join(dir("stable"), "game/plugins/Autre-Mod"), { recursive: true });
     fs.writeFileSync(path.join(dir("stable"), "game/plugins/Autre-Mod/x.dll"), "autre");
 
-    remote["/stable.yml"]["game-breaking"].mods = { ...remote["/stable.yml"]["game-breaking"].mods, version: "2", content: ["Au-ModB-3.0.0"] };
+    remote["/stable.yml"]["game-details"].mods = { ...remote["/stable.yml"]["game-details"].mods, version: "2", content: ["Au-ModB-3.0.0"] };
     await installer.sync("g", "stable");
     assert.equal(fs.existsSync(path.join(dir("stable"), "game/plugins/Au-ModA")), false);
     assert.equal(read("stable", "game/plugins/Au-ModB/plugin.dll"), "B3");
@@ -253,8 +253,8 @@ describe("InstanceInstaller", () => {
     const remote: Record<string, any> = {
       "/index.json": index({ stable: "/stable.yml" }),
       "/stable.yml": {
-        version: "1.0.0.0",
-        "game-breaking": {
+        version: "1.0.0",
+        "game-details": {
           normal: { version: "1", path: "game/plugins", type: "thunderstore_modpack_url", content: ["Au-Normal-1.0.0"] },
           admin: { version: "1", path: "game/plugins", type: "thunderstore_modpack_url", content: ["Au-Admin-1.0.0"], optional: { setting: "modsAdmin" } },
         },
@@ -287,7 +287,7 @@ describe("InstanceInstaller", () => {
   it("type non pris en charge (nexus) : échec signalé, pas d'exception", async () => {
     const remote: Record<string, any> = {
       "/index.json": index({ stable: "/stable.yml" }),
-      "/stable.yml": { version: "1.0.0.0", "game-notbreaking": { n: { version: "1", path: "game", type: "nexus_modpack_url", content: "/x.json" } } },
+      "/stable.yml": { version: "1.0.0", "game-details": { n: { version: "1", path: "game", type: "nexus_modpack_url", content: "/x.json" } } },
     };
     const { installer } = build(remote, {});
     const result = await installer.sync("g", "stable");

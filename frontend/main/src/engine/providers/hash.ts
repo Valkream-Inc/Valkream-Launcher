@@ -10,7 +10,6 @@
 import fs from "fs";
 import path from "path";
 
-import { contentForPlatform } from "../link";
 import { hashFile, manifestHash, type Manifest } from "../manifest";
 import { resolveInside } from "../paths";
 import { matchesAny, normalizeRelative } from "../patterns";
@@ -23,7 +22,7 @@ const encodePath = (relative: string): string =>
 export const hashProvider: Provider = async (context) => {
   const { entry, entryDir, tempDir, plan, platform, resolver, io, name, signal } = context;
 
-  const content = contentForPlatform(entry.content, platform);
+  const content = entry.content;
   if (content === undefined || Array.isArray(content)) {
     throw new Error(`${name} : manifeste de hash absent pour la plateforme ${platform}`);
   }
