@@ -61,9 +61,16 @@ frontend/
 ## Publier une version d'un jeu
 
 1. Déposer les fichiers sur le serveur (zips à la racine du dossier de l'archive, ou dossier de fichiers + manifeste).
-2. Pour une entrée `hash_url` : `yarn workspace Valkream-Launcher build:manifest <dossier-source> <sortie>` produit `hash.json` (le copier dans `games/<id>/hash/`) ; reporter son hash dans le `latest.yml`. Optionnel : zipper le dossier et le déclarer en `zip` (installation complète plus légère).
+2. Pour une entrée `hash_url` : `yarn workspace Valkream-Launcher build:manifest <dossier-source> <sortie> --latest backend/public/games/<id>/latest.yml --entry game-base.<nom>` produit `hash.json` (à copier dans `games/<id>/hash/`) et écrit le `hash` de l'entrée dans le `latest.yml` (commentaires conservés). Sans `--latest`, le hash est seulement affiché. Optionnel : zipper le dossier et le déclarer en `zip` (installation complète plus légère).
 3. Mettre à jour `latest.beta.yml`, tester avec l'option beta du launcher, puis reporter dans `latest.yml`.
 4. Incrémenter la version `X0.X1.X2` (affichage seulement : la mise à jour se décide entrée par entrée via version + hash).
+
+## Annulation, espace disque, journal
+
+- **Annulation** : le bouton « Annuler » de l'accueil interrompt la synchronisation du canal en cours (`cancelInstanceSync`). Une annulation n'est pas un échec : `InstanceSyncResult.cancelled` vaut `true` et l'entrée interrompue reprendra à la prochaine synchronisation.
+- **Espace disque** : `requiredSpaceMb` (optionnel, dans l'`index.config.json`) est l'espace libre minimal exigé avant une *première* installation du jeu ; la valeur est une estimation à ajuster.
+- **Journal** : `instance.log` (dans le dossier du canal) note le début, la fin et les erreurs de chaque entrée.
+- **Sécurité** : les archives sont refusées au-delà de 200 000 fichiers ou 100 Go décompressés ; les liens externes sont limités à http, https et steam.
 
 ## Format du latest.yml
 

@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "Valheim-Valkream-v2",
+  "requiredSpaceMb": 2500,
   "enabled": {
     "win32": true,
     "linux": true,

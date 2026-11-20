@@ -46,6 +46,7 @@ const electronAPI: ElectronAPI = {
     ipcRenderer.invoke("instances:report", id, channel, options),
   syncInstance: (id, channel, options) =>
     ipcRenderer.invoke("instances:sync", id, channel, options),
+  cancelInstanceSync: (id, channel) => ipcRenderer.invoke("instances:cancel", id, channel),
   launchInstance: (id, channel) => ipcRenderer.invoke("instances:launch", id, channel),
   openInstanceFolder: (id, channel) =>
     ipcRenderer.invoke("instances:open-folder", id, channel),

@@ -57,6 +57,8 @@ export interface ElectronAPI {
     channel: Channel,
     options?: { repair?: boolean }
   ): Promise<InstanceSyncResult>;
+  /** Annule la synchronisation en cours de ce canal (sans effet s'il n'y en a pas). */
+  cancelInstanceSync(id: InstanceId, channel: Channel): Promise<void>;
   launchInstance(id: InstanceId, channel: Channel): Promise<void>;
   openInstanceFolder(id: InstanceId, channel: Channel): Promise<void>;
   uninstallInstance(id: InstanceId, channel: Channel): Promise<void>;

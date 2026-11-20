@@ -10,7 +10,7 @@ import { enqueueSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
-import { ButtonBase, Stack } from "@mui/material";
+import { Button, ButtonBase, Stack } from "@mui/material";
 import type { InstanceSyncProgress } from "@shared/types";
 
 import Popup from "../../../../component/popup/popup";
@@ -35,6 +35,7 @@ export default function InstanceButton() {
 
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
   const [action, setAction] = useState<InstanceButtonAction>(LOADING_ACTION);
+  const [syncing, setSyncing] = useState(false);
 
   const callback = (text: string, progress?: InstanceSyncProgress) => {
     const transfer = progress?.transfer;
@@ -64,6 +65,7 @@ export default function InstanceButton() {
     const cleanup = () => window.electron_API.removeInstanceProgressListeners();
 
     try {
+      setSyncing(true);
       window.electron_API.onInstanceProgress((progress) => {
         if (
           progress.id !== actualInstanceId ||
@@ -79,7 +81,9 @@ export default function InstanceButton() {
         actualInstanceId,
         actualChannel
       );
-      if (result.failed.length > 0) {
+      if (result.cancelled) {
+        enqueueSnackbar("Installation annulée", { variant: "info" });
+      } else if (result.failed.length > 0) {
         error(
           actionName,
           result.failed.map((item) => `${item.name} (${item.error})`).join(", ")
@@ -91,8 +95,12 @@ export default function InstanceButton() {
       error(actionName, err);
     } finally {
       cleanup();
+      setSyncing(false);
     }
   };
+
+  const cancel = () =>
+    window.electron_API.cancelInstanceSync(actualInstanceId, actualChannel);
 
   const handleInstall = () =>
     runAction(
@@ -280,6 +288,16 @@ export default function InstanceButton() {
           ))}
         </Stack>
       </ButtonBase>
+      {syncing && (
+        <Button
+          color="error"
+          variant="contained"
+          onClick={cancel}
+          sx={{ position: "fixed", bottom: 8, left: "50%", transform: "translateX(-50%)", zIndex: 9 }}
+        >
+          Annuler
+        </Button>
+      )}
     </>
   );
 }

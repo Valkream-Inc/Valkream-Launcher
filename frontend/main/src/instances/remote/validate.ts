@@ -124,6 +124,13 @@ export const validateRemoteIndex = (
     }
   }
 
+  if (
+    raw.requiredSpaceMb !== undefined &&
+    !(typeof raw.requiredSpaceMb === "number" && Number.isFinite(raw.requiredSpaceMb) && raw.requiredSpaceMb > 0)
+  ) {
+    errors.push(`${where}.requiredSpaceMb : nombre positif attendu (Mo)`);
+  }
+
   if (raw.channels !== undefined) {
     if (!isObject(raw.channels)) {
       errors.push(`${where}.channels : objet attendu`);

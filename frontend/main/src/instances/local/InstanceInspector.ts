@@ -48,6 +48,8 @@ export interface LoadedInstance {
   /** Erreurs de validation du latest.yml (`latest.<niveau>.<entrée>.<champ> : …`). */
   releaseErrors: string[];
   releaseSource: "online" | "cache" | "none";
+  /** Espace libre minimal (Mo) exigé par l'index avant une première installation. */
+  requiredSpaceMb?: number;
   mods: ModDisplay[];
   contributors: Contributor[];
   errors: string[];
@@ -92,6 +94,7 @@ export class InstanceInspector {
         errors.push(`instance désactivée pour la plateforme ${platform}`);
       }
       releaseLink = index.channels?.[channel];
+      loaded.requiredSpaceMb = index.requiredSpaceMb;
       loaded.mods = await this.loadList<ModDisplay>(index.mods, "mods", errors);
       loaded.contributors = await this.loadList<Contributor>(index.contributors, "contributeurs", errors);
     }

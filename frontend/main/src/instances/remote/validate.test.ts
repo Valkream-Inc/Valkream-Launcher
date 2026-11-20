@@ -202,4 +202,12 @@ describe("gameFolderToPreserve et to_ignore", () => {
     assert.match(text, /gameFolderToPreserve\[3\]/);
     assert.match(text, /to_ignore\[0\]/);
   });
+
+  it("requiredSpaceMb de l'index : nombre positif", () => {
+    const base = { schemaVersion: 1, id: "g", enabled: { win32: true } };
+    assert.equal(validateRemoteIndex({ ...base, requiredSpaceMb: 2048 }, "g").ok, true);
+    for (const bad of [0, -5, "10", Number.NaN]) {
+      assert.equal(validateRemoteIndex({ ...base, requiredSpaceMb: bad }, "g").ok, false, String(bad));
+    }
+  });
 });

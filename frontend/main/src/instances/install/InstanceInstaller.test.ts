@@ -381,4 +381,51 @@ describe("InstanceInstaller", () => {
     assert.match(log, /\[stable\] base start/);
     assert.match(log, /\[stable\] base done/);
   });
+
+  it("annulation : signal déjà annulé = rien n'est traité, pas d'échec", async () => {
+    const { installer } = build(baseRemote(), files);
+    const controller = new AbortController();
+    controller.abort();
+    const result = await installer.sync("g", "stable", { signal: controller.signal });
+    assert.equal(result.cancelled, true);
+    assert.deepEqual(result.installed, []);
+    assert.deepEqual(result.failed, []);
+  });
+
+  it("annulation pendant la synchro : l'entrée en cours n'est pas comptée en échec", async () => {
+    const { installer } = build(baseRemote(), files);
+    const controller = new AbortController();
+    const result = await installer.sync("g", "stable", {
+      signal: controller.signal,
+      onProgress: (progress) => {
+        if (progress.step === "start") controller.abort();
+      },
+    });
+    assert.equal(result.cancelled, true);
+    assert.deepEqual(result.failed, []);
+  });
+
+  describe("espace disque", () => {
+    const withSpace = (freeMb: number) => {
+      const remote = baseRemote() as Record<string, any>;
+      remote["/index.json"].requiredSpaceMb = 1000;
+      const world = makeWorld({ ...remote }, files);
+      const inspector = new InstanceInspector({ configs: [config], resolver: world.resolver, platform: "win32", rootPath: () => root });
+      return new InstanceInstaller({
+        inspector, resolver: world.resolver, platform: "win32", io: world.io,
+        freeSpace: () => freeMb * 1024 ** 2,
+      });
+    };
+
+    it("refuse une première installation sans assez de place", async () => {
+      await assert.rejects(withSpace(10).sync("g", "stable"), /espace disque insuffisant : 10 Mo libres, 1000 Mo/);
+      assert.equal(fs.existsSync(path.join(dir("stable"), "game")), false);
+    });
+
+    it("installe quand l'espace suffit", async () => {
+      const result = await withSpace(5000).sync("g", "stable");
+      assert.deepEqual(result.failed, []);
+      assert.equal(read("stable", "game/bin/game.exe"), "exe-v1");
+    });
+  });
 });

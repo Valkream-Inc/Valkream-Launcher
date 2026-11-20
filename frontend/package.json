@@ -12,7 +12,7 @@
     "typecheck": "concurrently -n main,tests,renderer,scripts \"yarn typecheck:main\" \"yarn typecheck:tests\" \"yarn typecheck:renderer\" \"yarn typecheck:scripts\"",
     "typecheck:main": "tsc -p main/tsconfig.json --noEmit",
     "typecheck:tests": "tsc -p main/tsconfig.test.json && tsc -p renderer/tsconfig.test.json",
-    "test": "tsx --test \"main/src/**/*.test.ts\" \"renderer/src/**/*.test.ts\"",
+    "test": "tsx --test \"main/src/**/*.test.ts\" \"renderer/src/**/*.test.ts\" \"scripts/**/*.test.ts\"",
     "typecheck:renderer": "tsc -p renderer/tsconfig.json",
     "typecheck:scripts": "tsc -p tsconfig.json",
     "build:manifest": "tsx scripts/build-manifest.ts",

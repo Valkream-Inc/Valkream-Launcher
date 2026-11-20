@@ -76,14 +76,29 @@ const InstanceIpcHandlers = (): void => {
     }
   );
 
-  ipcMain.handle("instances:sync", (event, id: string, channel: Channel, options?: { repair?: boolean }) => {
-    resolve(id, channel);
-    return getInstanceInstaller().sync(id, channel, {
-      repair: options?.repair === true,
-      onProgress: (progress) => {
-        if (!event.sender.isDestroyed()) event.sender.send("instances:progress", progress);
-      },
-    });
+  // Une synchronisation annulable par canal (clé = dossier d'installation).
+  const syncs = new Map<string, AbortController>();
+
+  ipcMain.handle("instances:sync", async (event, id: string, channel: Channel, options?: { repair?: boolean }) => {
+    const { locations } = resolve(id, channel);
+    const controller = new AbortController();
+    syncs.set(locations.installDir, controller);
+    try {
+      return await getInstanceInstaller().sync(id, channel, {
+        repair: options?.repair === true,
+        signal: controller.signal,
+        onProgress: (progress) => {
+          if (!event.sender.isDestroyed()) event.sender.send("instances:progress", progress);
+        },
+      });
+    } finally {
+      if (syncs.get(locations.installDir) === controller) syncs.delete(locations.installDir);
+    }
+  });
+
+  ipcMain.handle("instances:cancel", (_event, id: string, channel: Channel) => {
+    const { locations } = resolve(id, channel);
+    syncs.get(locations.installDir)?.abort();
   });
 
   ipcMain.handle("instances:launch", async (_event, id: string, channel: Channel) => {

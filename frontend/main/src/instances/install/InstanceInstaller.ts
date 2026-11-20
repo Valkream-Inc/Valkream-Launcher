@@ -51,6 +51,8 @@ export interface InstallerOptions {
   io: InstallIO;
   providers?: Record<string, Provider>;
   uninstallers?: Record<string, Uninstaller>;
+  /** Octets libres du disque contenant ce dossier (injectable pour les tests). */
+  freeSpace?: (directory: string) => number;
 }
 
 export interface SyncOptions {
@@ -59,6 +61,14 @@ export interface SyncOptions {
   onProgress?: (progress: InstanceSyncProgress) => void;
   signal?: AbortSignal;
 }
+
+/** Octets libres du disque qui contient `directory` (ou son premier parent existant). */
+const diskFreeBytes = (directory: string): number => {
+  let current = path.resolve(directory);
+  while (!fs.existsSync(current) && path.dirname(current) !== current) current = path.dirname(current);
+  const stats = fs.statfsSync(current);
+  return stats.bavail * stats.bsize;
+};
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -131,6 +141,16 @@ export class InstanceInstaller {
         }
       }
 
+      // Première installation du jeu : l'espace disque exigé par l'index doit être disponible.
+      if (loaded.requiredSpaceMb && todo.some((item) => item.tier === "game-base" && !item.remove && !state.entries[item.name])) {
+        const free = (this.options.freeSpace ?? diskFreeBytes)(installDir);
+        if (free < loaded.requiredSpaceMb * 1024 ** 2) {
+          throw new Error(
+            `espace disque insuffisant : ${Math.floor(free / 1024 ** 2)} Mo libres, ${loaded.requiredSpaceMb} Mo nécessaires`,
+          );
+        }
+      }
+
       const emit = (progress: Omit<InstanceSyncProgress, "id" | "channel">) => {
         // Journal : début / fin / erreur de chaque entrée (pas la progression des téléchargements).
         if (progress.step === "start" || progress.step === "done" || progress.step === "error") {
@@ -142,6 +162,10 @@ export class InstanceInstaller {
 
       let index = 0;
       for (const item of todo) {
+        if (signal?.aborted) {
+          result.cancelled = true;
+          break;
+        }
         index++;
         const common = { entry: item.name, index, total: todo.length };
         emit({ ...common, step: "start", message: `${item.name} (${item.entry.version})` });
@@ -193,6 +217,12 @@ export class InstanceInstaller {
           result.installed.push(item.name);
           emit({ ...common, step: "done" });
         } catch (error) {
+          // Annulation demandée : on s'arrête sans compter d'échec (l'entrée reprendra à la prochaine synchro).
+          if (signal?.aborted) {
+            result.cancelled = true;
+            emit({ ...common, step: "error", message: "annulé" });
+            break;
+          }
           const message = messageOf(error);
           result.failed.push({ name: item.name, error: message });
           emit({ ...common, step: "error", message });

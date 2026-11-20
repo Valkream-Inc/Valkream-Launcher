@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "SevenDtoD-Valkream-v2",
+  "requiredSpaceMb": 15000,
   "enabled": {
     "win32": true,
     "linux": true,

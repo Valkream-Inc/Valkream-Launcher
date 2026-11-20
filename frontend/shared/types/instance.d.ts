@@ -62,6 +62,8 @@ export interface RemoteIndex {
   enabled: Partial<Record<GamePlatform, boolean>>;
   /** Liens vers les `latest*.yml` de chaque canal (un canal absent n'est pas proposé). */
   channels?: Partial<Record<Channel, string>>;
+  /** Espace libre minimal (Mo) exigé avant une première installation du jeu. */
+  requiredSpaceMb?: number;
   event?: LinkOrData<GameEvent>;
   maintenance?: LinkOrData<Maintenance>;
   contributors?: LinkOrData<Contributor[]>;
@@ -317,6 +319,8 @@ export interface InstanceSyncResult {
   failed: { name: string; error: string }[];
   /** Le jeu est-il jouable après cette synchronisation ? */
   works: boolean;
+  /** L'utilisateur a annulé : les entrées restantes n'ont pas été traitées (ce n'est pas un échec). */
+  cancelled?: boolean;
 }
 
 /* ------------------------------------------------------------------ */

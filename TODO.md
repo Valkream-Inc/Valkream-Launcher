@@ -26,12 +26,12 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 - [ ] (++) Script `build-manifest --zip` : générer aussi l'archive `zip` d'une entrée `hash_url`.
 - [x] (++) Téléchargements parallèles (limités à 3-4) pour le provider `hash_url` + reprise d'un téléchargement interrompu (HTTP Range). — fait : 4 fichiers en parallèle (`runPool`) ; reprise HTTP Range reste à faire.
 - [ ] (++) Installation atomique : extraire dans un dossier temporaire puis basculer, pour ne jamais laisser un jeu à moitié mis à jour.
-- [ ] (+) Annulation propre d'une installation en cours depuis l'interface (le `signal` existe déjà côté moteur).
-- [ ] (+) Vérifier l'espace disque disponible avant une installation.
+- [x] (+) Annulation propre d'une installation en cours depuis l'interface (le `signal` existe déjà côté moteur). — fait : bouton « Annuler » (`cancelInstanceSync`), `cancelled` dans le résultat.
+- [x] (+) Vérifier l'espace disque disponible avant une installation. — fait : `requiredSpaceMb` dans l'index (première installation) ; valeurs actuelles = estimations à ajuster.
 - [ ] (+++) Mise à jour différentielle des gros fichiers (bsdiff / zstd) pour les mises à jour de jeu.
 
 ### Backend / publication
-- [ ] (++) Script de publication : copie des fichiers, calcul des hash, mise à jour du `latest.yml` et de la version `X0.X1.X2` en une commande.
+- [x] (++) Script de publication : copie des fichiers, calcul des hash, mise à jour du `latest.yml` et de la version `X0.X1.X2` en une commande. — fait : `build-manifest --latest <latest.yml> --entry <niveau.nom>` écrit le hash dans le latest.yml ; reste à automatiser la version `X0.X1.X2` et la copie des fichiers.
 - [x] (++) Test CI qui valide `backend/public` (déjà couvert par `backend-files.test.ts` : l'exécuter dans le workflow GitHub à chaque push). — fait : `.github/workflows/ci.yml` (tests + typecheck + lint non bloquant) ; `backend-files.test.ts` est inclus dans `yarn test`.
 - [ ] (+) Signature des manifestes (ou des `latest.yml`) pour ne pas dépendre uniquement de HTTPS.
 - [ ] (+) Versionner les anciens `latest.yml` pour pouvoir revenir en arrière (rollback d'une version).
