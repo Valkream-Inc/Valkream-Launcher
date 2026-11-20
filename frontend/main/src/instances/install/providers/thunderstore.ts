@@ -16,6 +16,7 @@ import path from "path";
 
 import { resolveInside } from "../../../lib/paths";
 import { commitStaged } from "../staging";
+import { createGlobalProgress } from "./global-progress";
 import type { Provider, Uninstaller } from "./types";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
@@ -65,23 +66,32 @@ export const thunderstoreProvider: Provider = async (context) => {
   const stage = path.join(tempDir, `${name}.stage`);
   fs.rmSync(stage, { recursive: true, force: true });
 
-  let done = 0;
+  // Progression globale sur l'ensemble des mods (la file peut grandir avec les dépendances) :
+  // téléchargement = 80 % d'un mod, extraction = 20 %. Aucun nom de mod affiché.
+  let total = queue.length;
+  const progress = createGlobalProgress(
+    (transfer) => context.report("download", `${name} : mods`, transfer),
+    () => total,
+  );
+  context.report("download", `${name} : mods`);
+
   while (queue.length > 0) {
     const mod = queue.shift()!;
-    context.report("download", `${mod.folder} ${mod.version} (${++done}/${done + queue.length})`);
     const zipPath = path.join(tempDir, `${mod.folder}.zip`);
     const url = resolver.urlOf(
       `${apiUrl}/package/download/${encodeURIComponent(mod.author)}/${encodeURIComponent(mod.name)}/${encodeURIComponent(mod.version)}/`,
     );
-    await io.download(url, zipPath, signal, (transfer) =>
-      context.report("download", `${mod.folder} ${mod.version} (${done}/${done + queue.length})`, transfer),
-    );
+    let bytes = 0;
+    await io.download(url, zipPath, signal, (transfer) => {
+      bytes = transfer.processed ?? bytes;
+      progress.update(mod.folder, (transfer.percent / 100) * 0.8, bytes);
+    });
 
     const staged = path.join(stage, mod.folder);
-    context.report("extract", `Extraction de ${mod.folder}`);
+    progress.update(mod.folder, 0.8, bytes);
     await io.extract(zipPath, staged, {
       accept: () => true,
-      onProgress: (transfer) => context.report("extract", `Extraction de ${mod.folder}`, transfer),
+      onProgress: (transfer) => progress.update(mod.folder, 0.8 + (transfer.percent / 100) * 0.2, bytes),
     });
     fs.rmSync(zipPath, { force: true });
 
@@ -90,8 +100,10 @@ export const thunderstoreProvider: Provider = async (context) => {
         if (skip.has(dependency.folder) || owned.includes(dependency.folder)) continue;
         owned.push(dependency.folder);
         queue.push(dependency);
+        total++;
       }
     }
+    progress.finish(mod.folder, bytes);
   }
 
   // Tout est prêt : bascule. Dossier du mod remplacé en entier (version propre, pas de résidus),

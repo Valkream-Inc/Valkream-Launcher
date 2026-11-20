@@ -53,19 +53,12 @@ export default function InstanceButton() {
   const render = () => {
     const { text, progress } = lastProgress.current;
     const transfer = progress?.transfer;
-    const existProgress =
-      transfer?.processedBytes &&
-      transfer?.totalBytes &&
-      transfer?.percent &&
-      transfer?.speed;
     const elapsed = `⏱ ${formatElapsed(Date.now() - syncStartedAt.current)}`;
-    setAction({
-      text: existProgress
-        ? `${text}\n ${transfer.percent}% (${transfer.processedBytes}/${transfer.totalBytes}) à ${transfer.speed}/s · ${elapsed}`
-        : `${text}\n ${elapsed}`,
-      playIcon: false,
-      onClick: () => {},
-    });
+    // Progression globale : pourcentage, cumul d'octets (total connu seulement pour un fichier unique)
+    const details = transfer
+      ? `\n ${transfer.percent}% (${transfer.processedBytes}${transfer.totalBytes ? `/${transfer.totalBytes}` : ""}) à ${transfer.speed}/s · ${elapsed}`
+      : `\n ${elapsed}`;
+    setAction({ text: `${text}${details}`, playIcon: false, onClick: () => {} });
   };
 
   const callback = (text: string, progress?: InstanceSyncProgress) => {

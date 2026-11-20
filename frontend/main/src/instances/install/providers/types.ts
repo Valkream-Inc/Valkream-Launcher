@@ -13,7 +13,10 @@ import type { HashCache } from "../hash-cache";
 import type { UpdatePlan } from "../preserve";
 
 /** Progression d'un téléchargement : valeurs déjà formatées pour l'affichage. */
-export type TransferProgress = Pick<ProgressData, "processedBytes" | "totalBytes" | "percent" | "speed">;
+export type TransferProgress = Pick<ProgressData, "processedBytes" | "totalBytes" | "percent" | "speed"> & {
+  /** Octets traités (valeur brute) : sert à additionner plusieurs fichiers en une progression globale. */
+  processed?: number;
+};
 
 export interface InstallIO {
   /** Télécharge `url` vers `destination` (crée les dossiers parents). */

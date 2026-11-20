@@ -25,6 +25,7 @@ import { matchesAny, normalizeRelative } from "../../../lib/patterns";
 import { shouldWriteFile } from "../preserve";
 import { commitStaged, stageFile } from "../staging";
 import { fetchArchive } from "./archive";
+import { createGlobalProgress } from "./global-progress";
 import type { Provider, ProviderContext } from "./types";
 
 /** Téléchargements simultanés de fichiers individuels. */
@@ -92,7 +93,14 @@ export const hashProvider: Provider = async (context) => {
     unzipped = await extractFromZip(context, zipUrl, new Set(toFetch.map(([file]) => file)));
   }
 
-  let done = wanted.length - toFetch.length;
+  // Progression globale (tous les fichiers à récupérer) : un pourcentage, pas de nom de fichier.
+  // Le téléchargement compte pour 90 % d'un fichier, la vérification pour 10 %.
+  const progress = createGlobalProgress(
+    (transfer) => context.report("download", `${name} : téléchargement`, transfer),
+    () => toFetch.length,
+  );
+  context.report("download", `${name} : téléchargement`);
+
   await runPool(toFetch, DOWNLOAD_CONCURRENCY, async ([file, expected]) => {
     // Nom stable (hash du chemin) : un téléchargement interrompu est repris à la synchro suivante.
     const partial = path.join(tempDir, `${name}.${createHash("sha1").update(file).digest("hex").slice(0, 12)}.part`);
@@ -100,23 +108,23 @@ export const hashProvider: Provider = async (context) => {
     const fromZip = unzipped ? path.join(unzipped, file) : undefined;
     if (fromZip && fs.existsSync(fromZip) && (await hashFile(fromZip)) === expected) {
       stageVerified(file, fromZip);
-      done++;
+      progress.skip();
       return;
     }
 
-    const label = () => `${name} : ${file} (${done + 1}/${wanted.length})`;
-    context.report("download", label());
-    await io.download(resolver.urlOf(baseUrl + encodePath(file)), partial, signal, (transfer) =>
-      context.report("download", label(), transfer),
-    );
+    let bytes = 0;
+    await io.download(resolver.urlOf(baseUrl + encodePath(file)), partial, signal, (transfer) => {
+      bytes = transfer.processed ?? bytes;
+      progress.update(file, (transfer.percent / 100) * 0.9, bytes);
+    });
 
-    context.report("verify", `${name} : vérification de ${file}`);
+    progress.update(file, 0.9, bytes);
     if ((await hashFile(partial)) !== expected) {
       fs.rmSync(partial, { force: true });
       throw new Error(`${name} : hash invalide pour ${file}`);
     }
     stageVerified(file, partial);
-    done++;
+    progress.finish(file, bytes);
   });
 
   if (unzipped) fs.rmSync(unzipped, { recursive: true, force: true });

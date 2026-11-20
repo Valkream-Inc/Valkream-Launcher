@@ -31,6 +31,7 @@ export const realInstallIO: InstallIO = {
           totalBytes: formatBytes(total),
           percent,
           speed: formatBytes(speed),
+          processed,
         }),
       signal
     );
