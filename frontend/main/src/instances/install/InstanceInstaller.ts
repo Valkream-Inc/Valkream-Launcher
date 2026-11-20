@@ -31,14 +31,14 @@ import type { InstallIO, Provider, Uninstaller } from "./providers/types";
 import { zipProvider } from "./providers/zip";
 import { planEntryUpdate } from "./preserve";
 
-export const DEFAULT_PROVIDERS: Record<string, Provider> = {
+const DEFAULT_PROVIDERS: Record<string, Provider> = {
   zip_url: zipProvider,
   hash_url: hashProvider,
   thunderstore_modpack_url: thunderstoreProvider,
   // nexus_modpack_url : pas encore implémenté (l'entrée est signalée en échec).
 };
 
-export const DEFAULT_UNINSTALLERS: Record<string, Uninstaller> = {
+const DEFAULT_UNINSTALLERS: Record<string, Uninstaller> = {
   thunderstore_modpack_url: thunderstoreUninstall,
   // Les autres types ne savent pas quels fichiers leur appartiennent : seul l'état est oublié.
 };

@@ -16,7 +16,7 @@ describe("classifyLink", () => {
     assert.equal(classifyLink("data:image/png;base64,AAAA"), "data");
   });
 
-  it("refuse ce qui n'est pas un lien (exemples du brouillon)", () => {
+  it("refuse ce qui n'est pas un lien (exemples)", () => {
     for (const bad of ["htpp://something", "binary", "relative/sans/slash", "//hote/x", "", "https://"]) {
       assert.equal(classifyLink(bad), "invalid", bad);
     }

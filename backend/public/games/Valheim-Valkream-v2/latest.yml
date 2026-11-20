@@ -1,6 +1,5 @@
 # ──────────────────────────────────────────────────────────────
 # Exemple de latest.yml du nouveau système d'instances.
-# Spécification d'origine commentée : doc/instance-system/draft-original/remote/latest.yml
 #
 # NORME DE VERSIONNAGE : X0.X1.X2 (affichage seulement)
 #   X0 saison · X1 game-base · X2 game-details
@@ -41,7 +40,6 @@
 version: 2.34.37
 buildDate: 2025-09-18T19:00:00.929Z
 
-# Migré depuis games/Valheim/latest/latest.yml (ancien format : modpack / valheim / bepinex).
 # Les mods du modpack Thunderstore (dépendances de son manifest.json) sont attendus dans
 # /games/Valheim-Valkream-v2/modpack.json : un tableau "Auteur-Nom-Version", à générer
 # depuis le manifest.json du package ValheimValkream/Valkream à chaque release.

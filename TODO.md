@@ -2,7 +2,7 @@
 
 ## Packages prioritaire a faire dans l'ordre susivant (4 --> 1 --> 3 --> 2)
 
-- 1 : [ ] (?) transformer les different theme en vraie theme mui valide avec le passage à la derniére version
+- 1 : [ ] (?) transformer les different theme en vraie theme mui (base faite : `windows/launcher/theme/mui-themes.ts` ; reste à migrer les CSS des thèmes modern, old puis futuristic)
 - 2 : [ ] (?) migrer l'application vers TAURI
 - 3 : [ ] (?) rajouter un chemin d'installation par défaut/ que l'on demandera de modifier ou non au premier démarrage via un panel "info", et un qelecteur de fichier (l'installeur devra lire un flag avec le chmin pour pouvoir suprimer ce path lors de la déinstallation). Il faudra également gérer le changemment de ROOTPATH via les générals settings.
 - 4 : [x] (fait : voir doc/instance-system/README.md) il faudra revoir la structure de gestion des jeux cf ce prompt : Salut regarde ma repo ValkreamLauncher dans l'organisations Valkream-Inc et fait moi un plan d'actions détaillé pour avoir un system de gestion des jeux plus propre et adaptable ...
@@ -10,9 +10,8 @@
 
 ## Pour plus tard
 
-- [ ] (++) optimize performance in TreeJs (3d ..?), optimize performance in react (useMemo, useCallback, etc.)
+- [ ] (++) optimize performance in TreeJs (3d ..?)
 - [ ] (++) optimize base fonction (trottle, etc.)
 - [ ] (++) mettre http2 en place (got plutot que axios)
-- [ ] (++) mettre en place les hash lors de l'installation pour ne recommencer que ce qui a foiré.
-- [ ] (++) mettre en place la verification des plugins et configs via Hash
-- [ ] (+++) mettre a jour la doc
+- [x] (fait) hash à l'installation, reprise par entrée, vérification via hash, cache `instance.hashes.json`
+- [x] (fait) doc : README racine, frontend, backend, doc/instance-system

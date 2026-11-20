@@ -3,7 +3,7 @@
  * @license MIT-NC
  *
  * Génère, pour une entrée `hash_url` du latest.yml, le manifeste de hash et les
- * fichiers à servir. Utilise le MÊME algorithme que le launcher (engine/install/manifest).
+ * fichiers à servir. Utilise le MÊME algorithme que le launcher (instances/install/manifest).
  *
  *   yarn tsx scripts/build-manifest.ts <dossier-source> <dossier-sortie> [--ignore <motif>]...
  *

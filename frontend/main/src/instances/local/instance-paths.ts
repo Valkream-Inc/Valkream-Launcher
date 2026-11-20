@@ -41,12 +41,3 @@ export const installLocations = (
 export const entryDirectory = (installDir: string, entryPath: string): string =>
   resolveInside(installDir, entryPath);
 
-/** Les deux canaux d'une instance ne doivent jamais se recouvrir. */
-export const channelsAreIsolated = (
-  rootPath: string,
-  id: string,
-): boolean => {
-  const stable = path.resolve(instanceRootPath(rootPath, id, "stable"));
-  const beta = path.resolve(instanceRootPath(rootPath, id, "beta"));
-  return !(stable + path.sep).startsWith(beta + path.sep) && !(beta + path.sep).startsWith(stable + path.sep);
-};

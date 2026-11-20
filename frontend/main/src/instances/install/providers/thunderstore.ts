@@ -18,7 +18,7 @@ import type { Provider, Uninstaller } from "./types";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
 
-export const parseDependency = (dependency: string) => {
+const parseDependency = (dependency: string) => {
   const match = DEPENDENCY.exec(dependency);
   if (!match) throw new Error(`Dépendance invalide : ${dependency}`);
   return { author: match[1], name: match[2], version: match[3], folder: `${match[1]}-${match[2]}` };

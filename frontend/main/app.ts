@@ -4,14 +4,11 @@
  */
 
 import { app } from "electron";
-import path from "path";
-import fse from "fs-extra";
 
 import * as UpdateWindow from "./src/windows/updateWindow";
 import * as MainWindow from "./src/windows/mainWindow";
 import IpcHandlers from "./src/ipc/launcher-ipc";
-
-const isDev = process.env.NODE_ENV === "dev";
+import { isDev } from "./src/core/constants";
 
 if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
 
@@ -23,27 +20,6 @@ app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
 if (!app.requestSingleInstanceLock() && !isDev) app.quit();
 else {
   app.whenReady().then(async () => {
-    // Supprimer le dossier data si il existe et que le mode de développement n'est pas activé (ancienne version)
-    try {
-      if (!isDev) {
-        const oldDataPath = path.join(
-          app.getPath("appData"),
-          ".valkream-launcher-data"
-        );
-        const oldDirExists = await fse.pathExists(oldDataPath);
-
-        if (oldDirExists) {
-          await fse.remove(oldDataPath);
-          console.log(`Nettoyage réussi : suppression de ${oldDataPath}.`);
-        }
-      }
-    } catch (error) {
-      console.error(
-        "Erreur lors de la suppresion de l'ancien dossier de données:",
-        error
-      );
-    }
-
     // ⚙️ Initialisation des handlers IPC
     const ipcHandlers = new IpcHandlers();
     ipcHandlers.init();

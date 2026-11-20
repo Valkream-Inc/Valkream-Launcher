@@ -40,8 +40,6 @@ frontend/
     windows/launcher/             contexts, composants, panneaux (home, settings, choose-games), theme/ (thèmes MUI)
 ```
 
-`draft-original/` garde le brouillon de départ, commenté (spécification des champs de `latest.yml`).
-
 ## État
 
 - Fait : types partagés, règle de lien, validation de l'index et du `latest.yml`, résolveur avec cache disque, registre, confinement des chemins.
@@ -59,6 +57,13 @@ frontend/
 1. Une entrée dans `main/src/instances/instances.config.ts` (serveur, chemins, exécutable, `steamAppId`).
 2. Une entrée dans `renderer/src/instances/instances.config.tsx` (assets dans `public/`, 3D, textes, réglages).
 3. Un dossier `backend/public/games/<id>/` avec son `index.config.json` (liens des latest stable / beta) et son `latest.yml`.
+
+## Publier une version d'un jeu
+
+1. Déposer les fichiers sur le serveur (zips à la racine du dossier de l'archive, ou dossier de fichiers + manifeste).
+2. Pour une entrée `hash_url` : `yarn workspace Valkream-Launcher build:manifest <dossier-source> <sortie>` produit `hash.json` (le copier dans `games/<id>/hash/`) ; reporter son hash dans le `latest.yml`. Optionnel : zipper le dossier et le déclarer en `zip` (installation complète plus légère).
+3. Mettre à jour `latest.beta.yml`, tester avec l'option beta du launcher, puis reporter dans `latest.yml`.
+4. Incrémenter la version `X0.X1.X2` (affichage seulement : la mise à jour se décide entrée par entrée via version + hash).
 
 ## Format du latest.yml
 

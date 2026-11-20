@@ -2,7 +2,7 @@
  * @author Valkream Team
  * @license MIT-NC
  *
- * Config main de chaque instance (ex-brouillon `temp-for-new-system/main/config.js`).
+ * Config main de chaque instance.
  * Ajouter une instance = ajouter une entrée ici, une dans `renderer/src/instances`
  * et un dossier `backend/public/games/<id>/` avec son `index.config.json`.
  */

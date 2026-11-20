@@ -85,7 +85,7 @@ describe("validateReleaseConfig", () => {
     assert.match(errorsOf(validateReleaseConfig({ ...validRelease(), version: "1.2.3.4" })), /X0\.X1\.X2 attendu/);
   });
 
-  it("attrape la faute « game-notbreacking » du brouillon", () => {
+  it("attrape la faute « game-notbreacking »", () => {
     const release = { ...validRelease(), "game-notbreacking": { configs: validEntry() } };
     assert.match(errorsOf(validateReleaseConfig(release)), /game-notbreacking : clé inconnue/);
   });
@@ -108,7 +108,7 @@ describe("validateReleaseConfig", () => {
     assert.match(errorsOf(validateReleaseConfig(release)), /déjà utilisé dans game-base/);
   });
 
-  it("refuse les contenus du brouillon qui ne sont pas des liens", () => {
+  it("refuse les contenus qui ne sont pas des liens", () => {
     const release = {
       version: "0.0.0",
       "game-base": {

@@ -80,7 +80,7 @@ export const selectEntryPlatform = (entry: unknown, platform: GamePlatform): Raw
 };
 
 /** Lit les options dont la valeur est un lien vers un fichier de données. */
-export const resolveEntryLinks = async (
+const resolveEntryLinks = async (
   entry: unknown,
   platform: GamePlatform,
   resolver: ParamResolver,

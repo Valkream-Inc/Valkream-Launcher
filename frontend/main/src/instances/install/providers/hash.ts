@@ -21,7 +21,7 @@ import { shouldWriteFile } from "../preserve";
 import type { Provider, ProviderContext } from "./types";
 
 /** Part de fichiers à récupérer au-delà de laquelle on préfère l'archive aux fichiers un par un. */
-export const ZIP_MIN_RATIO = 0.5;
+const ZIP_MIN_RATIO = 0.5;
 
 const encodePath = (relative: string): string =>
   relative.split("/").map(encodeURIComponent).join("/");

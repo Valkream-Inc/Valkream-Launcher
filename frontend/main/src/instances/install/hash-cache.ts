@@ -13,7 +13,7 @@ import path from "path";
 
 import { hashFile } from "./manifest";
 
-export const HASH_CACHE_FILE = "instance.hashes.json";
+const HASH_CACHE_FILE = "instance.hashes.json";
 
 interface CachedHash {
   size: number;

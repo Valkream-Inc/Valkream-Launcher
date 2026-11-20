@@ -24,7 +24,7 @@ const escapeRegExp = (text: string): string =>
   text.replace(/[.+^${}()|[\]\\]/g, "\\$&");
 
 /** Transforme un motif en expression régulière (le dossier couvre son contenu). */
-export const patternToRegExp = (pattern: string): RegExp => {
+const patternToRegExp = (pattern: string): RegExp => {
   const normalized = normalizeRelative(pattern);
   let source = "";
   for (let i = 0; i < normalized.length; i++) {

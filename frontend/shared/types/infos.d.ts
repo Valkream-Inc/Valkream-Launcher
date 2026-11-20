@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-/** Contenu de `configs/<jeu>/event.json` (l'image est normalisée côté main). */
+/** Contenu de `games/<id>/config/event.json` (l'image est normalisée côté main). */
 export interface GameEvent {
   name: string;
   enabled: boolean;
@@ -13,7 +13,7 @@ export interface GameEvent {
   link: string;
 }
 
-/** Contenu de `configs/<jeu>/maintenance.json`. */
+/** Contenu de `games/<id>/config/maintenance.json`. */
 export interface Maintenance {
   enabled: boolean;
   description: string;

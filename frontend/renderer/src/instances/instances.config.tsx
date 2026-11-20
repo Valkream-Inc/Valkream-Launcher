@@ -2,7 +2,7 @@
  * @author Valkream Team
  * @license MIT-NC
  *
- * Config render de chaque instance (ex-brouillon `render/config.js`).
+ * Config render de chaque instance.
  * Le main reste la source de vérité de la liste des instances (`getInstances()`) :
  * une entrée ici sans instance main correspondante n'est pas affichée.
  * Ajouter un jeu = une entrée ici (+ une côté main et une dans l'index remote).

@@ -1,6 +1,5 @@
 # Instance SevenDtoD-Valkream-v2 — canal stable.
-# Migré depuis games/SevenDtoD/latest/latest.yml (ancien format : modpack / sevendtod).
-# Les fichiers de l'ancien dossier restent en place : les anciennes versions du launcher les lisent encore.
+# Les gros fichiers (zips, dossiers `files/`) sont hébergés sur le serveur, sous /games/<jeu>/latest/ (hors dépôt).
 #
 # NORME DE VERSIONNAGE : X0.X1.X2 (affichage seulement)
 #   X0 saison · X1 game-base · X2 game-details

@@ -1,6 +1,6 @@
 # Valkream-Launcher
 
-Launcher et système de mise à jour pour le serveur Valheim Valkream.
+Launcher multi-jeux moddé pour les serveurs Valkream (Valheim, 7 Days to Die…) et serveur de fichiers de mise à jour.
 
 <img src="./frontend\renderer\public\images\icon/Valkream-icon-with-name.png">
 
@@ -27,8 +27,8 @@ This project is under the **MIT Non-Commercial License (MIT-NC)**.
 
 Ce projet comprend :
 
-- Un launcher Electron pour Valheim et 7days moddé
-- Un serveur backend pour servir les fichiers pendant le développement
+- Un launcher Electron, générique : chaque jeu est une **instance** (config main + config render + fichiers remote), installée séparément en stable et en beta
+- Un serveur backend statique qui sert `backend/public` (configs, `latest.yml`, manifestes de hash) pendant le développement
 
 ---
 
@@ -38,7 +38,9 @@ Ce projet comprend :
 
 - 🚀 **Téléchargement & mise à jour** du jeu (via HTTPS sécurisé)
 - 🆚 **Vérification de la version** locale et en ligne du jeu/modpack
-- 🧩 **Installation/Désinstallation** du jeu, des mods et du modpack via Thunderstore
+- 🧩 **Installation/Désinstallation** du jeu, des mods et du modpack (archives zip, manifestes de hash, Thunderstore)
+- 🗂️ **Stable et beta isolées** : deux installations indépendantes par jeu
+- ♻️ **Reprise et cache de hash** : seuls les fichiers absents ou modifiés sont retéléchargés ou revérifiés
 - 🎉 **Gestion des événements spéciaux** (affichage dynamique dans l’interface)
 - 🖥️ **Affichage des infos serveur** (joueurs, statut, ping, etc.)
 - 🛡️ **Vérification d’intégrité** des plugins et configs (hash)
@@ -60,8 +62,9 @@ Ce projet comprend :
 
 ## Structure du projet
 
-- `frontend/` : Le launcher Electron (interface utilisateur)
-- `backend/` : Serveur Node.js pour servir les fichiers en dev
+- `frontend/` : le launcher Electron ([frontend/README.md](frontend/README.md))
+- `backend/` : serveur Node.js qui sert les fichiers en dev ([backend/README.md](backend/README.md))
+- `doc/` : [système d'instances](doc/instance-system/README.md) (architecture, formats, ajouter un jeu) et [déploiement d'une version du launcher](doc/new-launcher-version.doc.md)
 
 ---
 
@@ -116,9 +119,9 @@ yarn rebuild      # recompilation des modules natifs (better-sqlite3) pour Elect
 
 Des tâches équivalentes sont disponibles dans VS Code (`Terminal > Exécuter la tâche...`) et un profil de debug Electron est fourni dans `.vscode/launch.json`.
 
-### Fichiers Zip du jeu
+### Fichiers des jeux
 
-> **⚠️ Attention** : N'oubliez pas d'ajouter les zips `BepInEx` et `Valheim` dans le dossier `/backend/public` et sur votre serveur. Les `.zip` doivent contenir directement les fichiers (pas un dossier parent). `ex: https://play.valkream.com/game/Valheim/latest/`. Le fichier zip BepInEx peut être par exemple `le fichier thunderstore BepInEx` modifié pour que les fichiers soit à la racine. Le fichier zip Valheim peut quand à lui être une `installation neuve zippée` (avec les fichiers a la racine) ou une archive téléchargés depuis `steam`.
+Les gros fichiers (zips du jeu, dossiers de fichiers référencés par un manifeste de hash) ne sont pas dans le dépôt : ils sont hébergés sur le serveur et référencés par les `latest.yml` (ex : `/games/Valheim/latest/`). Les `.zip` doivent contenir directement les fichiers (pas de dossier parent). Voir [Publier une version d'un jeu](doc/instance-system/README.md#publier-une-version-dun-jeu).
 
 ## Test (Production)
 
@@ -139,7 +142,7 @@ Des tâches équivalentes sont disponibles dans VS Code (`Terminal > Exécuter l
    <br>
    <img src="./doc/images/activer les devs 2.png" style="max-width: 10cm">
 9. Lancer le launcher (pour verifier que le beta est désactivé et que le launcher se met à jour)
-10. Installer la mise à jour sur le serveur si tout est ok (voire la procédure dans le dossier de doc)
+10. Installer la mise à jour sur le serveur si tout est ok (voir `doc/new-launcher-version.doc.md`)
 
 ---
 
