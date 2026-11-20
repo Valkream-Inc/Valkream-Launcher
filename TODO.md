@@ -24,8 +24,8 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 - [ ] (++) Provider Nexus (`nexus_url`) : aujourd'hui une entrée Nexus est un échec explicite.
 - [x] (++) Dépendances Thunderstore transitives (résoudre et installer les dépendances d'un mod). — fait : option `dependencies: { skip }` par entrée (à activer dans les latest.yml si voulu).
 - [ ] (++) Script `build-manifest --zip` : générer aussi l'archive `zip` d'une entrée `hash_url`.
-- [x] (++) Téléchargements parallèles (limités à 3-4) pour le provider `hash_url` + reprise d'un téléchargement interrompu (HTTP Range). — fait : 4 fichiers en parallèle (`runPool`) ; reprise HTTP Range reste à faire.
-- [ ] (++) Installation atomique : extraire dans un dossier temporaire puis basculer, pour ne jamais laisser un jeu à moitié mis à jour.
+- [x] (++) Téléchargements parallèles (limités à 3-4) pour le provider `hash_url` + reprise d'un téléchargement interrompu (HTTP Range). — fait : 4 fichiers en parallèle (`runPool`) ; reprise HTTP `Range`/`If-Range` entre deux synchronisations faite.
+- [x] (++) Installation atomique : extraire dans un dossier temporaire puis basculer, pour ne jamais laisser un jeu à moitié mis à jour. — fait : préparation dans `.tmp/<entrée>.stage` puis bascule par renommages.
 - [x] (+) Annulation propre d'une installation en cours depuis l'interface (le `signal` existe déjà côté moteur). — fait : bouton « Annuler » (`cancelInstanceSync`), `cancelled` dans le résultat.
 - [x] (+) Vérifier l'espace disque disponible avant une installation. — fait : `requiredSpaceMb` dans l'index (première installation) ; valeurs actuelles = estimations à ajuster.
 - [ ] (+++) Mise à jour différentielle des gros fichiers (bsdiff / zstd) pour les mises à jour de jeu.

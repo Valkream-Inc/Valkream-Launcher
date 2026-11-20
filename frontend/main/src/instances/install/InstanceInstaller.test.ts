@@ -486,4 +486,64 @@ describe("InstanceInstaller", () => {
       assert.equal(read("stable", "game/plugins/bep-BepInExPack/plugin.dll"), "bep");
     });
   });
+
+  describe("installation atomique", () => {
+    // v2 : data/a.txt change, bin/game.exe change mais n'est PAS téléchargeable (404) ; gameFolderToRemove: data
+    const v2 = () => {
+      const next = { "bin/game.exe": sha("exe-v2"), "data/a.txt": sha("a2") };
+      const remote = baseRemote() as Record<string, any>;
+      remote["/stable.yml"]["game-base"].base = {
+        ...remote["/stable.yml"]["game-base"].base,
+        version: "2.0.0",
+        content: "/manifest2.json",
+        hash: manifestHash(next, ["logs"]),
+        gameFolderToRemove: ["data"],
+      };
+      remote["/manifest2.json"] = next;
+      return remote;
+    };
+
+    it("un téléchargement qui échoue en cours de route ne touche pas à l'installation", async () => {
+      const first = build(baseRemote(), files);
+      await first.installer.sync("g", "stable");
+      assert.equal(read("stable", "game/data/a.txt"), "a");
+
+      // Les fichiers v2 : seul a.txt est disponible (game.exe → 404)
+      const second = build(v2(), { ...files, "/h/data/a.txt": "a2" });
+      const result = await second.installer.sync("g", "stable");
+
+      assert.equal(result.failed.length, 1);
+      assert.equal(read("stable", "game/bin/game.exe"), "exe-v1"); // inchangé
+      assert.equal(read("stable", "game/data/a.txt"), "a"); // ni écrasé ni supprimé (gameFolderToRemove non appliqué)
+    });
+
+    it("tout disponible : bascule complète, gameFolderToRemove appliqué", async () => {
+      const first = build(baseRemote(), files);
+      await first.installer.sync("g", "stable");
+      const second = build(v2(), { ...files, "/h/data/a.txt": "a2", "/h/bin/game.exe": "exe-v2" });
+      const result = await second.installer.sync("g", "stable");
+
+      assert.deepEqual(result.failed, []);
+      assert.equal(read("stable", "game/bin/game.exe"), "exe-v2");
+      assert.equal(read("stable", "game/data/a.txt"), "a2");
+    });
+
+    it("archive zip invalide : l'installation n'est pas modifiée", async () => {
+      const first = build(baseRemote(), files);
+      await first.installer.sync("g", "stable");
+      const remote = baseRemote() as Record<string, any>;
+      remote["/stable.yml"]["game-details"].extra = { version: "1", type: "zip_url", content: "/broken.zip" };
+      const second = build(remote, { ...files, "/broken.zip": "pas du json" });
+      const result = await second.installer.sync("g", "stable");
+      assert.equal(result.failed.length, 1);
+      assert.equal(read("stable", "game/data/a.txt"), "a");
+    });
+  });
+
+  it("synchronisation réussie : le dossier .tmp est entièrement supprimé", async () => {
+    const okRemote = baseRemote();
+    const { installer } = build(okRemote, files);
+    await installer.sync("g", "stable");
+    assert.equal(fs.existsSync(path.join(dir("stable"), ".tmp")), false);
+  });
 });

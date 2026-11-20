@@ -15,6 +15,7 @@ import fs from "fs";
 import path from "path";
 
 import { resolveInside } from "../../../lib/paths";
+import { commitStaged } from "../staging";
 import type { Provider, Uninstaller } from "./types";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
@@ -44,7 +45,7 @@ const readDependencies = (modDir: string) => {
 };
 
 export const thunderstoreProvider: Provider = async (context) => {
-  const { entry, entryDir, tempDir, platform, resolver, io, name, signal, previousOwned } = context;
+  const { entry, entryDir, tempDir, platform, resolver, io, name, signal, previousOwned, beforeCommit } = context;
 
   const content = entry.content;
   if (content === undefined || (typeof content === "object" && !Array.isArray(content))) {
@@ -55,12 +56,14 @@ export const thunderstoreProvider: Provider = async (context) => {
 
   const apiUrl = (entry["api-url"] ?? "https://thunderstore.io").replace(/\/+$/, "");
   const mods = list.map(parseDependency);
-  fs.mkdirSync(entryDir, { recursive: true });
-
   // Dépendances transitives (si `dependencies` est déclaré) : lues dans le manifest.json de chaque mod.
   const skip = new Set(entry.dependencies?.skip ?? []);
   const owned = mods.map((mod) => mod.folder);
   const queue = [...mods];
+
+  // Chaque mod est extrait dans un dossier de préparation ; la bascule se fait une fois tout prêt.
+  const stage = path.join(tempDir, `${name}.stage`);
+  fs.rmSync(stage, { recursive: true, force: true });
 
   let done = 0;
   while (queue.length > 0) {
@@ -74,14 +77,13 @@ export const thunderstoreProvider: Provider = async (context) => {
       context.report("download", `${mod.folder} ${mod.version} (${done}/${done + queue.length})`, transfer),
     );
 
-    const destination = resolveInside(entryDir, mod.folder);
-    fs.rmSync(destination, { recursive: true, force: true }); // version propre, pas de résidus
+    const staged = path.join(stage, mod.folder);
     context.report("extract", `Extraction de ${mod.folder}`);
-    await io.extract(zipPath, destination, { accept: () => true });
+    await io.extract(zipPath, staged, { accept: () => true });
     fs.rmSync(zipPath, { force: true });
 
     if (entry.dependencies) {
-      for (const dependency of readDependencies(destination)) {
+      for (const dependency of readDependencies(staged)) {
         if (skip.has(dependency.folder) || owned.includes(dependency.folder)) continue;
         owned.push(dependency.folder);
         queue.push(dependency);
@@ -89,7 +91,11 @@ export const thunderstoreProvider: Provider = async (context) => {
     }
   }
 
-  // Mods retirés (liste ou dépendances) depuis la dernière installation de CETTE entrée.
+  // Tout est prêt : bascule. Dossier du mod remplacé en entier (version propre, pas de résidus),
+  // puis retrait des mods disparus depuis la dernière installation de CETTE entrée.
+  beforeCommit();
+  for (const folder of owned) fs.rmSync(resolveInside(entryDir, folder), { recursive: true, force: true });
+  commitStaged(stage, entryDir);
   for (const folder of previousOwned.filter((item) => !owned.includes(item))) {
     fs.rmSync(resolveInside(entryDir, folder), { recursive: true, force: true });
   }

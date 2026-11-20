@@ -70,6 +70,24 @@ const diskFreeBytes = (directory: string): number => {
   return stats.bavail * stats.bsize;
 };
 
+/** Les téléchargements partiels (`.zip`, `.part`, `.meta`) survivent 7 jours pour être repris. */
+const PARTIAL_MAX_AGE_MS = 7 * 24 * 3600 * 1000;
+const isPartial = (name: string): boolean => /\.(zip|part|meta)$/.test(name);
+
+const cleanTempDir = (tempDir: string): void => {
+  let names: string[];
+  try {
+    names = fs.readdirSync(tempDir);
+  } catch {
+    return;
+  }
+  for (const name of names) {
+    const file = path.join(tempDir, name);
+    const stale = Date.now() - fs.statSync(file).mtimeMs > PARTIAL_MAX_AGE_MS;
+    if (!isPartial(name) || stale) fs.rmSync(file, { recursive: true, force: true });
+  }
+};
+
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
@@ -103,7 +121,7 @@ export class InstanceInstaller {
     const tempDir = path.join(installDir, ".tmp");
 
     try {
-      fs.rmSync(tempDir, { recursive: true, force: true }); // reste d'une synchro interrompue
+      cleanTempDir(tempDir); // restes d'une synchro interrompue (les téléchargements partiels sont gardés)
       fs.mkdirSync(tempDir, { recursive: true });
 
       const settings = { ...loaded.config.defaultSettings, ...readInstanceSettings(installDir) };
@@ -192,7 +210,13 @@ export class InstanceInstaller {
           const previous = state.entries[item.name];
           const plan = planEntryUpdate(item.entry, previous?.version);
 
-          removeWithPlan(entryDir, item.entry.gameFolderToRemove ?? [], plan);
+          // Rien n'est retiré ni écrit dans l'installation avant que tout soit prêt (voir staging.ts).
+          let removed = false;
+          const beforeCommit = () => {
+            if (removed) return;
+            removed = true;
+            removeWithPlan(entryDir, item.entry.gameFolderToRemove ?? [], plan);
+          };
 
           const provided = await provider({
             name: item.name,
@@ -206,9 +230,11 @@ export class InstanceInstaller {
             hashes,
             previousOwned: previous?.owned ?? [],
             signal,
+            beforeCommit,
             report: (step, message, transfer) => emit({ ...common, step, message, transfer }),
           });
 
+          beforeCommit();
           recordInstalledEntry(installDir, item.name, {
             version: String(item.entry.version),
             hash: provided.hash,
@@ -233,7 +259,9 @@ export class InstanceInstaller {
     } finally {
       hashes.prune();
       hashes.save();
-      fs.rmSync(tempDir, { recursive: true, force: true });
+      // Tout est passé : plus rien à garder. Sinon on garde les partiels pour reprendre.
+      if (result.failed.length === 0 && !result.cancelled) fs.rmSync(tempDir, { recursive: true, force: true });
+      else cleanTempDir(tempDir);
       this.running.delete(lockKey);
     }
 

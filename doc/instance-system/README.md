@@ -65,6 +65,11 @@ frontend/
 3. Mettre à jour `latest.beta.yml`, tester avec l'option beta du launcher, puis reporter dans `latest.yml`.
 4. Incrémenter la version `X0.X1.X2` (affichage seulement : la mise à jour se décide entrée par entrée via version + hash).
 
+## Installation atomique et reprise
+
+- **Atomique par entrée** : chaque provider (`zip_url`, `hash_url`, Thunderstore) télécharge, vérifie et extrait d'abord dans `.tmp/<entrée>.stage`. Ce n'est qu'une fois tout prêt que `gameFolderToRemove` est appliqué et que les fichiers sont basculés dans le dossier du jeu par renommages (`install/staging.ts`). Une erreur, une annulation ou un hash invalide pendant la préparation laisse l'installation exactement dans son état précédent. La bascule elle-même (quelques renommages) n'est pas transactionnelle : une coupure à cet instant précis est rattrapée par « Vérifier / Réparer ». L'espace disque temporaire nécessaire est celui des fichiers à mettre à jour (ou de l'archive et de son extraction).
+- **Reprise HTTP** : un téléchargement interrompu (annulation, coupure, fermeture du launcher) est repris à la synchronisation suivante (`Range` + `If-Range`), à condition que l'URL soit la même et que le serveur annonce un `ETag` ou `Last-Modified` inchangé ; sinon il repart de zéro. Les partiels sont gardés 7 jours dans `.tmp` (`*.zip`, `*.part`, `*.meta`) et supprimés dès qu'une synchronisation réussit.
+
 ## Annulation, espace disque, journal
 
 - **Annulation** : le bouton « Annuler » de l'accueil interrompt la synchronisation du canal en cours (`cancelInstanceSync`). Une annulation n'est pas un échec : `InstanceSyncResult.cancelled` vaut `true` et l'entrée interrompue reprendra à la prochaine synchronisation.

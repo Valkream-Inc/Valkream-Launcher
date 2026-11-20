@@ -16,6 +16,7 @@ import type {
   NetworkErrorLike,
 } from "../types/utils";
 
+import { completePartial, discardPartial, rememberPartial, resumePoint, validatorOf } from "./download-resume";
 import { formatBytes } from "./format-bytes";
 import { consoleStreamAnswer } from "./console-stream";
 
@@ -45,23 +46,6 @@ const isNetworkError = (err: unknown): boolean => {
 
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-const getExistingFileSize = async (destPath: string): Promise<number> => {
-  try {
-    const stat = await fs.promises.stat(destPath);
-    return stat.isFile() ? stat.size : 0;
-  } catch {
-    return 0;
-  }
-};
-
-const removePartialFile = async (destPath: string): Promise<void> => {
-  try {
-    await fs.promises.unlink(destPath);
-  } catch {
-    // Fichier déjà absent : rien à supprimer
-  }
-};
 
 const parseTotalSizeFromContentRange = (
   contentRange: string | undefined,
@@ -105,7 +89,10 @@ const attemptDownload = (
     void (async () => {
       try {
         await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
-        let existingSize = await getExistingFileSize(destPath);
+        // Reprise d'un partiel (même URL, fichier distant inchangé) ; sinon on repart de zéro.
+        const resume = resumePoint(destPath, downloadUrl);
+        let existingSize = resume.offset;
+        let validator = resume.validator;
 
         while (true) {
           if (signal?.aborted) throw new Error("Aborted");
@@ -113,6 +100,7 @@ const attemptDownload = (
           const headers: Record<string, string> = { "Accept-Encoding": "identity" };
           if (existingSize > 0) {
             headers.Range = `bytes=${existingSize}-`;
+            if (validator) headers["If-Range"] = validator; // fichier changé : le serveur renvoie 200 (tout)
           }
 
           response = await downloadAxios<Readable>({
@@ -137,11 +125,14 @@ const attemptDownload = (
 
           if (existingSize > 0 && response.status === 200) {
             response.data.destroy();
-            await removePartialFile(destPath);
+            discardPartial(destPath);
             callback(0, 0, 0, 0);
             existingSize = 0;
+            validator = undefined;
             continue;
           }
+
+          rememberPartial(destPath, downloadUrl, validatorOf(response.headers));
 
           const remainingSize = parseInt(
             response.headers["content-length"] || "0",
@@ -224,7 +215,9 @@ const downloadFile = async (
     }
 
     try {
-      return await attemptDownload(downloadUrl, destPath, callback, signal);
+      await attemptDownload(downloadUrl, destPath, callback, signal);
+      completePartial(destPath);
+      return;
     } catch (err) {
       const { message, code } = err as NetworkErrorLike;
 
@@ -248,7 +241,7 @@ const downloadFile = async (
         console.log(
           `⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} -> ${message || code} pour ${downloadUrl}...`,
         );
-        await removePartialFile(destPath);
+        discardPartial(destPath);
         callback(0, 0, 0, 0);
         await sleep(delay);
         continue;

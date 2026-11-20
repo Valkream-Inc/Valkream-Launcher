@@ -20,7 +20,7 @@ import type { InstallIO } from "./providers/types";
 export const realInstallIO: InstallIO = {
   async download(url, destination, signal, onProgress) {
     fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.rmSync(destination, { force: true }); // jamais de reprise sur un fichier d'une autre synchro
+    // Un fichier partiel de la même URL (fichier distant inchangé) est repris, sinon supprimé : voir download-resume.
     await downloadFile(
       url,
       destination,

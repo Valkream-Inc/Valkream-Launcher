@@ -7,6 +7,8 @@
  * `zip` (optionnel) : archive de tous les fichiers. Quand plus de la moitié des fichiers
  * est à récupérer (installation complète), elle est téléchargée en une fois ; les fichiers
  * absents de l'archive ou au mauvais hash sont repris un par un via `hash-folder`.
+ * Les fichiers sont préparés dans un dossier temporaire puis basculés d'un coup (atomique) ;
+ * un téléchargement interrompu est repris à la synchronisation suivante.
  * `to_ignore` : jamais vérifié ni touché. Fichiers conservés : gardés s'ils existent.
  * Les hash du disque passent par le cache de l'installation (`HashCache`).
  */
@@ -14,11 +16,14 @@
 import fs from "fs";
 import path from "path";
 
+import { createHash } from "crypto";
+
 import { hashFile, manifestHash, type Manifest } from "../manifest";
 import { runPool } from "../../../lib/concurrency";
 import { resolveInside } from "../../../lib/paths";
 import { matchesAny, normalizeRelative } from "../../../lib/patterns";
 import { shouldWriteFile } from "../preserve";
+import { commitStaged, stageFile } from "../staging";
 import type { Provider, ProviderContext } from "./types";
 
 /** Téléchargements simultanés de fichiers individuels. */
@@ -56,7 +61,7 @@ const extractFromZip = async (
 };
 
 export const hashProvider: Provider = async (context) => {
-  const { entry, entryDir, tempDir, plan, platform, resolver, io, hashes, name, signal } = context;
+  const { entry, entryDir, tempDir, plan, platform, resolver, io, hashes, name, signal, beforeCommit } = context;
 
   const content = entry.content;
   if (content === undefined || Array.isArray(content)) {
@@ -87,14 +92,11 @@ export const hashProvider: Provider = async (context) => {
     if (shouldWriteFile(file, plan, exists)) toFetch.push(item);
   }
 
-  // Un fichier vérifié est mis en place, puis son hash est mémorisé.
-  const install = (file: string, partial: string, expected: string): void => {
-    const destination = resolveInside(entryDir, file);
-    fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.copyFileSync(partial, destination);
-    fs.rmSync(partial, { force: true });
-    hashes.remember(destination, expected);
-  };
+  // Un fichier vérifié rejoint le dossier de préparation ; la bascule dans l'entrée se fait à la fin.
+  const stage = path.join(tempDir, `${name}.stage`);
+  fs.rmSync(stage, { recursive: true, force: true });
+  const expectedByFile = new Map(toFetch);
+  const stageVerified = (file: string, partial: string): void => stageFile(partial, stage, file);
 
   // Installation complète : une archive vaut mieux que des centaines de petits fichiers.
   const zipUrl = entry.zip;
@@ -104,12 +106,13 @@ export const hashProvider: Provider = async (context) => {
   }
 
   let done = wanted.length - toFetch.length;
-  await runPool(toFetch, DOWNLOAD_CONCURRENCY, async ([file, expected], index) => {
-    const partial = path.join(tempDir, `${name}.${index}.part`);
+  await runPool(toFetch, DOWNLOAD_CONCURRENCY, async ([file, expected]) => {
+    // Nom stable (hash du chemin) : un téléchargement interrompu est repris à la synchro suivante.
+    const partial = path.join(tempDir, `${name}.${createHash("sha1").update(file).digest("hex").slice(0, 12)}.part`);
 
     const fromZip = unzipped ? path.join(unzipped, file) : undefined;
     if (fromZip && fs.existsSync(fromZip) && (await hashFile(fromZip)) === expected) {
-      install(file, fromZip, expected);
+      stageVerified(file, fromZip);
       done++;
       return;
     }
@@ -125,10 +128,17 @@ export const hashProvider: Provider = async (context) => {
       fs.rmSync(partial, { force: true });
       throw new Error(`${name} : hash invalide pour ${file}`);
     }
-    install(file, partial, expected);
+    stageVerified(file, partial);
     done++;
   });
 
   if (unzipped) fs.rmSync(unzipped, { recursive: true, force: true });
+
+  // Tout est prêt et vérifié : bascule.
+  beforeCommit();
+  commitStaged(stage, entryDir, (relative, destination) => {
+    const expected = expectedByFile.get(relative);
+    if (expected) hashes.remember(destination, expected);
+  });
   return { hash: computed };
 };

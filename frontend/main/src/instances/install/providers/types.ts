@@ -51,6 +51,11 @@ export interface ProviderContext {
   /** Dossiers possédés enregistrés lors de la précédente installation de l'entrée. */
   previousOwned: string[];
   signal?: AbortSignal;
+  /**
+   * À appeler une fois TOUT téléchargé et prêt, juste avant de basculer dans `entryDir` :
+   * retire les dossiers `gameFolderToRemove`. Jusque-là, l'installation n'est pas touchée.
+   */
+  beforeCommit: () => void;
   report: (step: "download" | "extract" | "verify", message: string, transfer?: TransferProgress) => void;
 }
 
