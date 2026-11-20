@@ -19,6 +19,8 @@ import type {
   ReleaseEntry,
 } from "@shared/types";
 
+import { ArchiveCache } from "./providers/archive-cache";
+import { loadEntryContent } from "./local-content";
 import { entryDirectory } from "../local/instance-paths";
 import { buildRow, TIERS, type InstanceInspector } from "../local/InstanceInspector";
 import { readInstallState, readInstanceSettings, recordInstalledEntry, removeInstalledEntry } from "./install-store";
@@ -189,6 +191,15 @@ export class InstanceInstaller {
         }
         onProgress?.({ id, channel, elapsedMs: now - startedAt, ...progress });
       };
+      // Archives partagées : combien d'entrées utilisent chaque lien (supprimée après la dernière).
+      const archiveUses = new Map<string, number>();
+      for (const item of todo) {
+        if (item.remove || item.error) continue;
+        const link = item.entry.type === "zip_url" ? item.entry.content : item.entry.zip;
+        if (typeof link === "string") archiveUses.set(link, (archiveUses.get(link) ?? 0) + 1);
+      }
+      const archives = new ArchiveCache(archiveUses);
+
       appendInstallLog(installDir, `[${channel}] synchronisation${repair ? " (réparation)" : ""} : ${todo.length} entrée(s)`);
 
       let index = 0;
@@ -243,6 +254,8 @@ export class InstanceInstaller {
             hashes,
             previousOwned: previous?.owned ?? [],
             signal,
+            archives,
+            loadContent: () => loadEntryContent(resolver, item.entry, installDir, loaded.release),
             beforeCommit,
             report: (step, message, transfer) => emit({ ...common, step, message, transfer }),
           });

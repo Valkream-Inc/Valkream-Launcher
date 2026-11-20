@@ -14,7 +14,6 @@ import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
-import { pickKey } from "../../../lib/json-key";
 import { resolveInside } from "../../../lib/paths";
 import { commitStaged } from "../staging";
 import { createGlobalProgress } from "./global-progress";
@@ -53,8 +52,7 @@ export const thunderstoreProvider: Provider = async (context) => {
   if (content === undefined || (typeof content === "object" && !Array.isArray(content))) {
     throw new Error(`${name} : liste de mods absente pour la plateforme ${platform}`);
   }
-  const { value: document } = await resolver.getJson<unknown>(content as string | string[]);
-  const list = pickKey<string[]>(document, entry.key);
+  const list = await context.loadContent<string[]>();
   if (!Array.isArray(list)) throw new Error(`${name} : liste de mods invalide`);
 
   const apiUrl = (entry["api-url"] ?? "https://thunderstore.io").replace(/\/+$/, "");

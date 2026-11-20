@@ -234,6 +234,70 @@ describe("InstanceInstaller", () => {
     assert.equal(fs.existsSync(path.join(dir("beta"), "game/bin/game.exe")), false);
   });
 
+  it("thunderstore : content local:<entrée>/<fichier> lit la liste livrée dans le zip de config", async () => {
+    const remote: Record<string, any> = {
+      "/index.json": index({ stable: "/stable.yml" }),
+      "/stable.yml": {
+        version: "1.0.0",
+        "game-details": {
+          cfg: { version: "1", type: "zip_url", content: "/cfg.zip", folder_in_zip: "config" },
+          mods: { version: "1", type: "thunderstore_modpack_url", "api-url": "https://thunderstore.io", content: "local:cfg/modpack.json", key: "dependencies.mods" },
+        },
+      },
+    };
+    const w = makeWorld(remote, {
+      "/cfg.zip": JSON.stringify({ "config/modpack.json": JSON.stringify({ dependencies: { mods: ["Au-ModA-1.0.0"] } }) }),
+    });
+    const original = w.io.download;
+    w.io.download = async (url, dest, signal, onProgress) => {
+      if (!url.startsWith("https://thunderstore.io/")) return original(url, dest, signal, onProgress);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.writeFileSync(dest, JSON.stringify({ "plugin.dll": "A1" }));
+    };
+    const inspector = new InstanceInspector({ configs: [config], resolver: w.resolver, platform: "win32", rootPath: () => root });
+    const installer = new InstanceInstaller({ inspector, resolver: w.resolver, platform: "win32", io: w.io });
+    const result = await installer.sync("g", "stable");
+    assert.deepEqual(result.failed, []);
+    assert.equal(read("stable", "game/plugins/Au-ModA/plugin.dll"), "A1");
+  });
+
+  it("une même archive pour plusieurs entrées (un folder_in_zip chacune) n'est téléchargée qu'une fois", async () => {
+    const remote: Record<string, any> = {
+      "/index.json": index({ stable: "/stable.yml" }),
+      "/stable.yml": {
+        version: "1.0.0",
+        "game-details": {
+          cfg: { version: "1", type: "zip_url", content: "/all.zip", folder_in_zip: "config" },
+          n: { version: "1", type: "zip_url", content: "/all.zip", folder_in_zip: "extra" },
+        },
+      },
+    };
+    const w = makeWorld(remote, { "/all.zip": JSON.stringify({ "config/a.cfg": "A", "extra/b.txt": "B" }) });
+    const inspector = new InstanceInspector({ configs: [config], resolver: w.resolver, platform: "win32", rootPath: () => root });
+    const installer = new InstanceInstaller({ inspector, resolver: w.resolver, platform: "win32", io: w.io });
+    const result = await installer.sync("g", "stable");
+    assert.deepEqual(result.failed, []);
+    assert.equal(w.downloads.filter((url) => url.endsWith("/all.zip")).length, 1);
+    assert.equal(read("stable", "game/config/a.cfg"), "A");
+    assert.equal(read("stable", "game/b.txt"), "B");
+  });
+
+  it("local: absent ou entrée inconnue : erreur claire", async () => {
+    const remote: Record<string, any> = {
+      "/index.json": index({ stable: "/stable.yml" }),
+      "/stable.yml": {
+        version: "1.0.0",
+        "game-details": {
+          mods: { version: "1", type: "thunderstore_modpack_url", "api-url": "https://thunderstore.io", content: "local:cfg/modpack.json" },
+        },
+      },
+    };
+    const w = makeWorld(remote, {});
+    const inspector = new InstanceInspector({ configs: [config], resolver: w.resolver, platform: "win32", rootPath: () => root });
+    const result = await new InstanceInstaller({ inspector, resolver: w.resolver, platform: "win32", io: w.io }).sync("g", "stable");
+    assert.match(result.failed[0]?.error ?? "", /inconnue/);
+  });
+
   it("thunderstore : `key` désigne la liste dans le JSON lié (dependencies.mods)", async () => {
     const remote: Record<string, any> = {
       "/index.json": index({ stable: "/stable.yml" }),

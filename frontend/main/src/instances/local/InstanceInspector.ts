@@ -29,6 +29,7 @@ import { HashCache } from "../install/hash-cache";
 import { verifyManifest, type Manifest } from "../install/manifest";
 import type { ParamResolver } from "../remote/ParamResolver";
 import { resolvePreserved } from "../install/preserve";
+import { loadEntryContent } from "../install/local-content";
 import { flattenRelease, RELEASE_TIERS } from "../remote/release-options";
 import { validateReleaseConfig } from "../remote/validate";
 
@@ -178,7 +179,7 @@ export class InstanceInspector {
         const row = buildRow(name, tier, entry, entryErrors, state.entries[name], settings);
 
         if (verify && row.status === "up-to-date" && entry?.type === "hash_url") {
-          await this.verifyEntry(row, entry, locations.installDir, hashes!, fresh);
+          await this.verifyEntry(row, entry, locations.installDir, hashes!, fresh, release);
         }
         report.entries.push(row);
       }
@@ -220,11 +221,12 @@ export class InstanceInspector {
     installDir: string,
     hashes: HashCache,
     fresh: boolean,
+    release: ReleaseConfig,
   ): Promise<void> {
     try {
       const content = entry.content;
       if (content === undefined || Array.isArray(content)) return;
-      const { value: manifest } = await this.options.resolver.getJson<Manifest>(content as string | Manifest);
+      const manifest = await loadEntryContent<Manifest>(this.options.resolver, entry, installDir, release);
       const directory = entryDirectory(installDir, entry.path);
       const diff = await verifyManifest(directory, manifest, entry.to_ignore ?? [], (file) =>
         hashes.hash(file, { fresh }),

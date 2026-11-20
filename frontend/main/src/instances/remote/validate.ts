@@ -17,6 +17,7 @@ import type {
   RemoteIndex,
 } from "@shared/types";
 
+import { isLocalContent, parseLocalContent } from "../install/local-content";
 import { isValidKey } from "../../lib/json-key";
 import { classifyLink, isFetchableLink, isPerPlatformContent } from "./link";
 import { RELEASE_TIERS } from "./release-options";
@@ -170,6 +171,13 @@ const checkContentValue = (
   content: unknown,
   where: string,
 ): string[] => {
+  if (typeof content === "string" && isLocalContent(content)) {
+    if (type !== "hash_url" && type !== "thunderstore_modpack_url") {
+      return [`${where} : local: réservé à hash_url et thunderstore_modpack_url`];
+    }
+    return parseLocalContent(content) ? [] : [`${where} : local:<entrée>/<fichier> attendu (chemin relatif sûr) : ${content}`];
+  }
+
   if (typeof content === "string") {
     return isFetchableLink(content)
       ? []

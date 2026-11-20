@@ -138,6 +138,30 @@ Le test `instances/remote/backend-files.test.ts` recoupe la config main et `back
 
 Quand `content` d'un `hash_url` ou d'un `thunderstore_modpack_url` est un lien vers un fichier JSON, `key` indique où se trouvent les données dans ce fichier : chemin pointé, `.` (défaut, le fichier entier) ou index de tableau. Exemple : `content: /games/<id>/modpack.json` + `key: dependencies.mods` lit la liste `modpack.json → dependencies.mods`. Pour `hash_url`, le hash de l'entrée est calculé sur le contenu désigné. Clé introuvable : l'entrée échoue avec un message clair. Déclinable par plateforme comme les autres options.
 
+### Contenu local : `local:<entrée>/<fichier>`
+
+`content` d'un `hash_url` ou d'un `thunderstore_modpack_url` peut désigner un fichier déjà installé par une autre entrée plutôt qu'un lien distant. Exemple : la liste des mods de base est livrée dans le zip de config :
+
+```yaml
+game-details:
+  cfg:
+    version: 3
+    type: zip_url
+    content: /games/valheim/config.zip
+    folder_in_zip: config          # config/modpack.json → <dossier de cfg>/modpack.json
+  mods:
+    version: 3                     # à incrémenter aussi quand modpack.json change
+    type: thunderstore_modpack_url
+    content: local:cfg/modpack.json
+    key: dependencies.mods
+```
+
+Le dossier de `cfg` vient de la config main (`entryPaths`) : le remote ne choisit jamais un chemin. L'entrée source doit être déclarée **avant** (elle est installée d'abord) ; sinon l'entrée échoue avec « l'entrée « cfg » doit être installée avant ». Comme le launcher ne sait pas à l'avance que le fichier a changé, la `version` de l'entrée qui le lit se change en même temps que celle de la source.
+
+### Un zip, plusieurs dossiers d'installation
+
+Une archive peut contenir un dossier par chemin d'installation : déclarez une entrée par chemin (le chemin de chaque entrée est dans la config main), avec le **même** `content` et un `folder_in_zip` différent. L'archive `.zip` n'est téléchargée qu'une seule fois par synchronisation et supprimée après sa dernière utilisation. (Une archive `.tar.gz` est lue en flux : elle n'est pas mise en cache, privilégiez le zip dans ce cas.)
+
 La résolution des dépendances **transitives** Thunderstore reste désactivée par défaut : elle n'existe que si l'entrée déclare explicitement `dependencies` (avec `skip` en option). Sans elle, la liste de `content` est installée telle quelle.
 
 ## Réseau et robustesse

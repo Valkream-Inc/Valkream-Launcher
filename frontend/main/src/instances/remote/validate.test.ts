@@ -165,6 +165,15 @@ describe("validateReleaseConfig", () => {
     assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: zip } })), /key : réservé/);
   });
 
+  it("content local:<entrée>/<fichier> : réservé à hash_url / thunderstore, chemin sûr", () => {
+    const ok = { ...validEntry(), type: "thunderstore_modpack_url", content: "local:cfg/modpack.json" };
+    assert.doesNotMatch(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-details": { v: ok } })), /local/);
+    const bad = { ...ok, content: "local:cfg/../secret.json" };
+    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-details": { v: bad } })), /local:<entrée>/);
+    const zip = { ...validEntry(), type: "zip_url", content: "local:cfg/a.zip" };
+    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-details": { v: zip } })), /réservé/);
+  });
+
   it("gameFolderToRemove/Preserve et optional sont contrôlés", () => {
     const entry = { ...validEntry(), gameFolderToRemove: ["/BepInEx/cache", "../x"], gameFolderToPreserve: "pas-une-liste", optional: {} };
     const errors = errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: entry } }));
