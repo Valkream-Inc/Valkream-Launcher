@@ -73,8 +73,8 @@ const InstanceIpcHandlers = (): void => {
   ipcMain.handle(
     "instances:set-setting",
     (_event, id: string, channel: Channel, name: string, value: InstanceSettingValue) => {
-      const { locations } = resolve(id, channel);
-      return writeInstanceSetting(locations.installDir, name, value);
+      const { config, locations } = resolve(id, channel);
+      return writeInstanceSetting(locations.installDir, name, value, config.defaultSettings);
     }
   );
 

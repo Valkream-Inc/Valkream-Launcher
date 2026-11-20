@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 import type { InstanceMainConfig } from "../instances.types";
 import { InstanceInspector } from "../local/InstanceInspector";
 import { InstanceInstaller } from "./InstanceInstaller";
-import { readInstallState, writeInstanceSetting } from "./install-store";
+import { readInstallState, readInstanceSettings, writeInstanceSetting } from "./install-store";
 import { manifestHash } from "./manifest";
 import { instanceRootPath } from "../../lib/paths";
 import type { ParamResolver } from "../remote/ParamResolver";
@@ -145,6 +145,13 @@ describe("InstanceInstaller", () => {
     assert.ok(events.filter((event) => event.step === "download").length < 20, "progression non limitée");
     assert.ok(events.some((event) => event.step === "start") && events.some((event) => event.step === "done"));
     assert.ok(events.every((event) => event.elapsedMs >= 0));
+  });
+
+  it("réglage : le fichier créé et le résultat contiennent aussi les valeurs par défaut", () => {
+    const defaults = { modsAdmin: false, launchSteam: true, launcherBehavior: "hide" };
+    const result = writeInstanceSetting(dir("stable"), "modsAdmin", true, defaults);
+    assert.deepEqual(result, { modsAdmin: true, launchSteam: true, launcherBehavior: "hide" });
+    assert.deepEqual(readInstanceSettings(dir("stable")), result);
   });
 
   it("deuxième passage : rien à faire, aucun téléchargement", async () => {

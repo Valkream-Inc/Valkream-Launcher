@@ -108,16 +108,22 @@ export const readInstanceSettings = (
   return settings;
 };
 
+/**
+ * Enregistre un réglage et retourne les réglages EFFECTIFS : valeurs par défaut de l'instance
+ * (`defaults`) complétées par celles du fichier. Le fichier créé contient donc tous les réglages
+ * avec leur valeur par défaut, pas seulement celui qui vient de changer.
+ */
 export const writeInstanceSetting = (
   installDir: string,
   name: string,
   value: InstanceSettingValue,
+  defaults: Readonly<Record<string, InstanceSettingValue>> = {},
 ): Record<string, InstanceSettingValue> => {
   if (!SETTING_NAME.test(name)) throw new Error(`Nom de réglage invalide : ${name}`);
   if (typeof value !== "boolean" && typeof value !== "string") {
     throw new Error(`Valeur de réglage invalide pour ${name}`);
   }
-  const settings = { ...readInstanceSettings(installDir), [name]: value };
+  const settings = { ...defaults, ...readInstanceSettings(installDir), [name]: value };
   writeJsonFile(path.join(installDir, SETTINGS_FILE), settings);
   return settings;
 };
