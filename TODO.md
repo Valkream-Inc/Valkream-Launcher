@@ -12,7 +12,7 @@
 
 - [ ] (++) optimize performance in TreeJs (3d ..?)
 - [ ] (++) optimize base fonction (trottle, etc.)
-- [ ] (++) mettre http2 en place (got plutot que axios)
+- [x] ~~http2 / remplacer axios~~ : `fetch` natif (lib/http.ts + lib/download-file.ts)
 - [x] (fait) hash à l'installation, reprise par entrée, vérification via hash, cache `instance.hashes.json`
 - [x] (fait) doc : README racine, frontend, backend, doc/instance-system
 
@@ -51,7 +51,7 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 - [ ] (++) Tests du renderer (contexts, `InstanceSettings`, `InstanceButton`) avec Testing Library ; aujourd'hui seuls le main et le moteur sont testés.
 - [x] (+) Lint et `typecheck` dans le workflow CI avant le build des installeurs. — fait : job `verify` de `ci.yml`.
 - [ ] (+) Découper `launcher-ipc` / `instance-ipc` par domaine et typer les canaux IPC de bout en bout (un seul fichier de contrat dans `shared/types/ipc.d.ts`).
-- [ ] (+) Remplacer `axios` + `progress-stream` + `stream-throttle` par un seul client (`got` / `fetch`), cf. item http2.
+- [x] Remplacer `axios` + `progress-stream` + `stream-throttle` par `fetch` (fait ; lancer `yarn install` pour resynchroniser yarn.lock).
 - [ ] (+) Renommer `windows/launcher/component` en `components` (cohérence) et ranger les CSS à côté de leur composant.
 - [ ] (++) Tests de bout en bout du launcher (Playwright + Electron) sur le backend de dev : installation complète, mise à jour, réparation.
 

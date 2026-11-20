@@ -25,6 +25,7 @@ import {
 } from "../instances/services";
 import DirsManager from "../core/dirs";
 import LauncherManager from "../core/launcher";
+import { cancelSync, runSync } from "./sync-registry";
 
 const isChannel = (value: unknown): value is Channel =>
   value === "stable" || value === "beta";
@@ -77,24 +78,18 @@ const InstanceIpcHandlers = (): void => {
     }
   );
 
-  // Une synchronisation annulable par canal (clé = dossier d'installation).
-  const syncs = new Map<string, AbortController>();
-
-  ipcMain.handle("instances:sync", async (event, id: string, channel: Channel, options?: { repair?: boolean }) => {
+  // Une synchronisation annulable par canal (clé = dossier d'installation) : relancer en remplace une bloquée.
+  ipcMain.handle("instances:sync", (event, id: string, channel: Channel, options?: { repair?: boolean }) => {
     const { locations } = resolve(id, channel);
-    const controller = new AbortController();
-    syncs.set(locations.installDir, controller);
-    try {
-      return await getInstanceInstaller().sync(id, channel, {
+    return runSync(locations.installDir, (signal) =>
+      getInstanceInstaller().sync(id, channel, {
         repair: options?.repair === true,
-        signal: controller.signal,
+        signal,
         onProgress: (progress) => {
           if (!event.sender.isDestroyed()) event.sender.send("instances:progress", progress);
         },
-      });
-    } finally {
-      if (syncs.get(locations.installDir) === controller) syncs.delete(locations.installDir);
-    }
+      })
+    );
   });
 
   // Journal d'installation du canal (texte), pour le support.
@@ -105,7 +100,7 @@ const InstanceIpcHandlers = (): void => {
 
   ipcMain.handle("instances:cancel", (_event, id: string, channel: Channel) => {
     const { locations } = resolve(id, channel);
-    syncs.get(locations.installDir)?.abort();
+    cancelSync(locations.installDir);
   });
 
   ipcMain.handle("instances:launch", async (_event, id: string, channel: Channel) => {

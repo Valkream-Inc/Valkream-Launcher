@@ -3,13 +3,13 @@
  * @license MIT-NC
  */
 
-import axios from "axios";
 import dns from "dns";
 import { GameDig } from "gamedig";
 
 import type { ServerInfos } from "@shared/types";
 
 import { baseUrl, noCache } from "./constants";
+import { httpGet } from "../lib/http";
 import type { ServerQueryConfig } from "../types/core";
 
 class InfosManager {
@@ -40,7 +40,7 @@ class InfosManager {
       return this.isServerReachable;
 
     try {
-      await axios.get(url, { timeout: 3000, ...noCache });
+      await httpGet(url, { timeout: 3000, noCache });
       this.isServerReachable = true;
       return true;
     } catch (error) {

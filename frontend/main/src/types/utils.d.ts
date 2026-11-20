@@ -19,12 +19,13 @@ export type FileProgressCallback = (
   speed: number
 ) => void | Promise<void>;
 
-/** Erreur réseau Node/axios (champs optionnels utilisés pour la détection). */
+/** Erreur réseau Node / fetch (champs optionnels utilisés pour la détection). */
 export interface NetworkErrorLike {
   code?: string;
+  name?: string;
   message?: string;
-  request?: unknown;
-  response?: unknown;
+  /** `fetch` place le code système (ECONNRESET…) dans `cause`. */
+  cause?: { code?: string };
 }
 
 /** Ligne brute de la table SQLite (`id`, `json_data`). */

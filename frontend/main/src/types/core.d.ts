@@ -21,7 +21,7 @@ export interface ServerQueryConfig {
   timeout: number;
 }
 
-/** Options axios pour désactiver le cache HTTP. */
+/** En-têtes et paramètre qui désactivent le cache HTTP. */
 export interface NoCacheConfig {
   headers: {
     "Cache-Control": string;

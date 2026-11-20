@@ -9,6 +9,7 @@ import * as UpdateWindow from "./src/windows/updateWindow";
 import * as MainWindow from "./src/windows/mainWindow";
 import IpcHandlers from "./src/ipc/launcher-ipc";
 import { isDev } from "./src/core/constants";
+import { abortAllSyncs } from "./src/ipc/sync-registry";
 
 if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
 
@@ -29,6 +30,17 @@ else {
     else UpdateWindow.createWindow();
   });
 }
+
+// Fermeture ou erreur fatale : on coupe les installations en cours (les partiels restent reprenables)
+app.on("before-quit", abortAllSyncs);
+process.on("uncaughtException", (error) => {
+  console.error("❌ Erreur non gérée :", error);
+  abortAllSyncs();
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("❌ Promesse rejetée non gérée :", reason);
+  abortAllSyncs();
+});
 
 // Quitte l'application quand toutes les fenêtres sont fermées (sauf macOS)
 app.on("window-all-closed", () => {

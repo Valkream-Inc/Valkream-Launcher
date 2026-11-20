@@ -4,10 +4,10 @@
  *
  * Panneau de réglages générique d'une instance (remplace un panneau par jeu) :
  * General, Launcher, Game (réglages décrits par la config render), Mods (affichage
- * joueur) et Dev (outils + onglet Debug admin : un tableau par sous-chemin).
+ * joueur), Dev (outils admin) et Debug (diagnostic admin : un tableau par sous-chemin).
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Typography } from "@mui/material";
 
 import type { InstanceId } from "@shared/types";
@@ -60,13 +60,20 @@ export default function InstanceSettings({
   const isAdmin = isDevActive || isSpecialOptionVisible;
   const customSettings = renderConfig?.customGamesSettings ?? [];
 
+  // Les réglages viennent du rapport au premier chargement de chaque instance / canal seulement :
+  // ensuite l'état local fait foi (sinon un rechargement en retard écrase le réglage qu'on vient de changer).
+  const loadedKey = useRef<string | null>(null);
   useEffect(() => {
-    if (report) setValues(report.settings);
-  }, [report]);
+    const key = `${instanceId}@${channel}`;
+    if (report && loadedKey.current !== key) {
+      loadedKey.current = key;
+      setValues(report.settings);
+    }
+  }, [report, instanceId, channel]);
 
   // Pendant une action (installation…), on ne reste pas sur les onglets qui modifient le jeu
   useEffect(() => {
-    if (actionLoading && ["mods", "dev"].includes(activeTab)) changeTab("general");
+    if (actionLoading && ["mods", "dev", "debug"].includes(activeTab)) changeTab("general");
   }, [actionLoading]);
 
   if (!renderConfig) {
@@ -79,7 +86,7 @@ export default function InstanceSettings({
     values,
     onChange: (next: InstanceSettingValues) => {
       setValues(next);
-      void reload(); // une entrée `optional` peut avoir changé d'état
+      void reload({ silent: true }); // une entrée `optional` peut avoir changé d'état
     },
   };
 
@@ -97,6 +104,7 @@ export default function InstanceSettings({
         <NavButton id="game" label="Game" active={false} />
         {!actionLoading && <NavButton id="mods" label="Mods" active={false} />}
         {isAdmin && <NavButton id="dev" label="Dev" active={false} />}
+        {isAdmin && <NavButton id="debug" label="Debug" active={false} />}
       </NavSettings>
 
       {/* Tabs */}
@@ -150,9 +158,10 @@ export default function InstanceSettings({
         {report && <InstanceModsTab report={report} />}
       </SettingsTab>
 
+      {/* Dev : outils d'administration */}
       {isAdmin && (
         <SettingsTab id="dev" activeTab={activeTab}>
-          <SettingsTitle warn={true}>Dev / Debug</SettingsTitle>
+          <SettingsTitle warn={true}>Dev</SettingsTitle>
           {!actionLoading && (
             <Instance_ButtonUninstallGame id={instanceId} channel={channel} onDone={reload} />
           )}
@@ -162,7 +171,13 @@ export default function InstanceSettings({
           <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>
           <ButtonDebug />
           {!actionLoading && isSpecialOptionVisible && <ToggleBeta />}
+        </SettingsTab>
+      )}
 
+      {/* Debug : diagnostic de l'installation (rapport, tableaux, journal) */}
+      {isAdmin && (
+        <SettingsTab id="debug" activeTab={activeTab}>
+          {!report && loading && <Typography>Chargement…</Typography>}
           {report && (
             <InstanceDebugTab
               report={report}

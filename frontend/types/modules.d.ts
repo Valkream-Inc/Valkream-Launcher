@@ -39,22 +39,3 @@ declare module "gamedig" {
     static query(options: GameDigQueryOptions): Promise<GameDigState>;
   }
 }
-
-declare module "stream-throttle" {
-  import type { Transform } from "node:stream";
-
-  export interface ThrottleOptions {
-    rate: number;
-    chunksize?: number;
-    burst?: number;
-  }
-
-  export class Throttle extends Transform {
-    constructor(options: ThrottleOptions);
-  }
-
-  export class ThrottleGroup {
-    constructor(options: ThrottleOptions);
-    throttle(options?: ThrottleOptions): Throttle;
-  }
-}

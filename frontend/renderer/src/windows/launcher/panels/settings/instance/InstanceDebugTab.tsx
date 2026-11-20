@@ -2,13 +2,17 @@
  * @author Valkream Team
  * @license MIT-NC
  *
- * Onglet Debug (admin) : un tableau par sous-chemin géré, un tableau récapitulatif
- * « ça fonctionne ou non », et les erreurs de configuration remote.
+ * Onglet Debug (admin, distinct de Dev) : récapitulatif « ça fonctionne ou non », un tableau
+ * par sous-chemin géré (filtrable sur les problèmes), réglages, journal d'installation
+ * et outils de support (copier rapport / journal, vérifier, réparer).
  */
 
+import { useCallback, useEffect, useState } from "react";
 import {
   Button,
   Chip,
+  FormControlLabel,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -47,13 +51,29 @@ interface Props {
   /** Titres personnalisés par entrée (config render). */
   debugContent?: DebugContent[];
   loading: boolean;
-  onReload: (verify?: boolean) => void | Promise<void>;
+  onReload: (options?: { verify?: boolean; silent?: boolean }) => void | Promise<void>;
 }
 
 export default function InstanceDebugTab({ report, debugContent = [], loading, onReload }: Props) {
   const titleOf = (entry: EntryReport) =>
     debugContent.find((item) => item.entry === entry.name)?.title ?? entry.name;
-  const tables = groupEntriesByPath(report.entries);
+  const [problemsOnly, setProblemsOnly] = useState(false);
+  const [log, setLog] = useState<string | null>(null);
+  const isProblem = (entry: EntryReport) => !["up-to-date", "skipped"].includes(entry.status);
+  const tables = groupEntriesByPath(report.entries)
+    .map((table) => (problemsOnly ? { ...table, entries: table.entries.filter(isProblem) } : table))
+    .filter((table) => table.entries.length > 0);
+
+  const loadLog = useCallback(async () => {
+    try {
+      setLog(await window.electron_API.getInstanceLog(report.id, report.channel));
+    } catch (error) {
+      setLog(`Journal illisible : ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }, [report.id, report.channel]);
+  useEffect(() => {
+    void loadLog();
+  }, [loadLog, report]);
   const overlaps = overlappingPaths(report.entries);
   const { summary } = report;
   const { actionLoading, runAction } = useAction();
@@ -81,7 +101,7 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
         console.error(error);
         enqueueSnackbar("Réparation impossible !", { variant: "error" });
       } finally {
-        await onReload(true);
+        await onReload({ verify: true });
       }
     }, "repair-instance");
 
@@ -96,11 +116,7 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
     }
   };
   const copyReport = () => copy(JSON.stringify(report, null, 2), "Rapport");
-  const copyLog = async () =>
-    copy(
-      (await window.electron_API.getInstanceLog(report.id, report.channel)) || "(journal vide)",
-      "Journal"
-    );
+  const copyLog = () => copy(log || "(journal vide)", "Journal");
 
   return (
     <>
@@ -117,8 +133,8 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
             Exécutable : {report.executable.path} ({report.executable.exists ? "présent" : "absent"})
           </Typography>
         )}
-        <Button disabled={loading} onClick={() => onReload(false)}>Recharger</Button>
-        <Button disabled={loading} onClick={() => onReload(true)}>Vérifier les fichiers</Button>
+        <Button disabled={loading} onClick={() => onReload()}>Recharger</Button>
+        <Button disabled={loading} onClick={() => onReload({ verify: true })}>Vérifier les fichiers</Button>
         <Button disabled={loading || actionLoading} color="warning" onClick={repair}>
           Réparer
         </Button>
@@ -179,6 +195,11 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
         </SettingsBox>
       )}
 
+      <FormControlLabel
+        control={<Switch checked={problemsOnly} onChange={(event) => setProblemsOnly(event.target.checked)} />}
+        label="Afficher seulement les problèmes"
+      />
+
       {/* Un tableau par sous-chemin */}
       {tables.map((table) => (
         <div key={table.path}>
@@ -234,6 +255,45 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
           </SettingsBox>
         </div>
       ))}
+
+      {tables.length === 0 && problemsOnly && (
+        <SettingsBox warn={false}>
+          <Typography>Aucun problème détecté.</Typography>
+        </SettingsBox>
+      )}
+
+      {/* Réglages de l'installation */}
+      <SettingsTitle warn={false}>Réglages</SettingsTitle>
+      <SettingsBox warn={false}>
+        <Table size="small">
+          <TableBody>
+            {Object.entries(report.settings).map(([name, value]) => (
+              <TableRow key={name}>
+                <TableCell>{name}</TableCell>
+                <TableCell>{String(value)}</TableCell>
+              </TableRow>
+            ))}
+            {Object.keys(report.settings).length === 0 && (
+              <TableRow>
+                <TableCell>Aucun réglage enregistré</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </SettingsBox>
+
+      {/* Journal d'installation */}
+      <SettingsTitle warn={false}>Journal d'installation</SettingsTitle>
+      <SettingsBox warn={false}>
+        <Button onClick={loadLog}>Actualiser</Button>
+        <Typography
+          component="pre"
+          variant="caption"
+          sx={{ maxHeight: 300, overflow: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", userSelect: "text" }}
+        >
+          {log === null ? "Chargement…" : log.trim() || "(journal vide)"}
+        </Typography>
+      </SettingsBox>
     </>
   );
 }

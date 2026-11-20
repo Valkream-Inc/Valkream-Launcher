@@ -1,27 +1,28 @@
 /**
  * @author Valkream Team
  * @license MIT-NC
+ *
+ * Téléchargement d'un fichier avec `fetch` : reprise (Range + If-Range, voir download-resume),
+ * progression, reprise automatique sur coupure réseau, retries limités sur les autres erreurs
+ * et garde-fou d'inactivité (un flux qui n'envoie plus rien est coupé puis repris).
  */
 
-import axios from "axios";
-import type { AxiosResponse } from "axios";
 import fs from "fs";
 import path from "path";
-import type { Readable } from "stream";
-import progress from "progress-stream";
-import { Throttle } from "stream-throttle";
+import { Readable, Transform } from "stream";
+import { pipeline } from "stream/promises";
 
-import type {
-  FileProgressCallback,
-  NetworkErrorLike,
-} from "../types/utils";
+import type { FileProgressCallback, NetworkErrorLike } from "../types/utils";
 
 import { completePartial, discardPartial, rememberPartial, resumePoint, validatorOf } from "./download-resume";
-import { formatBytes } from "./format-bytes";
 import { consoleStreamAnswer } from "./console-stream";
+import { formatBytes } from "./format-bytes";
+import { HttpError, httpGet } from "./http";
 
 const REQUEST_TIMEOUT = 10 * 1000;
+const STALL_TIMEOUT = 30 * 1000;
 const MAX_OTHER_RETRIES = 5;
+const PROGRESS_INTERVAL = 100;
 
 const NETWORK_ERROR_CODES = new Set([
   "ECONNRESET",
@@ -32,166 +33,138 @@ const NETWORK_ERROR_CODES = new Set([
   "ECONNABORTED",
   "ENETUNREACH",
   "EAI_AGAIN",
-  "ERR_NETWORK",
+  "UND_ERR_SOCKET",
+  "UND_ERR_CONNECT_TIMEOUT",
+  "UND_ERR_HEADERS_TIMEOUT",
+  "UND_ERR_BODY_TIMEOUT",
 ]);
 
-const isNetworkError = (err: unknown): boolean => {
+export interface DownloadOptions {
+  /** Inactivité maximale du flux avant coupure (ms). */
+  stallTimeoutMs?: number;
+  /** Multiplicateur des délais entre deux tentatives (ms, défaut 1000). */
+  retryDelayMs?: number;
+}
+
+export const isNetworkError = (err: unknown): boolean => {
   if (!err) return false;
   const error = err as NetworkErrorLike;
   if (NETWORK_ERROR_CODES.has(error.code as string)) return true;
-  if (error.message === "Network Error") return true;
-  if (error.request && !error.response) return true;
-  return false;
+  if (NETWORK_ERROR_CODES.has(error.cause?.code as string)) return true;
+  // `fetch` signale toute coupure de connexion par « TypeError: fetch failed »
+  return error.name === "TypeError" && error.message === "fetch failed";
 };
 
-const sleep = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
+/** Erreur HTTP définitive (4xx hors 408 / 429) : inutile de réessayer. */
+const isFatalHttpError = (err: unknown): boolean =>
+  err instanceof HttpError && err.status >= 400 && err.status < 500 && err.status !== 408 && err.status !== 429;
 
-const parseTotalSizeFromContentRange = (
-  contentRange: string | undefined,
-  fallback: number
-): number => {
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+const parseTotalSizeFromContentRange = (contentRange: string | null, fallback: number): number => {
   const match = contentRange?.match(/bytes \d+-\d+\/(\d+|\*)/);
   if (!match || match[1] === "*") return fallback;
   return parseInt(match[1], 10);
 };
 
-const downloadAxios = axios.create();
-
-const attemptDownload = (
+const attemptDownload = async (
   downloadUrl: string,
   destPath: string,
   callback: FileProgressCallback,
-  signal?: AbortSignal
+  signal: AbortSignal | undefined,
+  stallTimeoutMs: number,
 ): Promise<void> => {
-  return new Promise<void>((resolve, reject) => {
-    let writer: fs.WriteStream | undefined;
-    let response: AxiosResponse<Readable> | undefined;
+  await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
 
-    // Gestionnaire d'annulation d'urgence
-    const onAbort = () => {
-      cleanup();
-      reject(new Error(`Download aborted for ${downloadUrl}`));
-    };
+  // Reprise d'un partiel (même URL, fichier distant inchangé) ; sinon on repart de zéro.
+  let { offset: existingSize, validator } = resumePoint(destPath, downloadUrl);
 
-    const cleanup = () => {
-      if (response && response.data) response.data.destroy();
-      if (writer) writer.destroy(); // 🔑 Libère instantanément le descripteur de fichier (pas de lock)
-      signal?.removeEventListener("abort", onAbort);
-    };
+  while (true) {
+    if (signal?.aborted) throw new Error(`Download aborted for ${downloadUrl}`);
 
-    if (signal?.aborted) {
-      return onAbort();
+    const headers: Record<string, string> = { "Accept-Encoding": "identity" };
+    if (existingSize > 0) {
+      headers.Range = `bytes=${existingSize}-`;
+      if (validator) headers["If-Range"] = validator; // fichier changé : le serveur renvoie 200 (tout)
     }
 
-    signal?.addEventListener("abort", onAbort);
+    const response = await httpGet(downloadUrl, {
+      timeout: REQUEST_TIMEOUT,
+      headers,
+      signal,
+      accept: (status) => status === 200 || status === 206 || status === 416,
+    });
 
-    void (async () => {
-      try {
-        await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
-        // Reprise d'un partiel (même URL, fichier distant inchangé) ; sinon on repart de zéro.
-        const resume = resumePoint(destPath, downloadUrl);
-        let existingSize = resume.offset;
-        let validator = resume.validator;
+    // Déjà complet : rien à télécharger
+    if (existingSize > 0 && response.status === 416) {
+      callback(existingSize, existingSize, 100, 0);
+      return;
+    }
 
-        while (true) {
-          if (signal?.aborted) throw new Error("Aborted");
+    // Le serveur ignore Range ou le fichier a changé : on repart de zéro
+    if (existingSize > 0 && response.status === 200) {
+      void response.body?.cancel();
+      discardPartial(destPath);
+      callback(0, 0, 0, 0);
+      existingSize = 0;
+      validator = undefined;
+      continue;
+    }
 
-          const headers: Record<string, string> = { "Accept-Encoding": "identity" };
-          if (existingSize > 0) {
-            headers.Range = `bytes=${existingSize}-`;
-            if (validator) headers["If-Range"] = validator; // fichier changé : le serveur renvoie 200 (tout)
-          }
+    if (!response.body) throw new Error(`Réponse sans contenu pour ${downloadUrl}`);
+    rememberPartial(destPath, downloadUrl, validatorOf(Object.fromEntries(response.headers)));
 
-          response = await downloadAxios<Readable>({
-            url: downloadUrl,
-            method: "GET",
-            responseType: "stream",
-            timeout: REQUEST_TIMEOUT,
-            maxContentLength: Infinity,
-            maxBodyLength: Infinity,
-            headers,
-            signal, // Axios coupe automatiquement sa propre requête si le signal trigger
-            validateStatus: (status) =>
-              status === 200 || status === 206 || status === 416,
-          });
+    const remainingSize = parseInt(response.headers.get("content-length") ?? "0", 10);
+    const totalSize =
+      response.status === 206
+        ? parseTotalSizeFromContentRange(response.headers.get("content-range"), existingSize + remainingSize)
+        : remainingSize;
 
-          if (existingSize > 0 && response.status === 416) {
-            cleanup();
-            callback(existingSize, existingSize, 100, 0);
-            resolve();
-            return;
-          }
+    const source = Readable.fromWeb(response.body as Parameters<typeof Readable.fromWeb>[0]);
+    const writer = fs.createWriteStream(destPath, { flags: existingSize > 0 ? "a" : "w" });
 
-          if (existingSize > 0 && response.status === 200) {
-            response.data.destroy();
-            discardPartial(destPath);
-            callback(0, 0, 0, 0);
-            existingSize = 0;
-            validator = undefined;
-            continue;
-          }
+    let transferred = existingSize;
+    let lastReport = Date.now();
+    let lastBytes = existingSize;
 
-          rememberPartial(destPath, downloadUrl, validatorOf(response.headers));
+    // Garde-fou : plus aucun octet reçu depuis `stallTimeoutMs` → coupure (la reprise est automatique)
+    let stallTimer: NodeJS.Timeout | undefined;
+    const armStall = () => {
+      clearTimeout(stallTimer);
+      stallTimer = setTimeout(
+        () => source.destroy(Object.assign(new Error(`Aucune donnée reçue depuis ${stallTimeoutMs} ms`), { code: "ETIMEDOUT" })),
+        stallTimeoutMs,
+      );
+    };
 
-          const remainingSize = parseInt(
-            response.headers["content-length"] || "0",
-            10,
-          );
-          const totalSize =
-            response.status === 206
-              ? parseTotalSizeFromContentRange(
-                  response.headers["content-range"],
-                  existingSize + remainingSize,
-                )
-              : remainingSize;
-          const downloadedOffset = existingSize;
-
-          const progressStream = progress({
-            length: remainingSize || undefined,
-            time: 100,
-          });
-
-          progressStream.on("progress", (p) => {
-            const transferred = downloadedOffset + p.transferred;
-            const percent =
-              totalSize > 0
-                ? Math.round((transferred / totalSize) * 100)
-                : Math.round(p.percentage);
-            callback(transferred, totalSize, percent, p.speed);
-          });
-
-          writer = fs.createWriteStream(destPath, {
-            flags: downloadedOffset > 0 ? "a" : "w",
-          });
-
-          response.data
-            .pipe(new Throttle({ rate: 1024 * 1024 * 1024 }))
-            .pipe(progressStream)
-            .pipe(writer);
-
-          writer.on("finish", () => {
-            cleanup();
-            resolve();
-          });
-
-          writer.on("error", (err) => {
-            cleanup();
-            reject(err);
-          });
-
-          response.data.on("error", (err) => {
-            cleanup();
-            reject(err);
-          });
-          return;
+    const counter = new Transform({
+      transform(chunk: Buffer, _encoding, done) {
+        armStall();
+        transferred += chunk.length;
+        const now = Date.now();
+        if (now - lastReport >= PROGRESS_INTERVAL) {
+          const speed = ((transferred - lastBytes) * 1000) / (now - lastReport);
+          const percent = totalSize > 0 ? Math.round((transferred / totalSize) * 100) : 0;
+          void callback(transferred, totalSize, percent, speed);
+          lastReport = now;
+          lastBytes = transferred;
         }
-      } catch (err) {
-        cleanup();
-        reject(err);
-      }
-    })();
-  });
+        done(null, chunk);
+      },
+    });
+
+    const onAbort = () => source.destroy(new Error(`Download aborted for ${downloadUrl}`));
+    signal?.addEventListener("abort", onAbort, { once: true });
+    armStall();
+    try {
+      await pipeline(source, counter, writer);
+      void callback(transferred, totalSize || transferred, 100, 0);
+    } finally {
+      clearTimeout(stallTimer);
+      signal?.removeEventListener("abort", onAbort);
+    }
+    return;
+  }
 };
 
 const downloadFile = async (
@@ -203,47 +176,37 @@ const downloadFile = async (
         `(${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}) ` +
         `à ${formatBytes(speed)}/s`,
     ),
-  signal?: AbortSignal, // 👈 Ajouté aux arguments
+  signal?: AbortSignal,
+  { stallTimeoutMs = STALL_TIMEOUT, retryDelayMs = 1000 }: DownloadOptions = {},
 ): Promise<void> => {
   let otherRetryCount = 0;
 
   while (true) {
-    if (signal?.aborted) {
-      throw new Error(
-        `Download aborted before starting retry for ${downloadUrl}`,
-      );
-    }
+    if (signal?.aborted) throw new Error(`Download aborted before starting retry for ${downloadUrl}`);
 
     try {
-      await attemptDownload(downloadUrl, destPath, callback, signal);
+      await attemptDownload(downloadUrl, destPath, callback, signal, stallTimeoutMs);
       completePartial(destPath);
       return;
     } catch (err) {
       const { message, code } = err as NetworkErrorLike;
 
-      // Si l'erreur provient d'une annulation volontaire, on ne fait PAS de retry
-      if (signal?.aborted /*|| err.message?.includes("aborted")*/) {
-        throw err;
-      }
+      // Annulation volontaire (ou erreur définitive) : pas de retry
+      if (signal?.aborted || isFatalHttpError(err)) throw err;
 
+      // Coupure réseau : on reprend là où on s'est arrêté, sans limite (l'utilisateur peut annuler)
       if (isNetworkError(err)) {
-        console.log(
-          `⚠️  Erreur réseau -> ${message || code} pour ${downloadUrl}, reprise...`,
-          message || code,
-        );
-        await sleep(1000); // Léger délai pour éviter de spammer en boucle fermée
+        console.log(`⚠️  Erreur réseau -> ${message || code} pour ${downloadUrl}, reprise...`);
+        await sleep(retryDelayMs);
         continue;
       }
 
       if (otherRetryCount < MAX_OTHER_RETRIES) {
         otherRetryCount++;
-        const delay = otherRetryCount * 1000;
-        console.log(
-          `⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} -> ${message || code} pour ${downloadUrl}...`,
-        );
+        console.log(`⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} -> ${message || code} pour ${downloadUrl}...`);
         discardPartial(destPath);
         callback(0, 0, 0, 0);
-        await sleep(delay);
+        await sleep(otherRetryCount * retryDelayMs);
         continue;
       }
 
@@ -252,4 +215,4 @@ const downloadFile = async (
   }
 };
 
-export { downloadFile, isNetworkError, REQUEST_TIMEOUT };
+export { downloadFile, REQUEST_TIMEOUT };
