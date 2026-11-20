@@ -210,4 +210,14 @@ describe("gameFolderToPreserve et to_ignore", () => {
       assert.equal(validateRemoteIndex({ ...base, requiredSpaceMb: bad }, "g").ok, false, String(bad));
     }
   });
+
+  it("dependencies : thunderstore uniquement, skip = liste de textes", () => {
+    const entry = (extra: object, type = "thunderstore_modpack_url") => ({
+      version: "1", type, content: ["Au-A-1.0.0"], path: "game", ...extra,
+    });
+    const check = (value: object) => errorsOf(validateReleaseConfig({ version: "0.0.0", "game-details": { v: value } }));
+    assert.equal(check(entry({ dependencies: { skip: ["a-b"] } })), "");
+    assert.match(check(entry({ dependencies: {} }, "zip_url")), /dependencies : réservé à thunderstore/);
+    assert.match(check(entry({ dependencies: { skip: [1] } })), /dependencies.skip/);
+  });
 });

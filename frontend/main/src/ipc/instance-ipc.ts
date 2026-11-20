@@ -12,6 +12,7 @@ import { ipcMain, shell } from "electron";
 import type { Channel, GamePlatform, InstanceSettingValue } from "@shared/types";
 
 import instancesConfig from "../instances/instances.config";
+import { readInstallLog } from "../instances/install/install-log";
 import { installLocations } from "../instances/local/instance-paths";
 import { readInstanceSettings, writeInstanceSetting } from "../instances/install/install-store";
 import { planLaunch } from "../instances/local/launch";
@@ -94,6 +95,12 @@ const InstanceIpcHandlers = (): void => {
     } finally {
       if (syncs.get(locations.installDir) === controller) syncs.delete(locations.installDir);
     }
+  });
+
+  // Journal d'installation du canal (texte), pour le support.
+  ipcMain.handle("instances:log", (_event, id: string, channel: Channel) => {
+    const { locations } = resolve(id, channel);
+    return readInstallLog(locations.installDir);
   });
 
   ipcMain.handle("instances:cancel", (_event, id: string, channel: Channel) => {

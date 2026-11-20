@@ -50,7 +50,7 @@ frontend/
 - Fait : instances `Valheim-Valkream-v2` et `SevenDtoD-Valkream-v2` (7 Days to Die installé entièrement dans le launcher, comme Valheim).
 - Fait : **une seule API** `window.electron_API` (`getInstances`, `getInstanceInfos`, `getInstanceStatus`, `getInstanceReport`, `syncInstance`, `launchInstance`, `openInstanceFolder`, `uninstallInstance`, `setInstanceSetting`, `onInstanceProgress`…). Les anciens managers, IPC, panneaux et API par jeu (`electron_Valheim_API`, `electron_SevenDtoD_API`) sont supprimés.
 - Pas de migration des anciennes installations : réinstallation propre dans `instances/<id>/<canal>/` (les anciens dossiers ne sont pas touchés).
-- Pas encore : provider Nexus (signalé comme échec), dépendances transitives Thunderstore.
+- Pas encore : provider Nexus (signalé comme échec).
 
 ## Ajouter un jeu
 
@@ -111,6 +111,8 @@ Une entrée `hash_url` peut déclarer `zip: <lien>` : une archive de **tous** le
 Les hash des fichiers installés sont mémorisés dans `instance.hashes.json` (à côté de `instance.state.json`), avec la taille et la date de chaque fichier : la vérification d'une installation ne relit que les fichiers modifiés depuis. La réparation (`repair`) ignore ce cache et relit tout le disque.
 
 ## Mods Thunderstore
+
+`dependencies: { skip?: [Auteur-Nom] }` (optionnel) active la résolution des dépendances transitives : après extraction, le `manifest.json` de chaque mod est lu et ses dépendances sont installées à leur tour (une version par mod : la première rencontrée, la liste de l'entrée d'abord ; les cycles sont gérés). `skip` liste les dossiers jamais installés comme dépendance, typiquement le pack BepInEx déjà fourni par le jeu. Sans `dependencies`, la liste de l'entrée doit être complète.
 
 Chaque mod est extrait dans son propre dossier `<Auteur>-<Nom>` : plusieurs entrées (mods normaux, admin, boost FPS…) peuvent partager `game/BepInEx/plugins` sans se gêner. `modpack.json` d'une instance (tableau `Auteur-Nom-Version`) est à générer depuis le `manifest.json` du modpack à chaque release.
 

@@ -22,7 +22,7 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 
 ### Moteur d'installation
 - [ ] (++) Provider Nexus (`nexus_url`) : aujourd'hui une entrée Nexus est un échec explicite.
-- [ ] (++) Dépendances Thunderstore transitives (résoudre et installer les dépendances d'un mod).
+- [x] (++) Dépendances Thunderstore transitives (résoudre et installer les dépendances d'un mod). — fait : option `dependencies: { skip }` par entrée (à activer dans les latest.yml si voulu).
 - [ ] (++) Script `build-manifest --zip` : générer aussi l'archive `zip` d'une entrée `hash_url`.
 - [x] (++) Téléchargements parallèles (limités à 3-4) pour le provider `hash_url` + reprise d'un téléchargement interrompu (HTTP Range). — fait : 4 fichiers en parallèle (`runPool`) ; reprise HTTP Range reste à faire.
 - [ ] (++) Installation atomique : extraire dans un dossier temporaire puis basculer, pour ne jamais laisser un jeu à moitié mis à jour.
@@ -39,7 +39,7 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 
 ### Launcher / UX
 - [ ] (++) Page Mods plus riche : recherche, filtres par catégorie, version installée vs disponible.
-- [ ] (++) Onglet Debug : export du rapport (JSON) pour le support, bouton « copier les erreurs ».
+- [x] (++) Onglet Debug : export du rapport (JSON) pour le support, bouton « copier les erreurs ». — fait : boutons « Copier le rapport » (JSON) et « Copier le journal ».
 - [x] (+) Journal d'installation consultable (fichier de log par instance et par canal). — fait : `instance.log` par canal (début / fin / erreur de chaque entrée) ; affichage dans l'interface à faire.
 - [ ] (+) Gestion de plusieurs instances du même jeu côté interface (choix, duplication, suppression avec taille occupée).
 - [ ] (++) Accessibilité : navigation clavier, contraste des thèmes, réduction des animations (`prefers-reduced-motion`).

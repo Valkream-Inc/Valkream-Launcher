@@ -85,6 +85,23 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
       }
     }, "repair-instance");
 
+  // Pour le support : rapport complet (JSON) ou journal d'installation, copiés dans le presse-papiers
+  const copy = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      enqueueSnackbar(`${label} copié !`, { variant: "success" });
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar(`Impossible de copier : ${label}`, { variant: "error" });
+    }
+  };
+  const copyReport = () => copy(JSON.stringify(report, null, 2), "Rapport");
+  const copyLog = async () =>
+    copy(
+      (await window.electron_API.getInstanceLog(report.id, report.channel)) || "(journal vide)",
+      "Journal"
+    );
+
   return (
     <>
       <Wait isVisible={actionLoading} />
@@ -105,6 +122,8 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
         <Button disabled={loading || actionLoading} color="warning" onClick={repair}>
           Réparer
         </Button>
+        <Button onClick={copyReport}>Copier le rapport</Button>
+        <Button onClick={copyLog}>Copier le journal</Button>
       </SettingsBox>
 
       {report.errors.length > 0 && (

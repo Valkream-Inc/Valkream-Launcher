@@ -6,7 +6,8 @@
  * est extrait dans son propre dossier `<Auteur>-<Nom>` sous le dossier de l'entrée,
  * donc deux entrées partageant un même `path` (mods normaux et mods admin) ne
  * s'écrasent jamais. Les dossiers des mods retirés de la liste sont supprimés.
- * Limite : les dépendances transitives ne sont pas résolues (la liste doit être complète).
+ * Option `dependencies` : résout aussi les dépendances transitives (manifest.json de chaque mod),
+ * sauf celles listées dans `skip`. Sans elle, la liste doit être complète.
  */
 
 import { createHash } from "crypto";
@@ -24,6 +25,24 @@ const parseDependency = (dependency: string) => {
   return { author: match[1], name: match[2], version: match[3], folder: `${match[1]}-${match[2]}` };
 };
 
+/** Dépendances déclarées dans le manifest.json d'un mod extrait (absent ou invalide : aucune). */
+const readDependencies = (modDir: string) => {
+  try {
+    const raw = fs.readFileSync(path.join(modDir, "manifest.json"), "utf8").replace(/^\uFEFF/, "");
+    const dependencies = (JSON.parse(raw) as { dependencies?: unknown }).dependencies;
+    if (!Array.isArray(dependencies)) return [];
+    return dependencies.flatMap((item) => {
+      try {
+        return [parseDependency(String(item))];
+      } catch {
+        return [];
+      }
+    });
+  } catch {
+    return [];
+  }
+};
+
 export const thunderstoreProvider: Provider = async (context) => {
   const { entry, entryDir, tempDir, platform, resolver, io, name, signal, previousOwned } = context;
 
@@ -38,22 +57,21 @@ export const thunderstoreProvider: Provider = async (context) => {
   const mods = list.map(parseDependency);
   fs.mkdirSync(entryDir, { recursive: true });
 
+  // Dépendances transitives (si `dependencies` est déclaré) : lues dans le manifest.json de chaque mod.
+  const skip = new Set(entry.dependencies?.skip ?? []);
   const owned = mods.map((mod) => mod.folder);
-
-  // Mods retirés de la liste depuis la dernière installation de CETTE entrée.
-  for (const folder of previousOwned.filter((item) => !owned.includes(item))) {
-    fs.rmSync(resolveInside(entryDir, folder), { recursive: true, force: true });
-  }
+  const queue = [...mods];
 
   let done = 0;
-  for (const mod of mods) {
-    context.report("download", `${mod.folder} ${mod.version} (${++done}/${mods.length})`);
+  while (queue.length > 0) {
+    const mod = queue.shift()!;
+    context.report("download", `${mod.folder} ${mod.version} (${++done}/${done + queue.length})`);
     const zipPath = path.join(tempDir, `${mod.folder}.zip`);
     const url = resolver.urlOf(
       `${apiUrl}/package/download/${encodeURIComponent(mod.author)}/${encodeURIComponent(mod.name)}/${encodeURIComponent(mod.version)}/`,
     );
     await io.download(url, zipPath, signal, (transfer) =>
-      context.report("download", `${mod.folder} ${mod.version} (${done}/${mods.length})`, transfer),
+      context.report("download", `${mod.folder} ${mod.version} (${done}/${done + queue.length})`, transfer),
     );
 
     const destination = resolveInside(entryDir, mod.folder);
@@ -61,6 +79,19 @@ export const thunderstoreProvider: Provider = async (context) => {
     context.report("extract", `Extraction de ${mod.folder}`);
     await io.extract(zipPath, destination, { accept: () => true });
     fs.rmSync(zipPath, { force: true });
+
+    if (entry.dependencies) {
+      for (const dependency of readDependencies(destination)) {
+        if (skip.has(dependency.folder) || owned.includes(dependency.folder)) continue;
+        owned.push(dependency.folder);
+        queue.push(dependency);
+      }
+    }
+  }
+
+  // Mods retirés (liste ou dépendances) depuis la dernière installation de CETTE entrée.
+  for (const folder of previousOwned.filter((item) => !owned.includes(item))) {
+    fs.rmSync(resolveInside(entryDir, folder), { recursive: true, force: true });
   }
 
   const hash = createHash("sha256").update([...list].sort().join("\n")).digest("hex");

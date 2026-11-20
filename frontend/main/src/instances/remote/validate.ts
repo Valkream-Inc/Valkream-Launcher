@@ -320,6 +320,20 @@ const checkEntry = (entry: unknown, where: string): string[] => {
     }
   }
 
+  if (entry.dependencies !== undefined && !isDataLink(entry.dependencies)) {
+    const dependencies = entry.dependencies;
+    if (type !== "thunderstore_modpack_url") {
+      errors.push(`${where}.dependencies : réservé à thunderstore_modpack_url`);
+    } else if (!isObject(dependencies)) {
+      errors.push(`${where}.dependencies : objet attendu ({ skip?: [Auteur-Nom] })`);
+    } else if (
+      dependencies.skip !== undefined &&
+      !(Array.isArray(dependencies.skip) && dependencies.skip.every(isNonEmptyString))
+    ) {
+      errors.push(`${where}.dependencies.skip : liste de dossiers « Auteur-Nom » attendue`);
+    }
+  }
+
   return errors;
 };
 

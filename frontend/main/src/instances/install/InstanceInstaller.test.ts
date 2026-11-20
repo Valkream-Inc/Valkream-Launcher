@@ -428,4 +428,62 @@ describe("InstanceInstaller", () => {
       assert.equal(read("stable", "game/bin/game.exe"), "exe-v1");
     });
   });
+
+  describe("thunderstore : dépendances transitives", () => {
+    const pack = (text: string, dependencies: string[]) =>
+      JSON.stringify({ "plugin.dll": text, "manifest.json": JSON.stringify({ dependencies }) });
+
+    const setup = (dependencies?: { skip?: string[] }) => {
+      const remote: Record<string, any> = {
+        "/index.json": index({ stable: "/stable.yml" }),
+        "/stable.yml": {
+          version: "1.0.0",
+          "game-details": {
+            mods: {
+              version: "1", type: "thunderstore_modpack_url", content: ["Au-Top-1.0.0"],
+              ...(dependencies ? { dependencies } : {}),
+            },
+          },
+        },
+      };
+      const archives: Record<string, string> = {
+        "https://thunderstore.io/package/download/Au/Top/1.0.0/": pack("top", ["Au-Mid-1.0.0", "bep-BepInExPack-5.4.0"]),
+        "https://thunderstore.io/package/download/Au/Mid/1.0.0/": pack("mid", ["Au-Leaf-2.0.0", "Au-Top-1.0.0"]),
+        "https://thunderstore.io/package/download/Au/Leaf/2.0.0/": pack("leaf", []),
+        "https://thunderstore.io/package/download/bep/BepInExPack/5.4.0/": pack("bep", []),
+      };
+      const world = makeWorld(remote, {});
+      world.io.download = async (url, dest) => {
+        const body = archives[url];
+        if (!body) throw new Error(`404 ${url}`);
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        fs.writeFileSync(dest, body);
+      };
+      const inspector = new InstanceInspector({ configs: [config], resolver: world.resolver, platform: "win32", rootPath: () => root });
+      return { remote, installer: new InstanceInstaller({ inspector, resolver: world.resolver, platform: "win32", io: world.io }) };
+    };
+
+    it("sans `dependencies` : seule la liste est installée", async () => {
+      const { installer } = setup();
+      await installer.sync("g", "stable");
+      assert.equal(fs.existsSync(path.join(dir("stable"), "game/plugins/Au-Top")), true);
+      assert.equal(fs.existsSync(path.join(dir("stable"), "game/plugins/Au-Mid")), false);
+    });
+
+    it("avec `dependencies` : chaîne résolue, cycle et `skip` respectés", async () => {
+      const { installer } = setup({ skip: ["bep-BepInExPack"] });
+      const result = await installer.sync("g", "stable");
+      assert.deepEqual(result.failed, []);
+      for (const folder of ["Au-Top", "Au-Mid", "Au-Leaf"]) {
+        assert.equal(fs.existsSync(path.join(dir("stable"), "game/plugins", folder)), true, folder);
+      }
+      assert.equal(fs.existsSync(path.join(dir("stable"), "game/plugins/bep-BepInExPack")), false);
+    });
+
+    it("dépendance non ignorée : installée aussi", async () => {
+      const { installer } = setup({});
+      await installer.sync("g", "stable");
+      assert.equal(read("stable", "game/plugins/bep-BepInExPack/plugin.dll"), "bep");
+    });
+  });
 });

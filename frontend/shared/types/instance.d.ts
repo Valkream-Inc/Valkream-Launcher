@@ -160,6 +160,16 @@ export interface RawReleaseEntry {
   to_ignore?: RawOption<string[]>;
   /** Entrée installée seulement si ce réglage d'instance est actif. */
   optional?: RawOption<{ setting: string }>;
+  /**
+   * `thunderstore_modpack_url` : sa présence active la résolution des dépendances transitives
+   * (le `manifest.json` de chaque mod liste les siennes). `skip` : dossiers `Auteur-Nom`
+   * jamais installés comme dépendance (ex : le pack BepInEx, déjà fourni par le jeu).
+   */
+  dependencies?: RawOption<DependencyOptions>;
+}
+
+export interface DependencyOptions {
+  skip?: string[];
 }
 
 /** Entrée résolue pour la plateforme courante : plus de table par plateforme, liens de données lus. */
@@ -179,6 +189,7 @@ export interface ReleaseEntry {
   gameFolderToPreserve?: PreserveItem[];
   to_ignore?: string[];
   optional?: { setting: string };
+  dependencies?: DependencyOptions;
 }
 
 export type ReleaseEntries = Record<string, ReleaseEntry>;

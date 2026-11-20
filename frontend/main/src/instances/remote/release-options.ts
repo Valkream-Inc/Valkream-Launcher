@@ -34,6 +34,7 @@ const DATA_OPTIONS = [
   "gameFolderToPreserve",
   "to_ignore",
   "optional",
+  "dependencies",
 ] as const;
 
 /** Sans valeur pour la plateforme, l'entrée n'est pas proposée. */

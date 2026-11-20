@@ -26,3 +26,11 @@ export const appendInstallLog = (installDir: string, message: string, now: Date 
     // journal facultatif
   }
 };
+
+export const readInstallLog = (installDir: string): string => {
+  try {
+    return fs.readFileSync(path.join(installDir, INSTALL_LOG_FILE), "utf8");
+  } catch {
+    return "";
+  }
+};
