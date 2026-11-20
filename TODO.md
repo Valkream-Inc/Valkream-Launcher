@@ -23,7 +23,9 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 ### Moteur d'installation
 - [ ] (++) Provider Nexus (`nexus_url`) : aujourd'hui une entrée Nexus est un échec explicite.
 - [x] (++) Dépendances Thunderstore transitives (résoudre et installer les dépendances d'un mod). — fait : option `dependencies: { skip }` par entrée (à activer dans les latest.yml si voulu).
-- [ ] (++) Script `build-manifest --zip` : générer aussi l'archive `zip` d'une entrée `hash_url`.
+- [ ] (++) Script `build-manifest --zip` / `--tar.gz` : générer aussi l'archive d'une entrée `hash_url` (le launcher sait déjà installer un `.tar.gz` en flux).
+- [x] (++) Installation `.tar.gz` en flux (décompression pendant le téléchargement), progression d'extraction, progression globale (hash / Thunderstore), temps écoulé.
+- [x] (+) Option `key` (données dans un JSON lié), contenu `local:<entrée>/<fichier>`, archive partagée entre entrées.
 - [x] (++) Téléchargements parallèles (limités à 3-4) pour le provider `hash_url` + reprise d'un téléchargement interrompu (HTTP Range). — fait : 4 fichiers en parallèle (`runPool`) ; reprise HTTP `Range`/`If-Range` entre deux synchronisations faite.
 - [x] (++) Installation atomique : extraire dans un dossier temporaire puis basculer, pour ne jamais laisser un jeu à moitié mis à jour. — fait : préparation dans `.tmp/<entrée>.stage` puis bascule par renommages.
 - [x] (+) Annulation propre d'une installation en cours depuis l'interface (le `signal` existe déjà côté moteur). — fait : bouton « Annuler » (`cancelInstanceSync`), `cancelled` dans le résultat.
@@ -38,6 +40,8 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 - [ ] (++) Dockerfile du backend + en-têtes de cache (ETag, `Cache-Control`) adaptés aux gros fichiers.
 
 ### Launcher / UX
+- [x] (++) Onglet Tools admin : hash d'un dossier (+ export), liste de mods Thunderstore avec images.
+- [ ] (+) Onglet Tools : champ « source Thunderstore » (`Auteur/Nom/Version` → liste des dépendances), génération du `latest.yml` / écriture du hash dans le latest.
 - [ ] (++) Page Mods plus riche : recherche, filtres par catégorie, version installée vs disponible.
 - [x] (++) Onglet Debug : export du rapport (JSON) pour le support, bouton « copier les erreurs ». — fait : boutons « Copier le rapport » (JSON) et « Copier le journal ».
 - [x] (+) Journal d'installation consultable (fichier de log par instance et par canal). — fait : `instance.log` par canal (début / fin / erreur de chaque entrée) ; affichage dans l'interface à faire.
@@ -51,7 +55,7 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 - [ ] (++) Tests du renderer (contexts, `InstanceSettings`, `InstanceButton`) avec Testing Library ; aujourd'hui seuls le main et le moteur sont testés.
 - [x] (+) Lint et `typecheck` dans le workflow CI avant le build des installeurs. — fait : job `verify` de `ci.yml`.
 - [ ] (+) Découper `launcher-ipc` / `instance-ipc` par domaine et typer les canaux IPC de bout en bout (un seul fichier de contrat dans `shared/types/ipc.d.ts`).
-- [x] Remplacer `axios` + `progress-stream` + `stream-throttle` par `fetch` (fait ; lancer `yarn install` pour resynchroniser yarn.lock).
+- [x] Remplacer `axios` + `progress-stream` + `stream-throttle` par `fetch` (fait ; **lancer `yarn install` et committer yarn.lock** : sans cela la CI en `--immutable` échoue).
 - [ ] (+) Renommer `windows/launcher/component` en `components` (cohérence) et ranger les CSS à côté de leur composant.
 - [ ] (++) Tests de bout en bout du launcher (Playwright + Electron) sur le backend de dev : installation complète, mise à jour, réparation.
 

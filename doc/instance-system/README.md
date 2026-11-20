@@ -24,14 +24,18 @@ frontend/
     app.ts                        point d'entrée Electron
     src/
       core/                       services du launcher : constants, dirs, files, settings, launcher, server-infos
-      lib/                        helpers techniques sans logique métier : database, download-file, platform-dir,
-                                  format-bytes, console-stream, paths, patterns, version
+      lib/                        helpers techniques sans logique métier : database, http (fetch), download-file
+                                  (reprise + watchdog), tar-extract (tar en flux), json-key (option `key`), archive-limits,
+                                  safe-link, platform-dir, format-bytes, console-stream, paths, patterns, version
       windows/                    fenêtres (main, update) et preloads
-      ipc/                        handlers IPC : launcher-ipc, instance-ipc, check-for-updates
+      ipc/                        handlers IPC : launcher-ipc, instance-ipc, admin-tools-ipc (onglet Tools),
+                                  sync-registry (une synchro par installation, annulation / relance), check-for-updates
       instances/                  tout ce qui concerne les jeux
         instances.config.ts       config main des instances (+ instances.types.d.ts)
         remote/                   lien, résolveur + cache, validation, options par plateforme / lien, registre, index
-        install/                  installation : providers (zip, hash, thunderstore), conservation, hash, cache, état
+        install/                  installation : providers (zip, hash, thunderstore, archive, global-progress), conservation,
+                                  hash, cache, état, staging, stream-extract (.tar.gz en flux), local-content (`local:`)
+        tools/                    outils admin : hash-folder (hash + export), mods-list (liste de mods Thunderstore)
         local/                    état local : rapport (inspector), infos d'accueil, statut, lancement, chemins
         services.ts               assemble les services avec les dépendances réelles
       types/                      types du main (core, utils)
@@ -46,9 +50,10 @@ frontend/
 - Fait : **installation par canal** (`instances/<id>/stable|beta/`) avec état (`instance.state.json`) et réglages (`instance.settings.json`) propres à chaque canal : la beta n'a aucun fichier en commun avec le stable.
 - Fait : **moteur d'installation** (`instances/install/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url` ; reprise par entrée ; une synchronisation à la fois par installation.
 - Fait : **rapport** (`instances:report`) : un statut par entrée + récapitulatif « fonctionne ou non ».
-- Fait : **UI 100 % générique** : choix du jeu, accueil (un seul `InstanceButton` : installer / réinstaller / mettre à jour / jouer, avec progression), réglages General / Launcher / Game / Mods (affichage joueur) / Dev (outils admin) / Debug (admin : récapitulatif, tableaux filtrables, réglages, journal d'installation, « Réparer »). Fonds image / vidéo / 3D, loader, liens et infos serveur lisent la config render de l'instance active.
+- Fait : **UI 100 % générique** : choix du jeu, accueil (un seul `InstanceButton` : installer / réinstaller / mettre à jour / jouer, avec progression), réglages General / Launcher / Game / Mods (affichage joueur) / Dev (outils du jeu : désinstaller, ouvrir le dossier…) / Tools (préparation du remote : hash d'un dossier, liste de mods) / Debug (diagnostic : récapitulatif, tableaux filtrables, réglages, journal d'installation, « Réparer »). Dev, Tools et Debug sont réservés aux admins. Fonds image / vidéo / 3D, loader, liens et infos serveur lisent la config render de l'instance active.
 - Fait : instances `Valheim-Valkream-v2` et `SevenDtoD-Valkream-v2` (7 Days to Die installé entièrement dans le launcher, comme Valheim).
 - Fait : **une seule API** `window.electron_API` (`getInstances`, `getInstanceInfos`, `getInstanceStatus`, `getInstanceReport`, `syncInstance`, `launchInstance`, `openInstanceFolder`, `uninstallInstance`, `setInstanceSetting`, `onInstanceProgress`…). Les anciens managers, IPC, panneaux et API par jeu (`electron_Valheim_API`, `electron_SevenDtoD_API`) sont supprimés.
+- Fait : **réglages d'installation** : `instance.settings.json` contient tous les réglages (valeurs par défaut de l'instance incluses) dès le premier changement ; la lecture complète toujours avec les défauts.
 - Pas de migration des anciennes installations : réinstallation propre dans `instances/<id>/<canal>/` (les anciens dossiers ne sont pas touchés).
 - Pas encore : provider Nexus (signalé comme échec).
 
@@ -119,7 +124,9 @@ Les hash des fichiers installés sont mémorisés dans `instance.hashes.json` (�
 
 `dependencies: { skip?: [Auteur-Nom] }` (optionnel) active la résolution des dépendances transitives : après extraction, le `manifest.json` de chaque mod est lu et ses dépendances sont installées à leur tour (une version par mod : la première rencontrée, la liste de l'entrée d'abord ; les cycles sont gérés). `skip` liste les dossiers jamais installés comme dépendance, typiquement le pack BepInEx déjà fourni par le jeu. Sans `dependencies`, la liste de l'entrée doit être complète.
 
-Chaque mod est extrait dans son propre dossier `<Auteur>-<Nom>` : plusieurs entrées (mods normaux, admin, boost FPS…) peuvent partager `game/BepInEx/plugins` sans se gêner. `modpack.json` d'une instance (tableau `Auteur-Nom-Version`) est à générer depuis le `manifest.json` du modpack à chaque release.
+Le contenu d'une entrée Thunderstore (`content`) peut être : une liste inline `[Auteur-Nom-Version, …]`, un lien vers un JSON (avec `key` pour désigner la liste à l'intérieur, ex : `dependencies.mods`) ou `local:<entrée>/<fichier>` (liste livrée dans une autre entrée, voir plus bas). L'API Thunderstore expose aussi, par version de mod, `https://thunderstore.io/api/experimental/package/<Auteur>/<Nom>/<version>/` dont le champ `dependencies` est la liste des dépendances directes : `content: <cette URL>` + `key: dependencies` l'utilise directement (API « experimental » : à vérifier avant usage, il n'existe pas d'URL qui renvoie le `manifest.json` brut seul).
+
+Chaque mod est extrait dans son propre dossier `<Auteur>-<Nom>` : plusieurs entrées (mods normaux, admin, boost FPS…) peuvent partager `game/BepInEx/plugins` sans se gêner. `modpack.json` d'une instance (tableau `Auteur-Nom-Version`) est à générer depuis le `manifest.json` du modpack à chaque release : l'onglet Tools (Liste de mods) fait aussi l'aperçu avec images pour `mods.config.json`.
 
 ## Règles de lien
 
