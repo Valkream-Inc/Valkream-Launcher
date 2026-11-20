@@ -17,6 +17,7 @@ import type {
   RemoteIndex,
 } from "@shared/types";
 
+import { isValidKey } from "../../lib/json-key";
 import { classifyLink, isFetchableLink, isPerPlatformContent } from "./link";
 import { RELEASE_TIERS } from "./release-options";
 import { isSafeRelativePath, isSafeSegment } from "../../lib/paths";
@@ -282,6 +283,14 @@ const checkEntry = (entry: unknown, where: string): string[] => {
 
   if (type === "hash_url" && !isFetchableLink(entry["hash-folder"])) {
     errors.push(`${where}.hash-folder : URL de base des fichiers requise`);
+  }
+
+  if (entry.key !== undefined && !isDataLink(entry.key)) {
+    if (type !== "hash_url" && type !== "thunderstore_modpack_url") {
+      errors.push(`${where}.key : réservé à hash_url et thunderstore_modpack_url`);
+    } else if (typeof entry.key !== "string" || !isValidKey(entry.key)) {
+      errors.push(`${where}.key : chemin pointé attendu (ex : dependencies.mods, ou « . »)`);
+    }
   }
 
   if (entry.zip !== undefined) {

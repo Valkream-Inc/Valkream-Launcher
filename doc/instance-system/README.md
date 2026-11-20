@@ -81,7 +81,7 @@ frontend/
 
 - Version globale `X0.X1.X2` (affichage seulement) : X0 saison, X1 `game-base`, X2 `game-details`.
 - Deux niveaux, **tous deux forcés** : `game-base` (le jeu, réinstallation complète si en retard) et `game-details` (mods, configs, détails, mise à jour incrémentale). Le jeu n'est jouable en ligne que lorsque tout ce qui est actif est à jour ; hors ligne, on joue ce qui est installé. Les anciens `game-breaking` / `game-notbreaking` sont réunis sous `game-details`.
-- **Toutes les options d'une entrée sauf `version`** (`path`, `type`, `hash`, `content`, `hash-folder`, `zip`, `folder_in_zip`, `api-url`, `gameFolderToRemove`, `gameFolderToPreserve`, `to_ignore`, `optional`) :
+- **Toutes les options d'une entrée sauf `version`** (`path`, `type`, `hash`, `content`, `key`, `hash-folder`, `zip`, `folder_in_zip`, `api-url`, `gameFolderToRemove`, `gameFolderToPreserve`, `to_ignore`, `optional`) :
   - peuvent être déclinées par plateforme : `{ win32: …, linux: …, darwin: …, default: … }` ;
   - prennent une valeur **inline**, un **chemin relatif** (`/chemin`, racine du serveur de fichiers) ou une **URL** (`https://…`) vers un fichier JSON/YAML qui contient la valeur. Le fichier lié peut lui-même être décliné par plateforme.
   - Une chaîne qui commence par `/` est donc un lien : `path` et `folder_in_zip` s'écrivent sans `/` initial.
@@ -133,6 +133,12 @@ yarn typecheck:tests   # types du code et des tests
 ```
 
 Le test `instances/remote/backend-files.test.ts` recoupe la config main et `backend/public` pour chaque jeu, canal et plateforme : index valide, dossier d'installation pour chaque entrée, hash des manifestes cohérents, fichiers liés présents.
+
+## Option `key` (données dans un fichier JSON lié)
+
+Quand `content` d'un `hash_url` ou d'un `thunderstore_modpack_url` est un lien vers un fichier JSON, `key` indique où se trouvent les données dans ce fichier : chemin pointé, `.` (défaut, le fichier entier) ou index de tableau. Exemple : `content: /games/<id>/modpack.json` + `key: dependencies.mods` lit la liste `modpack.json → dependencies.mods`. Pour `hash_url`, le hash de l'entrée est calculé sur le contenu désigné. Clé introuvable : l'entrée échoue avec un message clair. Déclinable par plateforme comme les autres options.
+
+La résolution des dépendances **transitives** Thunderstore reste désactivée par défaut : elle n'existe que si l'entrée déclare explicitement `dependencies` (avec `skip` en option). Sans elle, la liste de `content` est installée telle quelle.
 
 ## Réseau et robustesse
 

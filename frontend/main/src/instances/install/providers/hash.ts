@@ -19,6 +19,7 @@ import path from "path";
 import { createHash } from "crypto";
 
 import { hashFile, manifestHash, type Manifest } from "../manifest";
+import { pickKey } from "../../../lib/json-key";
 import { runPool } from "../../../lib/concurrency";
 import { resolveInside } from "../../../lib/paths";
 import { matchesAny, normalizeRelative } from "../../../lib/patterns";
@@ -55,7 +56,8 @@ export const hashProvider: Provider = async (context) => {
   if (content === undefined || Array.isArray(content)) {
     throw new Error(`${name} : manifeste de hash absent pour la plateforme ${platform}`);
   }
-  const { value: manifest } = await resolver.getJson<Manifest>(content as string | Manifest);
+  const { value: document } = await resolver.getJson<unknown>(content as string | Manifest);
+  const manifest = pickKey<Manifest>(document, entry.key);
 
   // Intégrité du manifeste lui-même : le hash déclaré par le latest.yml fait foi.
   const computed = manifestHash(manifest, plan.ignored);

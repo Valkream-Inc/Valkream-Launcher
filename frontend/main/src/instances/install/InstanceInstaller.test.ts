@@ -234,6 +234,38 @@ describe("InstanceInstaller", () => {
     assert.equal(fs.existsSync(path.join(dir("beta"), "game/bin/game.exe")), false);
   });
 
+  it("thunderstore : `key` désigne la liste dans le JSON lié (dependencies.mods)", async () => {
+    const remote: Record<string, any> = {
+      "/index.json": index({ stable: "/stable.yml" }),
+      "/stable.yml": {
+        version: "1.0.0",
+        "game-details": {
+          mods: { version: "1", type: "thunderstore_modpack_url", "api-url": "https://thunderstore.io", content: "/modpack.json", key: "dependencies.mods" },
+        },
+      },
+      "/modpack.json": { name: "pack", dependencies: { mods: ["Au-ModA-1.0.0"] } },
+    };
+    const w = makeWorld(remote, {});
+    w.io.download = async (url, dest) => {
+      if (url !== "https://thunderstore.io/package/download/Au/ModA/1.0.0/") throw new Error(`404 ${url}`);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.writeFileSync(dest, JSON.stringify({ "plugin.dll": "A1" }));
+    };
+    const inspector = new InstanceInspector({ configs: [config], resolver: w.resolver, platform: "win32", rootPath: () => root });
+    const installer = new InstanceInstaller({ inspector, resolver: w.resolver, platform: "win32", io: w.io });
+    const result = await installer.sync("g", "stable");
+    assert.deepEqual(result.failed, []);
+    assert.equal(read("stable", "game/plugins/Au-ModA/plugin.dll"), "A1");
+
+    // Clé absente du fichier : l'entrée échoue avec un message clair (nouvelle version pour forcer la mise à jour)
+    remote["/stable.yml"]["game-details"].mods.key = "dependencies.absent";
+    remote["/stable.yml"]["game-details"].mods.version = "2";
+    const w3 = makeWorld(remote, {});
+    const inspector3 = new InstanceInspector({ configs: [config], resolver: w3.resolver, platform: "win32", rootPath: () => root });
+    const broken = await new InstanceInstaller({ inspector: inspector3, resolver: w3.resolver, platform: "win32", io: w3.io }).sync("g", "stable");
+    assert.match(broken.failed[0]?.error ?? "", /introuvable/);
+  });
+
   it("thunderstore : un dossier par mod, mod retiré supprimé, mods d'une autre entrée intacts", async () => {
     const remote: Record<string, any> = {
       "/index.json": index({ stable: "/stable.yml" }),

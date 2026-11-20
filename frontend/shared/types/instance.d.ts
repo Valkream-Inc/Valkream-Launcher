@@ -132,6 +132,12 @@ export interface RawReleaseEntry {
   /** sha256 du manifeste des fichiers que possède l'entrée. */
   hash?: RawOption<string>;
   content: EntryContentByPlatform;
+  /**
+   * `hash_url` et `thunderstore_modpack_url` : quand `content` est un lien vers un fichier JSON,
+   * chemin pointé des données dans ce fichier (ex : `dependencies.mods`, `packs.0.list`).
+   * Absent ou `.` : le fichier entier.
+   */
+  key?: RawOption<string>;
   /** `hash_url` : URL de base des fichiers du manifeste. */
   "hash-folder"?: RawOption<string>;
   /**
@@ -181,6 +187,7 @@ export interface ReleaseEntry {
   hash?: string;
   /** Lien, liste ou manifeste (jamais une table par plateforme). */
   content: EntryContent;
+  key?: string;
   "hash-folder"?: string;
   zip?: string;
   folder_in_zip?: string;

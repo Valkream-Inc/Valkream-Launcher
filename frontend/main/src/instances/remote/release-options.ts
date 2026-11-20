@@ -30,6 +30,7 @@ const DATA_OPTIONS = [
   "type",
   "hash",
   "folder_in_zip",
+  "key",
   "gameFolderToRemove",
   "gameFolderToPreserve",
   "to_ignore",
