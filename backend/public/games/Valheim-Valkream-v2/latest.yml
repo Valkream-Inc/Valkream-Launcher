@@ -49,22 +49,38 @@ game-base: # X1 : réinstallation complète
     version: 0.221.12
     type: zip_url
     content:
-      win32: /games/Valheim/latest/build-game-win32.zip
-      linux: /games/Valheim/latest/build-game-linux.zip
-      darwin: /games/Valheim/latest/build-game-darwin.zip
+      win32: https://play.valkream.com/games/Valheim/latest/build-game-win32.zip
+      linux: https://play.valkream.com/games/Valheim/latest/build-game-linux.zip
+      darwin: https://play.valkream.com/games/Valheim/latest/build-game-darwin.zip
   bepinex:
     version: 5.4.2333
     type: zip_url
-    content: /games/Valheim/latest/BepInEx-5.4.2333.zip
+    folder_in_zip: BepInExPack_Valheim
+    content: https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2333/
     gameFolderToRemove:
       - BepInEx/cache
 
 game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
+  configs:
+    version: 2.34.37
+    type: zip_url
+    folder_in_zip: config
+    content: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.34.37/
+    gameFolderToRemove:
+      - wackysDatabase/Cache
+      - Marketplace/SavedData
+    gameFolderToPreserve: # configs client conservées (chemins relatifs au dossier de l'entrée)
+      - Azumatt.MinimalUI.cfg
+      - WackyMole.EpicMMOSystemUI.cfg
+      - shudnal.ExtraSlots.cfg
+      - org.bepinex.plugins.groups.cfg
+      - randyknapp.mods.minimalstatuseffects.cfg
   mods-thunderstore:
     version: 2.34.37
     type: thunderstore_modpack_url
     api-url: https://thunderstore.io
-    content: /games/Valheim-Valkream-v2/modpack.json
+    key: dependencies
+    content: https://thunderstore.io/api/experimental/package/ValheimValkream/Valkream/2.34.37/
   mods-admin:
     version: 2.34.37
     optional:
@@ -95,18 +111,3 @@ game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
     content:
       - Willybach-Willybachs_HD_Seasonality-3.5.6
       - RustyMods-Seasonality-3.7.4
-
-  configs:
-    version: 2.34.37
-    type: zip_url
-    folder_in_zip: config
-    content: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.34.37/
-    gameFolderToRemove:
-      - wackysDatabase/Cache
-      - Marketplace/SavedData
-    gameFolderToPreserve: # configs client conservées (chemins relatifs au dossier de l'entrée)
-      - Azumatt.MinimalUI.cfg
-      - WackyMole.EpicMMOSystemUI.cfg
-      - shudnal.ExtraSlots.cfg
-      - org.bepinex.plugins.groups.cfg
-      - randyknapp.mods.minimalstatuseffects.cfg

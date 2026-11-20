@@ -12,10 +12,11 @@ import unzipper from "unzipper";
 
 import { assertArchiveWithinLimits } from "../../lib/archive-limits";
 import { downloadFile } from "../../lib/download-file";
+import { formatBytes } from "../../lib/format-bytes";
 import { isPathInside } from "../../lib/paths";
 import { normalizeRelative } from "../../lib/patterns";
-import type { InstallIO } from "./providers/types";
 import { progressOf } from "./progress";
+import type { InstallIO } from "./providers/types";
 import { streamExtractTarGz } from "./stream-extract";
 
 export const realInstallIO: InstallIO = {
@@ -33,7 +34,7 @@ export const realInstallIO: InstallIO = {
           speed: formatBytes(speed),
           processed,
         }),
-      signal
+      signal,
     );
   },
 
@@ -41,9 +42,14 @@ export const realInstallIO: InstallIO = {
     const root = path.resolve(outDir);
     const prefix = folderInZip ? normalizeRelative(folderInZip) : "";
     const directory = await unzipper.Open.file(zipPath);
-    const archived = directory.files.filter((file) => file.type !== "Directory");
+    const archived = directory.files.filter(
+      (file) => file.type !== "Directory",
+    );
     assertArchiveWithinLimits(archived);
-    const totalBytes = archived.reduce((sum, file) => sum + file.uncompressedSize, 0);
+    const totalBytes = archived.reduce(
+      (sum, file) => sum + file.uncompressedSize,
+      0,
+    );
     const startedAt = Date.now();
     let extracted = 0;
 
