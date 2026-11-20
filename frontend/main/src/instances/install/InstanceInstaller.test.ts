@@ -372,4 +372,13 @@ describe("InstanceInstaller", () => {
     const fresh = await inspector.report("g", "stable", { verify: true, fresh: true });
     assert.equal(fresh.entries[0].status, "up-to-date");
   });
+
+  it("écrit un journal d'installation (début, fin, erreur)", async () => {
+    const { installer } = build(baseRemote(), files);
+    await installer.sync("g", "stable");
+    const log = read("stable", "instance.log");
+    assert.match(log, /\[stable\] synchronisation : \d+ entrée\(s\)/);
+    assert.match(log, /\[stable\] base start/);
+    assert.match(log, /\[stable\] base done/);
+  });
 });

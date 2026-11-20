@@ -10,6 +10,7 @@ import fs from "fs";
 import path from "path";
 import unzipper from "unzipper";
 
+import { assertArchiveWithinLimits } from "../../lib/archive-limits";
 import { downloadFile } from "../../lib/download-file";
 import { formatBytes } from "../../lib/format-bytes";
 import { isPathInside } from "../../lib/paths";
@@ -38,6 +39,7 @@ export const realInstallIO: InstallIO = {
     const root = path.resolve(outDir);
     const prefix = folderInZip ? normalizeRelative(folderInZip) : "";
     const directory = await unzipper.Open.file(zipPath);
+    assertArchiveWithinLimits(directory.files.filter((file) => file.type !== "Directory"));
 
     for (const file of directory.files) {
       if (file.type === "Directory") continue;

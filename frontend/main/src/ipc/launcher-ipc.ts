@@ -14,6 +14,7 @@ import CheckForUpdates from "./check-for-updates";
 
 import SettingsManager from "../core/settings";
 import LauncherManager from "../core/launcher";
+import { isSafeExternalUrl } from "../lib/safe-link";
 
 import * as MainWindow from "../windows/mainWindow";
 import * as UpdateWindow from "../windows/updateWindow";
@@ -34,14 +35,7 @@ class IpcHandlers {
   }
 
   async openLink(event: IpcMainInvokeEvent, url = ""): Promise<void> {
-    if (
-      !(
-        url.startsWith("http://") ||
-        url.startsWith("https://") ||
-        url.startsWith("steam://")
-      )
-    )
-      throw new Error("URL invalide");
+    if (!isSafeExternalUrl(url)) throw new Error("URL invalide");
     await shell.openExternal(url);
   }
 

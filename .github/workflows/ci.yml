@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Yarn 4 (Berry) est fourni par corepack (champ packageManager de package.json).
+      - run: corepack enable
+
+      - run: yarn install --immutable
+
+      # Tests du moteur, de la config main et des fichiers de backend/public
+      - run: yarn workspace Valkream-Launcher test
+
+      - run: yarn typecheck
+
+      # Le lint ne bloque pas encore (dette existante)
+      - run: yarn lint
+        continue-on-error: true

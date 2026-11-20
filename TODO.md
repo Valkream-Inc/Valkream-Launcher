@@ -24,7 +24,7 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 - [ ] (++) Provider Nexus (`nexus_url`) : aujourd'hui une entrée Nexus est un échec explicite.
 - [ ] (++) Dépendances Thunderstore transitives (résoudre et installer les dépendances d'un mod).
 - [ ] (++) Script `build-manifest --zip` : générer aussi l'archive `zip` d'une entrée `hash_url`.
-- [ ] (++) Téléchargements parallèles (limités à 3-4) pour le provider `hash_url` + reprise d'un téléchargement interrompu (HTTP Range).
+- [x] (++) Téléchargements parallèles (limités à 3-4) pour le provider `hash_url` + reprise d'un téléchargement interrompu (HTTP Range). — fait : 4 fichiers en parallèle (`runPool`) ; reprise HTTP Range reste à faire.
 - [ ] (++) Installation atomique : extraire dans un dossier temporaire puis basculer, pour ne jamais laisser un jeu à moitié mis à jour.
 - [ ] (+) Annulation propre d'une installation en cours depuis l'interface (le `signal` existe déjà côté moteur).
 - [ ] (+) Vérifier l'espace disque disponible avant une installation.
@@ -32,7 +32,7 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 
 ### Backend / publication
 - [ ] (++) Script de publication : copie des fichiers, calcul des hash, mise à jour du `latest.yml` et de la version `X0.X1.X2` en une commande.
-- [ ] (++) Test CI qui valide `backend/public` (déjà couvert par `backend-files.test.ts` : l'exécuter dans le workflow GitHub à chaque push).
+- [x] (++) Test CI qui valide `backend/public` (déjà couvert par `backend-files.test.ts` : l'exécuter dans le workflow GitHub à chaque push). — fait : `.github/workflows/ci.yml` (tests + typecheck + lint non bloquant) ; `backend-files.test.ts` est inclus dans `yarn test`.
 - [ ] (+) Signature des manifestes (ou des `latest.yml`) pour ne pas dépendre uniquement de HTTPS.
 - [ ] (+) Versionner les anciens `latest.yml` pour pouvoir revenir en arrière (rollback d'une version).
 - [ ] (++) Dockerfile du backend + en-têtes de cache (ETag, `Cache-Control`) adaptés aux gros fichiers.
@@ -40,7 +40,7 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 ### Launcher / UX
 - [ ] (++) Page Mods plus riche : recherche, filtres par catégorie, version installée vs disponible.
 - [ ] (++) Onglet Debug : export du rapport (JSON) pour le support, bouton « copier les erreurs ».
-- [ ] (+) Journal d'installation consultable (fichier de log par instance et par canal).
+- [x] (+) Journal d'installation consultable (fichier de log par instance et par canal). — fait : `instance.log` par canal (début / fin / erreur de chaque entrée) ; affichage dans l'interface à faire.
 - [ ] (+) Gestion de plusieurs instances du même jeu côté interface (choix, duplication, suppression avec taille occupée).
 - [ ] (++) Accessibilité : navigation clavier, contraste des thèmes, réduction des animations (`prefers-reduced-motion`).
 - [ ] (+) Internationalisation (fr/en) : textes aujourd'hui en dur dans la config render et les composants.
@@ -49,13 +49,13 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 ### Code et qualité
 - [ ] (++) Migration des CSS des thèmes vers MUI, thème par thème (modern → old → futuristic) avec contrôle visuel.
 - [ ] (++) Tests du renderer (contexts, `InstanceSettings`, `InstanceButton`) avec Testing Library ; aujourd'hui seuls le main et le moteur sont testés.
-- [ ] (+) Lint et `typecheck` dans le workflow CI avant le build des installeurs.
+- [x] (+) Lint et `typecheck` dans le workflow CI avant le build des installeurs. — fait : job `verify` de `ci.yml`.
 - [ ] (+) Découper `launcher-ipc` / `instance-ipc` par domaine et typer les canaux IPC de bout en bout (un seul fichier de contrat dans `shared/types/ipc.d.ts`).
 - [ ] (+) Remplacer `axios` + `progress-stream` + `stream-throttle` par un seul client (`got` / `fetch`), cf. item http2.
 - [ ] (+) Renommer `windows/launcher/component` en `components` (cohérence) et ranger les CSS à côté de leur composant.
 - [ ] (++) Tests de bout en bout du launcher (Playwright + Electron) sur le backend de dev : installation complète, mise à jour, réparation.
 
 ### Sécurité
-- [ ] (+) Fenêtres Electron : vérifier `contextIsolation`, `sandbox`, CSP stricte, et limiter `openLink` aux domaines connus.
-- [ ] (+) Limiter la taille et la profondeur des archives extraites (protection contre les zip-bombs) en plus du confinement des chemins.
+- [ ] (+) Fenêtres Electron : `contextIsolation` et `nodeIntegration: false` sont déjà en place ; reste `sandbox`, CSP stricte. `openLink` est validé (`lib/safe-link.ts` : http, https, steam, sans identifiants).
+- [x] (+) Limiter la taille et la profondeur des archives extraites (protection contre les zip-bombs) en plus du confinement des chemins. — fait : `lib/archive-limits.ts` (fichiers et taille décompressée vérifiés avant extraction).
 - [ ] (+) `yarn audit` / Dependabot sur les dépendances du launcher.

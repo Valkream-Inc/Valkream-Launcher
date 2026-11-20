@@ -3,7 +3,7 @@
  * @license MIT-NC
  *
  * `hash_url` : l'entrée est un manifeste `{ fichier: sha256 }`. Seuls les fichiers
- * absents ou différents sont récupérés ; chacun est vérifié avant d'être mis en place.
+ * absents ou différents sont récupérés ; chacun est vérifié avant d'être mis en place (4 téléchargements en parallèle).
  * `zip` (optionnel) : archive de tous les fichiers. Quand plus de la moitié des fichiers
  * est à récupérer (installation complète), elle est téléchargée en une fois ; les fichiers
  * absents de l'archive ou au mauvais hash sont repris un par un via `hash-folder`.
@@ -15,10 +15,14 @@ import fs from "fs";
 import path from "path";
 
 import { hashFile, manifestHash, type Manifest } from "../manifest";
+import { runPool } from "../../../lib/concurrency";
 import { resolveInside } from "../../../lib/paths";
 import { matchesAny, normalizeRelative } from "../../../lib/patterns";
 import { shouldWriteFile } from "../preserve";
 import type { Provider, ProviderContext } from "./types";
+
+/** Téléchargements simultanés de fichiers individuels. */
+const DOWNLOAD_CONCURRENCY = 4;
 
 /** Part de fichiers à récupérer au-delà de laquelle on préfère l'archive aux fichiers un par un. */
 const ZIP_MIN_RATIO = 0.5;
@@ -100,19 +104,20 @@ export const hashProvider: Provider = async (context) => {
   }
 
   let done = wanted.length - toFetch.length;
-  for (const [file, expected] of toFetch) {
-    done++;
-    const partial = path.join(tempDir, `${name}.part`);
+  await runPool(toFetch, DOWNLOAD_CONCURRENCY, async ([file, expected], index) => {
+    const partial = path.join(tempDir, `${name}.${index}.part`);
 
     const fromZip = unzipped ? path.join(unzipped, file) : undefined;
     if (fromZip && fs.existsSync(fromZip) && (await hashFile(fromZip)) === expected) {
       install(file, fromZip, expected);
-      continue;
+      done++;
+      return;
     }
 
-    context.report("download", `${name} : ${file} (${done}/${wanted.length})`);
+    const label = () => `${name} : ${file} (${done + 1}/${wanted.length})`;
+    context.report("download", label());
     await io.download(resolver.urlOf(baseUrl + encodePath(file)), partial, signal, (transfer) =>
-      context.report("download", `${name} : ${file} (${done}/${wanted.length})`, transfer),
+      context.report("download", label(), transfer),
     );
 
     context.report("verify", `${name} : vérification de ${file}`);
@@ -121,7 +126,8 @@ export const hashProvider: Provider = async (context) => {
       throw new Error(`${name} : hash invalide pour ${file}`);
     }
     install(file, partial, expected);
-  }
+    done++;
+  });
 
   if (unzipped) fs.rmSync(unzipped, { recursive: true, force: true });
   return { hash: computed };

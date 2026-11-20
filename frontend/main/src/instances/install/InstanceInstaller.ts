@@ -24,6 +24,7 @@ import { buildRow, TIERS, type InstanceInspector } from "../local/InstanceInspec
 import { readInstallState, readInstanceSettings, recordInstalledEntry, removeInstalledEntry } from "./install-store";
 import { removeWithPlan } from "./fs-ops";
 import { HashCache } from "./hash-cache";
+import { appendInstallLog } from "./install-log";
 import type { ParamResolver } from "../remote/ParamResolver";
 import { hashProvider } from "./providers/hash";
 import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore";
@@ -130,8 +131,14 @@ export class InstanceInstaller {
         }
       }
 
-      const emit = (progress: Omit<InstanceSyncProgress, "id" | "channel">) =>
+      const emit = (progress: Omit<InstanceSyncProgress, "id" | "channel">) => {
+        // Journal : début / fin / erreur de chaque entrée (pas la progression des téléchargements).
+        if (progress.step === "start" || progress.step === "done" || progress.step === "error") {
+          appendInstallLog(installDir, `[${channel}] ${progress.entry} ${progress.step}${progress.message ? ` : ${progress.message}` : ""}`);
+        }
         onProgress?.({ id, channel, ...progress });
+      };
+      appendInstallLog(installDir, `[${channel}] synchronisation${repair ? " (réparation)" : ""} : ${todo.length} entrée(s)`);
 
       let index = 0;
       for (const item of todo) {
