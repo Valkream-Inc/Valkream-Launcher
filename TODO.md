@@ -15,3 +15,47 @@
 - [ ] (++) mettre http2 en place (got plutot que axios)
 - [x] (fait) hash à l'installation, reprise par entrée, vérification via hash, cache `instance.hashes.json`
 - [x] (fait) doc : README racine, frontend, backend, doc/instance-system
+
+## Propositions d'amélioration
+
+Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
+
+### Moteur d'installation
+- [ ] (++) Provider Nexus (`nexus_url`) : aujourd'hui une entrée Nexus est un échec explicite.
+- [ ] (++) Dépendances Thunderstore transitives (résoudre et installer les dépendances d'un mod).
+- [ ] (++) Script `build-manifest --zip` : générer aussi l'archive `zip` d'une entrée `hash_url`.
+- [ ] (++) Téléchargements parallèles (limités à 3-4) pour le provider `hash_url` + reprise d'un téléchargement interrompu (HTTP Range).
+- [ ] (++) Installation atomique : extraire dans un dossier temporaire puis basculer, pour ne jamais laisser un jeu à moitié mis à jour.
+- [ ] (+) Annulation propre d'une installation en cours depuis l'interface (le `signal` existe déjà côté moteur).
+- [ ] (+) Vérifier l'espace disque disponible avant une installation.
+- [ ] (+++) Mise à jour différentielle des gros fichiers (bsdiff / zstd) pour les mises à jour de jeu.
+
+### Backend / publication
+- [ ] (++) Script de publication : copie des fichiers, calcul des hash, mise à jour du `latest.yml` et de la version `X0.X1.X2` en une commande.
+- [ ] (++) Test CI qui valide `backend/public` (déjà couvert par `backend-files.test.ts` : l'exécuter dans le workflow GitHub à chaque push).
+- [ ] (+) Signature des manifestes (ou des `latest.yml`) pour ne pas dépendre uniquement de HTTPS.
+- [ ] (+) Versionner les anciens `latest.yml` pour pouvoir revenir en arrière (rollback d'une version).
+- [ ] (++) Dockerfile du backend + en-têtes de cache (ETag, `Cache-Control`) adaptés aux gros fichiers.
+
+### Launcher / UX
+- [ ] (++) Page Mods plus riche : recherche, filtres par catégorie, version installée vs disponible.
+- [ ] (++) Onglet Debug : export du rapport (JSON) pour le support, bouton « copier les erreurs ».
+- [ ] (+) Journal d'installation consultable (fichier de log par instance et par canal).
+- [ ] (+) Gestion de plusieurs instances du même jeu côté interface (choix, duplication, suppression avec taille occupée).
+- [ ] (++) Accessibilité : navigation clavier, contraste des thèmes, réduction des animations (`prefers-reduced-motion`).
+- [ ] (+) Internationalisation (fr/en) : textes aujourd'hui en dur dans la config render et les composants.
+- [ ] (++) Mode hors ligne explicite : bandeau « dernière version connue » quand seul le cache disque répond.
+
+### Code et qualité
+- [ ] (++) Migration des CSS des thèmes vers MUI, thème par thème (modern → old → futuristic) avec contrôle visuel.
+- [ ] (++) Tests du renderer (contexts, `InstanceSettings`, `InstanceButton`) avec Testing Library ; aujourd'hui seuls le main et le moteur sont testés.
+- [ ] (+) Lint et `typecheck` dans le workflow CI avant le build des installeurs.
+- [ ] (+) Découper `launcher-ipc` / `instance-ipc` par domaine et typer les canaux IPC de bout en bout (un seul fichier de contrat dans `shared/types/ipc.d.ts`).
+- [ ] (+) Remplacer `axios` + `progress-stream` + `stream-throttle` par un seul client (`got` / `fetch`), cf. item http2.
+- [ ] (+) Renommer `windows/launcher/component` en `components` (cohérence) et ranger les CSS à côté de leur composant.
+- [ ] (++) Tests de bout en bout du launcher (Playwright + Electron) sur le backend de dev : installation complète, mise à jour, réparation.
+
+### Sécurité
+- [ ] (+) Fenêtres Electron : vérifier `contextIsolation`, `sandbox`, CSP stricte, et limiter `openLink` aux domaines connus.
+- [ ] (+) Limiter la taille et la profondeur des archives extraites (protection contre les zip-bombs) en plus du confinement des chemins.
+- [ ] (+) `yarn audit` / Dependabot sur les dépendances du launcher.
