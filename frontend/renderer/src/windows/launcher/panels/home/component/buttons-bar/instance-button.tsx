@@ -7,7 +7,7 @@
  */
 
 import { enqueueSnackbar } from "notistack";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { Button, ButtonBase, Stack } from "@mui/material";
@@ -20,6 +20,14 @@ import { useBackground } from "../../../../context/background.context";
 import { useGames } from "../../../../context/games.context";
 import { useInfos } from "../../../../context/infos.context";
 import type { InstanceButtonAction } from "./instance-button.types";
+
+/** 75 s → "1:15", 3725 s → "1:02:05". */
+const formatElapsed = (ms: number): string => {
+  const total = Math.floor(ms / 1000);
+  const [h, m, sec] = [Math.floor(total / 3600), Math.floor((total % 3600) / 60), total % 60];
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
+};
 
 const LOADING_ACTION: InstanceButtonAction = {
   text: "Loading...",
@@ -37,20 +45,32 @@ export default function InstanceButton() {
   const [action, setAction] = useState<InstanceButtonAction>(LOADING_ACTION);
   const [syncing, setSyncing] = useState(false);
 
-  const callback = (text: string, progress?: InstanceSyncProgress) => {
+  // Dernier état de progression + horloge locale : le temps écoulé avance chaque seconde,
+  // même quand aucune progression n'arrive (extraction, vérification…).
+  const syncStartedAt = useRef(0);
+  const lastProgress = useRef<{ text: string; progress?: InstanceSyncProgress }>({ text: "" });
+
+  const render = () => {
+    const { text, progress } = lastProgress.current;
     const transfer = progress?.transfer;
     const existProgress =
       transfer?.processedBytes &&
       transfer?.totalBytes &&
       transfer?.percent &&
       transfer?.speed;
+    const elapsed = `⏱ ${formatElapsed(Date.now() - syncStartedAt.current)}`;
     setAction({
       text: existProgress
-        ? `${text}\n ${transfer.percent}% (${transfer.processedBytes}/${transfer.totalBytes}) à ${transfer.speed}/s`
-        : `${text}`,
+        ? `${text}\n ${transfer.percent}% (${transfer.processedBytes}/${transfer.totalBytes}) à ${transfer.speed}/s · ${elapsed}`
+        : `${text}\n ${elapsed}`,
       playIcon: false,
       onClick: () => {},
     });
+  };
+
+  const callback = (text: string, progress?: InstanceSyncProgress) => {
+    lastProgress.current = { text, progress };
+    render();
   };
 
   const error = (actionName: string, err: unknown) => {
@@ -64,8 +84,13 @@ export default function InstanceButton() {
   const sync = async (actionName: string, doneText: string) => {
     const cleanup = () => window.electron_API.removeInstanceProgressListeners();
 
+    let clock: ReturnType<typeof setInterval> | undefined;
     try {
       setSyncing(true);
+      syncStartedAt.current = Date.now();
+      lastProgress.current = { text: actionName };
+      render();
+      clock = setInterval(render, 1000);
       window.electron_API.onInstanceProgress((progress) => {
         if (
           progress.id !== actualInstanceId ||
@@ -94,6 +119,7 @@ export default function InstanceButton() {
     } catch (err) {
       error(actionName, err);
     } finally {
+      clearInterval(clock);
       cleanup();
       setSyncing(false);
     }

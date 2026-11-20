@@ -12,10 +12,11 @@ import unzipper from "unzipper";
 
 import { assertArchiveWithinLimits } from "../../lib/archive-limits";
 import { downloadFile } from "../../lib/download-file";
-import { formatBytes } from "../../lib/format-bytes";
 import { isPathInside } from "../../lib/paths";
 import { normalizeRelative } from "../../lib/patterns";
 import type { InstallIO } from "./providers/types";
+import { progressOf } from "./progress";
+import { streamExtractTarGz } from "./stream-extract";
 
 export const realInstallIO: InstallIO = {
   async download(url, destination, signal, onProgress) {
@@ -35,11 +36,15 @@ export const realInstallIO: InstallIO = {
     );
   },
 
-  async extract(zipPath, outDir, { folderInZip, accept }) {
+  async extract(zipPath, outDir, { folderInZip, accept, onProgress }) {
     const root = path.resolve(outDir);
     const prefix = folderInZip ? normalizeRelative(folderInZip) : "";
     const directory = await unzipper.Open.file(zipPath);
-    assertArchiveWithinLimits(directory.files.filter((file) => file.type !== "Directory"));
+    const archived = directory.files.filter((file) => file.type !== "Directory");
+    assertArchiveWithinLimits(archived);
+    const totalBytes = archived.reduce((sum, file) => sum + file.uncompressedSize, 0);
+    const startedAt = Date.now();
+    let extracted = 0;
 
     for (const file of directory.files) {
       if (file.type === "Directory") continue;
@@ -63,10 +68,16 @@ export const realInstallIO: InstallIO = {
         file
           .stream()
           .on("error", reject)
+          .on("data", (chunk: Buffer) => {
+            extracted += chunk.length;
+            onProgress?.(progressOf(extracted, totalBytes, startedAt));
+          })
           .pipe(fs.createWriteStream(fullPath))
           .on("finish", resolve)
           .on("error", reject);
       });
     }
   },
+
+  streamExtract: streamExtractTarGz,
 };

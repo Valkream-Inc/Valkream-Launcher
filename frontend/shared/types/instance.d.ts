@@ -321,6 +321,8 @@ export interface InstanceSyncProgress {
   total: number;
   step: "start" | "download" | "extract" | "verify" | "done" | "error";
   message?: string;
+  /** Temps écoulé depuis le début de la synchronisation (ms). */
+  elapsedMs: number;
   /** Progression du fichier en cours de téléchargement (valeurs formatées, ex : "12.3 Mo"). */
   transfer?: Pick<ProgressData, "processedBytes" | "totalBytes" | "percent" | "speed">;
 }
@@ -359,3 +361,22 @@ export interface InstanceStatus {
 
 /** Infos serveur / événement / maintenance d'une instance (`instances:infos`). */
 export interface InstanceInfos extends CheckInfosResult {}
+
+/* ------------------------------------------------------------------ */
+/* Outils admin                                                       */
+/* ------------------------------------------------------------------ */
+
+export interface ToolsHashSummary {
+  folder: string;
+  /** Hash d'entrée (`hash` du latest.yml). */
+  hash: string;
+  fileCount: number;
+  totalBytes: number;
+  /** `hash.json` : `{ "chemin/relatif": sha256 }`. */
+  manifest: Record<string, string>;
+}
+
+export interface ModsListResult {
+  mods: ModDisplay[];
+  failed: { id: string; error: string }[];
+}

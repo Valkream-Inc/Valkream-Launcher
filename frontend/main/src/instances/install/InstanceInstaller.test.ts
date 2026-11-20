@@ -57,6 +57,9 @@ const makeWorld = (remote: Record<string, unknown>, files: Record<string, string
         fs.writeFileSync(path.join(outDir, relative), content);
       }
     },
+    streamExtract: async () => {
+      throw new Error("flux non simulé");
+    },
   };
   return { resolver, io, downloads };
 };
@@ -122,6 +125,26 @@ describe("InstanceInstaller", () => {
     assert.equal(fs.existsSync(path.join(dir("stable"), "game/logs/run.log")), false); // to_ignore : jamais téléchargé
     assert.equal(fs.existsSync(path.join(dir("stable"), ".tmp")), false);
     assert.equal(readInstallState(dir("stable")).entries.base.version, "1.0.0");
+  });
+
+  it("progression limitée dans le temps, avec temps écoulé", async () => {
+    const world = makeWorld(baseRemote(), files);
+    const original = world.io.download;
+    // Un téléchargement très bavard : 300 événements d'affilée
+    world.io.download = async (url, destination, signal, onProgress) => {
+      for (let i = 1; i <= 300; i++) {
+        onProgress?.({ processedBytes: `${i}`, totalBytes: "300", percent: Math.min(99, i % 100), speed: "1" });
+      }
+      return original(url, destination, signal, onProgress);
+    };
+    const inspector = new InstanceInspector({ configs: [config], resolver: world.resolver, platform: "win32", rootPath: () => root });
+    const installer = new InstanceInstaller({ inspector, resolver: world.resolver, platform: "win32", io: world.io });
+    const events: { step: string; elapsedMs: number }[] = [];
+    await installer.sync("g", "stable", { onProgress: (progress) => events.push(progress) });
+
+    assert.ok(events.filter((event) => event.step === "download").length < 20, "progression non limitée");
+    assert.ok(events.some((event) => event.step === "start") && events.some((event) => event.step === "done"));
+    assert.ok(events.every((event) => event.elapsedMs >= 0));
   });
 
   it("deuxième passage : rien à faire, aucun téléchargement", async () => {

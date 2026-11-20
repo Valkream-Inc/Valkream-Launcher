@@ -17,10 +17,9 @@
  */
 
 import fs from "node:fs";
-import path from "node:path";
 
 import { setEntryHash } from "./update-latest";
-import { manifestHash, scanManifest } from "../main/src/instances/install/manifest";
+import { exportHashFolder } from "../main/src/instances/tools/hash-folder";
 
 const main = async (): Promise<void> => {
   const args = process.argv.slice(2);
@@ -45,20 +44,8 @@ const main = async (): Promise<void> => {
     process.exit(1);
   }
 
-  const manifest = await scanManifest(source, ignore);
-  const files = Object.keys(manifest);
-
-  fs.rmSync(path.join(output, "hash"), { recursive: true, force: true });
-  for (const file of files) {
-    const destination = path.join(output, "hash", file);
-    fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.copyFileSync(path.join(source, file), destination);
-  }
-  fs.mkdirSync(output, { recursive: true });
-  fs.writeFileSync(path.join(output, "hash.json"), JSON.stringify(manifest, null, 2));
-
-  const hash = manifestHash(manifest, ignore);
-  console.log(`${files.length} fichier(s) → ${output}`);
+  const { hash, fileCount } = await exportHashFolder(source, output, ignore);
+  console.log(`${fileCount} fichier(s) → ${output}`);
 
   if (latest && entry) {
     fs.writeFileSync(latest, setEntryHash(fs.readFileSync(latest, "utf8"), entry, hash));

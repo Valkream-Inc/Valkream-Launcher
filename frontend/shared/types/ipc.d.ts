@@ -17,6 +17,8 @@ import type {
   InstanceSummary,
   InstanceSyncProgress,
   InstanceSyncResult,
+  ModsListResult,
+  ToolsHashSummary,
 } from "./instance";
 import type { SettingKey, Settings } from "./settings";
 
@@ -57,6 +59,15 @@ export interface ElectronAPI {
     channel: Channel,
     options?: { repair?: boolean }
   ): Promise<InstanceSyncResult>;
+  // outils admin (onglet Tools) : les dossiers sont choisis par boîte de dialogue côté main
+  /** Choisit un dossier puis le hashe (même algorithme que le launcher). `null` si annulé. */
+  toolsHashFolder(ignore: string[]): Promise<ToolsHashSummary | null>;
+  /** Écrit `hash.json` + `hash/` du dernier dossier hashé dans un dossier choisi. `null` si annulé. */
+  toolsExportHash(ignore: string[]): Promise<{ output: string } | null>;
+  /** Liste `Auteur-Nom-Version` (texte, JSON ou lien) → mods avec image, description et lien. */
+  toolsModsList(source: string, apiUrl?: string): Promise<ModsListResult>;
+  /** Enregistre un texte via « Enregistrer sous ». Retourne le chemin, `null` si annulé. */
+  toolsSaveText(defaultName: string, text: string): Promise<string | null>;
   /** Journal d'installation du canal (texte). */
   getInstanceLog(id: InstanceId, channel: Channel): Promise<string>;
   /** Annule la synchronisation en cours de ce canal (sans effet s'il n'y en a pas). */

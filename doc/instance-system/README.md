@@ -138,3 +138,10 @@ Le test `instances/remote/backend-files.test.ts` recoupe la config main et `back
 
 - Un seul client HTTP : `fetch` natif (`main/src/lib/http.ts`, `lib/download-file.ts`). Le téléchargeur reprend (Range / If-Range), coupe un flux muet après 30 s d'inactivité puis reprend, et n'insiste pas sur une 4xx.
 - `ipc/sync-registry.ts` : une synchro par installation ; relancer une installation bloquée ou plantée annule l'ancienne et repart aussitôt (les partiels sont repris). Tout est coupé à la fermeture ou sur erreur non gérée.
+- **Archives `.tar.gz` / `.tgz`** (`content` d'un `zip_url`, ou `zip` d'un `hash_url`) : téléchargement, gunzip et extraction se font en un seul flux (`install/stream-extract.ts`, `lib/tar-extract.ts`), sans archive sur le disque ; `folder_in_zip`, conservation/exclusions, limites et protection contre les chemins hors destination s'appliquent comme pour un zip. Pas de reprise HTTP : une coupure relance l'extraction (3 tentatives). Les `.zip` gardent téléchargement avec reprise, puis extraction avec progression.
+- **Progression** : événements limités à 4 par seconde (`PROGRESS_INTERVAL_MS`), champ `elapsedMs` ; le bouton de l'accueil affiche un chronomètre ⏱ (horloge locale, mise à jour chaque seconde) en plus du pourcentage.
+
+## Onglet Tools (admin)
+
+- **Hash d'un dossier** : choix du dossier par dialogue, motifs `to_ignore` optionnels → `hash` du latest.yml, `hash.json` (copier / enregistrer), export `hash.json` + `hash/` prêt pour le backend. Même algorithme que `scripts/build-manifest.ts` (`instances/tools/hash-folder.ts`).
+- **Liste de mods depuis un manifest** : dépendances Thunderstore (une par ligne, tableau JSON ou lien) → `ModDisplay[]` avec image, description et lien (API Thunderstore), aperçu, copie / enregistrement pour `mods.config.json` (`instances/tools/mods-list.ts`).

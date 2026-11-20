@@ -19,6 +19,7 @@ import { isSafeExternalUrl } from "../lib/safe-link";
 import * as MainWindow from "../windows/mainWindow";
 import * as UpdateWindow from "../windows/updateWindow";
 
+import registerAdminToolsIpc from "./admin-tools-ipc";
 import InstanceIpcHandlers from "./instance-ipc";
 
 // Fenêtre principale (supposée ouverte quand les handlers sont appelés)
@@ -52,6 +53,7 @@ class IpcHandlers {
   init(): void {
     // jeux : un seul canal IPC pour toutes les instances
     InstanceIpcHandlers();
+    registerAdminToolsIpc();
 
     // update  windows
     ipcMain.on("update-window-close", () => UpdateWindow.destroyWindow());

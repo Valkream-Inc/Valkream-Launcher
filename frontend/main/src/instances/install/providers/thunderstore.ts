@@ -79,7 +79,10 @@ export const thunderstoreProvider: Provider = async (context) => {
 
     const staged = path.join(stage, mod.folder);
     context.report("extract", `Extraction de ${mod.folder}`);
-    await io.extract(zipPath, staged, { accept: () => true });
+    await io.extract(zipPath, staged, {
+      accept: () => true,
+      onProgress: (transfer) => context.report("extract", `Extraction de ${mod.folder}`, transfer),
+    });
     fs.rmSync(zipPath, { force: true });
 
     if (entry.dependencies) {

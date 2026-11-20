@@ -46,6 +46,11 @@ const electronAPI: ElectronAPI = {
     ipcRenderer.invoke("instances:report", id, channel, options),
   syncInstance: (id, channel, options) =>
     ipcRenderer.invoke("instances:sync", id, channel, options),
+  // outils admin
+  toolsHashFolder: (ignore) => ipcRenderer.invoke("tools:hash-folder", ignore),
+  toolsExportHash: (ignore) => ipcRenderer.invoke("tools:export-hash", ignore),
+  toolsModsList: (source, apiUrl) => ipcRenderer.invoke("tools:mods-list", source, apiUrl),
+  toolsSaveText: (defaultName, text) => ipcRenderer.invoke("tools:save-text", defaultName, text),
   getInstanceLog: (id, channel) => ipcRenderer.invoke("instances:log", id, channel),
   cancelInstanceSync: (id, channel) => ipcRenderer.invoke("instances:cancel", id, channel),
   launchInstance: (id, channel) => ipcRenderer.invoke("instances:launch", id, channel),

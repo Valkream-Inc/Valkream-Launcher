@@ -31,7 +31,24 @@ export interface InstallIO {
   extract(
     zipPath: string,
     outDir: string,
+    options: {
+      folderInZip?: string;
+      accept: (relativePath: string) => boolean;
+      /** Progression de l'extraction (octets décompressés). */
+      onProgress?: (progress: TransferProgress) => void;
+    },
+  ): Promise<void>;
+  /**
+   * Installation en flux d'une archive `.tar.gz` : décompression et écriture PENDANT le
+   * téléchargement, sans archive intermédiaire sur le disque. Pas de reprise : en cas de
+   * coupure réseau, l'extraction recommence depuis le début. La progression suit les octets reçus.
+   */
+  streamExtract(
+    url: string,
+    outDir: string,
     options: { folderInZip?: string; accept: (relativePath: string) => boolean },
+    signal?: AbortSignal,
+    onProgress?: (progress: TransferProgress) => void,
   ): Promise<void>;
 }
 

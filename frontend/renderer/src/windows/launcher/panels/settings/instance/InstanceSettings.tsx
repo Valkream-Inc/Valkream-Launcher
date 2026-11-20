@@ -4,7 +4,7 @@
  *
  * Panneau de réglages générique d'une instance (remplace un panneau par jeu) :
  * General, Launcher, Game (réglages décrits par la config render), Mods (affichage
- * joueur), Dev (outils admin) et Debug (diagnostic admin : un tableau par sous-chemin).
+ * joueur), Dev (outils du jeu), Tools (préparation du remote) et Debug (diagnostic admin : un tableau par sous-chemin).
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -36,6 +36,7 @@ import Instance_ToggleLaunchSteam from "../settings-list/instance/instance-toggl
 import type { GameSettingsProps } from "../settings.types";
 import InstanceDebugTab from "./InstanceDebugTab";
 import InstanceModsTab from "./InstanceModsTab";
+import InstanceToolsTab from "./InstanceToolsTab";
 import { useInstanceReport } from "./use-instance-report";
 
 interface Props extends GameSettingsProps {
@@ -73,7 +74,7 @@ export default function InstanceSettings({
 
   // Pendant une action (installation…), on ne reste pas sur les onglets qui modifient le jeu
   useEffect(() => {
-    if (actionLoading && ["mods", "dev", "debug"].includes(activeTab)) changeTab("general");
+    if (actionLoading && ["mods", "dev", "tools", "debug"].includes(activeTab)) changeTab("general");
   }, [actionLoading]);
 
   if (!renderConfig) {
@@ -104,6 +105,7 @@ export default function InstanceSettings({
         <NavButton id="game" label="Game" active={false} />
         {!actionLoading && <NavButton id="mods" label="Mods" active={false} />}
         {isAdmin && <NavButton id="dev" label="Dev" active={false} />}
+        {isAdmin && <NavButton id="tools" label="Tools" active={false} />}
         {isAdmin && <NavButton id="debug" label="Debug" active={false} />}
       </NavSettings>
 
@@ -171,6 +173,13 @@ export default function InstanceSettings({
           <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>
           <ButtonDebug />
           {!actionLoading && isSpecialOptionVisible && <ToggleBeta />}
+        </SettingsTab>
+      )}
+
+      {/* Tools : outils de préparation du remote (hash de dossier, liste de mods) */}
+      {isAdmin && (
+        <SettingsTab id="tools" activeTab={activeTab}>
+          <InstanceToolsTab />
         </SettingsTab>
       )}
 

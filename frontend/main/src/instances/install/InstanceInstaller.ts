@@ -91,6 +91,9 @@ const cleanTempDir = (tempDir: string): void => {
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+/** Intervalle minimal entre deux événements de progression envoyés à l'interface. */
+const PROGRESS_INTERVAL_MS = 250;
+
 export class InstanceInstaller {
   /** Une seule synchronisation à la fois par installation. */
   private readonly running = new Set<string>();
@@ -169,12 +172,22 @@ export class InstanceInstaller {
         }
       }
 
-      const emit = (progress: Omit<InstanceSyncProgress, "id" | "channel">) => {
+      // Progression : au plus une mise à jour toutes les PROGRESS_INTERVAL_MS (le renderer ne suit pas
+      // des dizaines d'événements par seconde) ; début / fin / erreur / 100 % passent toujours.
+      const startedAt = Date.now();
+      let lastProgress = 0;
+      const emit = (progress: Omit<InstanceSyncProgress, "id" | "channel" | "elapsedMs">) => {
+        const now = Date.now();
+        const frequent = !["start", "done", "error"].includes(progress.step) && progress.transfer?.percent !== 100;
+        if (frequent) {
+          if (now - lastProgress < PROGRESS_INTERVAL_MS) return;
+          lastProgress = now;
+        }
         // Journal : début / fin / erreur de chaque entrée (pas la progression des téléchargements).
         if (progress.step === "start" || progress.step === "done" || progress.step === "error") {
           appendInstallLog(installDir, `[${channel}] ${progress.entry} ${progress.step}${progress.message ? ` : ${progress.message}` : ""}`);
         }
-        onProgress?.({ id, channel, ...progress });
+        onProgress?.({ id, channel, elapsedMs: now - startedAt, ...progress });
       };
       appendInstallLog(installDir, `[${channel}] synchronisation${repair ? " (réparation)" : ""} : ${todo.length} entrée(s)`);
 

@@ -24,6 +24,7 @@ import { resolveInside } from "../../../lib/paths";
 import { matchesAny, normalizeRelative } from "../../../lib/patterns";
 import { shouldWriteFile } from "../preserve";
 import { commitStaged, stageFile } from "../staging";
+import { fetchArchive } from "./archive";
 import type { Provider, ProviderContext } from "./types";
 
 /** Téléchargements simultanés de fichiers individuels. */
@@ -35,28 +36,14 @@ const ZIP_MIN_RATIO = 0.5;
 const encodePath = (relative: string): string =>
   relative.split("/").map(encodeURIComponent).join("/");
 
-/** Télécharge l'archive et en extrait seulement `files` ; retourne le dossier d'extraction. */
+/** Récupère l'archive (zip ou tar.gz) et en extrait seulement `files` ; retourne le dossier d'extraction. */
 const extractFromZip = async (
   context: ProviderContext,
   zipUrl: string,
   files: ReadonlySet<string>,
 ): Promise<string> => {
-  const { entry, tempDir, resolver, io, name, signal } = context;
-  const zipPath = path.join(tempDir, `${name}.zip`);
-  const extractDir = path.join(tempDir, `${name}.unzipped`);
-
-  context.report("download", `${name} : archive`);
-  await io.download(resolver.urlOf(zipUrl), zipPath, signal, (transfer) =>
-    context.report("download", `${name} : archive`, transfer),
-  );
-
-  context.report("extract", `${name} : extraction`);
-  fs.mkdirSync(extractDir, { recursive: true });
-  await io.extract(zipPath, extractDir, {
-    folderInZip: entry.folder_in_zip,
-    accept: (relative) => files.has(relative),
-  });
-  fs.rmSync(zipPath, { force: true });
+  const extractDir = path.join(context.tempDir, `${context.name}.unzipped`);
+  await fetchArchive(context, zipUrl, extractDir, (relative) => files.has(relative), `${context.name} : archive`);
   return extractDir;
 };
 
