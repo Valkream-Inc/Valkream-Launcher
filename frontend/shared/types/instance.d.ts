@@ -356,6 +356,14 @@ export interface SteamSourceIssue {
   depotAvailable: boolean;
 }
 
+export interface DepotInfo {
+  /** Version épinglée de DepotDownloader (vide : non configuré). */
+  version: string;
+  toolsDir: string;
+  downloadDir: string;
+  sourceUrl: string;
+}
+
 export interface DepotOutput {
   id: InstanceId;
   channel: Channel;

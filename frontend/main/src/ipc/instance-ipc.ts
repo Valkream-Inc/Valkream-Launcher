@@ -30,7 +30,7 @@ import LauncherManager from "../core/launcher";
 import { ensureSteamRunning, isSteamRunning } from "../instances/local/steam";
 import { cancelSync, runSync } from "./sync-registry";
 import { clearGameSourceDir, writeGameSourceDir } from "../instances/install/game-source";
-import { DEPOT_DOWNLOADER_ASSETS } from "../instances/install/depot-config";
+import { DEPOT_DOWNLOADER_ASSETS, DEPOT_DOWNLOADER_VERSION } from "../instances/install/depot-config";
 import { depotAssetFor, ensureDepotDownloader } from "../instances/install/depot-tool";
 import { depotOsOf, downloadWithDepot } from "../instances/install/depot-download";
 import { realDepotRunner } from "../instances/install/depot-runner";
@@ -219,6 +219,17 @@ const InstanceIpcHandlers = (): void => {
       writeGameSourceDir(locations.installDir, dir);
       return dir;
     });
+  });
+
+  // Écran d'information affiché avant la première utilisation de DepotDownloader.
+  ipcMain.handle("instances:depot-info", (_event, id: string, channel: Channel) => {
+    const { locations } = resolve(id, channel);
+    return {
+      version: DEPOT_DOWNLOADER_VERSION,
+      toolsDir: path.join(DirsManager.rootPath(), "tools", "depotdownloader"),
+      downloadDir: path.join(locations.installDir, ".depot"),
+      sourceUrl: "https://github.com/SteamRE/DepotDownloader",
+    };
   });
 
   ipcMain.handle("instances:depot-cancel", (_event, id: string, channel: Channel) => {

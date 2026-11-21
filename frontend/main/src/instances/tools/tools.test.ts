@@ -10,7 +10,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
 import { manifestHash } from "../install/manifest";
-import { exportHashFolder, hashFolder } from "./hash-folder";
+import { exportHashFolder, exportManifestOnly, hashFolder } from "./hash-folder";
 import { buildModsDisplay, parseModList } from "./mods-list";
 
 let dir: string;
@@ -38,6 +38,13 @@ describe("hashFolder / exportHashFolder", () => {
     assert.ok(fs.existsSync(path.join(out, "hash", "sub", "b.txt")));
     assert.ok(!fs.existsSync(path.join(out, "hash", "local.cfg")));
     assert.deepEqual(Object.keys(JSON.parse(fs.readFileSync(path.join(out, "hash.json"), "utf8"))).sort(), ["a.txt", "sub/b.txt"]);
+  });
+
+  it("manifest-only : hash.json seulement, aucun fichier copié (jeu commercial)", async () => {
+    const out = path.join(dir, "out2");
+    const result = await exportManifestOnly(path.join(dir, "src"), out, ["*.cfg"]);
+    assert.deepEqual(fs.readdirSync(out), ["hash.json"]);
+    assert.equal(result.fileCount, 2);
   });
 
   it("dossier absent : erreur claire", async () => {

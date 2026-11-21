@@ -54,3 +54,18 @@ export const exportHashFolder = async (
   fs.writeFileSync(path.join(output, "hash.json"), JSON.stringify(result.manifest, null, 2));
   return result;
 };
+
+/**
+ * Écrit seulement `<sortie>/hash.json` : pour un jeu commercial (`steam_library`), les fichiers ne sont
+ * JAMAIS copiés ni hébergés, seul leur hash est publié.
+ */
+export const exportManifestOnly = async (
+  directory: string,
+  output: string,
+  ignore: readonly string[] = [],
+): Promise<FolderHash> => {
+  const result = await hashFolder(directory, ignore);
+  fs.mkdirSync(output, { recursive: true });
+  fs.writeFileSync(path.join(output, "hash.json"), JSON.stringify(result.manifest, null, 2));
+  return result;
+};

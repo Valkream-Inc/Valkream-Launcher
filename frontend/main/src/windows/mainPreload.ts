@@ -65,6 +65,7 @@ const electronAPI: ElectronAPI = {
   pickInstanceSource: (id, channel) => ipcRenderer.invoke("instances:pick-source", id, channel),
   clearInstanceSource: (id, channel) => ipcRenderer.invoke("instances:clear-source", id, channel),
   depotDownloadInstance: (id, channel) => ipcRenderer.invoke("instances:depot-download", id, channel),
+  getDepotInfo: (id, channel) => ipcRenderer.invoke("instances:depot-info", id, channel),
   cancelDepotDownload: (id, channel) => ipcRenderer.invoke("instances:depot-cancel", id, channel),
   onDepotOutput: (callback) => ipcRenderer.on("instances:depot-output", (_event, data) => callback(data)),
   removeDepotOutputListeners: () => ipcRenderer.removeAllListeners("instances:depot-output"),

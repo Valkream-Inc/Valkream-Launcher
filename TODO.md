@@ -22,7 +22,7 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 
 ### Moteur d'installation
 - [x] (++) Provider `steam_library` : copie du jeu depuis l'installation Steam du joueur (`libraryfolders.vdf`, `appmanifest_<id>.acf`, hash par fichier, `buildid` dans l'erreur). Reste : l'utiliser pour Valheim / 7DtD (manifeste du jeu à générer avec `build:manifest`) et retirer les zips hébergés.
-- [x] (++) Jeu absent / autre version : dialogue à 3 solutions (mode d'emploi Markdown, dossier choisi `instance.source.json`, DepotDownloader par QR code `depot-*.ts`). Reste : renseigner `depot-config.ts` (url + sha256 des releases officielles), écran d'information avant la première utilisation, tester avec le vrai DepotDownloader (format du QR, codes de sortie), rendu Markdown du dialogue à valider visuellement.
+- [x] (++) Jeu absent / autre version : dialogue à 3 solutions (mode d'emploi Markdown, dossier choisi `instance.source.json`, DepotDownloader par QR code `depot-*.ts`). Écran d'information et `yarn depot:pin` faits. Reste : lancer `yarn depot:pin <tag>` (url + sha256), migrer 7DtD / Valheim (`build:manifest --manifest-only`), tester avec le vrai DepotDownloader (format du QR, codes de sortie), rendu Markdown du dialogue à valider visuellement.
 - [ ] (++) Provider Nexus (`nexus_url`) : aujourd'hui une entrée Nexus est un échec explicite.
 - [x] (++) Dépendances Thunderstore transitives (résoudre et installer les dépendances d'un mod). — fait : option `dependencies: { skip }` par entrée (à activer dans les latest.yml si voulu).
 - [ ] (++) Script `build-manifest --zip` / `--tar.gz` : générer aussi l'archive d'une entrée `hash_url` (le launcher sait déjà installer un `.tar.gz` en flux).

@@ -34,6 +34,21 @@ export const depotAssetFor = (assets: Record<string, DepotAsset>, platformKey: s
   return asset;
 };
 
+/**
+ * Mise à jour de l'outil : la version (et son sha256) est épinglée dans `depot-config.ts` et change avec
+ * le launcher. Une nouvelle version est téléchargée et vérifiée automatiquement au premier usage ;
+ * les anciennes versions et archives partielles sont alors supprimées.
+ */
+export const pruneOldVersions = (base: string, keep: string): void => {
+  let names: string[];
+  try {
+    names = fs.readdirSync(base);
+  } catch {
+    return;
+  }
+  for (const name of names) if (name !== keep) fs.rmSync(path.join(base, name), { recursive: true, force: true });
+};
+
 /** Chemin de l'exécutable vérifié ; télécharge et extrait si nécessaire. */
 export const ensureDepotDownloader = async ({
   toolsDir,
@@ -58,7 +73,10 @@ export const ensureDepotDownloader = async ({
 
   // Déjà extrait : l'exécutable doit être celui dont on a mémorisé le hash.
   if (fs.existsSync(exe) && fs.existsSync(marker)) {
-    if ((await hashFile(exe)) === fs.readFileSync(marker, "utf8").trim()) return exe;
+    if ((await hashFile(exe)) === fs.readFileSync(marker, "utf8").trim()) {
+      pruneOldVersions(base, path.basename(outDir));
+      return exe;
+    }
     fs.rmSync(outDir, { recursive: true, force: true });
   }
 
@@ -75,5 +93,6 @@ export const ensureDepotDownloader = async ({
   if (process.platform !== "win32") fs.chmodSync(exe, 0o755);
   fs.writeFileSync(marker, await hashFile(exe));
   fs.rmSync(zipPath, { force: true });
+  pruneOldVersions(base, path.basename(outDir));
   return exe;
 };

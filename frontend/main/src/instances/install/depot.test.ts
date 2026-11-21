@@ -105,10 +105,35 @@ describe("outil épinglé", () => {
     assert.deepEqual(fs.readdirSync(path.join(dir, "depotdownloader")), []);
   });
 
+  it("nouvelle version épinglée : téléchargée, ancienne supprimée", async () => {
+    const first = await ensureDepotDownloader({ toolsDir: dir, platformKey: "linux-x64", assets, io: fakeIo(zip) });
+    const newer = { "linux-x64": { url: "https://x.test/dd2.zip", sha256: sha("ZIP2"), file: "DepotDownloader" } };
+    const second = await ensureDepotDownloader({ toolsDir: dir, platformKey: "linux-x64", assets: newer, io: fakeIo("ZIP2") });
+    assert.notEqual(first, second);
+    assert.ok(!fs.existsSync(first), "l'ancienne version est supprimée");
+    assert.ok(fs.existsSync(second));
+  });
+
   it("exécutable modifié après coup : retéléchargé et revérifié", async () => {
     const exe = await ensureDepotDownloader({ toolsDir: dir, platformKey: "linux-x64", assets, io: fakeIo(zip) });
     fs.writeFileSync(exe, "EVIL");
     const again = await ensureDepotDownloader({ toolsDir: dir, platformKey: "linux-x64", assets, io: fakeIo(zip) });
     assert.equal(fs.readFileSync(again, "utf8"), "EXE");
+  });
+});
+
+import { platformOfAsset, renderDepotConfig } from "./depot-pins";
+
+describe("épinglage d'une release", () => {
+  it("reconnaît les assets par plateforme, ignore le reste", () => {
+    assert.deepEqual(platformOfAsset("DepotDownloader-windows-x64.zip"), { key: "win32-x64", file: "DepotDownloader.exe" });
+    assert.deepEqual(platformOfAsset("DepotDownloader-macos-arm64.zip"), { key: "darwin-arm64", file: "DepotDownloader" });
+    assert.equal(platformOfAsset("source.tar.gz"), undefined);
+  });
+
+  it("le fichier généré contient version et hash fournis", () => {
+    const text = renderDepotConfig("v1", { "linux-x64": { url: "https://x/y.zip", sha256: "a".repeat(64), file: "DepotDownloader" } });
+    assert.match(text, /DEPOT_DOWNLOADER_VERSION = "v1"/);
+    assert.match(text, /"linux-x64": \{"url":"https:\/\/x\/y\.zip","sha256":"a{64}"/);
   });
 });

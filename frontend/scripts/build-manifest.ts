@@ -6,7 +6,9 @@
  * fichiers à servir. Utilise le MÊME algorithme que le launcher (instances/install/manifest).
  *
  *   yarn tsx scripts/build-manifest.ts <dossier-source> <dossier-sortie> [--ignore <motif>]...
- *                                      [--latest <latest.yml> --entry <niveau.nom>]
+ *                                      [--latest <latest.yml> --entry <niveau.nom>] [--manifest-only]
+ *
+ * --manifest-only : écrit seulement hash.json (jeux Steam : on ne copie ni n'héberge les fichiers du jeu).
  *
  * Avec --latest et --entry, le `hash` de l'entrée est écrit directement dans le latest.yml.
  *
@@ -19,7 +21,7 @@
 import fs from "node:fs";
 
 import { setEntryHash } from "./update-latest";
-import { exportHashFolder } from "../main/src/instances/tools/hash-folder";
+import { exportHashFolder, exportManifestOnly } from "../main/src/instances/tools/hash-folder";
 
 const main = async (): Promise<void> => {
   const args = process.argv.slice(2);
@@ -27,10 +29,12 @@ const main = async (): Promise<void> => {
   const positional: string[] = [];
   let latest: string | undefined;
   let entry: string | undefined;
+  let manifestOnly = false;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--ignore") ignore.push(args[++i] ?? "");
     else if (args[i] === "--latest") latest = args[++i];
     else if (args[i] === "--entry") entry = args[++i];
+    else if (args[i] === "--manifest-only") manifestOnly = true;
     else positional.push(args[i]);
   }
 
@@ -44,7 +48,8 @@ const main = async (): Promise<void> => {
     process.exit(1);
   }
 
-  const { hash, fileCount } = await exportHashFolder(source, output, ignore);
+  // --manifest-only : jeu commercial (steam_library), seul le hash.json est écrit, aucun fichier copié
+  const { hash, fileCount } = await (manifestOnly ? exportManifestOnly : exportHashFolder)(source, output, ignore);
   console.log(`${fileCount} fichier(s) → ${output}`);
 
   if (latest && entry) {

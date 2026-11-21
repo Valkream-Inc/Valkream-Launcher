@@ -15,6 +15,7 @@
     "test": "tsx --test \"main/src/**/*.test.ts\" \"renderer/src/**/*.test.ts\" \"scripts/**/*.test.ts\"",
     "typecheck:renderer": "tsc -p renderer/tsconfig.json",
     "typecheck:scripts": "tsc -p tsconfig.json",
+    "depot:pin": "tsx scripts/pin-depotdownloader.ts",
     "build:manifest": "tsx scripts/build-manifest.ts",
     "set-icon": "tsx set-icon.ts",
     "build": "yarn set-icon && yarn build:compile && yarn build:electron",

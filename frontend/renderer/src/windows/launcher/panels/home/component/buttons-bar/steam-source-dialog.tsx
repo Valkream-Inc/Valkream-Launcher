@@ -21,7 +21,7 @@ import {
   LinearProgress,
   Stack,
 } from "@mui/material";
-import type { Channel, InstanceId, SteamSourceIssue } from "@shared/types";
+import type { Channel, DepotInfo, InstanceId, SteamSourceIssue } from "@shared/types";
 
 import SimpleMarkdown from "./simple-markdown";
 
@@ -34,6 +34,16 @@ interface Props {
   onRetry: () => void;
 }
 
+const INFO_KEY = "valkream.depot-info-accepted";
+
+const infoAccepted = (): boolean => {
+  try {
+    return localStorage.getItem(INFO_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
 /** Lignes gardées à l'écran : assez pour le QR code (une trentaine de lignes). */
 const MAX_LINES = 60;
 
@@ -42,6 +52,7 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
   const [lines, setLines] = useState<string[]>([]);
   const [percent, setPercent] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<DepotInfo | null>(null); // écran d'information (première utilisation)
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -60,6 +71,26 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
+  };
+
+  // Première utilisation : écran d'information d'abord (ce qui est exécuté, où, avec quelles garanties).
+  const askDepot = async () => {
+    if (infoAccepted()) return startDepot();
+    try {
+      setInfo(await window.electron_API.getDepotInfo(instanceId, channel));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const acceptInfo = () => {
+    try {
+      localStorage.setItem(INFO_KEY, "1");
+    } catch {
+      /* stockage indisponible : l'écran sera réaffiché */
+    }
+    setInfo(null);
+    void startDepot();
   };
 
   const startDepot = async () => {
@@ -115,7 +146,7 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
           Localiser l'installation
         </Button>
         {issue?.depotAvailable && (
-          <Button onClick={depotRunning ? cancelDepot : startDepot} color={depotRunning ? "error" : "primary"}>
+          <Button onClick={depotRunning ? cancelDepot : askDepot} color={depotRunning ? "error" : "primary"}>
             {depotRunning ? "Annuler le téléchargement" : "Télécharger la bonne version (QR)"}
           </Button>
         )}
@@ -126,6 +157,31 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
           Fermer
         </Button>
       </DialogActions>
+      <Dialog open={info !== null} onClose={() => setInfo(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>À savoir avant d'utiliser DepotDownloader</DialogTitle>
+        <DialogContent dividers>
+          {info && (
+            <SimpleMarkdown
+              source={[
+                "**DepotDownloader** est un outil open source (licence GPL-2.0) qui télécharge une version précise d'un jeu depuis les serveurs de Steam.",
+                `Code source : ${info.sourceUrl}`,
+                "## Ce qui se passe",
+                `1. Le launcher télécharge la version officielle **${info.version || "non configurée"}** de l'outil, vérifie son empreinte sha256 puis le range dans \`${info.toolsDir}\`. S'il est modifié, il est refusé.`,
+                "2. Une fenêtre affiche un **QR code** : scannez-le avec l'application mobile Steam. Votre mot de passe et votre code Steam Guard ne passent jamais par le launcher.",
+                `3. Le jeu est téléchargé dans \`${info.downloadDir}\`, puis chaque fichier est vérifié avant d'être copié dans l'instance. Ce dossier est ensuite supprimé.`,
+                "4. Le jeu doit appartenir à votre compte Steam. Ne partagez jamais les fichiers téléchargés.",
+                "Vous pouvez annuler à tout moment.",
+              ].join("\n")}
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setInfo(null)}>Annuler</Button>
+          <Button onClick={acceptInfo} variant="contained">
+            J'ai compris, continuer
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 }

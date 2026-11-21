@@ -18,6 +18,7 @@ import type {
   InstanceSyncProgress,
   InstanceSyncResult,
   DepotOutput,
+  DepotInfo,
   ModsListResult,
   ToolsHashSummary,
 } from "./instance";
@@ -66,6 +67,8 @@ export interface ElectronAPI {
   clearInstanceSource(id: InstanceId, channel: Channel): Promise<void>;
   /** Solution « DepotDownloader » : télécharge la version exacte (connexion par QR code). Retourne le dossier. */
   depotDownloadInstance(id: InstanceId, channel: Channel): Promise<string>;
+  /** Informations de l'écran affiché avant la première utilisation de DepotDownloader. */
+  getDepotInfo(id: InstanceId, channel: Channel): Promise<DepotInfo>;
   cancelDepotDownload(id: InstanceId, channel: Channel): Promise<void>;
   /** Sortie de DepotDownloader (lignes, dont le QR code) et progression. */
   onDepotOutput(callback: (data: DepotOutput) => void): void;
