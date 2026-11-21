@@ -59,6 +59,8 @@ export const clearGameSourceDir = (installDir: string): void => {
   fs.rmSync(path.join(installDir, SOURCE_FILE), { force: true });
 };
 
+export type GuideLanguage = "fr" | "en";
+
 export interface GuideInput {
   entry: string;
   issue: "missing" | "version";
@@ -70,55 +72,93 @@ export interface GuideInput {
   files?: string[];
   chosenFolder?: boolean;
   depotAvailable: boolean;
+  /** Langue du mode d'emploi (défaut : français). */
+  language?: GuideLanguage;
 }
+
+const TEXT = {
+  fr: {
+    missingTitle: (entry: string) => `## Jeu introuvable pour « ${entry} »`,
+    versionTitle: (entry: string) => `## Version du jeu différente pour « ${entry} »`,
+    missing:
+      "Le launcher n'a pas trouvé le jeu dans votre bibliothèque Steam. Il ne contient pas les fichiers du jeu (propriété de son éditeur) : il copie ceux de **votre** installation.",
+    version: (build: string, files: string) =>
+      `Les fichiers du jeu ne correspondent pas à la version attendue${build}.${files}`,
+    build: (expected: string | number, installed?: string) =>
+      ` (build **${expected}**${installed ? `, installé : **${installed}**` : ""})`,
+    files: (list: string) => ` Par exemple : \`${list}\`.`,
+    chosen: "_Le dossier utilisé est celui que vous avez indiqué._",
+    s1: "### Solution 1 — installer la bonne version dans Steam",
+    openLibrary: "1. Ouvrez Steam → **Bibliothèque**.",
+    install: "2. Installez le jeu (il doit être dans votre compte).",
+    props: "1. Steam → **Bibliothèque** → clic droit sur le jeu → **Propriétés**.",
+    beta: (branch: string) => `2. Onglet **Bêtas** → choisissez la branche **${branch}**.`,
+    betaAny: "2. Onglet **Bêtas** → choisissez la branche qui correspond à la version demandée.",
+    wait: "3. Laissez Steam finir la mise à jour (le jeu doit afficher « À jour »).",
+    back: (n: number) => `${n}. Revenez ici et relancez l'installation.`,
+    page: (id: number) => `Page Steam du jeu : steam://nav/games/details/${id}`,
+    s2: "### Solution 2 — indiquer le dossier d'une installation",
+    s2text:
+      "Si le jeu est installé ailleurs (autre disque, copie, version non Steam…), choisissez son dossier. Seuls les fichiers attendus sont copiés, après vérification : les fichiers en plus (BepInEx, mods, sauvegardes) sont ignorés et jamais modifiés.",
+    s3: "### Solution 3 — télécharger la version exacte (DepotDownloader)",
+    s3text:
+      "Le launcher peut télécharger cette version directement depuis Steam avec l'outil open source DepotDownloader. Vous vous connectez en **scannant un QR code** avec l'application mobile Steam : le launcher ne voit jamais votre mot de passe. Le jeu doit appartenir à votre compte.",
+  },
+  en: {
+    missingTitle: (entry: string) => `## Game not found for “${entry}”`,
+    versionTitle: (entry: string) => `## Different game version for “${entry}”`,
+    missing:
+      "The launcher did not find the game in your Steam library. It does not contain the game files (owned by their publisher): it copies those of **your** installation.",
+    version: (build: string, files: string) => `The game files do not match the expected version${build}.${files}`,
+    build: (expected: string | number, installed?: string) =>
+      ` (build **${expected}**${installed ? `, installed: **${installed}**` : ""})`,
+    files: (list: string) => ` For example: \`${list}\`.`,
+    chosen: "_The folder used is the one you selected._",
+    s1: "### Solution 1 — install the right version in Steam",
+    openLibrary: "1. Open Steam → **Library**.",
+    install: "2. Install the game (it must be in your account).",
+    props: "1. Steam → **Library** → right-click the game → **Properties**.",
+    beta: (branch: string) => `2. **Betas** tab → choose the **${branch}** branch.`,
+    betaAny: "2. **Betas** tab → choose the branch that matches the requested version.",
+    wait: "3. Let Steam finish updating (the game must show “Up to date”).",
+    back: (n: number) => `${n}. Come back here and restart the installation.`,
+    page: (id: number) => `Game page on Steam: steam://nav/games/details/${id}`,
+    s2: "### Solution 2 — point to an existing installation",
+    s2text:
+      "If the game is installed elsewhere (another drive, a copy, a non-Steam version…), choose its folder. Only the expected files are copied, after verification: extra files (BepInEx, mods, saves) are ignored and never modified.",
+    s3: "### Solution 3 — download the exact version (DepotDownloader)",
+    s3text:
+      "The launcher can download this version straight from Steam with the open source tool DepotDownloader. You sign in by **scanning a QR code** with the Steam mobile app: the launcher never sees your password. The game must belong to your account.",
+  },
+} as const;
 
 /** Mode d'emploi Markdown affiché au joueur. */
 export const buildSteamGuide = (input: GuideInput): string => {
   const { issue, appId, branch, expectedBuild, installedBuild, files = [], chosenFolder, depotAvailable } = input;
+  const text = TEXT[input.language ?? "fr"];
   const lines: string[] = [];
 
+  lines.push(issue === "missing" ? text.missingTitle(input.entry) : text.versionTitle(input.entry), "");
   lines.push(
     issue === "missing"
-      ? `## Jeu introuvable pour « ${input.entry} »`
-      : `## Version du jeu différente pour « ${input.entry} »`,
+      ? text.missing
+      : text.version(
+          expectedBuild !== undefined ? text.build(expectedBuild, installedBuild) : "",
+          files.length > 0 ? text.files(files.slice(0, 3).join("`, `")) : "",
+        ),
   );
-  lines.push("");
-  lines.push(
-    issue === "missing"
-      ? "Le launcher n'a pas trouvé le jeu dans votre bibliothèque Steam. Il ne contient pas les fichiers du jeu (propriété de son éditeur) : il copie ceux de **votre** installation."
-      : `Les fichiers du jeu ne correspondent pas à la version attendue${expectedBuild !== undefined ? ` (build **${expectedBuild}**` + (installedBuild ? `, installé : **${installedBuild}**` : "") + ")" : ""}.` +
-          (files.length > 0 ? ` Par exemple : \`${files.slice(0, 3).join("`, `")}\`.` : ""),
-  );
-  if (chosenFolder) lines.push("", "_Le dossier utilisé est celui que vous avez indiqué._");
-  lines.push("", "### Solution 1 — installer la bonne version dans Steam", "");
+  if (chosenFolder) lines.push("", text.chosen);
+  lines.push("", text.s1, "");
   if (issue === "missing") {
-    lines.push("1. Ouvrez Steam → **Bibliothèque**.", "2. Installez le jeu (il doit être dans votre compte).");
+    lines.push(text.openLibrary, text.install);
   } else {
-    lines.push("1. Steam → **Bibliothèque** → clic droit sur le jeu → **Propriétés**.");
-    lines.push(
-      branch
-        ? `2. Onglet **Bêtas** → choisissez la branche **${branch}**.`
-        : "2. Onglet **Bêtas** → choisissez la branche qui correspond à la version demandée.",
-    );
-    lines.push("3. Laissez Steam finir la mise à jour (le jeu doit afficher « À jour »).");
+    lines.push(text.props, branch ? text.beta(branch) : text.betaAny, text.wait);
   }
-  lines.push(`${issue === "missing" ? "3" : "4"}. Revenez ici et relancez l'installation.`);
-  if (appId !== undefined) lines.push("", `Page Steam du jeu : steam://nav/games/details/${appId}`);
+  lines.push(text.back(issue === "missing" ? 3 : 4));
+  if (appId !== undefined) lines.push("", text.page(appId));
 
-  lines.push("", "### Solution 2 — indiquer le dossier d'une installation", "");
-  lines.push(
-    "Si le jeu est installé ailleurs (autre disque, copie, version non Steam…), choisissez son dossier. " +
-      "Seuls les fichiers attendus sont copiés, après vérification : les fichiers en plus (BepInEx, mods, sauvegardes) sont ignorés et jamais modifiés.",
-  );
-
-  if (depotAvailable) {
-    lines.push("", "### Solution 3 — télécharger la version exacte (DepotDownloader)", "");
-    lines.push(
-      "Le launcher peut télécharger cette version directement depuis Steam avec l'outil open source DepotDownloader. " +
-        "Vous vous connectez en **scannant un QR code** avec l'application mobile Steam : le launcher ne voit jamais votre mot de passe. " +
-        "Le jeu doit appartenir à votre compte.",
-    );
-  }
+  lines.push("", text.s2, "", text.s2text);
+  if (depotAvailable) lines.push("", text.s3, "", text.s3text);
   return lines.join("\n");
 };
 

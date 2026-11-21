@@ -55,3 +55,17 @@ describe("mode d'emploi", () => {
     assert.doesNotMatch(guide, /Solution 3/);
   });
 });
+
+describe("mode d'emploi en anglais", () => {
+  it("traduit le guide et garde les 3 solutions", () => {
+    const guide = buildSteamGuide({
+      entry: "Valheim", issue: "version", appId: 1, branch: "public-test",
+      expectedBuild: 111, installedBuild: "222", files: ["a.dll"], depotAvailable: true, language: "en",
+    });
+    assert.match(guide, /Different game version/);
+    assert.match(guide, /\*\*Betas\*\*.*public-test/);
+    assert.match(guide, /Solution 1/);
+    assert.match(guide, /Solution 3.*DepotDownloader/s);
+    assert.doesNotMatch(guide, /Bibliothèque/);
+  });
+});

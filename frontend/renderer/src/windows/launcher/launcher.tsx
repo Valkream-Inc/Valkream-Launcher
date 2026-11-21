@@ -25,8 +25,10 @@ import type {
 import ChooseGames from "./panels/choose-games/choose-games";
 import Home from "./panels/home/home";
 import Settings from "./panels/settings/settings";
+import { useTranslation } from "react-i18next";
 
 function BetaEnabledPanel() {
+  const { t } = useTranslation();
   const { changePanel } = usePanels();
   const goHome = () => changePanel("choose-games");
 
@@ -40,10 +42,10 @@ function BetaEnabledPanel() {
     <Box sx={{ position: "absolute", inset: 0 }}>
       <SpecialPanel
         type="info"
-        paragraph="Vous avez les tests betas activés ..."
+        paragraph={t("beta.panel")}
         buttons={[
-          { text: "Continuer", onClick: goHome },
-          { text: "Les desactiver", onClick: desactiverBeta },
+          { text: t("common.continue"), onClick: goHome },
+          { text: t("beta.disable"), onClick: desactiverBeta },
         ]}
       />
     </Box>

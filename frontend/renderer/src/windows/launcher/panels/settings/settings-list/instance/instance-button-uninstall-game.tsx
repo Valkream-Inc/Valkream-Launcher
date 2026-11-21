@@ -10,12 +10,14 @@ import Wait from "../../../../component/wait/wait";
 import { useAction } from "../../../../context/action.context";
 import SettingsBox from "../../component/settings-box/settings-box";
 import type { InstanceButtonProps } from "./instance-setting.types";
+import { useTranslation } from "react-i18next";
 
 const Instance_ButtonUninstallGame = ({
   id,
   channel,
   onDone = () => {},
 }: InstanceButtonProps) => {
+  const { t } = useTranslation();
   const { runAction } = useAction();
   const [isWaiting, setIsWaiting] = useState(false);
 
@@ -24,11 +26,11 @@ const Instance_ButtonUninstallGame = ({
       try {
         setIsWaiting(true);
         await window.electron_API.uninstallInstance(id, channel);
-        enqueueSnackbar("Jeu désinstallé !", { variant: "success" });
+        enqueueSnackbar(t("instance.uninstall.done"), { variant: "success" });
         onDone();
       } catch (error) {
         console.error(error);
-        enqueueSnackbar("Jeu non désinstallé !", { variant: "error" });
+        enqueueSnackbar(t("instance.uninstall.failed"), { variant: "error" });
       } finally {
         setIsWaiting(false);
       }
@@ -40,7 +42,7 @@ const Instance_ButtonUninstallGame = ({
       <Wait isVisible={isWaiting} />
       <SettingsBox
         warn={false}
-        text="Vous pouvez supprimer les fichiers de jeux valkream."
+        text={t("instance.uninstall.text")}
       >
         <Button
           variant="contained"
@@ -49,7 +51,7 @@ const Instance_ButtonUninstallGame = ({
           color="error"
           onClick={handleClick}
         >
-          Désinstaller le jeu
+          {t("instance.uninstall.button")}
         </Button>
       </SettingsBox>
     </>

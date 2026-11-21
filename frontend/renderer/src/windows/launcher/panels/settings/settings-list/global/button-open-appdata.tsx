@@ -6,23 +6,25 @@
 import { Button } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import SettingsBox from "../../component/settings-box/settings-box";
+import { useTranslation } from "react-i18next";
 
 const ButtonOpenAppData = () => {
+  const { t } = useTranslation();
   const handleClick = async () =>
     await window.electron_API
       .openAppData()
       .then(() => {
-        enqueueSnackbar("AppData ouvert !", { variant: "success" });
+        enqueueSnackbar(t("settings.appdata.opened"), { variant: "success" });
       })
       .catch((error) => {
         console.error(error);
-        enqueueSnackbar("AppData non ouvert !", { variant: "error" });
+        enqueueSnackbar(t("settings.appdata.notOpened"), { variant: "error" });
       });
 
   return (
     <SettingsBox
       warn={false}
-      text="Vous pouvez ouvrir le dossier AppData de Valkream."
+      text={t("settings.appdata.text")}
     >
       <Button
         variant="contained"
@@ -31,7 +33,7 @@ const ButtonOpenAppData = () => {
         color="warning"
         onClick={handleClick}
       >
-        Ouvrir le dossier AppData
+        {t("settings.appdata.button")}
       </Button>
     </SettingsBox>
   );

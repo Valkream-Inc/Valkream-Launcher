@@ -13,6 +13,7 @@ import Button from "@mui/material/Button";
 import { usePanels } from "../../../../context/panels.context";
 import { useGames } from "../../../../context/games.context";
 import type { NavButtonProps, NavSettingsProps } from "./nav-settings.types";
+import { useTranslation } from "react-i18next";
 
 export const NavButton = ({
   id,
@@ -39,6 +40,7 @@ export const NavSettings = ({
   setActiveTab,
   ToggleIsConfirmAdminVisible,
 }: NavSettingsProps) => {
+  const { t } = useTranslation();
   const { changePanel } = usePanels();
   const { actualInstance } = useGames();
 
@@ -67,7 +69,7 @@ export const NavSettings = ({
         alt="Logo Valkream"
         className="menu-header"
       />
-      <div className="menu-header">Paramètres</div>
+      <div className="menu-header">{t("nav.title")}</div>
 
       {/* Boutons */}
       <Box className="nav-box">
@@ -83,7 +85,7 @@ export const NavSettings = ({
       </Box>
       <NavButton
         id="save"
-        label="Sauvegarder"
+        label={t("nav.save")}
         active={false}
         onClick={redirectToSave}
       />

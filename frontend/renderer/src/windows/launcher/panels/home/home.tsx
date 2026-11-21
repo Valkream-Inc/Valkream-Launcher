@@ -13,8 +13,10 @@ import Popup from "../../component/popup/popup";
 
 import { useGames } from "../../context/games.context";
 import { usePanels } from "../../context/panels.context";
+import { useTranslation } from "react-i18next";
 
 function Home() {
+  const { t } = useTranslation();
   const { changePanel } = usePanels();
   const { actualInstance } = useGames();
   const [isTipsOpen, setIsTipsOpen] = useState(false);
@@ -25,7 +27,7 @@ function Home() {
         open={isTipsOpen}
         onClose={() => setIsTipsOpen(false)}
         type="tips"
-        title="Astuces du jour"
+        title={t("home.tips")}
         message={actualInstance.tipContent}
       />
 

@@ -10,6 +10,7 @@ import { Button, Switch } from "@mui/material";
 import SettingsBox from "../../component/settings-box/settings-box";
 import { saveInstanceSetting } from "./instance-save-setting";
 import type { InstanceSettingProps } from "./instance-setting.types";
+import { useTranslation } from "react-i18next";
 
 interface Props extends InstanceSettingProps {
   /** App Steam de l'instance : sans elle, le réglage n'existe pas. */
@@ -17,6 +18,7 @@ interface Props extends InstanceSettingProps {
 }
 
 function Instance_ToggleLaunchSteam({ steamAppId, ...props }: Props) {
+  const { t } = useTranslation();
   const checked = props.values.launchSteam === true;
 
   const handleChange = (event: ToggleChangeEvent) => {
@@ -27,8 +29,8 @@ function Instance_ToggleLaunchSteam({ steamAppId, ...props }: Props) {
       "launchSteam",
       enabled,
       enabled
-        ? "Steam sera démarré avant le jeu."
-        : "Steam ne sera plus démarré par le launcher."
+        ? t("instance.steam.on")
+        : t("instance.steam.off")
     );
   };
 
@@ -37,10 +39,10 @@ function Instance_ToggleLaunchSteam({ steamAppId, ...props }: Props) {
   return (
     <SettingsBox
       warn={false}
-      text="Démarrer Steam avant le jeu (nécessaire à la vérification de possession du jeu) ?"
+      text={t("instance.steam.text")}
     >
       <Switch onChange={handleChange} checked={checked} />
-      <span>Lancer Steam avec le jeu</span>
+      <span>{t("instance.steam.label")}</span>
       <Button
         onClick={() =>
           window.electron_API

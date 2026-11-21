@@ -4,6 +4,7 @@
  */
 
 import { enqueueSnackbar } from "notistack";
+import i18n from "../../../../../../i18n";
 import type { InstanceSettingValue } from "@shared/types";
 
 import type { InstanceSettingProps } from "./instance-setting.types";
@@ -28,6 +29,6 @@ export const saveInstanceSetting = async (
   } catch (error) {
     console.error(error);
     onChange(values);
-    enqueueSnackbar("Réglage non enregistré !", { variant: "error" });
+    enqueueSnackbar(i18n.t("instance.saveFailed"), { variant: "error" });
   }
 };

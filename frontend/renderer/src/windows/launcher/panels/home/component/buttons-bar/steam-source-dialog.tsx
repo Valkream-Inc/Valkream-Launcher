@@ -24,6 +24,7 @@ import {
 import type { Channel, DepotInfo, InstanceId, SteamSourceIssue } from "@shared/types";
 
 import SimpleMarkdown from "./simple-markdown";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   issue: SteamSourceIssue | null;
@@ -48,6 +49,7 @@ const infoAccepted = (): boolean => {
 const MAX_LINES = 60;
 
 export default function SteamSourceDialog({ issue, instanceId, channel, onClose, onRetry }: Props) {
+  const { t } = useTranslation();
   const [depotRunning, setDepotRunning] = useState(false);
   const [lines, setLines] = useState<string[]>([]);
   const [percent, setPercent] = useState<number | null>(null);
@@ -118,13 +120,13 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
 
   return (
     <Dialog open={issue !== null} onClose={depotRunning ? undefined : onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Le jeu n'est pas utilisable tel quel</DialogTitle>
+      <DialogTitle>{t("steam.dialogTitle")}</DialogTitle>
       <DialogContent dividers>
         {issue && <SimpleMarkdown source={issue.guide} />}
         {depotRunning && (
           <Stack spacing={1} sx={{ mt: 2 }}>
             <Alert severity="info">
-              Scannez le QR code avec l'application mobile Steam (Steam Guard → « Scanner un code QR »). Le launcher ne voit pas votre mot de passe.
+              {t("steam.scan")}
             </Alert>
             <Box
               component="pre"
@@ -143,42 +145,42 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
       </DialogContent>
       <DialogActions>
         <Button onClick={pickFolder} disabled={depotRunning}>
-          Localiser l'installation
+          {t("steam.pick")}
         </Button>
         {issue?.depotAvailable && (
           <Button onClick={depotRunning ? cancelDepot : askDepot} color={depotRunning ? "error" : "primary"}>
-            {depotRunning ? "Annuler le téléchargement" : "Télécharger la bonne version (QR)"}
+            {depotRunning ? t("steam.cancelDepot") : t("steam.depot")}
           </Button>
         )}
         <Button onClick={onRetry} disabled={depotRunning}>
-          J'ai installé la bonne version : réessayer
+          {t("steam.retry")}
         </Button>
         <Button onClick={onClose} disabled={depotRunning}>
-          Fermer
+          {t("common.close")}
         </Button>
       </DialogActions>
       <Dialog open={info !== null} onClose={() => setInfo(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>À savoir avant d'utiliser DepotDownloader</DialogTitle>
+        <DialogTitle>{t("steam.infoTitle")}</DialogTitle>
         <DialogContent dividers>
           {info && (
             <SimpleMarkdown
               source={[
-                "**DepotDownloader** est un outil open source (licence GPL-2.0) qui télécharge une version précise d'un jeu depuis les serveurs de Steam.",
-                `Code source : ${info.sourceUrl}`,
-                "## Ce qui se passe",
-                `1. Le launcher télécharge la version officielle **${info.version || "non configurée"}** de l'outil, vérifie son empreinte sha256 puis le range dans \`${info.toolsDir}\`. S'il est modifié, il est refusé.`,
-                "2. Une fenêtre affiche un **QR code** : scannez-le avec l'application mobile Steam. Votre mot de passe et votre code Steam Guard ne passent jamais par le launcher.",
-                `3. Le jeu est téléchargé dans \`${info.downloadDir}\`, puis chaque fichier est vérifié avant d'être copié dans l'instance. Ce dossier est ensuite supprimé.`,
-                "4. Le jeu doit appartenir à votre compte Steam. Ne partagez jamais les fichiers téléchargés.",
-                "Vous pouvez annuler à tout moment.",
+                t("steam.info.what"),
+                t("steam.info.source", { url: info.sourceUrl }),
+                `## ${t("steam.info.title")}`,
+                t("steam.info.step1", { version: info.version || t("steam.info.notConfigured"), dir: info.toolsDir }),
+                t("steam.info.step2"),
+                t("steam.info.step3", { dir: info.downloadDir }),
+                t("steam.info.step4"),
+                t("steam.info.cancel"),
               ].join("\n")}
             />
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setInfo(null)}>Annuler</Button>
+          <Button onClick={() => setInfo(null)}>{t("common.cancel")}</Button>
           <Button onClick={acceptInfo} variant="contained">
-            J'ai compris, continuer
+            {t("steam.infoContinue")}
           </Button>
         </DialogActions>
       </Dialog>

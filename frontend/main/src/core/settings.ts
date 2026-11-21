@@ -19,6 +19,7 @@ class SettingsManager {
       betaEnabled: false,
       launcherTheme: "modern",
       backgroundType: "video",
+      language: Intl.DateTimeFormat().resolvedOptions().locale.startsWith("fr") ? "fr" : "en",
     };
   }
 
@@ -34,7 +35,8 @@ class SettingsManager {
       throw new Error(`Setting "${setting}" does not exist.`);
 
     const config = await this.db.readData<Settings>("configClient");
-    return config ? config[setting] : this.defaultSettings[setting];
+    // Réglage absent d'une config créée par une ancienne version : valeur par défaut
+    return config?.[setting] ?? this.defaultSettings[setting];
   }
 
   async setSetting<K extends SettingKey>(

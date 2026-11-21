@@ -27,6 +27,7 @@ import type {
   GameEntry,
   SearchColors,
 } from "./choose-games.types";
+import { useTranslation } from "react-i18next";
 
 // Normalise : minuscules, sans accents, sans espaces
 const normalize = (str: string): string =>
@@ -204,6 +205,7 @@ const searchColors = (theme: LauncherTheme): SearchColors => {
 };
 
 export default function ChooseGames() {
+  const { t } = useTranslation();
   const { changeActualInstance } = useGames();
   const [games, setGames] = useState<GameEntry[]>([]);
 
@@ -326,7 +328,7 @@ export default function ChooseGames() {
           <TextField
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un jeu..."
+            placeholder={t("games.search")}
             autoFocus
             fullWidth
             size="small"
@@ -334,13 +336,13 @@ export default function ChooseGames() {
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <span role="img" aria-label="Rechercher">
+                    <span role="img" aria-label={t("games.searchLabel")}>
                       🔍
                     </span>
                   </InputAdornment>
                 ),
               },
-              htmlInput: { "aria-label": "Rechercher un jeu" },
+              htmlInput: { "aria-label": t("games.search") },
             }}
             sx={{
               maxWidth: 420,
@@ -434,7 +436,7 @@ export default function ChooseGames() {
                 opacity: 0.7,
               }}
             >
-              Aucun jeu trouvé pour « {search} »
+              {t("games.none", { search })}
             </Typography>
           )}
         </Box>

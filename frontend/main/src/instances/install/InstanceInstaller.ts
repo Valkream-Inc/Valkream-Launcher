@@ -30,7 +30,7 @@ import { HashCache } from "./hash-cache";
 import { appendInstallLog } from "./install-log";
 import type { ParamResolver } from "../remote/ParamResolver";
 import { hashProvider, steamLibraryProvider } from "./providers/hash";
-import { clearGameSourceDir, DEPOT_DIR, GameSourceError, readGameSourceDir, toSteamSourceIssue } from "./game-source";
+import { clearGameSourceDir, DEPOT_DIR, GameSourceError, type GuideLanguage, readGameSourceDir, toSteamSourceIssue } from "./game-source";
 import { locateSteamGame, type SteamGame } from "../local/steam-library";
 import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore";
 import type { InstallIO, Provider, Uninstaller } from "./providers/types";
@@ -57,6 +57,8 @@ export interface InstallerOptions {
   io: InstallIO;
   providers?: Record<string, Provider>;
   uninstallers?: Record<string, Uninstaller>;
+  /** Langue de l'interface (mode d'emploi Steam) ; défaut : français. */
+  language?: () => Promise<GuideLanguage> | GuideLanguage;
   /** Retrouve le jeu dans la bibliothèque Steam du joueur (injectable pour les tests). */
   steamLocator?: (appId: number) => Promise<SteamGame | null>;
   /** Octets libres du disque contenant ce dossier (injectable pour les tests). */
@@ -305,6 +307,7 @@ export class InstanceInstaller {
                   appId: loaded.config.steamAppId,
                   branch: item.entry["steam-beta"],
                   depotAvailable: item.entry.depot !== undefined && loaded.config.steamAppId !== undefined,
+                  language: await this.options.language?.(),
                 })
               : undefined;
           result.failed.push({ name: item.name, error: message, ...(steamIssue ? { steamIssue } : {}) });

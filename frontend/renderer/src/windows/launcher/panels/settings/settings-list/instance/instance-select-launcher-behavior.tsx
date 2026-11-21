@@ -13,8 +13,10 @@ import {
 import SettingsBox from "../../component/settings-box/settings-box";
 import { saveInstanceSetting } from "./instance-save-setting";
 import type { InstanceSettingProps } from "./instance-setting.types";
+import { useTranslation } from "react-i18next";
 
 function Instance_SelectLauncherBehavior(props: InstanceSettingProps) {
+  const { t } = useTranslation();
   const selected = (props.values.launcherBehavior ?? "close") as LauncherBehavior;
 
   const handleChange = (event: LauncherBehaviorChangeEvent) => {
@@ -24,23 +26,23 @@ function Instance_SelectLauncherBehavior(props: InstanceSettingProps) {
       props,
       "launcherBehavior",
       value,
-      "Comportement du launcher sauvegardé !"
+      t("instance.behavior.saved")
     );
   };
 
   return (
     <SettingsBox
       warn={false}
-      text="Comportement du launcher au lancement du jeu :"
+      text={t("instance.behavior.text")}
     >
       <SelectSettings value={selected} onChange={handleChange}>
         <SelectItemSettings value="hide">
-          Masquer le launcher
+          {t("instance.behavior.hide")}
         </SelectItemSettings>
         <SelectItemSettings value="close">
-          Fermer le launcher
+          {t("instance.behavior.close")}
         </SelectItemSettings>
-        <SelectItemSettings value="nothing">Ne rien faire</SelectItemSettings>
+        <SelectItemSettings value="nothing">{t("instance.behavior.nothing")}</SelectItemSettings>
       </SelectSettings>
     </SettingsBox>
   );

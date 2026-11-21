@@ -13,6 +13,7 @@ import type { Channel, GamePlatform } from "@shared/types";
 
 import { baseUrl, isDev } from "../core/constants";
 import instancesConfig from "./instances.config";
+import SettingsManager from "../core/settings";
 import DirsManager from "../core/dirs";
 import { createDiskCache } from "./remote/disk-cache";
 import { httpFetchText } from "./remote/http-fetcher";
@@ -69,6 +70,7 @@ export const getInstanceInstaller = (): InstanceInstaller => {
     resolver: getResolver(),
     platform: platform(),
     io: realInstallIO,
+    language: async () => ((await SettingsManager.getSetting("language")) === "en" ? "en" : "fr"),
   });
   return installer;
 };

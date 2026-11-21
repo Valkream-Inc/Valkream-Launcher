@@ -5,11 +5,13 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import "./updater.css";
+import { useTranslation } from "react-i18next";
 
 export default function Updater() {
+  const { t } = useTranslation();
   const preloadVideoRef = useRef<HTMLVideoElement>(null);
   const loadingSectionRef = useRef<HTMLDivElement>(null);
-  const [message, setMessage] = useState("⏳ Recherche de mise à jour...");
+  const [message, setMessage] = useState(t("updater.searching"));
 
   useEffect(() => {
     const preloadVideo = preloadVideoRef.current;

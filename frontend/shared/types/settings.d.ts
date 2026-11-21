@@ -14,6 +14,8 @@ export interface Settings {
   betaEnabled: boolean;
   launcherTheme: LauncherTheme;
   backgroundType: BackgroundType;
+  /** Langue de l'interface. */
+  language: "fr" | "en";
 }
 
 export type SettingKey = keyof Settings;

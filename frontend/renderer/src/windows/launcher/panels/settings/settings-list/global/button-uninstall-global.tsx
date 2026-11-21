@@ -6,25 +6,25 @@
 import { Button } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import SettingsBox from "../../component/settings-box/settings-box";
+import { useTranslation } from "react-i18next";
 
 const ButtonUninstallGlobal = () => {
+  const { t } = useTranslation();
   const handleClick = async () =>
     await window.electron_API
       .uninstallLauncher()
       .then(() => {
-        enqueueSnackbar("Launcher désinstallé !", { variant: "success" });
+        enqueueSnackbar(t("settings.uninstallLauncher.done"), { variant: "success" });
       })
       .catch((error) => {
         console.error(error);
-        enqueueSnackbar("Launcher non désinstallé !", { variant: "error" });
+        enqueueSnackbar(t("settings.uninstallLauncher.failed"), { variant: "error" });
       });
 
   return (
     <SettingsBox
       warn={true}
-      text="Vous voulez Désinstaller le launcher et Jeu ? Faites-le ici. Mais
-        attention, vous perdrez ainsi tous les paramètres de jeux mais vous
-        conserverez vos personnages."
+      text={t("settings.uninstallLauncher.text")}
     >
       <Button
         variant="contained"
@@ -33,7 +33,7 @@ const ButtonUninstallGlobal = () => {
         color="error"
         onClick={handleClick}
       >
-        Désinstaller
+        {t("settings.uninstallLauncher.button")}
       </Button>
     </SettingsBox>
   );

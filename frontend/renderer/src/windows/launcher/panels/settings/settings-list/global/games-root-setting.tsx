@@ -13,8 +13,10 @@ import { enqueueSnackbar } from "notistack";
 
 import { useGames } from "../../../../context/games.context";
 import SettingsBox from "../../component/settings-box/settings-box";
+import { useTranslation } from "react-i18next";
 
 function GamesRootSetting() {
+  const { t } = useTranslation();
   const { refreshChannel } = useGames();
   const [root, setRoot] = useState<{ path: string; isDefault: boolean } | null>(null);
   const [moving, setMoving] = useState(false);
@@ -29,7 +31,7 @@ function GamesRootSetting() {
     try {
       const folder = await action();
       if (folder) {
-        enqueueSnackbar(`Jeux déplacés vers ${folder}`, { variant: "success" });
+        enqueueSnackbar(t("settings.gamesRoot.moved", { folder }), { variant: "success" });
         await load();
         await refreshChannel();
       }
@@ -41,14 +43,14 @@ function GamesRootSetting() {
   };
 
   return (
-    <SettingsBox warn={true} text="Dossier d'installation des jeux. Changer le dossier déplace les jeux déjà installés (peut durer plusieurs minutes sur un autre disque).">
+    <SettingsBox warn={true} text={t("settings.gamesRoot.text")}>
       <span>{root ? root.path : "…"}</span>
       <Button disabled={moving} onClick={() => run(() => window.electron_API.changeGamesRoot())}>
-        {moving ? "Déplacement…" : "Changer"}
+        {moving ? t("settings.gamesRoot.moving") : t("settings.gamesRoot.change")}
       </Button>
       {root && !root.isDefault && (
         <Button disabled={moving} onClick={() => run(() => window.electron_API.resetGamesRoot())}>
-          Dossier par défaut
+          {t("settings.gamesRoot.reset")}
         </Button>
       )}
     </SettingsBox>

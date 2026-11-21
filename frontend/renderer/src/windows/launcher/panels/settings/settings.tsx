@@ -9,8 +9,10 @@ import SpecialPanel from "../../component/special-panel/special-panel";
 
 import { useGames } from "../../context/games.context";
 import InstanceSettings from "./instance/InstanceSettings";
+import { useTranslation } from "react-i18next";
 
 function Settings() {
+  const { t } = useTranslation();
   const { actualInstanceId } = useGames();
   const [activeTab, setActiveTab] = useState("general");
   const [isConfirmAdminVisible, setIsConfirmAdminVisible] = useState(false);
@@ -20,8 +22,8 @@ function Settings() {
   const toogleAdmin = () => {
     enqueueSnackbar(
       isAdminActive
-        ? "Options Admin désactivées !"
-        : "Options Admin activées !",
+        ? t("admin.off")
+        : t("admin.on"),
       { variant: "warning" },
     );
     setIsAdminActive(!isAdminActive);
@@ -31,17 +33,17 @@ function Settings() {
     return (
       <SpecialPanel
         type="warning"
-        paragraph="Vous êtes sur le point d’activer des options avancées pouvant endommager votre installation (Admin Tools, Debug Tools, Dev Tools, Fonctionnalités Alpha). Êtes-vous sûr de vouloir continuer ?"
+        paragraph={t("admin.confirm")}
         buttons={[
           {
-            text: "Continuer",
+            text: t("common.continue"),
             onClick: () => {
               toogleAdmin();
               setIsConfirmAdminVisible(false);
             },
           },
           {
-            text: "Annuler et revenir",
+            text: t("admin.cancelBack"),
             onClick: () => setIsConfirmAdminVisible(false),
           },
         ]}

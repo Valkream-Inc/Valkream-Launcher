@@ -24,6 +24,7 @@ import ButtonOpenAppData from "../settings-list/global/button-open-appdata";
 import ButtonUninstallGlobal from "../settings-list/global/button-uninstall-global";
 import SelectLauncherBackgroundType from "../settings-list/global/select-launcher-background-type";
 import SelectLauncherTheme from "../settings-list/global/select-launcher-theme";
+import SelectLanguage from "../settings-list/global/select-language";
 import GamesRootSetting from "../settings-list/global/games-root-setting";
 import ToggleBeta from "../settings-list/global/toggle-beta";
 import ToggleDev from "../settings-list/global/toggle-dev";
@@ -39,6 +40,7 @@ import InstanceDebugTab from "./InstanceDebugTab";
 import InstanceModsTab from "./InstanceModsTab";
 import InstanceToolsTab from "./InstanceToolsTab";
 import { useInstanceReport } from "./use-instance-report";
+import { useTranslation } from "react-i18next";
 
 interface Props extends GameSettingsProps {
   instanceId: InstanceId;
@@ -54,6 +56,7 @@ export default function InstanceSettings({
   setIsDevActive,
   isDevActive,
 }: Props) {
+  const { t } = useTranslation();
   const { actualChannel: channel } = useGames();
   const { actionLoading } = useAction();
   const renderConfig = instancesRenderConfig.find(
@@ -88,7 +91,7 @@ export default function InstanceSettings({
     return (
       <SettingsBox
         warn={true}
-        text={`Instance « ${instanceId} » sans config render.`}
+        text={t("instance.noConfig", { id: instanceId })}
       />
     );
   }
@@ -135,7 +138,7 @@ export default function InstanceSettings({
             {renderConfig.descriptionContent}
           </SettingsBox>
         )}
-        <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
+        <SettingsTitle warn={true}>{t("instance.dangerZone")}</SettingsTitle>
         {!actionLoading && <ButtonUninstallGlobal />}
         <ToggleDev
           devActive={isDevActive}
@@ -200,7 +203,7 @@ export default function InstanceSettings({
                   (setting.category?.level === "dev" && isDevActive) ||
                   (setting.category?.level === "admin" && isAdminActive) ||
                   (setting.category?.level === "special" && isSpecialActive)),
-            ) && <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>}
+            ) && <SettingsTitle warn={true}>{t("instance.dangerZone")}</SettingsTitle>}
             <Instance_CustomSettings
               {...settingProps}
               settings={customSettings}
@@ -236,7 +239,7 @@ export default function InstanceSettings({
       </SettingsTab>
 
       <SettingsTab id="mods" activeTab={activeTab}>
-        {loading && !report && <Typography>Chargement…</Typography>}
+        {loading && !report && <Typography>{t("common.loading")}</Typography>}
         {report && <InstanceModsTab report={report} />}
       </SettingsTab>
 
@@ -255,10 +258,11 @@ export default function InstanceSettings({
         )}
         <ButtonOpenAppData />
 
-        <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>
+        <SettingsTitle warn={true}>{t("instance.advanced")}</SettingsTitle>
         <ButtonDebug />
         {!actionLoading && <ToggleBeta />}
         {!actionLoading && <GamesRootSetting />}
+        <SelectLanguage />
       </SettingsTab>
 
       {/* Tools : outils de préparation du remote (hash de dossier, liste de mods) */}
@@ -268,7 +272,7 @@ export default function InstanceSettings({
 
       {/* Debug : diagnostic de l'installation (rapport, tableaux, journal) */}
       <SettingsTab id="debug" activeTab={activeTab}>
-        {!report && loading && <Typography>Chargement…</Typography>}
+        {!report && loading && <Typography>{t("common.loading")}</Typography>}
         {report && (
           <InstanceDebugTab
             report={report}

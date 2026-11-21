@@ -264,3 +264,11 @@ La résolution des dépendances **transitives** Thunderstore reste désactivée 
 - **Chemin d'une entrée modifié** (`entryPaths` de la config main) : le launcher mémorise le dossier de chaque entrée à l'installation. S'il change entre deux versions, l'entrée est réinstallée au nouvel endroit (installation complète) et ce qu'elle possédait à l'ancien endroit (mods listés) est retiré. Si le chemin ne change pas, rien n'est refait. Un état ancien sans chemin mémorisé n'est pas réinstallé.
 - **Changement de version majeure du launcher** : au démarrage (hors dev), le contenu des installations est supprimé pour une réinstallation propre ; seuls les réglages du joueur (`instance.settings.json`) sont conservés. Les versions mineures / correctifs ne suppriment rien. La version précédente est mémorisée dans `launcher-version.json`.
 - **Contournement de la mise à jour du launcher** : Ctrl + Maj + clic sur la vidéo de démarrage ouvre directement le launcher. Le mode beta ne désactive plus la mise à jour.
+
+## Traduction (fr / en)
+
+Interface traduite avec **i18next** + **react-i18next** : `frontend/renderer/src/i18n/` (`fr.ts` = référence, `en.ts`, `index.ts`). La langue est le réglage général `language` (Paramètres → Langue ; défaut : langue du système, français sinon anglais), chargée avant le premier rendu. Dans un composant : `const { t } = useTranslation(); t("settings.music.on")` ; variables `t("games.none", { search })`. Hors composant : `i18n.t(...)`.
+
+Ajouter un texte : l'écrire dans `fr.ts` ET `en.ts` (même clé, mêmes variables `{{x}}`) ; `i18n.test.ts` échoue sinon. Le mode d'emploi Steam est généré côté main dans la langue du réglage.
+
+Pas encore traduits (français uniquement) : onglets Debug / Tools / Dev (outils admin), messages d'erreur et de progression venant du processus main, textes propres à chaque jeu (`instances.config.tsx` : descriptions, astuces, bienvenue), fenêtre de mise à jour (messages du main).

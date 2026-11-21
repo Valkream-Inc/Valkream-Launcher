@@ -12,6 +12,7 @@ import type { InstanceReport } from "@shared/types";
 
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
+import { useTranslation } from "react-i18next";
 
 const open = (url: string) =>
   window.electron_API.openLink(url).catch(console.error);
@@ -21,6 +22,7 @@ export default function InstanceModsTab({
 }: {
   report: InstanceReport;
 }) {
+  const { t } = useTranslation();
   const { mods, contributors } = report;
 
   return (
@@ -63,7 +65,7 @@ export default function InstanceModsTab({
       <SettingsTitle warn={false}>Mods ({mods.length})</SettingsTitle>
       {mods.length === 0 && (
         <SettingsBox warn={false}>
-          <Typography>Aucun mod à afficher pour cette instance.</Typography>
+          <Typography>{t("instance.noMods")}</Typography>
         </SettingsBox>
       )}
       {mods.map((mod) => (

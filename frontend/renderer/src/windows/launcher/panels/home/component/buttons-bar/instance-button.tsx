@@ -21,6 +21,7 @@ import { useGames } from "../../../../context/games.context";
 import { useInfos } from "../../../../context/infos.context";
 import type { InstanceButtonAction } from "./instance-button.types";
 import SteamSourceDialog from "./steam-source-dialog";
+import { useTranslation } from "react-i18next";
 
 /** 75 s → "1:15", 3725 s → "1:02:05". */
 const formatElapsed = (ms: number): string => {
@@ -41,6 +42,7 @@ const LOADING_ACTION: InstanceButtonAction = {
 };
 
 export default function InstanceButton() {
+  const { t, i18n } = useTranslation();
   const { actionLoading, runAction } = useAction();
   const { pause, play } = useBackground();
   const { actualInstanceId, actualInstance, actualChannel } = useGames();
@@ -60,13 +62,16 @@ export default function InstanceButton() {
     progress?: InstanceSyncProgress;
   }>({ text: "" });
 
+  // « Jouer » ou « Jouer à la vX » selon la version connue
+  const playLabel = (version?: string) => (version ? t("button.playVersion", { version }) : t("button.play"));
+
   const render = () => {
     const { text, progress } = lastProgress.current;
     const transfer = progress?.transfer;
     const elapsed = `⏱ ${formatElapsed(Date.now() - syncStartedAt.current)}`;
     // Progression globale : pourcentage, cumul d'octets (total connu seulement pour un fichier unique)
     const details = transfer
-      ? `\n ${transfer.percent}% (${transfer.processedBytes}${transfer.totalBytes ? `/${transfer.totalBytes}` : ""}) à ${transfer.speed}/s · ${elapsed}`
+      ? `\n ${t("button.speed", { percent: transfer.percent, done: transfer.processedBytes, total: transfer.totalBytes ? `/${transfer.totalBytes}` : "", speed: transfer.speed })} · ${elapsed}`
       : `\n ${elapsed}`;
     setAction({
       text: `${text}${details}`,
@@ -82,7 +87,7 @@ export default function InstanceButton() {
 
   const error = (actionName: string, err: unknown) => {
     console.error(actionName, err);
-    enqueueSnackbar(`Erreur lors de ${actionName} !`, {
+    enqueueSnackbar(t("button.errorDuring", { action: actionName }), {
       variant: "error",
     });
   };
@@ -114,7 +119,7 @@ export default function InstanceButton() {
         actualChannel,
       );
       if (result.cancelled) {
-        enqueueSnackbar("Installation annulée", { variant: "info" });
+        enqueueSnackbar(t("button.cancelled"), { variant: "info" });
       } else if (result.failed.some((item) => item.steamIssue)) {
         setSteamIssue(
           result.failed.find((item) => item.steamIssue)?.steamIssue ?? null,
@@ -143,13 +148,13 @@ export default function InstanceButton() {
 
   const handleInstall = () =>
     runAction(
-      () => sync("l'installation", "Installation terminée !"),
+      () => sync(t("button.installing"), t("button.installDone")),
       `${actualInstanceId}-install`,
     );
 
   const handleUpdate = () =>
     runAction(
-      () => sync("la mise à jour", "Mise à jour terminée !"),
+      () => sync(t("button.updating"), t("button.updateDone")),
       `${actualInstanceId}-update`,
     );
 
@@ -167,7 +172,7 @@ export default function InstanceButton() {
       await window.electron_API.launchInstance(actualInstanceId, actualChannel);
     } catch (err) {
       console.error("Erreur lors du démarrage du jeu :", err);
-      enqueueSnackbar("Erreur lors du lancement du jeu !", {
+      enqueueSnackbar(t("button.launchError"), {
         variant: "error",
       });
     } finally {
@@ -184,7 +189,7 @@ export default function InstanceButton() {
           (setting.category?.zone ?? "normal") === "danger" &&
           activeSettings.includes(setting.settingsName),
       )
-      .map((setting) => `\n (⚠️ ${setting.label} activés.)`)
+      .map((setting) => t("button.dangerActive", { label: setting.label }))
       .join("");
 
   useEffect(() => {
@@ -212,9 +217,9 @@ export default function InstanceButton() {
         // Cas 1 : Pas installé et pas de connexion internet
         if (!isInstalled && !isConnected)
           return setAction({
-            text: `Installation Impossible\n (❌ Pas de connexion ${
-              isInternetConnected ? "au server" : "internet"
-            }.)`,
+            text: t("button.cannotInstall", {
+              what: isInternetConnected ? t("button.toServer") : t("button.toInternet"),
+            }),
             playIcon: false,
             onClick: () => {},
           });
@@ -222,7 +227,7 @@ export default function InstanceButton() {
         // Cas 2 : Pas installé et internet OK
         if (!isInstalled && isConnected)
           return setAction({
-            text: "Installer",
+            text: t("button.install"),
             playIcon: false,
             onClick: () => setIsWelcomeOpen(true),
           });
@@ -232,15 +237,15 @@ export default function InstanceButton() {
           return setAction(
             canPlay
               ? {
-                  text: `Jouer${gameVersion ? ` à la v${gameVersion}` : ""}
-          (⚠️ Pas de connexion ${
-            isInternetConnected ? "au server" : "internet"
-          }.)`,
+                  text: t("button.playOffline", {
+                    play: playLabel(gameVersion),
+                    what: isInternetConnected ? t("button.toServer") : t("button.toInternet"),
+                  }),
                   playIcon: true,
                   onClick: handleStart,
                 }
               : {
-                  text: "Installation incomplète\n (❌ Connexion requise.)",
+                  text: t("button.incomplete"),
                   playIcon: false,
                   onClick: () => {},
                 },
@@ -249,7 +254,7 @@ export default function InstanceButton() {
         // Cas 4 : Installé, internet, pas à jour (majeur)
         if (isInstalled && isConnected && !isUpToDate && isMajorUpdate)
           return setAction({
-            text: "Réinstaller\n (⚠️ Nouvelle version majeure.)",
+            text: t("button.reinstall"),
             playIcon: false,
             onClick: handleInstall,
           });
@@ -257,7 +262,7 @@ export default function InstanceButton() {
         // Cas 5 : Installé, internet, pas à jour (mineur)
         if (isInstalled && isConnected && !isUpToDate && !isMajorUpdate)
           return setAction({
-            text: "Mettre à jour",
+            text: t("button.update"),
             playIcon: false,
             onClick: handleUpdate,
           });
@@ -265,10 +270,8 @@ export default function InstanceButton() {
         // Cas 6 : Installé, internet, à jour
         if (isInstalled && isConnected && isUpToDate)
           return setAction({
-            text: `Jouer${gameVersion ? ` à la v${gameVersion}` : ""}${
-              maintenance && maintenance.enabled
-                ? "\n (⚠️ Maintenance en cours.)"
-                : ""
+            text: `${playLabel(gameVersion)}${
+              maintenance && maintenance.enabled ? t("button.maintenance") : ""
             }${dangerWarnings(activeOptionalSettings)}`,
             playIcon: true,
             onClick: handleStart,
@@ -276,17 +279,17 @@ export default function InstanceButton() {
 
         // Cas par défaut
         return setAction({
-          text: "Erreur inconnue, contactez le support.",
+          text: t("button.unknown"),
           playIcon: false,
           onClick: () => {},
         });
       } catch (err) {
         console.error(err);
-        enqueueSnackbar("Erreur lors de la vérification de la version !", {
+        enqueueSnackbar(t("button.checkErrorToast"), {
           variant: "error",
         });
         return setAction({
-          text: "Erreur lors de la vérification",
+          text: t("button.checkError"),
           playIcon: false,
           onClick: () => {},
         });
@@ -294,7 +297,7 @@ export default function InstanceButton() {
     };
 
     run();
-  }, [installationStatut, maintenance, actualInstanceId, actualChannel]);
+  }, [installationStatut, maintenance, actualInstanceId, actualChannel, i18n.language]);
 
   return (
     <>
@@ -308,7 +311,7 @@ export default function InstanceButton() {
           },
         ]}
         type="welcome"
-        title="Bienvenue sur le launcher de Valkream ! 👋"
+        title={t("button.welcome")}
         message={actualInstance.welcomeContent}
       />
       <SteamSourceDialog

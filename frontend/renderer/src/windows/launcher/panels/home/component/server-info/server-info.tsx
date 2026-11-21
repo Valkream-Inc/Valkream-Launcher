@@ -12,8 +12,10 @@ import { useGames } from "../../../../context/games.context";
 import Popup from "../../../../component/popup/popup";
 import { useInfos } from "../../../../context/infos.context";
 import EventCard from "../event-card/event-card";
+import { useTranslation } from "react-i18next";
 
 function ServerInfo() {
+  const { t } = useTranslation();
   const { isLoading, serverInfos: rawServerInfos, maintenance: rawMaintenance } =
     useInfos();
   // Le contexte peut renvoyer `false` quand l'info est indisponible
@@ -69,7 +71,7 @@ function ServerInfo() {
         open={isMaintenancePopupOpen}
         onClose={() => setIsMaintenancePopupOpen(false)}
         type="info"
-        title="Maintenance"
+        title={t("home.maintenance")}
         message={maintenance_message}
       />
       <div className="server-infos-container" onClick={handleClick}>
@@ -87,12 +89,12 @@ function ServerInfo() {
         <div>
           <span className="server-infos">
             {isLoading
-              ? "🟠 Chargement ..."
+              ? t("home.loading")
               : maintenance?.enabled
-              ? "🔵 En Maintenance"
+              ? t("home.inMaintenance")
               : serverInfos?.status === "server online"
-              ? "🟢 En ligne"
-              : "🔴 Hors ligne"}
+              ? t("home.online")
+              : t("home.offline")}
           </span>
           <span className="server-ping"> {pingText}</span>
         </div>

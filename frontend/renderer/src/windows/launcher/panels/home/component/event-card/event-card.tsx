@@ -10,8 +10,10 @@ import { ButtonBase } from "@mui/material";
 import Popup from "../../../../component/popup/popup";
 import { useInfos } from "../../../../context/infos.context";
 import ImagePreview from "../image-preview/image-preview";
+import { useTranslation } from "react-i18next";
 
 export default function EventCard() {
+  const { t } = useTranslation();
   const { event: rawEvent } = useInfos();
   // Le contexte peut renvoyer `false` quand il n'y a pas d'évènement
   const event = rawEvent || null;
@@ -40,7 +42,7 @@ export default function EventCard() {
         open={isEventPopupOpen}
         onClose={() => setIsEventPopupOpen(false)}
         type="event"
-        title={event?.name || "Évènement"}
+        title={event?.name || t("home.event")}
         message={event_message}
         onConfirm={
           eventLink
@@ -54,7 +56,7 @@ export default function EventCard() {
       {event?.enabled && (
         <ButtonBase
           className="event-container"
-          title="Voir plus de détails"
+          title={t("home.moreDetails")}
           onClick={handleClick}
         >
           {event?.image && (

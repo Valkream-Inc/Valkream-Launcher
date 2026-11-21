@@ -8,23 +8,25 @@ import { enqueueSnackbar } from "notistack";
 
 import SettingsBox from "../../component/settings-box/settings-box";
 import type { InstanceButtonProps } from "./instance-setting.types";
+import { useTranslation } from "react-i18next";
 
 const Instance_ButtonOpenGame = ({ id, channel }: InstanceButtonProps) => {
+  const { t } = useTranslation();
   const handleClick = async () =>
     await window.electron_API
       .openInstanceFolder(id, channel)
       .then(() => {
-        enqueueSnackbar("Dossier du jeu ouvert !", { variant: "success" });
+        enqueueSnackbar(t("instance.openGame.opened"), { variant: "success" });
       })
       .catch((error) => {
         console.error(error);
-        enqueueSnackbar("Dossier du jeu non ouvert !", { variant: "error" });
+        enqueueSnackbar(t("instance.openGame.notOpened"), { variant: "error" });
       });
 
   return (
     <SettingsBox
       warn={false}
-      text="Vous pouvez ouvrir le dossier du jeu de Valkream."
+      text={t("instance.openGame.text")}
     >
       <Button
         variant="contained"
@@ -33,7 +35,7 @@ const Instance_ButtonOpenGame = ({ id, channel }: InstanceButtonProps) => {
         color="warning"
         onClick={handleClick}
       >
-        Ouvrir le dossier du jeu
+        {t("instance.openGame.button")}
       </Button>
     </SettingsBox>
   );
