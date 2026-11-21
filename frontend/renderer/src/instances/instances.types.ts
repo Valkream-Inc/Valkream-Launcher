@@ -64,6 +64,20 @@ export type CustomGameSetting =
       level?: SettingLevel;
       options: { value: string; label: string }[];
       default?: string;
+    }
+  | {
+      /** Curseur numérique (ex : mémoire max d'un jeu Java, utilisable dans `launchArgs` du main : `-Xmx{ram}M`). */
+      type: "slider";
+      settingsName: string;
+      label: string;
+      text?: string;
+      level?: SettingLevel;
+      min: number;
+      max: number;
+      step?: number;
+      /** Unité affichée après la valeur (`Mo`, `%`…). */
+      unit?: string;
+      default?: number;
     };
 
 /** Tableau de l'onglet Debug : rattaché à une entrée du latest.yml par son nom. */

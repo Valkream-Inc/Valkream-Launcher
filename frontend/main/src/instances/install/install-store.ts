@@ -94,6 +94,9 @@ export const removeInstalledEntry = (installDir: string, name: string): void => 
   writeInstallState(installDir, state);
 };
 
+const isSettingValue = (value: unknown): value is InstanceSettingValue =>
+  typeof value === "boolean" || typeof value === "string" || (typeof value === "number" && Number.isFinite(value));
+
 export const readInstanceSettings = (
   installDir: string,
 ): Record<string, InstanceSettingValue> => {
@@ -101,7 +104,7 @@ export const readInstanceSettings = (
   if (!isObject(raw)) return {};
   const settings: Record<string, InstanceSettingValue> = {};
   for (const [name, value] of Object.entries(raw)) {
-    if (SETTING_NAME.test(name) && (typeof value === "boolean" || typeof value === "string")) {
+    if (SETTING_NAME.test(name) && isSettingValue(value)) {
       settings[name] = value;
     }
   }
@@ -120,7 +123,7 @@ export const writeInstanceSetting = (
   defaults: Readonly<Record<string, InstanceSettingValue>> = {},
 ): Record<string, InstanceSettingValue> => {
   if (!SETTING_NAME.test(name)) throw new Error(`Nom de réglage invalide : ${name}`);
-  if (typeof value !== "boolean" && typeof value !== "string") {
+  if (!isSettingValue(value)) {
     throw new Error(`Valeur de réglage invalide pour ${name}`);
   }
   const settings = { ...defaults, ...readInstanceSettings(installDir), [name]: value };

@@ -136,7 +136,7 @@ export default function InstanceSettings({
       <SettingsTab id="game" activeTab={activeTab}>
         <SettingsTitle warn={false}>Game</SettingsTitle>
         {error && <Typography color="error">{error}</Typography>}
-        <Instance_ToggleLaunchSteam {...settingProps} />
+        <Instance_ToggleLaunchSteam {...settingProps} steamAppId={report?.steamAppId} />
         <Instance_SelectLauncherBehavior {...settingProps} />
         {!actionLoading && (
           <Instance_CustomSettings {...settingProps} settings={customSettings} level="normal" />

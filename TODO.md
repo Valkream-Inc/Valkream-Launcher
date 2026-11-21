@@ -40,6 +40,8 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 - [ ] (++) Dockerfile du backend + en-têtes de cache (ETag, `Cache-Control`) adaptés aux gros fichiers.
 
 ### Launcher / UX
+- [x] (++) Lancement : `launchSteam` démarre Steam avant le jeu (réservé aux jeux avec `steamAppId`), arguments d'exécutable selon les réglages (`launchArgs`, `command`), réglage curseur.
+- [ ] (+) Page de réglages : aperçu de la ligne de commande effective (admin / Debug).
 - [x] (++) Onglet Tools admin : hash d'un dossier (+ export), liste de mods Thunderstore avec images.
 - [ ] (+) Onglet Tools : champ « source Thunderstore » (`Auteur/Nom/Version` → liste des dépendances), génération du `latest.yml` / écriture du hash dans le latest.
 - [ ] (++) Page Mods plus riche : recherche, filtres par catégorie, version installée vs disponible.

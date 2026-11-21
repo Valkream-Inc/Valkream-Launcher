@@ -154,6 +154,12 @@ describe("InstanceInstaller", () => {
     assert.deepEqual(readInstanceSettings(dir("stable")), result);
   });
 
+  it("réglage numérique (curseur) enregistré et relu tel quel", () => {
+    writeInstanceSetting(dir("stable"), "ram", 4096, { ram: 2048 });
+    assert.equal(readInstanceSettings(dir("stable")).ram, 4096);
+    assert.throws(() => writeInstanceSetting(dir("stable"), "ram", Number.NaN), /invalide/);
+  });
+
   it("deuxième passage : rien à faire, aucun téléchargement", async () => {
     const { installer, downloads } = build(baseRemote(), files);
     await installer.sync("g", "stable");

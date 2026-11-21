@@ -70,6 +70,23 @@ frontend/
 3. Mettre à jour `latest.beta.yml`, tester avec l'option beta du launcher, puis reporter dans `latest.yml`.
 4. Incrémenter la version `X0.X1.X2` (affichage seulement : la mise à jour se décide entrée par entrée via version + hash).
 
+## Lancement : Steam et arguments
+
+- **`steamAppId`** (config main) : sa présence active le réglage `launchSteam` (absent de l'interface pour un jeu sans app Steam) et le bouton « Page Steam du jeu » (`steam://store/<id>`). Avec `launchSteam` actif, le launcher **démarre Steam s'il ne tourne pas** (`steam://open/main`, puis attente de son démarrage, 30 s au plus et sans jamais bloquer le lancement) pour que la vérification de possession du jeu fonctionne, **puis lance l'exécutable de l'instance**. Un jeu sans `executable` déclaré est lancé par Steam (`steam://rungameid/<id>`).
+- **`launchArgs`** (config main, déclinable par plateforme) : arguments passés à l'exécutable, éventuellement selon les réglages. Un argument est une chaîne (toujours, `{réglage}` remplacé par sa valeur) ou `{ when, equals?, args }` (ajoutés si le réglage est actif, ou égal à `equals`). Les arguments sont transmis en tableau, jamais via un shell.
+- **`command`** : commande du PATH lancée à la place de `executable` (ex : `java`), avec `launchCwd` (dossier relatif à l'instance) ; le fichier du jeu passe dans `launchArgs`.
+- **Curseur** (config render) : `{ type: "slider", settingsName: "ram", label, min, max, step, unit, default }` ; la valeur numérique est enregistrée au relâchement et utilisable dans `launchArgs`. Exemple pour un jeu Java :
+
+```ts
+// main
+command: { win32: "java", linux: "java" },
+launchCwd: "game",
+launchArgs: ["-Xmx{ram}M", { when: "fullscreen", args: ["--fullscreen"] }, "-jar", "server.jar"],
+defaultSettings: { ram: 4096, fullscreen: false },
+// render : customGamesSettings
+{ type: "slider", settingsName: "ram", label: "Mémoire max", min: 1024, max: 16384, step: 512, unit: "Mo", default: 4096 }
+```
+
 ## Installation atomique et reprise
 
 - **Atomique par entrée** : chaque provider (`zip_url`, `hash_url`, Thunderstore) télécharge, vérifie et extrait d'abord dans `.tmp/<entrée>.stage`. Ce n'est qu'une fois tout prêt que `gameFolderToRemove` est appliqué et que les fichiers sont basculés dans le dossier du jeu par renommages (`install/staging.ts`). Une erreur, une annulation ou un hash invalide pendant la préparation laisse l'installation exactement dans son état précédent. La bascule elle-même (quelques renommages) n'est pas transactionnelle : une coupure à cet instant précis est rattrapée par « Vérifier / Réparer ». L'espace disque temporaire nécessaire est celui des fichiers à mettre à jour (ou de l'archive et de son extraction).

@@ -8,6 +8,7 @@
 import type { GamePlatform, InstanceId, InstanceSettingValue, RawOption } from "@shared/types";
 
 import type { ServerQueryConfig } from "../types/core";
+import type { LaunchArgs } from "./local/launch-args";
 
 /**
  * Config main d'une instance : ce que le remote n'a pas le droit de décider
@@ -30,7 +31,22 @@ export interface InstanceMainConfig {
   entryPaths: Record<string, RawOption<string>>;
   /** Exécutable du jeu, relatif à la racine de l'instance. */
   executable?: Partial<Record<GamePlatform, string>>;
-  /** App Steam, pour le lancement via Steam. */
+  /**
+   * Commande du PATH lancée à la place de `executable` (ex : `java` pour un jeu Java),
+   * par plateforme. Le fichier du jeu se passe alors dans `launchArgs` (`-jar`, …).
+   */
+  command?: Partial<Record<GamePlatform, string>>;
+  /** Dossier de lancement, relatif à la racine de l'instance (défaut : dossier de l'exécutable, ou la racine avec `command`). */
+  launchCwd?: string;
+  /**
+   * Arguments passés à l'exécutable, éventuellement selon les réglages (voir `local/launch-args.ts`) :
+   * `["-Xmx{ram}M", { when: "fullscreen", args: ["--fullscreen"] }]`.
+   */
+  launchArgs?: LaunchArgs;
+  /**
+   * App Steam. Sa présence active le réglage `launchSteam` (démarrer Steam avant le jeu, pour la
+   * vérification de possession) et le lien vers la page du jeu dans les réglages.
+   */
   steamAppId?: number;
   /** Valeurs des réglages tant que le joueur n'en a pas choisi une (`launchSteam`, `launcherBehavior`…). */
   defaultSettings?: Readonly<Record<string, InstanceSettingValue>>;

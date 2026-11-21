@@ -244,7 +244,8 @@ export interface InstanceSummary {
 /* Rapport d'une installation (`instances:report`) : onglets Mods/Debug */
 /* ------------------------------------------------------------------ */
 
-export type InstanceSettingValue = boolean | string;
+/** Valeur d'un réglage : interrupteur, choix / texte, ou nombre (curseur). */
+export type InstanceSettingValue = boolean | string | number;
 
 export type EntryStatus =
   /** Version et hash installés = ceux du remote. */
@@ -307,6 +308,8 @@ export interface InstanceReport {
   contributors: Contributor[];
   /** Nombre d'entrées enregistrées comme installées (connu même sans accès au remote). */
   installedCount: number;
+  /** App Steam de l'instance : active le réglage `launchSteam` et le lien vers la page du jeu. */
+  steamAppId?: number;
   /** Réglages propres à cette installation. */
   settings: Record<string, InstanceSettingValue>;
   executable?: { path: string; exists: boolean };

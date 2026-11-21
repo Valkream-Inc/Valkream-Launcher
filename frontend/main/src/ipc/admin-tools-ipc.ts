@@ -28,8 +28,9 @@ export default function registerAdminToolsIpc(): void {
   ipcMain.handle("tools:hash-folder", async (_event, ignore: unknown): Promise<ToolsHashSummary | null> => {
     const picked = await dialog.showOpenDialog(window(), { properties: ["openDirectory"], title: "Dossier à hasher" });
     if (picked.canceled || !picked.filePaths[0]) return null;
-    lastFolder = picked.filePaths[0];
-    return { folder: lastFolder, ...(await hashFolder(lastFolder, patterns(ignore))) };
+    const folder = picked.filePaths[0];
+    lastFolder = folder;
+    return { folder, ...(await hashFolder(folder, patterns(ignore))) };
   });
 
   // Écrit hash.json + hash/ pour le dossier choisi précédemment

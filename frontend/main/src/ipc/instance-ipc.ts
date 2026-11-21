@@ -25,6 +25,7 @@ import {
 } from "../instances/services";
 import DirsManager from "../core/dirs";
 import LauncherManager from "../core/launcher";
+import { ensureSteamRunning, isSteamRunning } from "../instances/local/steam";
 import { cancelSync, runSync } from "./sync-registry";
 
 const isChannel = (value: unknown): value is Channel =>
@@ -116,13 +117,23 @@ const InstanceIpcHandlers = (): void => {
     const behavior = settings.launcherBehavior;
     const plan = planLaunch(config, locations, settings);
 
+    // `launchSteam` : Steam doit tourner pour la vérification de possession du jeu.
+    if (plan.kind === "executable" && plan.ensureSteam) {
+      const result = await ensureSteamRunning({
+        isRunning: () => isSteamRunning(),
+        open: (url) => shell.openExternal(url),
+        sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+      });
+      if (result === "timeout") console.warn("⚠️ Steam ne répond pas : lancement du jeu sans attendre.");
+    }
+
     if (plan.kind === "steam") {
       await shell.openExternal(plan.url);
       if (behavior === "close") LauncherManager.close();
       return;
     }
 
-    const child = spawn(plan.path, [], { cwd: plan.cwd, stdio: "ignore", detached: behavior !== "hide" });
+    const child = spawn(plan.path, plan.args, { cwd: plan.cwd, stdio: "ignore", detached: behavior !== "hide" });
     if (behavior === "hide") {
       // Le launcher revient quand le jeu se ferme.
       LauncherManager.hide();

@@ -16,6 +16,7 @@ import type {
   GamePlatform,
   InstanceReport,
   ModDisplay,
+  InstanceSettingValue,
   ReleaseConfig,
   ReleaseEntry,
   ReleaseTier,
@@ -135,6 +136,7 @@ export class InstanceInspector {
       id,
       channel,
       installDir: locations.installDir,
+      steamAppId: config.steamAppId,
       releaseSource: loaded.releaseSource,
       entries: [],
       summary: {
@@ -245,7 +247,7 @@ export const buildRow = (
   entry: ReleaseEntry,
   entryErrors: string[],
   installed: { version: string; hash?: string } | undefined,
-  settings: Record<string, boolean | string>,
+  settings: Record<string, InstanceSettingValue>,
 ): EntryReport => {
   const optionalSetting = entry?.optional?.setting;
   const skipped = optionalSetting !== undefined && settings[optionalSetting] !== true;
