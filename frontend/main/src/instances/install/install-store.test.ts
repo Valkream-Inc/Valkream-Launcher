@@ -35,6 +35,8 @@ describe("install-store", () => {
     writeInstanceSetting(dir, "modsAdmin", true);
     assert.deepEqual(writeInstanceSetting(dir, "quality", "high"), { modsAdmin: true, quality: "high" });
     assert.throws(() => writeInstanceSetting(dir, "../x", true), /invalide/);
-    assert.throws(() => writeInstanceSetting(dir, "ok", 3 as unknown as boolean), /invalide/);
+    assert.equal(writeInstanceSetting(dir, "ram", 3).ram, 3); // nombre : curseur
+    assert.throws(() => writeInstanceSetting(dir, "ok", Number.NaN), /invalide/);
+    assert.throws(() => writeInstanceSetting(dir, "ok", {} as unknown as boolean), /invalide/);
   });
 });
