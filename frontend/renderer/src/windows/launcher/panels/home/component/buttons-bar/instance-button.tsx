@@ -97,14 +97,16 @@ export default function InstanceButton() {
 
       const result = await window.electron_API.syncInstance(
         actualInstanceId,
-        actualChannel
+        actualChannel,
       );
       if (result.cancelled) {
         enqueueSnackbar("Installation annulée", { variant: "info" });
       } else if (result.failed.length > 0) {
         error(
           actionName,
-          result.failed.map((item) => `${item.name} (${item.error})`).join(", ")
+          result.failed
+            .map((item) => `${item.name} (${item.error})`)
+            .join(", "),
         );
       } else {
         enqueueSnackbar(doneText, { variant: "success" });
@@ -124,13 +126,13 @@ export default function InstanceButton() {
   const handleInstall = () =>
     runAction(
       () => sync("l'installation", "Installation terminée !"),
-      `${actualInstanceId}-install`
+      `${actualInstanceId}-install`,
     );
 
   const handleUpdate = () =>
     runAction(
       () => sync("la mise à jour", "Mise à jour terminée !"),
-      `${actualInstanceId}-update`
+      `${actualInstanceId}-update`,
     );
 
   const start = async () => {
@@ -139,7 +141,7 @@ export default function InstanceButton() {
       // Le comportement du launcher est un réglage de l'installation
       const report = await window.electron_API.getInstanceReport(
         actualInstanceId,
-        actualChannel
+        actualChannel,
       );
       hidden = report.settings.launcherBehavior === "hide";
 
@@ -162,7 +164,7 @@ export default function InstanceButton() {
       .filter(
         (setting) =>
           setting.level === "danger" &&
-          activeSettings.includes(setting.settingsName)
+          activeSettings.includes(setting.settingsName),
       )
       .map((setting) => `\n (⚠️ ${setting.label} activés.)`)
       .join("");
@@ -223,7 +225,7 @@ export default function InstanceButton() {
                   text: "Installation incomplète\n (❌ Connexion requise.)",
                   playIcon: false,
                   onClick: () => {},
-                }
+                },
           );
 
         // Cas 4 : Installé, internet, pas à jour (majeur)
@@ -246,7 +248,9 @@ export default function InstanceButton() {
         if (isInstalled && isConnected && isUpToDate)
           return setAction({
             text: `Jouer${gameVersion ? ` à la v${gameVersion}` : ""}${
-              maintenance && maintenance.enabled ? "\n (⚠️ Maintenance en cours.)" : ""
+              maintenance && maintenance.enabled
+                ? "\n (⚠️ Maintenance en cours.)"
+                : ""
             }${dangerWarnings(activeOptionalSettings)}`,
             playIcon: true,
             onClick: handleStart,
@@ -307,12 +311,21 @@ export default function InstanceButton() {
           ))}
         </Stack>
       </ButtonBase>
+
       {syncing && (
         <Button
           color="error"
           variant="contained"
+          size="large"
           onClick={cancel}
-          sx={{ position: "fixed", bottom: 8, left: "50%", transform: "translateX(-50%)", zIndex: 9 }}
+          sx={{
+            
+            // position: "absolute",
+            // bottom: "100%",
+            // left: "50%",
+            // transform: "translateX(-50%)",
+            // zIndex: 9,
+          }}
         >
           Annuler
         </Button>

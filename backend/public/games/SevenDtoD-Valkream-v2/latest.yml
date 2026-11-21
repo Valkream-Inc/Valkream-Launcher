@@ -44,14 +44,13 @@ game-base:
     version: 0.220.5
     type: zip_url
     content:
-      win32: /games/SevenDtoD/latest/build-game-win32.zip
-      linux: /games/SevenDtoD/latest/build-game-linux.zip
-      darwin: /games/SevenDtoD/latest/build-game-darwin.zip
+      win32: https://play.valkream.com/games/SevenDtoD/latest/build-game-win32.zip
+      linux: https://play.valkream.com/games/SevenDtoD/latest/build-game-linux.zip
+      darwin: https://play.valkream.com/games/SevenDtoD/latest/build-game-darwin.zip
 
 game-details:
   modpack:
     version: 1.0.0
     type: hash_url
-    hash: ace10f3403df67afe9d34aeb2481159a89c1b6e0b72ed09ffe299d50cc74a075
-    content: /games/SevenDtoD-Valkream-v2/hash/stable.json
-    hash-folder: /games/SevenDtoD/latest/files/
+    content: https://play.valkream.com/games/SevenDtoD/latest/mods.json
+    hash-folder: https://play.valkream.com/games/SevenDtoD/latest/files/Mods/
