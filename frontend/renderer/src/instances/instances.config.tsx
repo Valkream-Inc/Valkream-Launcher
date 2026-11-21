@@ -98,21 +98,21 @@ const instancesRenderConfig: InstanceRenderConfig[] = [
         type: "toggle",
         settingsName: "boostFps",
         label: "Mods boost FPS",
-        text: "Installer les mods qui améliorent les performances ?",
+        text: "Installer les mods qui améliorent les performances (dégrade grandement les graphiques) ?",
       },
       {
         type: "toggle",
         settingsName: "boostGraphic",
         label: "Mods boost graphismes",
-        text: "Installer les mods qui améliorent les graphismes ?",
-        level: "special",
+        text: "Installer les mods qui améliorent les graphismes (demande un pc performant) ?",
+        category: { level: "admin" },
       },
       {
         type: "toggle",
         settingsName: "modsAdmin",
         label: "Mods admin",
         text: "Installer les mods d'administration (réservé aux admins du serveur).",
-        level: "danger",
+        category: { level: "admin", zone: "danger" },
       },
     ],
     debugContent: [
@@ -147,7 +147,12 @@ const instancesRenderConfig: InstanceRenderConfig[] = [
       },
     },
     serverLabel: "7 Days",
-    links: { discord: DISCORD, site: SITE },
+    links: {
+      discord: DISCORD,
+      site: SITE,
+      topserver:
+        "https://top-serveurs.net/7-days-to-die/vote/7-days-to-valkream",
+    },
     tipContent: <TipsMessage />,
     welcomeContent: <WelcomeMessage />,
     descriptionContent: (

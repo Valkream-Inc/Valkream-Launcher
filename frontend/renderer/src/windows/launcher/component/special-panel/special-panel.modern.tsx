@@ -63,7 +63,13 @@ function SpecialPanelModern({
           color: "text.primary",
         }}
       >
-        <Stack direction="row" spacing={2} alignItems="flex-start">
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "flex-start",
+          }}
+        >
           <Typography
             component="span"
             sx={{
@@ -75,7 +81,7 @@ function SpecialPanelModern({
             {data.icon}
           </Typography>
 
-          <Box flex={1}>
+          <Box sx={{ flex: 1 }}>
             <Typography
               variant="h6"
               gutterBottom
@@ -88,7 +94,7 @@ function SpecialPanelModern({
             </Typography>
 
             {buttons.length > 0 && (
-              <Stack direction="row" spacing={2} mt={3}>
+              <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
                 {buttons.map((btn, idx) => (
                   <Button
                     key={idx}

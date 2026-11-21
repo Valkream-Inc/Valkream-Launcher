@@ -5,12 +5,12 @@
 
 import Box from "@mui/material/Box";
 
+import { ActionProvider } from "./context/action.context";
 import { BackgroundProvider } from "./context/background.context";
+import { GamesProvider } from "./context/games.context";
 import { InfosProvider } from "./context/infos.context";
 import { PanelsProvider, usePanels } from "./context/panels.context";
 import { ThemeProvider } from "./context/theme.context";
-import { ActionProvider } from "./context/action.context";
-import { GamesProvider } from "./context/games.context";
 
 import Background from "./component/background/background";
 import Copyright from "./component/copyright/copyright";
@@ -18,13 +18,13 @@ import Panel from "./component/panel/panel";
 import SpecialPanel from "./component/special-panel/special-panel";
 import WindowsBar from "./component/windows-bar/windows-bar";
 
-import Home from "./panels/home/home";
-import Settings from "./panels/settings/settings";
-import ChooseGames from "./panels/choose-games/choose-games";
 import type {
   LauncherBackgroundProps,
   MainLauncherProvidersProps,
 } from "./launcher.types";
+import ChooseGames from "./panels/choose-games/choose-games";
+import Home from "./panels/home/home";
+import Settings from "./panels/settings/settings";
 
 function BetaEnabledPanel() {
   const { changePanel } = usePanels();
@@ -35,6 +35,7 @@ function BetaEnabledPanel() {
     return window.location.reload();
   };
 
+  console.log("render toto");
   return (
     <Box sx={{ position: "absolute", inset: 0 }}>
       <SpecialPanel

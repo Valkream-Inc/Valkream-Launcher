@@ -19,13 +19,17 @@ import { useAction } from "../../../../context/action.context";
 import { useBackground } from "../../../../context/background.context";
 import { useGames } from "../../../../context/games.context";
 import { useInfos } from "../../../../context/infos.context";
-import SteamSourceDialog from "./steam-source-dialog";
 import type { InstanceButtonAction } from "./instance-button.types";
+import SteamSourceDialog from "./steam-source-dialog";
 
 /** 75 s → "1:15", 3725 s → "1:02:05". */
 const formatElapsed = (ms: number): string => {
   const total = Math.floor(ms / 1000);
-  const [h, m, sec] = [Math.floor(total / 3600), Math.floor((total % 3600) / 60), total % 60];
+  const [h, m, sec] = [
+    Math.floor(total / 3600),
+    Math.floor((total % 3600) / 60),
+    total % 60,
+  ];
   const pad = (n: number) => String(n).padStart(2, "0");
   return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
 };
@@ -51,7 +55,10 @@ export default function InstanceButton() {
   // Dernier état de progression + horloge locale : le temps écoulé avance chaque seconde,
   // même quand aucune progression n'arrive (extraction, vérification…).
   const syncStartedAt = useRef(0);
-  const lastProgress = useRef<{ text: string; progress?: InstanceSyncProgress }>({ text: "" });
+  const lastProgress = useRef<{
+    text: string;
+    progress?: InstanceSyncProgress;
+  }>({ text: "" });
 
   const render = () => {
     const { text, progress } = lastProgress.current;
@@ -61,7 +68,11 @@ export default function InstanceButton() {
     const details = transfer
       ? `\n ${transfer.percent}% (${transfer.processedBytes}${transfer.totalBytes ? `/${transfer.totalBytes}` : ""}) à ${transfer.speed}/s · ${elapsed}`
       : `\n ${elapsed}`;
-    setAction({ text: `${text}${details}`, playIcon: false, onClick: () => {} });
+    setAction({
+      text: `${text}${details}`,
+      playIcon: false,
+      onClick: () => {},
+    });
   };
 
   const callback = (text: string, progress?: InstanceSyncProgress) => {
@@ -105,7 +116,9 @@ export default function InstanceButton() {
       if (result.cancelled) {
         enqueueSnackbar("Installation annulée", { variant: "info" });
       } else if (result.failed.some((item) => item.steamIssue)) {
-        setSteamIssue(result.failed.find((item) => item.steamIssue)?.steamIssue ?? null);
+        setSteamIssue(
+          result.failed.find((item) => item.steamIssue)?.steamIssue ?? null,
+        );
       } else if (result.failed.length > 0) {
         error(
           actionName,
@@ -168,7 +181,7 @@ export default function InstanceButton() {
     (actualInstance.customGamesSettings ?? [])
       .filter(
         (setting) =>
-          setting.level === "danger" &&
+          (setting.category?.zone ?? "normal") === "danger" &&
           activeSettings.includes(setting.settingsName),
       )
       .map((setting) => `\n (⚠️ ${setting.label} activés.)`)
@@ -328,20 +341,7 @@ export default function InstanceButton() {
       </ButtonBase>
 
       {syncing && (
-        <Button
-          color="error"
-          variant="contained"
-          size="large"
-          onClick={cancel}
-          sx={{
-            
-            // position: "absolute",
-            // bottom: "100%",
-            // left: "50%",
-            // transform: "translateX(-50%)",
-            // zIndex: 9,
-          }}
-        >
+        <Button color="error" variant="contained" size="large" onClick={cancel}>
           Annuler
         </Button>
       )}

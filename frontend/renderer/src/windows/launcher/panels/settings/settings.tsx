@@ -13,22 +13,21 @@ import InstanceSettings from "./instance/InstanceSettings";
 function Settings() {
   const { actualInstanceId } = useGames();
   const [activeTab, setActiveTab] = useState("general");
-  const [isConfirmSpecialOptionVisible, setIsConfirmSpecialOptionVisible] =
-    useState(false);
-  const [isSpecialOptionVisible, setIsSpecialOptionVisible] = useState(false);
+  const [isConfirmAdminVisible, setIsConfirmAdminVisible] = useState(false);
+  const [isAdminActive, setIsAdminActive] = useState(false);
   const [isDevActive, setIsDevActive] = useState(false);
 
-  const toogleSpecialOption = () => {
+  const toogleAdmin = () => {
     enqueueSnackbar(
-      isSpecialOptionVisible
-        ? "Options Speciales désactivées !"
-        : "Options Speciales activées !",
-      { variant: "warning" }
+      isAdminActive
+        ? "Options Admin désactivées !"
+        : "Options Admin activées !",
+      { variant: "warning" },
     );
-    setIsSpecialOptionVisible(!isSpecialOptionVisible);
+    setIsAdminActive(!isAdminActive);
   };
 
-  const EnabledSpecialOption = () => {
+  const EnabledAdmin = () => {
     return (
       <SpecialPanel
         type="warning"
@@ -37,33 +36,33 @@ function Settings() {
           {
             text: "Continuer",
             onClick: () => {
-              toogleSpecialOption();
-              setIsConfirmSpecialOptionVisible(false);
+              toogleAdmin();
+              setIsConfirmAdminVisible(false);
             },
           },
           {
             text: "Annuler et revenir",
-            onClick: () => setIsConfirmSpecialOptionVisible(false),
+            onClick: () => setIsConfirmAdminVisible(false),
           },
         ]}
       />
     );
   };
-  if (isConfirmSpecialOptionVisible) return <EnabledSpecialOption />;
+  if (isConfirmAdminVisible) return <EnabledAdmin />;
 
   const changeTab = (tab: string) => setActiveTab(tab);
 
   // Rien à libérer au retour à l'accueil : les onglets lisent le rapport de l'instance
   const returnToHome = () => {};
 
-  function ToggleIsConfirmSpecialOptionVisible() {
+  function ToggleIsConfirmAdminVisible() {
     // si déja activés --> les désactivés
-    if (isSpecialOptionVisible) {
-      setIsSpecialOptionVisible(false);
-      setIsConfirmSpecialOptionVisible(false);
+    if (isConfirmAdminVisible) {
+      setIsAdminActive(false);
+      setIsConfirmAdminVisible(false);
     }
     // sinon rendre visible le panel de confirmation
-    else setIsConfirmSpecialOptionVisible(true);
+    else setIsConfirmAdminVisible(true);
   }
 
   return (
@@ -72,8 +71,8 @@ function Settings() {
       returnToHome={returnToHome}
       changeTab={changeTab}
       activeTab={activeTab}
-      ToggleIsConfirmSpecialOptionVisible={ToggleIsConfirmSpecialOptionVisible}
-      isSpecialOptionVisible={isSpecialOptionVisible}
+      ToggleIsConfirmAdminVisible={ToggleIsConfirmAdminVisible}
+      isAdminActive={isAdminActive}
       setIsDevActive={setIsDevActive}
       isDevActive={isDevActive}
     />

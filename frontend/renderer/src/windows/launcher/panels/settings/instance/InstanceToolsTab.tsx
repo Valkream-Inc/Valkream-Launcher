@@ -8,9 +8,16 @@
  *   descriptions et liens, prête à coller dans `mods.config.json`.
  */
 
+import {
+  Avatar,
+  Box,
+  Button,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import { useState } from "react";
-import { Avatar, Box, Button, Stack, TextField, Typography } from "@mui/material";
 
 import type { ModsListResult, ToolsHashSummary } from "@shared/types";
 
@@ -18,7 +25,9 @@ import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
 
 const fail = (error: unknown) =>
-  enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: "error" });
+  enqueueSnackbar(error instanceof Error ? error.message : String(error), {
+    variant: "error",
+  });
 
 const copy = async (text: string, label: string) => {
   try {
@@ -32,7 +41,8 @@ const copy = async (text: string, label: string) => {
 const save = async (name: string, text: string) => {
   try {
     const target = await window.electron_API.toolsSaveText(name, text);
-    if (target) enqueueSnackbar(`Enregistré : ${target}`, { variant: "success" });
+    if (target)
+      enqueueSnackbar(`Enregistré : ${target}`, { variant: "success" });
   } catch (error) {
     fail(error);
   }
@@ -42,11 +52,15 @@ const formatBytes = (bytes: number): string => {
   const units = ["o", "Ko", "Mo", "Go"];
   let value = bytes;
   let unit = 0;
-  while (value >= 1024 && unit < units.length - 1) (value /= 1024), unit++;
+  while (value >= 1024 && unit < units.length - 1) ((value /= 1024), unit++);
   return `${value.toFixed(unit === 0 ? 0 : 1)} ${units[unit]}`;
 };
 
-const lines = (text: string) => text.split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean);
+const lines = (text: string) =>
+  text
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 
 function HashFolderTool() {
   const [ignoreText, setIgnoreText] = useState("");
@@ -73,7 +87,10 @@ function HashFolderTool() {
   const exportFiles = () =>
     run(async () => {
       const done = await window.electron_API.toolsExportHash(lines(ignoreText));
-      if (done) enqueueSnackbar(`hash.json et hash/ écrits dans ${done.output}`, { variant: "success" });
+      if (done)
+        enqueueSnackbar(`hash.json et hash/ écrits dans ${done.output}`, {
+          variant: "success",
+        });
     });
 
   return (
@@ -101,20 +118,36 @@ function HashFolderTool() {
           </Box>
           {result && (
             <>
-              <Typography variant="body2" sx={{ wordBreak: "break-all", userSelect: "text" }}>
+              <Typography
+                variant="body2"
+                sx={{ wordBreak: "break-all", userSelect: "text" }}
+              >
                 {result.folder}
                 <br />
                 {result.fileCount} fichier(s) · {formatBytes(result.totalBytes)}
               </Typography>
-              <Typography variant="caption" sx={{ wordBreak: "break-all", userSelect: "text" }}>
+              <Typography
+                variant="caption"
+                sx={{ wordBreak: "break-all", userSelect: "text" }}
+              >
                 hash : {result.hash}
               </Typography>
               <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                <Button onClick={() => copy(result.hash, "Hash")}>Copier le hash</Button>
-                <Button onClick={() => copy(JSON.stringify(result.manifest, null, 2), "hash.json")}>
+                <Button onClick={() => copy(result.hash, "Hash")}>
+                  Copier le hash
+                </Button>
+                <Button
+                  onClick={() =>
+                    copy(JSON.stringify(result.manifest, null, 2), "hash.json")
+                  }
+                >
                   Copier hash.json
                 </Button>
-                <Button onClick={() => save("hash.json", JSON.stringify(result.manifest, null, 2))}>
+                <Button
+                  onClick={() =>
+                    save("hash.json", JSON.stringify(result.manifest, null, 2))
+                  }
+                >
                   Enregistrer hash.json
                 </Button>
               </Box>
@@ -146,7 +179,9 @@ function ModsListTool() {
 
   return (
     <>
-      <SettingsTitle warn={false}>Liste de mods depuis un manifest</SettingsTitle>
+      <SettingsTitle warn={false}>
+        Liste de mods depuis un manifest
+      </SettingsTitle>
       <SettingsBox warn={false}>
         <Stack spacing={1}>
           <TextField
@@ -163,8 +198,12 @@ function ModsListTool() {
             </Button>
             {result && (
               <>
-                <Button onClick={() => copy(json, "mods.config.json")}>Copier le JSON</Button>
-                <Button onClick={() => save("mods.config.json", json)}>Enregistrer</Button>
+                <Button onClick={() => copy(json, "mods.config.json")}>
+                  Copier le JSON
+                </Button>
+                <Button onClick={() => save("mods.config.json", json)}>
+                  Enregistrer
+                </Button>
               </>
             )}
           </Box>
@@ -178,7 +217,9 @@ function ModsListTool() {
 
       {result && (
         <>
-          <SettingsTitle warn={false}>Aperçu ({result.mods.length})</SettingsTitle>
+          <SettingsTitle warn={false}>
+            Aperçu ({result.mods.length})
+          </SettingsTitle>
           {result.mods.map((mod) => (
             <SettingsBox key={mod.id ?? mod.name} warn={false}>
               <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
@@ -186,8 +227,10 @@ function ModsListTool() {
                   {mod.name.charAt(0)}
                 </Avatar>
                 <Box>
-                  <Typography fontWeight={700}>{mod.name}</Typography>
-                  {mod.description && <Typography variant="body2">{mod.description}</Typography>}
+                  <Typography sx={{ fontWeight: 700 }}>{mod.name}</Typography>
+                  {mod.description && (
+                    <Typography variant="body2">{mod.description}</Typography>
+                  )}
                 </Box>
               </Box>
             </SettingsBox>

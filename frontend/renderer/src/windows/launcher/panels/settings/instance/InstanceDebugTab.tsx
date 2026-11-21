@@ -7,7 +7,6 @@
  * et outils de support (copier rapport / journal, vérifier, réparer).
  */
 
-import { useCallback, useEffect, useState } from "react";
 import {
   Button,
   Chip,
@@ -20,18 +19,25 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
 
-import { enqueueSnackbar } from "notistack";
 import type { EntryReport, EntryStatus, InstanceReport } from "@shared/types";
+import { enqueueSnackbar } from "notistack";
 
-import { groupEntriesByPath, overlappingPaths } from "../../../../../instances/instances.helpers";
+import {
+  groupEntriesByPath,
+  overlappingPaths,
+} from "../../../../../instances/instances.helpers";
 import type { DebugContent } from "../../../../../instances/instances.types";
 import Wait from "../../../component/wait/wait";
 import { useAction } from "../../../context/action.context";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
 
-const STATUS: Record<EntryStatus, { label: string; color: "success" | "warning" | "error" | "default" | "info" }> = {
+const STATUS: Record<
+  EntryStatus,
+  { label: string; color: "success" | "warning" | "error" | "default" | "info" }
+> = {
   "up-to-date": { label: "À jour", color: "success" },
   outdated: { label: "Mise à jour", color: "warning" },
   "not-installed": { label: "Non installé", color: "warning" },
@@ -41,7 +47,11 @@ const STATUS: Record<EntryStatus, { label: string; color: "success" | "warning" 
 };
 
 const StatusChip = ({ status }: { status: EntryStatus }) => (
-  <Chip size="small" label={STATUS[status].label} color={STATUS[status].color} />
+  <Chip
+    size="small"
+    label={STATUS[status].label}
+    color={STATUS[status].color}
+  />
 );
 
 const short = (hash?: string) => (hash ? hash.slice(0, 8) : "—");
@@ -51,24 +61,41 @@ interface Props {
   /** Titres personnalisés par entrée (config render). */
   debugContent?: DebugContent[];
   loading: boolean;
-  onReload: (options?: { verify?: boolean; silent?: boolean }) => void | Promise<void>;
+  onReload: (options?: {
+    verify?: boolean;
+    silent?: boolean;
+  }) => void | Promise<void>;
 }
 
-export default function InstanceDebugTab({ report, debugContent = [], loading, onReload }: Props) {
+export default function InstanceDebugTab({
+  report,
+  debugContent = [],
+  loading,
+  onReload,
+}: Props) {
   const titleOf = (entry: EntryReport) =>
     debugContent.find((item) => item.entry === entry.name)?.title ?? entry.name;
   const [problemsOnly, setProblemsOnly] = useState(false);
   const [log, setLog] = useState<string | null>(null);
-  const isProblem = (entry: EntryReport) => !["up-to-date", "skipped"].includes(entry.status);
+  const isProblem = (entry: EntryReport) =>
+    !["up-to-date", "skipped"].includes(entry.status);
   const tables = groupEntriesByPath(report.entries)
-    .map((table) => (problemsOnly ? { ...table, entries: table.entries.filter(isProblem) } : table))
+    .map((table) =>
+      problemsOnly
+        ? { ...table, entries: table.entries.filter(isProblem) }
+        : table,
+    )
     .filter((table) => table.entries.length > 0);
 
   const loadLog = useCallback(async () => {
     try {
-      setLog(await window.electron_API.getInstanceLog(report.id, report.channel));
+      setLog(
+        await window.electron_API.getInstanceLog(report.id, report.channel),
+      );
     } catch (error) {
-      setLog(`Journal illisible : ${error instanceof Error ? error.message : String(error)}`);
+      setLog(
+        `Journal illisible : ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }, [report.id, report.channel]);
   useEffect(() => {
@@ -85,14 +112,14 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
         const result = await window.electron_API.syncInstance(
           report.id,
           report.channel,
-          { repair: true }
+          { repair: true },
         );
         if (result.failed.length > 0) {
           enqueueSnackbar(
             `Réparation incomplète : ${result.failed
               .map((item) => `${item.name} (${item.error})`)
               .join(", ")}`,
-            { variant: "error" }
+            { variant: "error" },
           );
         } else {
           enqueueSnackbar("Installation réparée !", { variant: "success" });
@@ -121,21 +148,33 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
   return (
     <>
       <Wait isVisible={actionLoading} />
-      <SettingsTitle warn={true}>Debug — {report.id} ({report.channel})</SettingsTitle>
+      <SettingsTitle warn={true}>
+        Debug — {report.id} ({report.channel})
+      </SettingsTitle>
 
       <SettingsBox warn={false}>
         <Typography>Installation : {report.installDir}</Typography>
         <Typography>
-          latest : {report.releaseVersion ?? "—"} (source : {report.releaseSource})
+          latest : {report.releaseVersion ?? "—"} (source :{" "}
+          {report.releaseSource})
         </Typography>
         {report.executable && (
           <Typography>
-            Exécutable : {report.executable.path} ({report.executable.exists ? "présent" : "absent"})
+            Exécutable : {report.executable.path} (
+            {report.executable.exists ? "présent" : "absent"})
           </Typography>
         )}
-        <Button disabled={loading} onClick={() => onReload()}>Recharger</Button>
-        <Button disabled={loading} onClick={() => onReload({ verify: true })}>Vérifier les fichiers</Button>
-        <Button disabled={loading || actionLoading} color="warning" onClick={repair}>
+        <Button disabled={loading} onClick={() => onReload()}>
+          Recharger
+        </Button>
+        <Button disabled={loading} onClick={() => onReload({ verify: true })}>
+          Vérifier les fichiers
+        </Button>
+        <Button
+          disabled={loading || actionLoading}
+          color="warning"
+          onClick={repair}
+        >
           Réparer
         </Button>
         <Button onClick={copyReport}>Copier le rapport</Button>
@@ -145,7 +184,9 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
       {report.errors.length > 0 && (
         <SettingsBox warn={true}>
           {report.errors.map((error) => (
-            <Typography key={error} color="error">{error}</Typography>
+            <Typography key={error} color="error">
+              {error}
+            </Typography>
           ))}
         </SettingsBox>
       )}
@@ -182,21 +223,29 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
           </TableBody>
         </Table>
         {summary.blocking.length > 0 && (
-          <Typography color="error">Bloquant : {summary.blocking.join(", ")}</Typography>
+          <Typography color="error">
+            Bloquant : {summary.blocking.join(", ")}
+          </Typography>
         )}
       </SettingsBox>
 
       {overlaps.length > 0 && (
         <SettingsBox warn={true}>
           <Typography>
-            Chemins imbriqués (fichiers partagés, vérifier to_ignore / gameFolderToPreserve) :{" "}
+            Chemins imbriqués (fichiers partagés, vérifier to_ignore /
+            gameFolderToPreserve) :{" "}
             {overlaps.map(([outer, inner]) => `${outer} ⊃ ${inner}`).join(", ")}
           </Typography>
         </SettingsBox>
       )}
 
       <FormControlLabel
-        control={<Switch checked={problemsOnly} onChange={(event) => setProblemsOnly(event.target.checked)} />}
+        control={
+          <Switch
+            checked={problemsOnly}
+            onChange={(event) => setProblemsOnly(event.target.checked)}
+          />
+        }
         label="Afficher seulement les problèmes"
       />
 
@@ -223,7 +272,8 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
                   <TableRow key={entry.name}>
                     <TableCell>
                       {titleOf(entry)}
-                      {entry.optionalSetting && ` (option : ${entry.optionalSetting})`}
+                      {entry.optionalSetting &&
+                        ` (option : ${entry.optionalSetting})`}
                     </TableCell>
                     <TableCell>{entry.tier}</TableCell>
                     <TableCell>{entry.type}</TableCell>
@@ -237,13 +287,25 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
                     <TableCell>{entry.toIgnore.join(", ") || "—"}</TableCell>
                     <TableCell>
                       <StatusChip status={entry.status} />
-                      {entry.files && entry.files.missing.length + entry.files.changed.length > 0 && (
-                        <Typography variant="caption" display="block">
-                          {entry.files.missing.length} manquant(s), {entry.files.changed.length} modifié(s)
-                        </Typography>
-                      )}
+                      {entry.files &&
+                        entry.files.missing.length +
+                          entry.files.changed.length >
+                          0 && (
+                          <Typography
+                            variant="caption"
+                            sx={{ display: "block" }}
+                          >
+                            {entry.files.missing.length} manquant(s),{" "}
+                            {entry.files.changed.length} modifié(s)
+                          </Typography>
+                        )}
                       {entry.errors.map((error) => (
-                        <Typography key={error} variant="caption" color="error" display="block">
+                        <Typography
+                          key={error}
+                          variant="caption"
+                          color="error"
+                          sx={{ display: "block" }}
+                        >
                           {error}
                         </Typography>
                       ))}
@@ -289,7 +351,13 @@ export default function InstanceDebugTab({ report, debugContent = [], loading, o
         <Typography
           component="pre"
           variant="caption"
-          sx={{ maxHeight: 300, overflow: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", userSelect: "text" }}
+          sx={{
+            maxHeight: 300,
+            overflow: "auto",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-all",
+            userSelect: "text",
+          }}
         >
           {log === null ? "Chargement…" : log.trim() || "(journal vide)"}
         </Typography>

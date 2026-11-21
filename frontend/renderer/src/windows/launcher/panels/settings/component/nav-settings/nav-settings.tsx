@@ -37,7 +37,7 @@ export const NavSettings = ({
   children,
   activeTab,
   setActiveTab,
-  onToogleSpecialOption,
+  ToggleIsConfirmAdminVisible,
 }: NavSettingsProps) => {
   const { changePanel } = usePanels();
   const { actualInstance } = useGames();
@@ -45,7 +45,7 @@ export const NavSettings = ({
   const handleToogleSpecialOptionClick = (e: MouseEvent<HTMLImageElement>) => {
     // ctrl + shift click pour rendre les options spéciaux visibles
     if (e.ctrlKey && e.shiftKey) {
-      onToogleSpecialOption();
+      ToggleIsConfirmAdminVisible();
     }
   };
 

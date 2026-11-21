@@ -10,8 +10,8 @@ export interface GameSettingsProps {
   returnToHome: () => void;
   changeTab: (tab: string) => void;
   activeTab: string;
-  ToggleIsConfirmSpecialOptionVisible: () => void;
-  isSpecialOptionVisible: boolean;
+  ToggleIsConfirmAdminVisible: () => void;
+  isAdminActive: boolean;
   setIsDevActive: Dispatch<SetStateAction<boolean>>;
   isDevActive: boolean;
 }

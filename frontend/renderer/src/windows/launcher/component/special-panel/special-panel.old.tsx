@@ -60,7 +60,7 @@ function SpecialPanelOld({
           color: "#2b1a0f",
         }}
       >
-        <Stack spacing={3} alignItems="center">
+        <Stack spacing={3} sx={{ alignItems: "center" }}>
           {/* Icône */}
           <Typography
             component="span"
@@ -98,7 +98,7 @@ function SpecialPanelOld({
 
           {/* Boutons façon sceaux */}
           {buttons.length > 0 && (
-            <Stack direction="row" spacing={3} mt={2}>
+            <Stack direction="row" spacing={3} sx={{ mt: 3 }}>
               {buttons.map((btn, idx) => (
                 <Button
                   key={idx}

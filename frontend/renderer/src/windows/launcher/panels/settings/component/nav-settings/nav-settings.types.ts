@@ -18,5 +18,5 @@ export interface NavSettingsProps {
   children?: ReactNode;
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  onToogleSpecialOption: () => void;
+  ToggleIsConfirmAdminVisible: () => void;
 }

@@ -7,8 +7,8 @@
  * joueur), Dev (outils du jeu), Tools (préparation du remote) et Debug (diagnostic admin : un tableau par sous-chemin).
  */
 
-import { useEffect, useRef, useState } from "react";
 import { Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
 
 import type { InstanceId } from "@shared/types";
 
@@ -48,17 +48,22 @@ export default function InstanceSettings({
   returnToHome,
   changeTab,
   activeTab,
-  ToggleIsConfirmSpecialOptionVisible,
-  isSpecialOptionVisible,
+  ToggleIsConfirmAdminVisible,
+  isAdminActive,
   setIsDevActive,
   isDevActive,
 }: Props) {
   const { actualChannel: channel } = useGames();
   const { actionLoading } = useAction();
-  const renderConfig = instancesRenderConfig.find((item) => item.id === instanceId);
+  const renderConfig = instancesRenderConfig.find(
+    (item) => item.id === instanceId,
+  );
   const [values, setValues] = useState<InstanceSettingValues>({});
-  const { report, loading, error, reload } = useInstanceReport(instanceId, channel);
-  const isAdmin = isDevActive || isSpecialOptionVisible;
+  const { report, loading, error, reload } = useInstanceReport(
+    instanceId,
+    channel,
+  );
+  const isSpecialActive = isDevActive || isAdminActive;
   const customSettings = renderConfig?.customGamesSettings ?? [];
 
   // Les réglages viennent du rapport au premier chargement de chaque instance / canal seulement :
@@ -74,11 +79,17 @@ export default function InstanceSettings({
 
   // Pendant une action (installation…), on ne reste pas sur les onglets qui modifient le jeu
   useEffect(() => {
-    if (actionLoading && ["mods", "dev", "tools", "debug"].includes(activeTab)) changeTab("general");
+    if (actionLoading && ["mods", "tools", "debug"].includes(activeTab))
+      changeTab("general");
   }, [actionLoading]);
 
   if (!renderConfig) {
-    return <SettingsBox warn={true} text={`Instance « ${instanceId} » sans config render.`} />;
+    return (
+      <SettingsBox
+        warn={true}
+        text={`Instance « ${instanceId} » sans config render.`}
+      />
+    );
   }
 
   const settingProps = {
@@ -97,16 +108,20 @@ export default function InstanceSettings({
       <NavSettings
         onSave={returnToHome}
         activeTab={activeTab}
-        onToogleSpecialOption={ToggleIsConfirmSpecialOptionVisible}
+        ToggleIsConfirmAdminVisible={ToggleIsConfirmAdminVisible}
         setActiveTab={changeTab}
       >
         <NavButton id="general" label="General" active={false} />
         <NavButton id="launcher" label="Launcher" active={false} />
         <NavButton id="game" label="Game" active={false} />
         {!actionLoading && <NavButton id="mods" label="Mods" active={false} />}
-        {isAdmin && <NavButton id="dev" label="Dev" active={false} />}
-        {isAdmin && <NavButton id="tools" label="Tools" active={false} />}
-        {isAdmin && <NavButton id="debug" label="Debug" active={false} />}
+        {isDevActive && <NavButton id="dev" label="Dev" active={false} />}
+        {!actionLoading && isAdminActive && (
+          <NavButton id="tools" label="Tools" active={false} />
+        )}
+        {!actionLoading && isDevActive && (
+          <NavButton id="debug" label="Debug" active={false} />
+        )}
       </NavSettings>
 
       {/* Tabs */}
@@ -115,7 +130,9 @@ export default function InstanceSettings({
           General{channel === "beta" && " (beta)"}
         </SettingsTitle>
         {renderConfig.descriptionContent && (
-          <SettingsBox warn={false}>{renderConfig.descriptionContent}</SettingsBox>
+          <SettingsBox warn={false}>
+            {renderConfig.descriptionContent}
+          </SettingsBox>
         )}
         <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
         {!actionLoading && <ButtonUninstallGlobal />}
@@ -136,67 +153,129 @@ export default function InstanceSettings({
       <SettingsTab id="game" activeTab={activeTab}>
         <SettingsTitle warn={false}>Game</SettingsTitle>
         {error && <Typography color="error">{error}</Typography>}
-        <Instance_ToggleLaunchSteam {...settingProps} steamAppId={report?.steamAppId} />
+        <Instance_ToggleLaunchSteam
+          {...settingProps}
+          steamAppId={report?.steamAppId}
+        />
         <Instance_SelectLauncherBehavior {...settingProps} />
         {!actionLoading && (
-          <Instance_CustomSettings {...settingProps} settings={customSettings} level="normal" />
-        )}
-        {!actionLoading && isSpecialOptionVisible && (
-          <Instance_CustomSettings {...settingProps} settings={customSettings} level="special" />
-        )}
-        {!actionLoading &&
-          isSpecialOptionVisible &&
-          customSettings.some((setting) => setting.level === "danger") && (
-            <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>
-          )}
-        {!actionLoading && isSpecialOptionVisible && (
-          <Instance_CustomSettings {...settingProps} settings={customSettings} level="danger" />
+          <>
+            {/* affichage normal */}
+            <Instance_CustomSettings
+              {...settingProps}
+              settings={customSettings}
+              level="normal"
+              zone="normal"
+            />{" "}
+            {isDevActive && (
+              <Instance_CustomSettings
+                {...settingProps}
+                settings={customSettings}
+                level="dev"
+                zone="normal"
+              />
+            )}
+            {isSpecialActive && (
+              <Instance_CustomSettings
+                {...settingProps}
+                settings={customSettings}
+                level="special"
+                zone="normal"
+              />
+            )}
+            {isAdminActive && (
+              <Instance_CustomSettings
+                {...settingProps}
+                settings={customSettings}
+                level="admin"
+                zone="normal"
+              />
+            )}
+            {/* affichage danger */}
+            {customSettings.some(
+              (setting) =>
+                setting.category?.zone === "danger" &&
+                (setting.category?.level === "normal" ||
+                  (setting.category?.level === "dev" && isDevActive) ||
+                  (setting.category?.level === "admin" && isAdminActive) ||
+                  (setting.category?.level === "special" && isSpecialActive)),
+            ) && <SettingsTitle warn={true}>⚠️ Danger zone !</SettingsTitle>}
+            <Instance_CustomSettings
+              {...settingProps}
+              settings={customSettings}
+              level="normal"
+              zone="danger"
+            />{" "}
+            {isDevActive && (
+              <Instance_CustomSettings
+                {...settingProps}
+                settings={customSettings}
+                level="dev"
+                zone="danger"
+              />
+            )}
+            {isSpecialActive && (
+              <Instance_CustomSettings
+                {...settingProps}
+                settings={customSettings}
+                level="special"
+                zone="danger"
+              />
+            )}
+            {isAdminActive && (
+              <Instance_CustomSettings
+                {...settingProps}
+                settings={customSettings}
+                level="admin"
+                zone="danger"
+              />
+            )}
+          </>
         )}
       </SettingsTab>
 
       <SettingsTab id="mods" activeTab={activeTab}>
-        <SettingsTitle warn={false}>Mods</SettingsTitle>
         {loading && !report && <Typography>Chargement…</Typography>}
         {report && <InstanceModsTab report={report} />}
       </SettingsTab>
 
       {/* Dev : outils d'administration */}
-      {isAdmin && (
-        <SettingsTab id="dev" activeTab={activeTab}>
-          <SettingsTitle warn={true}>Dev</SettingsTitle>
-          {!actionLoading && (
-            <Instance_ButtonUninstallGame id={instanceId} channel={channel} onDone={reload} />
-          )}
-          {!actionLoading && <Instance_ButtonOpenGame id={instanceId} channel={channel} />}
-          <ButtonOpenAppData />
+      <SettingsTab id="dev" activeTab={activeTab}>
+        <SettingsTitle warn={true}>Dev</SettingsTitle>
+        {!actionLoading && (
+          <Instance_ButtonUninstallGame
+            id={instanceId}
+            channel={channel}
+            onDone={reload}
+          />
+        )}
+        {!actionLoading && (
+          <Instance_ButtonOpenGame id={instanceId} channel={channel} />
+        )}
+        <ButtonOpenAppData />
 
-          <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>
-          <ButtonDebug />
-          {!actionLoading && isSpecialOptionVisible && <ToggleBeta />}
-        </SettingsTab>
-      )}
+        <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>
+        <ButtonDebug />
+        {!actionLoading && <ToggleBeta />}
+      </SettingsTab>
 
       {/* Tools : outils de préparation du remote (hash de dossier, liste de mods) */}
-      {isAdmin && (
-        <SettingsTab id="tools" activeTab={activeTab}>
-          <InstanceToolsTab />
-        </SettingsTab>
-      )}
+      <SettingsTab id="tools" activeTab={activeTab}>
+        <InstanceToolsTab />
+      </SettingsTab>
 
       {/* Debug : diagnostic de l'installation (rapport, tableaux, journal) */}
-      {isAdmin && (
-        <SettingsTab id="debug" activeTab={activeTab}>
-          {!report && loading && <Typography>Chargement…</Typography>}
-          {report && (
-            <InstanceDebugTab
-              report={report}
-              debugContent={renderConfig.debugContent}
-              loading={loading}
-              onReload={reload}
-            />
-          )}
-        </SettingsTab>
-      )}
+      <SettingsTab id="debug" activeTab={activeTab}>
+        {!report && loading && <Typography>Chargement…</Typography>}
+        {report && (
+          <InstanceDebugTab
+            report={report}
+            debugContent={renderConfig.debugContent}
+            loading={loading}
+            onReload={reload}
+          />
+        )}
+      </SettingsTab>
     </>
   );
 }

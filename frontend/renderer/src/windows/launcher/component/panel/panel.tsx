@@ -5,8 +5,8 @@
 
 import { Box, Fade } from "@mui/material";
 
-import { usePanels } from "../../context/panels.context";
 import { useAction } from "../../context/action.context";
+import { usePanels } from "../../context/panels.context";
 import type { PanelProps } from "./panel.types";
 
 function Panel({ id, children }: PanelProps) {
@@ -24,6 +24,12 @@ function Panel({ id, children }: PanelProps) {
         sx={{
           position: "absolute",
           inset: 0,
+          maxWidth:
+            activePanel === "home" ||
+            (activePanel === "settings" && activePanel !== id)
+              ? 0
+              : undefined,
+          overflow: activePanel !== id ? "hidden" : undefined,
         }}
       >
         {children}

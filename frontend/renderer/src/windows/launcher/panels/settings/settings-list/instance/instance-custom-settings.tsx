@@ -6,13 +6,21 @@
  * stockés par installation (stable et beta ont chacun les leurs).
  */
 
-import type { ToggleChangeEvent } from "../settings-list.types";
+import {
+  Box,
+  MenuItem,
+  Select,
+  Slider,
+  Switch,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
-import { Box, MenuItem, Select, Slider, Switch, Typography } from "@mui/material";
+import type { ToggleChangeEvent } from "../settings-list.types";
 
 import type {
   CustomGameSetting,
   SettingLevel,
+  SettingZone,
 } from "../../../../../../instances/instances.types";
 import SettingsBox from "../../component/settings-box/settings-box";
 import { saveInstanceSetting } from "./instance-save-setting";
@@ -22,6 +30,7 @@ interface Props extends InstanceSettingProps {
   settings: CustomGameSetting[];
   /** Seuls les réglages de ce niveau sont rendus. */
   level: SettingLevel;
+  zone: SettingZone;
 }
 
 /** Curseur : la valeur s'affiche en direct, mais n'est enregistrée qu'au relâchement (pas de rafale d'écritures). */
@@ -32,12 +41,22 @@ function SliderSetting({
   setting: Extract<CustomGameSetting, { type: "slider" }>;
   props: InstanceSettingProps;
 }) {
-  const saved = Number(props.values[setting.settingsName] ?? setting.default ?? setting.min);
+  const saved = Number(
+    props.values[setting.settingsName] ?? setting.default ?? setting.min,
+  );
   const [dragging, setDragging] = useState<number | null>(null);
   const value = dragging ?? saved;
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%", maxWidth: 420 }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        width: "100%",
+        maxWidth: 420,
+      }}
+    >
       <Typography sx={{ whiteSpace: "nowrap" }}>{setting.label}</Typography>
       <Slider
         size="small"
@@ -48,7 +67,12 @@ function SliderSetting({
         onChange={(_event, next) => setDragging(next as number)}
         onChangeCommitted={(_event, next) => {
           setDragging(null);
-          if (next !== saved) void saveInstanceSetting(props, setting.settingsName, next as number);
+          if (next !== saved)
+            void saveInstanceSetting(
+              props,
+              setting.settingsName,
+              next as number,
+            );
         }}
       />
       <Typography sx={{ minWidth: 80, textAlign: "right" }}>
@@ -59,31 +83,36 @@ function SliderSetting({
   );
 }
 
-function Instance_CustomSettings({ settings, level, ...props }: Props) {
+function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
   const { values } = props;
 
   return (
     <>
       {settings
-        .filter((setting) => (setting.level ?? "normal") === level)
+        .filter(
+          (setting) =>
+            (setting.category?.level ?? "normal") === level &&
+            (setting.category?.zone ?? "normal") === zone,
+        )
         .map((setting) => (
           <SettingsBox
             key={setting.settingsName}
-            warn={level === "danger"}
+            warn={setting.category?.zone === "danger"}
             text={setting.text}
           >
             {setting.type === "toggle" ? (
               <>
                 <Switch
                   checked={
-                    (values[setting.settingsName] ?? setting.default ?? false) ===
-                    true
+                    (values[setting.settingsName] ??
+                      setting.default ??
+                      false) === true
                   }
                   onChange={(event: ToggleChangeEvent) =>
                     saveInstanceSetting(
                       props,
                       setting.settingsName,
-                      event.target.checked
+                      event.target.checked,
                     )
                   }
                 />
@@ -100,13 +129,13 @@ function Instance_CustomSettings({ settings, level, ...props }: Props) {
                     values[setting.settingsName] ??
                       setting.default ??
                       setting.options[0]?.value ??
-                      ""
+                      "",
                   )}
                   onChange={(event) =>
                     saveInstanceSetting(
                       props,
                       setting.settingsName,
-                      event.target.value
+                      event.target.value,
                     )
                   }
                 >

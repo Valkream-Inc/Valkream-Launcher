@@ -39,10 +39,23 @@ export interface InstanceBackground {
 /**
  * Visibilité d'un réglage dans l'onglet Game :
  * - `normal` : toujours visible ;
- * - `special` : options spéciales activées (ctrl + shift + clic sur le logo) ;
- * - `danger` : idem, rangé sous « Danger zone ».
+ * - `admin` : options admin activées (ctrl + shift + clic sur le logo) ;
+ * - `dev` : options dev activées (toggle) ;
+ * - `special` : options dev activées (toggle) ou options admin activées (ctrl + shift + clic sur le logo);
  */
-export type SettingLevel = "normal" | "special" | "danger";
+export type SettingLevel = "normal" | "admin" | "dev" | "special";
+
+/**
+ * Zone d'un réglage dans l'onglet Game :
+ * - `normal` : category normal ;
+ * - `danger` : category attention (danger) ;
+ */
+export type SettingZone = "normal" | "danger";
+
+export type SettingCategory = {
+  level?: SettingLevel;
+  zone?: SettingZone;
+};
 
 /** Réglage propre à une instance, rendu par le composant de réglages générique. */
 export type CustomGameSetting =
@@ -53,7 +66,7 @@ export type CustomGameSetting =
       label: string;
       /** Texte d'aide affiché au-dessus du réglage. */
       text?: string;
-      level?: SettingLevel;
+      category?: SettingCategory;
       default?: boolean;
     }
   | {
@@ -61,7 +74,7 @@ export type CustomGameSetting =
       settingsName: string;
       label: string;
       text?: string;
-      level?: SettingLevel;
+      category?: SettingCategory;
       options: { value: string; label: string }[];
       default?: string;
     }
@@ -71,7 +84,7 @@ export type CustomGameSetting =
       settingsName: string;
       label: string;
       text?: string;
-      level?: SettingLevel;
+      category?: SettingCategory;
       min: number;
       max: number;
       step?: number;
