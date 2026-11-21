@@ -67,3 +67,7 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 - [ ] (+) Fenêtres Electron : `contextIsolation` et `nodeIntegration: false` sont déjà en place ; reste `sandbox`, CSP stricte. `openLink` est validé (`lib/safe-link.ts` : http, https, steam, sans identifiants).
 - [x] (+) Limiter la taille et la profondeur des archives extraites (protection contre les zip-bombs) en plus du confinement des chemins. — fait : `lib/archive-limits.ts` (fichiers et taille décompressée vérifiés avant extraction).
 - [ ] (+) `yarn audit` / Dependabot sur les dépendances du launcher.
+
+- [x] (++) Dossier des jeux modifiable (déplacement atomique), réinstallation d'une entrée dont le chemin change, nettoyage sur version majeure du launcher, contournement de la mise à jour (Ctrl+Maj+clic vidéo). Reste : valider dans Electron (dialogue, déplacement entre disques), version majeure : option de conserver aussi les dossiers `gameFolderToPreserve`.
+- [ ] (++) Provider Nexus (clé API du joueur) ; provider Hexium (doc https://hexium.gg/api/docs/ inaccessible automatiquement : robots.txt, à fournir).
+- [ ] (++) Traduction FR / EN de l'interface.

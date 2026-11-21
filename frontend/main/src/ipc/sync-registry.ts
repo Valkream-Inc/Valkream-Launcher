@@ -50,6 +50,9 @@ export const runSync = async <T>(
 
 export const cancelSync = (key: string): void => running.get(key)?.controller.abort();
 
+/** Une installation est-elle en cours (déplacement du dossier des jeux interdit) ? */
+export const anySyncRunning = (): boolean => running.size > 0;
+
 export const isSyncRunning = (key: string): boolean => running.has(key);
 
 /** Coupe toutes les synchros (fermeture de l'application, erreur fatale). */

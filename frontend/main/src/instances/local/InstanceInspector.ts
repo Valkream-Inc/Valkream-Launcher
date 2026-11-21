@@ -246,7 +246,7 @@ export const buildRow = (
   tier: ReleaseTier,
   entry: ReleaseEntry,
   entryErrors: string[],
-  installed: { version: string; hash?: string } | undefined,
+  installed: { version: string; hash?: string; path?: string } | undefined,
   settings: Record<string, InstanceSettingValue>,
 ): EntryReport => {
   const optionalSetting = entry?.optional?.setting;
@@ -260,6 +260,8 @@ export const buildRow = (
   else if (!installed) status = "not-installed";
   else if (
     installed.version !== declaredVersion ||
+    // Dossier de l'entrée changé depuis l'installation : réinstallation (sinon rien ne bouge)
+    (installed.path !== undefined && installed.path !== String(entry?.path ?? "")) ||
     (entry.hash !== undefined && installed.hash !== entry.hash)
   ) {
     status = "outdated";

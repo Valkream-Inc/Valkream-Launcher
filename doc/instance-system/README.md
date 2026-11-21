@@ -256,3 +256,11 @@ La résolution des dépendances **transitives** Thunderstore reste désactivée 
 
 - **Hash d'un dossier** : choix du dossier par dialogue, motifs `to_ignore` optionnels → `hash` du latest.yml, `hash.json` (copier / enregistrer), export `hash.json` + `hash/` prêt pour le backend. Même algorithme que `scripts/build-manifest.ts` (`instances/tools/hash-folder.ts`).
 - **Liste de mods depuis un manifest** : dépendances Thunderstore (une par ligne, tableau JSON ou lien) → `ModDisplay[]` avec image, description et lien (API Thunderstore), aperçu, copie / enregistrement pour `mods.config.json` (`instances/tools/mods-list.ts`).
+
+
+## Dossier d'installation, versions du launcher et mises à jour
+
+- **Dossier des jeux modifiable** (réglage général « Dossier d'installation des jeux ») : enregistré dans `launcher-paths.json` (données du launcher). Le déplacement est **atomique** : `rename` sur un même volume ; sur un autre disque, copie complète dans `instances.moving` puis `rename` final, et l'ancien dossier n'est supprimé qu'après. La config ne change qu'après un déplacement réussi ; un échec ou un arrêt brutal laisse l'ancien emplacement valide (les restes sont nettoyés au démarrage). Refusé si une installation est en cours, si le dossier cible n'est pas vide ou est imbriqué.
+- **Chemin d'une entrée modifié** (`entryPaths` de la config main) : le launcher mémorise le dossier de chaque entrée à l'installation. S'il change entre deux versions, l'entrée est réinstallée au nouvel endroit (installation complète) et ce qu'elle possédait à l'ancien endroit (mods listés) est retiré. Si le chemin ne change pas, rien n'est refait. Un état ancien sans chemin mémorisé n'est pas réinstallé.
+- **Changement de version majeure du launcher** : au démarrage (hors dev), le contenu des installations est supprimé pour une réinstallation propre ; seuls les réglages du joueur (`instance.settings.json`) sont conservés. Les versions mineures / correctifs ne suppriment rien. La version précédente est mémorisée dans `launcher-version.json`.
+- **Contournement de la mise à jour du launcher** : Ctrl + Maj + clic sur la vidéo de démarrage ouvre directement le launcher. Le mode beta ne désactive plus la mise à jour.

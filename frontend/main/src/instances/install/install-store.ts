@@ -18,6 +18,8 @@ export interface InstalledEntry {
   hash?: string;
   /** Dossiers de premier niveau possédés par l'entrée (ex : un dossier par mod Thunderstore). */
   owned?: string[];
+  /** Dossier de l'entrée (`path` de la config main) à l'installation : s'il change, l'entrée est réinstallée. */
+  path?: string;
   installedAt: string;
 }
 
@@ -64,6 +66,7 @@ export const readInstallState = (installDir: string): InstallState => {
         version: entry.version,
         ...(typeof entry.hash === "string" ? { hash: entry.hash } : {}),
         ...(owned ? { owned } : {}),
+        ...(typeof entry.path === "string" ? { path: entry.path } : {}),
         installedAt: typeof entry.installedAt === "string" ? entry.installedAt : "",
       };
     }
@@ -78,7 +81,7 @@ export const writeInstallState = (installDir: string, state: InstallState): void
 export const recordInstalledEntry = (
   installDir: string,
   name: string,
-  entry: { version: string; hash?: string; owned?: string[] },
+  entry: { version: string; hash?: string; owned?: string[]; path?: string },
   now: () => Date = () => new Date(),
 ): void => {
   const state = readInstallState(installDir);

@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 import type { InstanceMainConfig } from "../instances.types";
 import { InstanceInspector } from "../local/InstanceInspector";
 import { InstanceInstaller } from "./InstanceInstaller";
-import { readInstallState, readInstanceSettings, writeInstanceSetting } from "./install-store";
+import { readInstallState, readInstanceSettings, writeInstallState, writeInstanceSetting } from "./install-store";
 import { writeGameSourceDir } from "./game-source";
 import { manifestHash } from "./manifest";
 import { instanceRootPath } from "../../lib/paths";
@@ -168,6 +168,33 @@ describe("InstanceInstaller", () => {
     const again = await installer.sync("g", "stable");
     assert.deepEqual(again.installed, []);
     assert.deepEqual(downloads, []);
+  });
+
+  it("dossier d'une entrée modifié dans la config main : réinstallée au nouvel endroit, les autres non", async () => {
+    const { installer, downloads } = build(baseRemote(), files);
+    await installer.sync("g", "stable");
+    const original = config.entryPaths.cfg;
+    try {
+      config.entryPaths.cfg = "game/cfg2";
+      downloads.length = 0;
+      const again = await installer.sync("g", "stable");
+      assert.deepEqual(again.installed, ["cfg"]);
+      assert.equal(read("stable", "game/cfg2/new.cfg"), "n");
+      assert.equal(readInstallState(dir("stable")).entries.cfg.path, "game/cfg2");
+      // aucun changement de chemin ensuite : plus rien à faire
+      assert.deepEqual((await installer.sync("g", "stable")).installed, []);
+    } finally {
+      config.entryPaths.cfg = original;
+    }
+  });
+
+  it("état ancien sans chemin enregistré : pas de réinstallation", async () => {
+    const { installer } = build(baseRemote(), files);
+    await installer.sync("g", "stable");
+    const state = readInstallState(dir("stable"));
+    delete state.entries.cfg.path;
+    writeInstallState(dir("stable"), state);
+    assert.deepEqual((await installer.sync("g", "stable")).installed, []);
   });
 
   it("mise à jour : la config client conservée n'est pas écrasée, les autres le sont", async () => {

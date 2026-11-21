@@ -9,6 +9,11 @@ import * as UpdateWindow from "./src/windows/updateWindow";
 import * as MainWindow from "./src/windows/mainWindow";
 import IpcHandlers from "./src/ipc/launcher-ipc";
 import { isDev } from "./src/core/constants";
+import path from "path";
+import DirsManager from "./src/core/dirs";
+import LauncherManager from "./src/core/launcher";
+import { cleanupInterruptedMove, INSTANCES_DIR } from "./src/lib/games-root";
+import { applyLauncherVersion } from "./src/lib/launcher-version";
 import { abortAllSyncs } from "./src/ipc/sync-registry";
 
 if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
@@ -21,6 +26,21 @@ app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
 if (!app.requestSingleInstanceLock() && !isDev) app.quit();
 else {
   app.whenReady().then(async () => {
+    // Dossier des jeux : restes d'un déplacement interrompu, puis nettoyage si le launcher change de version majeure
+    try {
+      cleanupInterruptedMove(DirsManager.gamesRoot());
+      if (!isDev) {
+        const { change, cleaned } = applyLauncherVersion({
+          versionFile: DirsManager.versionFile(),
+          instancesDir: path.join(DirsManager.gamesRoot(), INSTANCES_DIR),
+          current: LauncherManager.getVersion(),
+        });
+        if (change === "major") console.log(`🧹 Nouvelle version majeure : ${cleaned.length} installation(s) nettoyée(s)`);
+      }
+    } catch (error) {
+      console.error("Nettoyage au démarrage impossible :", error);
+    }
+
     // ⚙️ Initialisation des handlers IPC
     const ipcHandlers = new IpcHandlers();
     ipcHandlers.init();

@@ -24,6 +24,7 @@ import ButtonOpenAppData from "../settings-list/global/button-open-appdata";
 import ButtonUninstallGlobal from "../settings-list/global/button-uninstall-global";
 import SelectLauncherBackgroundType from "../settings-list/global/select-launcher-background-type";
 import SelectLauncherTheme from "../settings-list/global/select-launcher-theme";
+import GamesRootSetting from "../settings-list/global/games-root-setting";
 import ToggleBeta from "../settings-list/global/toggle-beta";
 import ToggleDev from "../settings-list/global/toggle-dev";
 import ToggleMusic from "../settings-list/global/toggle-music";
@@ -257,6 +258,7 @@ export default function InstanceSettings({
         <SettingsTitle warn={true}> ⚠️ Advanced !</SettingsTitle>
         <ButtonDebug />
         {!actionLoading && <ToggleBeta />}
+        {!actionLoading && <GamesRootSetting />}
       </SettingsTab>
 
       {/* Tools : outils de préparation du remote (hash de dossier, liste de mods) */}

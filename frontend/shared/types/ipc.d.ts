@@ -105,6 +105,11 @@ export interface ElectronAPI {
   openDevTools(): Promise<void>;
   openAppData(): Promise<string>;
   uninstallLauncher(): Promise<ActionResult>;
+  /** Dossier d'installation des jeux (réglage général). */
+  getGamesRoot(): Promise<{ path: string; isDefault: boolean }>;
+  /** Choisit un nouveau dossier et y déplace les jeux (atomique). `null` si annulé. */
+  changeGamesRoot(): Promise<string | null>;
+  resetGamesRoot(): Promise<string>;
   chooseFolder(): Promise<string | null>;
 }
 

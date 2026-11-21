@@ -238,7 +238,9 @@ export class InstanceInstaller {
 
           const entryDir = entryDirectory(installDir, item.entry.path);
           const previous = state.entries[item.name];
-          const plan = planEntryUpdate(item.entry, previous?.version);
+          // Dossier changé depuis l'installation : réinstallation complète, l'ancien dossier est nettoyé.
+          const pathChanged = previous?.path !== undefined && previous.path !== item.entry.path;
+          const plan = planEntryUpdate(item.entry, pathChanged ? undefined : previous?.version);
 
           // Rien n'est retiré ni écrit dans l'installation avant que tout soit prêt (voir staging.ts).
           let removed = false;
@@ -258,7 +260,7 @@ export class InstanceInstaller {
             resolver,
             io,
             hashes,
-            previousOwned: previous?.owned ?? [],
+            previousOwned: pathChanged ? [] : (previous?.owned ?? []),
             signal,
             archives,
             steam: async () => {
@@ -275,10 +277,16 @@ export class InstanceInstaller {
           });
 
           beforeCommit();
+          if (pathChanged && previous?.path !== undefined) {
+            // Ancien dossier : on retire seulement ce que l'entrée possédait (mods listés), jamais le reste.
+            const uninstall = (this.options.uninstallers ?? DEFAULT_UNINSTALLERS)[String(item.entry.type)];
+            await uninstall?.({ entryDir: entryDirectory(installDir, previous.path), previousOwned: previous.owned ?? [] });
+          }
           recordInstalledEntry(installDir, item.name, {
             version: String(item.entry.version),
             hash: provided.hash,
             owned: provided.owned,
+            path: item.entry.path,
           });
           result.installed.push(item.name);
           emit({ ...common, step: "done" });

@@ -14,6 +14,9 @@ import CheckForUpdates from "./check-for-updates";
 
 import SettingsManager from "../core/settings";
 import LauncherManager from "../core/launcher";
+import DirsManager from "../core/dirs";
+import { moveGamesRoot, writeGamesRoot } from "../lib/games-root";
+import { anySyncRunning } from "./sync-registry";
 import { isSafeExternalUrl } from "../lib/safe-link";
 
 import * as MainWindow from "../windows/mainWindow";
@@ -111,6 +114,34 @@ class IpcHandlers {
       "uninstall-launcher",
       async () => await LauncherManager.uninstall()
     );
+
+    // Dossier d'installation des jeux (réglage général) : déplacement atomique
+    ipcMain.handle("games-root:get", () => ({
+      path: DirsManager.gamesRoot(),
+      isDefault: DirsManager.gamesRoot() === DirsManager.rootPath(),
+    }));
+    ipcMain.handle("games-root:change", async () => {
+      const folder = await this.choseFolder();
+      if (!folder) return null;
+      await moveGamesRoot({
+        fromRoot: DirsManager.gamesRoot(),
+        toRoot: folder,
+        configFile: DirsManager.pathsFile(),
+        isBusy: anySyncRunning,
+      });
+      return folder;
+    });
+    ipcMain.handle("games-root:reset", async () => {
+      await moveGamesRoot({
+        fromRoot: DirsManager.gamesRoot(),
+        toRoot: DirsManager.rootPath(),
+        configFile: DirsManager.pathsFile(),
+        isBusy: anySyncRunning,
+        record: undefined,
+      });
+      writeGamesRoot(DirsManager.pathsFile(), undefined);
+      return DirsManager.rootPath();
+    });
 
     // Sélection dossier
     ipcMain.handle("choose-folder", this.choseFolder.bind(this));

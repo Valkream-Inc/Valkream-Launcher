@@ -5,6 +5,7 @@
 
 import path from "path";
 import { app } from "electron";
+import { readGamesRoot } from "../lib/games-root";
 import newDir from "../lib/platform-dir";
 
 import { isDev } from "./constants";
@@ -43,6 +44,13 @@ class DirsManager {
             ),
           }
     );
+
+  /** Config des chemins (dossier des jeux) et version du launcher : dans les données du launcher. */
+  pathsFile = (): string => path.join(this.dbPath(), "launcher-paths.json");
+  versionFile = (): string => path.join(this.dbPath(), "launcher-version.json");
+
+  /** Dossier contenant `instances/` : réglage du joueur, sinon le dossier de données par défaut. */
+  gamesRoot = (): string => readGamesRoot(this.pathsFile()) ?? this.rootPath();
 
   dbPath = (): string => (isDev ? this.rootPath() : this.launcherAppDataPath());
 }

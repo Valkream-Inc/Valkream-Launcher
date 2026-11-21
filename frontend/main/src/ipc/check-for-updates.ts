@@ -10,7 +10,6 @@ import { autoUpdater } from "electron-updater";
 import { formatBytes } from "../lib/format-bytes";
 
 import { baseUrl } from "../core/constants";
-import SettingsManager from "../core/settings";
 import InfosManager from "../core/server-infos";
 import FilesManager from "../core/files";
 import LauncherManager from "../core/launcher";
@@ -25,14 +24,6 @@ class CheckForUpdates {
 
   async init(event: IpcMainEvent): Promise<void> {
     this.event = event;
-
-    const isBeta = await SettingsManager.getSetting("betaEnabled");
-
-    if (isBeta)
-      return this.onMsg(
-        "⚠️ Les tests beta sont activés. La mise à jour est désactivée.",
-        true
-      );
 
     if (!(await InfosManager.getIsServerReachable()))
       return this.onError(

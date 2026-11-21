@@ -40,11 +40,22 @@ export default function Updater() {
       });
     };
 
+    // Contournement de la mise à jour : Ctrl + Maj + clic sur la vidéo (avant la fin de la lecture)
+    const handleBypass = (event: MouseEvent) => {
+      if (!event.ctrlKey || !event.shiftKey || !window?.electron_API) return;
+      preloadVideo.removeEventListener("ended", handleVideoEnd);
+      window.electron_API.removeUpdateListeners();
+      window.electron_API.openMainWindow();
+      window.electron_API.closeUpdateWindow();
+    };
+    preloadVideo.addEventListener("click", handleBypass);
+
     // Événement équivalent à "DOMContentLoaded + ended"
     preloadVideo.addEventListener("ended", handleVideoEnd);
 
     return () => {
       preloadVideo.removeEventListener("ended", handleVideoEnd);
+      preloadVideo.removeEventListener("click", handleBypass);
     };
   }, []);
 

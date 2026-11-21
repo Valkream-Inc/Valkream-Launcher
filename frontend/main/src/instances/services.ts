@@ -58,7 +58,7 @@ export const getInstanceInspector = (): InstanceInspector => {
     configs: instancesConfig,
     resolver: getResolver(),
     platform: platform(),
-    rootPath: () => DirsManager.rootPath(),
+    rootPath: () => DirsManager.gamesRoot(),
   });
   return inspector;
 };

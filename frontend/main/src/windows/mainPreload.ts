@@ -79,6 +79,9 @@ const electronAPI: ElectronAPI = {
   openDevTools: () => ipcRenderer.invoke("main-window-open-devTools"),
   openAppData: () => ipcRenderer.invoke("open-appdata"),
   uninstallLauncher: () => ipcRenderer.invoke("uninstall-launcher"),
+  getGamesRoot: () => ipcRenderer.invoke("games-root:get"),
+  changeGamesRoot: () => ipcRenderer.invoke("games-root:change"),
+  resetGamesRoot: () => ipcRenderer.invoke("games-root:reset"),
   chooseFolder: () => ipcRenderer.invoke("choose-folder"),
 };
 

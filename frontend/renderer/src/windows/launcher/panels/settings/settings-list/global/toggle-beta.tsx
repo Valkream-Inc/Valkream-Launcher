@@ -40,8 +40,7 @@ function ToggleAdmin() {
   return (
     <SettingsBox
       warn={true}
-      text="Activer les tests beta (cella vas recuperer les mises à jour beta et vas
-        desactiver la mise à jour du launcher)"
+      text="Activer les tests beta (récupère les mises à jour beta des jeux). Pour contourner la mise à jour du launcher : Ctrl + Maj + clic sur la vidéo de démarrage."
     >
       <Switch onChange={handleChange} checked={checked} />
       <span>Activer les tests Betas</span>
