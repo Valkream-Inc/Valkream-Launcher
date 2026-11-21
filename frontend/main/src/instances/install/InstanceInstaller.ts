@@ -28,7 +28,8 @@ import { removeWithPlan } from "./fs-ops";
 import { HashCache } from "./hash-cache";
 import { appendInstallLog } from "./install-log";
 import type { ParamResolver } from "../remote/ParamResolver";
-import { hashProvider } from "./providers/hash";
+import { hashProvider, steamLibraryProvider } from "./providers/hash";
+import { locateSteamGame, type SteamGame } from "../local/steam-library";
 import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore";
 import type { InstallIO, Provider, Uninstaller } from "./providers/types";
 import { zipProvider } from "./providers/zip";
@@ -37,6 +38,7 @@ import { planEntryUpdate } from "./preserve";
 const DEFAULT_PROVIDERS: Record<string, Provider> = {
   zip_url: zipProvider,
   hash_url: hashProvider,
+  steam_library: steamLibraryProvider,
   thunderstore_modpack_url: thunderstoreProvider,
   // nexus_modpack_url : pas encore implémenté (l'entrée est signalée en échec).
 };
@@ -53,6 +55,8 @@ export interface InstallerOptions {
   io: InstallIO;
   providers?: Record<string, Provider>;
   uninstallers?: Record<string, Uninstaller>;
+  /** Retrouve le jeu dans la bibliothèque Steam du joueur (injectable pour les tests). */
+  steamLocator?: (appId: number) => Promise<SteamGame | null>;
   /** Octets libres du disque contenant ce dossier (injectable pour les tests). */
   freeSpace?: (directory: string) => number;
 }
@@ -255,6 +259,8 @@ export class InstanceInstaller {
             previousOwned: previous?.owned ?? [],
             signal,
             archives,
+            steam: async () =>
+              loaded.config.steamAppId === undefined ? null : (this.options.steamLocator ?? locateSteamGame)(loaded.config.steamAppId),
             loadContent: () => loadEntryContent(resolver, item.entry, installDir, loaded.release),
             beforeCommit,
             report: (step, message, transfer) => emit({ ...common, step, message, transfer }),

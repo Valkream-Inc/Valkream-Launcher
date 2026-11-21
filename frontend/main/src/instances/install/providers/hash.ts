@@ -11,6 +11,12 @@
  * un téléchargement interrompu est repris à la synchronisation suivante.
  * `to_ignore` : jamais vérifié ni touché. Fichiers conservés : gardés s'ils existent.
  * Les hash du disque passent par le cache de l'installation (`HashCache`).
+ *
+ * `steam_library` : même manifeste, mais les fichiers viennent d'abord de l'installation Steam du
+ * joueur (copie, jamais modifiée) : on n'héberge pas le jeu. Un fichier de Steam au mauvais hash
+ * (autre version du jeu) est refusé ; un fichier absent de Steam est pris dans `hash-folder` s'il
+ * est déclaré (nos propres fichiers). Si la version ne correspond pas : erreur explicite avec les
+ * `buildid` installé / attendu.
  */
 
 import fs from "fs";
@@ -48,7 +54,7 @@ const extractFromZip = async (
   return extractDir;
 };
 
-export const hashProvider: Provider = async (context) => {
+const createHashProvider = (source: "remote" | "steam"): Provider => async (context) => {
   const { entry, entryDir, tempDir, plan, platform, resolver, io, hashes, name, signal, beforeCommit } = context;
 
   const content = entry.content;
@@ -63,7 +69,13 @@ export const hashProvider: Provider = async (context) => {
     throw new Error(`${name} : le manifeste ne correspond pas au hash déclaré`);
   }
 
-  const baseUrl = String(entry["hash-folder"]).replace(/\/*$/, "/");
+  const folderLink = entry["hash-folder"];
+  const baseUrl = folderLink !== undefined ? String(folderLink).replace(/\/*$/, "/") : undefined;
+  const steamGame = source === "steam" ? await context.steam() : null;
+  if (source === "steam" && !steamGame) {
+    throw new Error(`${name} : jeu introuvable dans Steam : installez-le (Steam → Bibliothèque) puis relancez`);
+  }
+  const mismatched: string[] = [];
   fs.mkdirSync(entryDir, { recursive: true });
 
   const wanted = Object.entries(manifest)
@@ -112,6 +124,29 @@ export const hashProvider: Provider = async (context) => {
       return;
     }
 
+    // Steam : copie du fichier du joueur s'il a la bonne version (le dossier Steam n'est jamais modifié).
+    if (steamGame) {
+      const fromSteam = path.join(steamGame.dir, ...file.split("/"));
+      if (fs.existsSync(fromSteam)) {
+        if ((await hashFile(fromSteam)) === expected) {
+          fs.copyFileSync(fromSteam, partial);
+          stageVerified(file, partial);
+          progress.skip();
+          return;
+        }
+        if (baseUrl === undefined) {
+          mismatched.push(file); // fichier du jeu d'une autre version, rien d'autre pour le fournir
+          progress.skip();
+          return;
+        }
+      } else if (baseUrl === undefined) {
+        mismatched.push(file);
+        progress.skip();
+        return;
+      }
+    }
+    if (baseUrl === undefined) throw new Error(`${name} : hash-folder absent pour ${file}`);
+
     let bytes = 0;
     await io.download(resolver.urlOf(baseUrl + encodePath(file)), partial, signal, (transfer) => {
       bytes = transfer.processed ?? bytes;
@@ -129,6 +164,14 @@ export const hashProvider: Provider = async (context) => {
 
   if (unzipped) fs.rmSync(unzipped, { recursive: true, force: true });
 
+  if (mismatched.length > 0) {
+    const expectedBuild = entry.buildid !== undefined ? ` (build attendu : ${entry.buildid}, installé : ${steamGame?.buildId || "inconnu"})` : "";
+    throw new Error(
+      `${name} : la version du jeu installée par Steam ne correspond pas${expectedBuild} : ${mismatched.length} fichier(s) différent(s) ou absent(s), ex : ${mismatched.slice(0, 3).join(", ")}. ` +
+        "Dans Steam : clic droit sur le jeu → Propriétés → Bêtas, choisissez la version demandée, laissez Steam finir, puis relancez.",
+    );
+  }
+
   // Tout est prêt et vérifié : bascule.
   beforeCommit();
   commitStaged(stage, entryDir, (relative, destination) => {
@@ -137,3 +180,6 @@ export const hashProvider: Provider = async (context) => {
   });
   return { hash: computed };
 };
+
+export const hashProvider: Provider = createHashProvider("remote");
+export const steamLibraryProvider: Provider = createHashProvider("steam");

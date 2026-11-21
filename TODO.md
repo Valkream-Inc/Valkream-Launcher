@@ -21,7 +21,7 @@
 Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 
 ### Moteur d'installation
-- [ ] (++) Provider `steam_library` : copier le jeu depuis l'installation Steam du joueur (`libraryfolders.vdf`, `appmanifest_<id>.acf`, contrôle du `buildid`) au lieu de l'héberger ; message clair si la version Steam ne correspond pas (branche bêta à choisir).
+- [x] (++) Provider `steam_library` : copie du jeu depuis l'installation Steam du joueur (`libraryfolders.vdf`, `appmanifest_<id>.acf`, hash par fichier, `buildid` dans l'erreur). Reste : l'utiliser pour Valheim / 7DtD (manifeste du jeu à générer avec `build:manifest`) et retirer les zips hébergés.
 - [ ] (+++) Provider `steam_depot` : télécharger un manifeste précis via DepotDownloader (compte Steam du joueur, Steam Guard) : à n'envisager que si la copie depuis Steam ne suffit pas.
 - [ ] (++) Provider Nexus (`nexus_url`) : aujourd'hui une entrée Nexus est un échec explicite.
 - [x] (++) Dépendances Thunderstore transitives (résoudre et installer les dépendances d'un mod). — fait : option `dependencies: { skip }` par entrée (à activer dans les latest.yml si voulu).

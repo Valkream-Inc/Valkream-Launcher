@@ -79,6 +79,7 @@ export type EntryType =
   | "zip_url"
   | "hash_url"
   | "thunderstore_modpack_url"
+  | "steam_library"
   | "nexus_modpack_url";
 
 /**
@@ -149,6 +150,8 @@ export interface RawReleaseEntry {
   zip?: RawOption<string>;
   /** `zip_url` et `hash_url` (avec `zip`) : dossier de l'archive à extraire. */
   folder_in_zip?: RawOption<string>;
+  /** `steam_library` : `buildid` Steam attendu (affiché si la version installée par le joueur est différente). */
+  buildid?: RawOption<string | number>;
   /** `thunderstore_modpack_url` et `nexus_modpack_url` : domaine de l'API. */
   "api-url"?: RawOption<string>;
   /** Relatifs à `path`. Supprimés à la mise à jour de l'entrée. */
@@ -191,6 +194,7 @@ export interface ReleaseEntry {
   "hash-folder"?: string;
   zip?: string;
   folder_in_zip?: string;
+  buildid?: string | number;
   "api-url"?: string;
   gameFolderToRemove?: string[];
   gameFolderToPreserve?: PreserveItem[];

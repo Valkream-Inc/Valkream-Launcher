@@ -180,7 +180,7 @@ export class InstanceInspector {
 
         const row = buildRow(name, tier, entry, entryErrors, state.entries[name], settings);
 
-        if (verify && row.status === "up-to-date" && entry?.type === "hash_url") {
+        if (verify && row.status === "up-to-date" && (entry?.type === "hash_url" || entry?.type === "steam_library")) {
           await this.verifyEntry(row, entry, locations.installDir, hashes!, fresh, release);
         }
         report.entries.push(row);

@@ -9,6 +9,7 @@
 import type { GamePlatform, ProgressData, ReleaseEntry } from "@shared/types";
 
 import type { ParamResolver } from "../../remote/ParamResolver";
+import type { SteamGame } from "../../local/steam-library";
 import type { ArchiveCache } from "./archive-cache";
 import type { HashCache } from "../hash-cache";
 import type { UpdatePlan } from "../preserve";
@@ -72,6 +73,8 @@ export interface ProviderContext {
   /** Dossiers possédés enregistrés lors de la précédente installation de l'entrée. */
   previousOwned: string[];
   signal?: AbortSignal;
+  /** Jeu installé par le joueur dans sa bibliothèque Steam (`steamAppId` de l'instance), ou `null`. */
+  steam: () => Promise<SteamGame | null>;
   /** Archives déjà téléchargées pendant cette synchronisation (partagées entre entrées). */
   archives: ArchiveCache;
   /** Document JSON du `content` (lien, donnée inline ou `local:<entrée>/<fichier>`), `key` appliquée. */

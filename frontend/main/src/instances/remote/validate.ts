@@ -35,8 +35,12 @@ const ENTRY_TYPES = [
   "zip_url",
   "hash_url",
   "thunderstore_modpack_url",
+  "steam_library",
   "nexus_modpack_url",
 ];
+
+/** Types dont `content` est un manifeste de hash (`{ fichier: sha256 }`). */
+const isHashType = (type: string): boolean => type === "hash_url" || type === "steam_library";
 const RELEASE_ROOT_KEYS = ["version", "buildDate", ...TIERS];
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -172,8 +176,8 @@ const checkContentValue = (
   where: string,
 ): string[] => {
   if (typeof content === "string" && isLocalContent(content)) {
-    if (type !== "hash_url" && type !== "thunderstore_modpack_url") {
-      return [`${where} : local: réservé à hash_url et thunderstore_modpack_url`];
+    if (!isHashType(type) && type !== "thunderstore_modpack_url") {
+      return [`${where} : local: réservé à hash_url, steam_library et thunderstore_modpack_url`];
     }
     return parseLocalContent(content) ? [] : [`${where} : local:<entrée>/<fichier> attendu (chemin relatif sûr) : ${content}`];
   }
@@ -189,7 +193,7 @@ const checkContentValue = (
   }
 
   if (Array.isArray(content)) {
-    if (type === "hash_url") return [`${where} : lien ou manifeste {chemin: sha256} attendu`];
+    if (isHashType(type)) return [`${where} : lien ou manifeste {chemin: sha256} attendu`];
     return content.flatMap((item, index) =>
       typeof item === "string" && THUNDERSTORE_DEPENDENCY.test(item)
         ? []
@@ -198,7 +202,7 @@ const checkContentValue = (
   }
 
   if (isObject(content)) {
-    if (type !== "hash_url") return [`${where} : lien ou liste attendu`];
+    if (!isHashType(type)) return [`${where} : lien ou liste attendu`];
     return Object.entries(content).flatMap(([filePath, hash]) => [
       ...(isSafeRelativePath(filePath) ? [] : [`${where}.${filePath} : chemin invalide`]),
       ...(typeof hash === "string" && SHA256.test(hash)
@@ -289,13 +293,21 @@ const checkEntry = (entry: unknown, where: string): string[] => {
     }
   }
 
+  // `steam_library` : `hash-folder` est facultatif (fichiers à nous absents de Steam : config, mods…)
   if (type === "hash_url" && !isFetchableLink(entry["hash-folder"])) {
     errors.push(`${where}.hash-folder : URL de base des fichiers requise`);
+  } else if (type === "steam_library" && entry["hash-folder"] !== undefined && !isFetchableLink(entry["hash-folder"])) {
+    errors.push(`${where}.hash-folder : URL de base des fichiers attendue`);
+  }
+
+  if (entry.buildid !== undefined && !isDataLink(entry.buildid)) {
+    if (type !== "steam_library") errors.push(`${where}.buildid : réservé à steam_library`);
+    else if (typeof entry.buildid !== "string" && typeof entry.buildid !== "number") errors.push(`${where}.buildid : numéro de build attendu`);
   }
 
   if (entry.key !== undefined && !isDataLink(entry.key)) {
-    if (type !== "hash_url" && type !== "thunderstore_modpack_url") {
-      errors.push(`${where}.key : réservé à hash_url et thunderstore_modpack_url`);
+    if (!isHashType(type) && type !== "thunderstore_modpack_url") {
+      errors.push(`${where}.key : réservé à hash_url, steam_library et thunderstore_modpack_url`);
     } else if (typeof entry.key !== "string" || !isValidKey(entry.key)) {
       errors.push(`${where}.key : chemin pointé attendu (ex : dependencies.mods, ou « . »)`);
     }

@@ -174,6 +174,14 @@ describe("validateReleaseConfig", () => {
     assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-details": { v: zip } })), /réservé/);
   });
 
+  it("steam_library : hash-folder facultatif, buildid autorisé seulement ici", () => {
+    const ok = { ...validEntry(), type: "steam_library", content: "/manifest.json", buildid: 123 };
+    delete (ok as Record<string, unknown>)["hash-folder"];
+    assert.doesNotMatch(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: ok } })), /hash-folder|buildid|type/);
+    const zip = { ...validEntry(), type: "zip_url", content: "/a.zip", buildid: 1 };
+    assert.match(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: zip } })), /buildid : réservé/);
+  });
+
   it("gameFolderToRemove/Preserve et optional sont contrôlés", () => {
     const entry = { ...validEntry(), gameFolderToRemove: ["/BepInEx/cache", "../x"], gameFolderToPreserve: "pas-une-liste", optional: {} };
     const errors = errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: entry } }));

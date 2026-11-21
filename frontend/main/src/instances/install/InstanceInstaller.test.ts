@@ -435,6 +435,62 @@ describe("InstanceInstaller", () => {
     await first;
   });
 
+  describe("steam_library : le jeu vient de l'installation Steam du joueur", () => {
+    const gameManifest = { "valheim.exe": sha("EXE-v1"), "data/a.dat": sha("A"), "mod.cfg": sha("OURS") };
+    const steamRemote = (withFolder = true) => ({
+      "/index.json": index({ stable: "/stable.yml" }),
+      "/stable.yml": {
+        version: "1.0.0",
+        "game-base": {
+          base: {
+            version: "1.0.0", type: "steam_library", buildid: 111, content: "/manifest.json",
+            ...(withFolder ? { "hash-folder": "/h/" } : {}),
+          },
+        },
+      },
+      "/manifest.json": gameManifest,
+    });
+    const run = async (steamFiles: Record<string, string> | null, remote = steamRemote()) => {
+      const steamDir = path.join(root, "steam-game");
+      fs.rmSync(steamDir, { recursive: true, force: true });
+      for (const [file, content] of Object.entries(steamFiles ?? {})) {
+        fs.mkdirSync(path.dirname(path.join(steamDir, file)), { recursive: true });
+        fs.writeFileSync(path.join(steamDir, file), content);
+      }
+      const world = makeWorld(remote, { "/h/mod.cfg": "OURS", "/h/valheim.exe": "EXE-v1", "/h/data/a.dat": "A" });
+      const inspector = new InstanceInspector({
+        configs: [{ ...config, steamAppId: 7 }], resolver: world.resolver, platform: "win32", rootPath: () => root,
+      });
+      const installer = new InstanceInstaller({
+        inspector, resolver: world.resolver, platform: "win32", io: world.io,
+        steamLocator: async () => (steamFiles ? { dir: steamDir, buildId: "222" } : null),
+      });
+      return { ...world, steamDir, result: await installer.sync("g", "stable") };
+    };
+
+    it("copie les fichiers de Steam (jamais téléchargés), nos fichiers viennent de hash-folder", async () => {
+      const { result, downloads, steamDir } = await run({ "valheim.exe": "EXE-v1", "data/a.dat": "A" });
+      assert.deepEqual(result.failed, []);
+      assert.equal(read("stable", "game/valheim.exe"), "EXE-v1");
+      assert.equal(read("stable", "game/mod.cfg"), "OURS");
+      assert.deepEqual(downloads.filter((url) => /valheim|a\.dat/.test(url)), []);
+      assert.ok(fs.existsSync(path.join(steamDir, "valheim.exe")), "le dossier Steam n'est jamais modifié");
+    });
+
+    it("version Steam différente : refus explicite avec buildid, rien n'est installé", async () => {
+      // Sans hash-folder : rien d'autre que Steam ne peut fournir le fichier (pas d'hébergement du jeu)
+      const { result, steamDir } = await run({ "valheim.exe": "EXE-v2", "data/a.dat": "A", "mod.cfg": "OURS" }, steamRemote(false));
+      assert.match(result.failed[0]?.error ?? "", /ne correspond pas \(build attendu : 111, installé : 222\).*Bêtas/);
+      assert.ok(!fs.existsSync(path.join(dir("stable"), "game", "valheim.exe")));
+      assert.equal(fs.readFileSync(path.join(steamDir, "valheim.exe"), "utf8"), "EXE-v2");
+    });
+
+    it("jeu absent de Steam : message clair", async () => {
+      const { result } = await run(null);
+      assert.match(result.failed[0]?.error ?? "", /introuvable dans Steam/);
+    });
+  });
+
   describe("hash_url avec archive `zip`", () => {
     const zipRemote = () => {
       const remote = baseRemote() as Record<string, any>;

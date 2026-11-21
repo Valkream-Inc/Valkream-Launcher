@@ -91,7 +91,7 @@ defaultSettings: { ram: 4096, fullscreen: false },
 
 Héberger soi-même les fichiers d'un jeu commercial (`build-game-*.zip`) revient à le redistribuer : à éviter. Il vaut mieux que chaque joueur obtienne le jeu **par sa propre licence Steam**, et que le serveur ne porte que ce qui est à nous (mods, configs, BepInEx via Thunderstore). Trois façons d'obtenir une version précise :
 
-1. **Branche bêta Steam (officiel, sans outil)** : Steam → clic droit sur le jeu → Propriétés → Bêtas. Si l'éditeur propose la version voulue (branche « legacy » / « previous version »), le joueur la choisit ; les fichiers sont dans `steamapps/common/<jeu>`. Le launcher pourrait les copier dans l'instance et vérifier la version par hash (`hash_url`) ou `buildid` (voir « À faire »).
+1. **Branche bêta Steam (officiel, sans outil)** : Steam → clic droit sur le jeu → Propriétés → Bêtas. Si l'éditeur propose la version voulue (branche « legacy » / « previous version »), le joueur la choisit ; les fichiers sont dans `steamapps/common/<jeu>`. Le provider `steam_library` les copie dans l'instance (voir ci-dessous).
 2. **DepotDownloader (version arbitraire, avec son compte)** : outil open source [SteamRE/DepotDownloader](https://github.com/SteamRE/DepotDownloader) qui télécharge un **manifeste précis** d'un depot avec le compte Steam du joueur (il doit posséder le jeu) :
 
 ```
@@ -99,9 +99,26 @@ DepotDownloader -app 892970 -depot <depotId> -manifest <manifestId> -username <c
 ```
 
    `appId` / `depotId` / `manifestId` (un manifeste = une version du jeu) se trouvent sur [SteamDB](https://steamdb.info) (page du jeu → Depots → Manifests). Le premier lancement demande mot de passe et code Steam Guard ; `-remember-password` évite de les redemander. Options utiles : `-filelist` (ne télécharger que certains fichiers), `-os windows|linux|macos`, `-beta <branche>`.
-3. **Copie depuis l'installation Steam du joueur** : si le joueur a déjà le jeu, le launcher peut copier `steamapps/common/<jeu>` (dossier retrouvé via `libraryfolders.vdf` et `appmanifest_<appId>.acf`, qui contient le `buildid`) dans l'instance, puis appliquer nos mods par-dessus. Aucun identifiant Steam n'est manipulé par le launcher.
+3. **Copie depuis l'installation Steam du joueur (implémentée : `steam_library`)** : si le joueur a déjà le jeu, le launcher copie `steamapps/common/<jeu>` (dossier retrouvé via `libraryfolders.vdf` et `appmanifest_<appId>.acf`, qui contient le `buildid`) dans l'instance, puis appliquer nos mods par-dessus. Aucun identifiant Steam n'est manipulé par le launcher.
 
-Dans tous les cas le serveur n'héberge plus que nos fichiers (zip de config, mods Thunderstore). Ce document n'est pas un avis juridique : le contrat d'abonné Steam et les conditions de l'éditeur du jeu font foi (par exemple, ne jamais partager son compte ni distribuer les fichiers téléchargés).
+### Provider `steam_library`
+
+```yaml
+game-base:
+  valheim:
+    version: 0.221.12
+    type: steam_library
+    buildid: 17000000          # optionnel : build Steam attendu (affiché dans l'erreur si la version diffère)
+    content: /games/Valheim-Valkream-v2/hash/game.json   # manifeste { fichier: sha256 } du jeu (`build:manifest`)
+    to_ignore: [logs]
+    # hash-folder: /games/.../files/   # facultatif : fichiers à NOUS absents de Steam ou modifiés
+```
+
+Le `steamAppId` vient de la config main. Les fichiers du manifeste sont copiés depuis le dossier du jeu dans la bibliothèque Steam du joueur (retrouvé via `libraryfolders.vdf` et `appmanifest_<id>.acf`, sous Windows via le registre) ; chaque fichier est vérifié par son hash et le dossier Steam n'est **jamais modifié**. Sans `hash-folder`, un fichier absent ou d'une autre version fait échouer l'entrée avec un message explicite (build installé / attendu, fichiers en cause, et la marche à suivre : Propriétés → Bêtas dans Steam). Ne mettez dans le manifeste que les fichiers du jeu ; vos mods et configs passent par les autres entrées (`zip_url`, Thunderstore). `content` accepte les mêmes formes que `hash_url` (`key`, `local:`). Le rapport vérifie l'entrée comme un `hash_url`.
+
+Dans tous les cas le serveur n'héberge plus que nos fichiers (zip de config, mods Thunderstore). **Si un jour DepotDownloader est intégré**, règles de sécurité à respecter : le launcher ne voit jamais le mot de passe ni le code Steam Guard (l'outil tourne dans sa propre console, `-password` jamais en argument, journaux sans arguments sensibles) ; binaire officiel téléchargé avec version et sha256 fixés dans le launcher, vérifiés avant chaque exécution ; `appId` pris dans la config main (jamais du remote), `depotId` / `manifestId` numériques, arguments en tableau et dossier de sortie forcé dans `.tmp` ; vérification finale par le manifeste de hash ; écran d'information avant la première utilisation (commande exacte, emplacement du jeton, lien vers le code source).
+
+Ce document n'est pas un avis juridique : le contrat d'abonné Steam et les conditions de l'éditeur du jeu font foi (par exemple, ne jamais partager son compte ni distribuer les fichiers téléchargés).
 
 ## Installation atomique et reprise
 
