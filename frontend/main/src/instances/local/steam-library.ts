@@ -26,6 +26,8 @@ export interface SteamGame {
   dir: string;
   /** `buildid` Steam installé (identifie la version du jeu). */
   buildId: string;
+  /** Dossier indiqué par le joueur (ou téléchargé par DepotDownloader), pas celui de Steam. */
+  chosen?: boolean;
 }
 
 export interface SteamLocateDeps {

@@ -305,6 +305,20 @@ const checkEntry = (entry: unknown, where: string): string[] => {
     else if (typeof entry.buildid !== "string" && typeof entry.buildid !== "number") errors.push(`${where}.buildid : numéro de build attendu`);
   }
 
+  if (entry["steam-beta"] !== undefined && type !== "steam_library") {
+    errors.push(`${where}.steam-beta : réservé à steam_library`);
+  } else if (entry["steam-beta"] !== undefined && !isNonEmptyString(entry["steam-beta"])) {
+    errors.push(`${where}.steam-beta : nom de branche attendu`);
+  }
+
+  if (entry.depot !== undefined) {
+    const depot = entry.depot;
+    if (type !== "steam_library") errors.push(`${where}.depot : réservé à steam_library`);
+    else if (!isObject(depot) || !/^\d{1,20}$/.test(String(depot.id)) || !/^\d{1,20}$/.test(String(depot.manifest))) {
+      errors.push(`${where}.depot : { id, manifest } numériques attendus`);
+    }
+  }
+
   if (entry.key !== undefined && !isDataLink(entry.key)) {
     if (!isHashType(type) && type !== "thunderstore_modpack_url") {
       errors.push(`${where}.key : réservé à hash_url, steam_library et thunderstore_modpack_url`);

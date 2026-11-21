@@ -11,7 +11,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { Button, ButtonBase, Stack } from "@mui/material";
-import type { InstanceSyncProgress } from "@shared/types";
+import type { InstanceSyncProgress, SteamSourceIssue } from "@shared/types";
 
 import Popup from "../../../../component/popup/popup";
 
@@ -19,6 +19,7 @@ import { useAction } from "../../../../context/action.context";
 import { useBackground } from "../../../../context/background.context";
 import { useGames } from "../../../../context/games.context";
 import { useInfos } from "../../../../context/infos.context";
+import SteamSourceDialog from "./steam-source-dialog";
 import type { InstanceButtonAction } from "./instance-button.types";
 
 /** 75 s → "1:15", 3725 s → "1:02:05". */
@@ -44,6 +45,8 @@ export default function InstanceButton() {
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
   const [action, setAction] = useState<InstanceButtonAction>(LOADING_ACTION);
   const [syncing, setSyncing] = useState(false);
+  // Jeu Steam absent / autre version : solutions proposées au joueur
+  const [steamIssue, setSteamIssue] = useState<SteamSourceIssue | null>(null);
 
   // Dernier état de progression + horloge locale : le temps écoulé avance chaque seconde,
   // même quand aucune progression n'arrive (extraction, vérification…).
@@ -101,6 +104,8 @@ export default function InstanceButton() {
       );
       if (result.cancelled) {
         enqueueSnackbar("Installation annulée", { variant: "info" });
+      } else if (result.failed.some((item) => item.steamIssue)) {
+        setSteamIssue(result.failed.find((item) => item.steamIssue)?.steamIssue ?? null);
       } else if (result.failed.length > 0) {
         error(
           actionName,
@@ -292,6 +297,16 @@ export default function InstanceButton() {
         type="welcome"
         title="Bienvenue sur le launcher de Valkream ! 👋"
         message={actualInstance.welcomeContent}
+      />
+      <SteamSourceDialog
+        issue={steamIssue}
+        instanceId={actualInstanceId}
+        channel={actualChannel}
+        onClose={() => setSteamIssue(null)}
+        onRetry={() => {
+          setSteamIssue(null);
+          handleInstall();
+        }}
       />
       <ButtonBase
         onClick={action.onClick}

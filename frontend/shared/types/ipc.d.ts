@@ -17,6 +17,7 @@ import type {
   InstanceSummary,
   InstanceSyncProgress,
   InstanceSyncResult,
+  DepotOutput,
   ModsListResult,
   ToolsHashSummary,
 } from "./instance";
@@ -59,6 +60,16 @@ export interface ElectronAPI {
     channel: Channel,
     options?: { repair?: boolean }
   ): Promise<InstanceSyncResult>;
+  /** Solution « localiser l'installation » : choisit le dossier du jeu. Retourne le dossier, `null` si annulé. */
+  pickInstanceSource(id: InstanceId, channel: Channel): Promise<string | null>;
+  /** Oublie le dossier de jeu choisi (retour à la bibliothèque Steam). */
+  clearInstanceSource(id: InstanceId, channel: Channel): Promise<void>;
+  /** Solution « DepotDownloader » : télécharge la version exacte (connexion par QR code). Retourne le dossier. */
+  depotDownloadInstance(id: InstanceId, channel: Channel): Promise<string>;
+  cancelDepotDownload(id: InstanceId, channel: Channel): Promise<void>;
+  /** Sortie de DepotDownloader (lignes, dont le QR code) et progression. */
+  onDepotOutput(callback: (data: DepotOutput) => void): void;
+  removeDepotOutputListeners(): void;
   // outils admin (onglet Tools) : les dossiers sont choisis par boîte de dialogue côté main
   /** Choisit un dossier puis le hashe (même algorithme que le launcher). `null` si annulé. */
   toolsHashFolder(ignore: string[]): Promise<ToolsHashSummary | null>;

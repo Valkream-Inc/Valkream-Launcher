@@ -24,6 +24,7 @@ import path from "path";
 
 import { createHash } from "crypto";
 
+import { GameSourceError } from "../game-source";
 import { hashFile, manifestHash, type Manifest } from "../manifest";
 import { runPool } from "../../../lib/concurrency";
 import { resolveInside } from "../../../lib/paths";
@@ -73,7 +74,9 @@ const createHashProvider = (source: "remote" | "steam"): Provider => async (cont
   const baseUrl = folderLink !== undefined ? String(folderLink).replace(/\/*$/, "/") : undefined;
   const steamGame = source === "steam" ? await context.steam() : null;
   if (source === "steam" && !steamGame) {
-    throw new Error(`${name} : jeu introuvable dans Steam : installez-le (Steam → Bibliothèque) puis relancez`);
+    throw new GameSourceError(`${name} : jeu introuvable dans Steam : installez-le (Steam → Bibliothèque) puis relancez`, "missing", {
+      expectedBuild: entry.buildid,
+    });
   }
   const mismatched: string[] = [];
   fs.mkdirSync(entryDir, { recursive: true });
@@ -166,9 +169,10 @@ const createHashProvider = (source: "remote" | "steam"): Provider => async (cont
 
   if (mismatched.length > 0) {
     const expectedBuild = entry.buildid !== undefined ? ` (build attendu : ${entry.buildid}, installé : ${steamGame?.buildId || "inconnu"})` : "";
-    throw new Error(
-      `${name} : la version du jeu installée par Steam ne correspond pas${expectedBuild} : ${mismatched.length} fichier(s) différent(s) ou absent(s), ex : ${mismatched.slice(0, 3).join(", ")}. ` +
-        "Dans Steam : clic droit sur le jeu → Propriétés → Bêtas, choisissez la version demandée, laissez Steam finir, puis relancez.",
+    throw new GameSourceError(
+      `${name} : la version du jeu ne correspond pas${expectedBuild} : ${mismatched.length} fichier(s) différent(s) ou absent(s), ex : ${mismatched.slice(0, 3).join(", ")}.`,
+      "version",
+      { expectedBuild: entry.buildid, installedBuild: steamGame?.buildId, files: mismatched.slice(0, 3), chosenFolder: steamGame?.chosen },
     );
   }
 

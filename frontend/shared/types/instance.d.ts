@@ -152,6 +152,10 @@ export interface RawReleaseEntry {
   folder_in_zip?: RawOption<string>;
   /** `steam_library` : `buildid` Steam attendu (affiché si la version installée par le joueur est différente). */
   buildid?: RawOption<string | number>;
+  /** `steam_library` : branche bêta Steam à choisir (affichée dans le mode d'emploi). */
+  "steam-beta"?: RawOption<string>;
+  /** `steam_library` : depot + manifeste pour télécharger la version exacte avec DepotDownloader. */
+  depot?: RawOption<DepotOptions>;
   /** `thunderstore_modpack_url` et `nexus_modpack_url` : domaine de l'API. */
   "api-url"?: RawOption<string>;
   /** Relatifs à `path`. Supprimés à la mise à jour de l'entrée. */
@@ -195,6 +199,8 @@ export interface ReleaseEntry {
   zip?: string;
   folder_in_zip?: string;
   buildid?: string | number;
+  "steam-beta"?: string;
+  depot?: DepotOptions;
   "api-url"?: string;
   gameFolderToRemove?: string[];
   gameFolderToPreserve?: PreserveItem[];
@@ -341,9 +347,32 @@ export interface InstanceSyncProgress {
   transfer?: Pick<ProgressData, "processedBytes" | "totalBytes" | "percent" | "speed">;
 }
 
+/** `steam_library` : le jeu du joueur est absent ou d'une autre version → solutions proposées. */
+export interface SteamSourceIssue {
+  issue: "missing" | "version";
+  /** Mode d'emploi Markdown. */
+  guide: string;
+  /** DepotDownloader est possible (l'entrée déclare `depot`). */
+  depotAvailable: boolean;
+}
+
+export interface DepotOutput {
+  id: InstanceId;
+  channel: Channel;
+  line?: string;
+  percent?: number;
+}
+
+export interface DepotOptions {
+  /** Identifiant du depot Steam. */
+  id: number | string;
+  /** Identifiant du manifeste du depot (la version exacte du jeu). */
+  manifest: string | number;
+}
+
 export interface InstanceSyncResult {
   installed: string[];
-  failed: { name: string; error: string }[];
+  failed: { name: string; error: string; steamIssue?: SteamSourceIssue }[];
   /** Le jeu est-il jouable après cette synchronisation ? */
   works: boolean;
   /** L'utilisateur a annulé : les entrées restantes n'ont pas été traitées (ce n'est pas un échec). */

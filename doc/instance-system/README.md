@@ -116,7 +116,26 @@ game-base:
 
 Le `steamAppId` vient de la config main. Les fichiers du manifeste sont copiés depuis le dossier du jeu dans la bibliothèque Steam du joueur (retrouvé via `libraryfolders.vdf` et `appmanifest_<id>.acf`, sous Windows via le registre) ; chaque fichier est vérifié par son hash et le dossier Steam n'est **jamais modifié**. Sans `hash-folder`, un fichier absent ou d'une autre version fait échouer l'entrée avec un message explicite (build installé / attendu, fichiers en cause, et la marche à suivre : Propriétés → Bêtas dans Steam). Ne mettez dans le manifeste que les fichiers du jeu ; vos mods et configs passent par les autres entrées (`zip_url`, Thunderstore). `content` accepte les mêmes formes que `hash_url` (`key`, `local:`). Le rapport vérifie l'entrée comme un `hash_url`.
 
-Dans tous les cas le serveur n'héberge plus que nos fichiers (zip de config, mods Thunderstore). **Si un jour DepotDownloader est intégré**, règles de sécurité à respecter : le launcher ne voit jamais le mot de passe ni le code Steam Guard (l'outil tourne dans sa propre console, `-password` jamais en argument, journaux sans arguments sensibles) ; binaire officiel téléchargé avec version et sha256 fixés dans le launcher, vérifiés avant chaque exécution ; `appId` pris dans la config main (jamais du remote), `depotId` / `manifestId` numériques, arguments en tableau et dossier de sortie forcé dans `.tmp` ; vérification finale par le manifeste de hash ; écran d'information avant la première utilisation (commande exacte, emplacement du jeton, lien vers le code source).
+### Jeu absent ou autre version : trois solutions proposées au joueur
+
+Quand `steam_library` échoue (jeu introuvable ou fichiers d'une autre version), la synchronisation renvoie un `steamIssue` et l'interface ouvre un dialogue :
+
+1. **Mode d'emploi Markdown** (généré : builds attendu / installé, fichiers en cause, branche `steam-beta` à choisir dans Propriétés → Bêtas, lien `steam://`) ;
+2. **Localiser l'installation** : le joueur choisit un dossier (autre disque, copie…). Il est mémorisé dans `instance.source.json`, prioritaire sur Steam, lu seulement ;
+3. **DepotDownloader** (si l'entrée déclare `depot`) : version exacte téléchargée depuis Steam, connexion **par QR code** scanné avec l'application mobile Steam (le QR s'affiche dans le dialogue ; le launcher ne voit ni mot de passe ni Steam Guard). Le jeu est déposé dans `<installation>/.depot/game`, puis l'installation est relancée et supprime ce dossier une fois tout copié et vérifié.
+
+```yaml
+    steam-beta: public-test            # optionnel : branche bêta citée dans le mode d'emploi
+    depot: { id: 892971, manifest: "1234567890123456789" }   # active la solution 3 (par plateforme possible)
+```
+
+**Fichiers parasites (BepInEx déjà installé, mods, sauvegardes)** : seuls les fichiers listés dans le manifeste sont copiés, chacun vérifié par son hash ; le reste du dossier source est ignoré et jamais modifié. Le manifeste doit donc être calculé sur une **installation propre** de la bonne version (`build:manifest` ou onglet Tools → Hash folder), `to_ignore` couvrant les fichiers locaux. Si BepInEx modifie un fichier du jeu présent dans le manifeste, il sera signalé comme version différente : ne gardez dans le manifeste que les fichiers du jeu d'origine.
+
+**DepotDownloader : à configurer par un administrateur.** `main/src/instances/install/depot-config.ts` doit contenir, par plateforme (`win32-x64`, `linux-x64`…), l'URL du zip de la release officielle et son **sha256** (non fournis : ils ne peuvent pas être inventés). Le launcher télécharge ce zip, vérifie le sha256 **avant** extraction, mémorise le hash de l'exécutable et le revérifie avant chaque lancement. Sans entrée pour la plateforme, la solution 3 n'est pas proposée.
+
+Règles de sécurité appliquées : pas de mot de passe côté launcher (QR, stdin fermé, aucun `-username` / `-password`) ; `appId` pris dans la config main, `depot` / `manifest` strictement numériques, arguments en tableau (pas de shell), dossier de sortie forcé dans l'installation ; le dossier téléchargé n'est pas cru : chaque fichier est vérifié par le manifeste de hash. Reste à faire : écran d'information avant la première utilisation (emplacement des fichiers, lien vers le code source).
+
+Dans tous les cas le serveur n'héberge plus que nos fichiers (zip de config, mods Thunderstore).
 
 Ce document n'est pas un avis juridique : le contrat d'abonné Steam et les conditions de l'éditeur du jeu font foi (par exemple, ne jamais partager son compte ni distribuer les fichiers téléchargés).
 

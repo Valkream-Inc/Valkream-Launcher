@@ -9,6 +9,7 @@ import type { InstanceMainConfig } from "../instances.types";
 import { InstanceInspector } from "../local/InstanceInspector";
 import { InstanceInstaller } from "./InstanceInstaller";
 import { readInstallState, readInstanceSettings, writeInstanceSetting } from "./install-store";
+import { writeGameSourceDir } from "./game-source";
 import { manifestHash } from "./manifest";
 import { instanceRootPath } from "../../lib/paths";
 import type { ParamResolver } from "../remote/ParamResolver";
@@ -480,7 +481,12 @@ describe("InstanceInstaller", () => {
     it("version Steam différente : refus explicite avec buildid, rien n'est installé", async () => {
       // Sans hash-folder : rien d'autre que Steam ne peut fournir le fichier (pas d'hébergement du jeu)
       const { result, steamDir } = await run({ "valheim.exe": "EXE-v2", "data/a.dat": "A", "mod.cfg": "OURS" }, steamRemote(false));
-      assert.match(result.failed[0]?.error ?? "", /ne correspond pas \(build attendu : 111, installé : 222\).*Bêtas/);
+      assert.match(result.failed[0]?.error ?? "", /ne correspond pas \(build attendu : 111, installé : 222\)/);
+      const issue = result.failed[0]?.steamIssue;
+      assert.equal(issue?.issue, "version");
+      assert.match(issue?.guide ?? "", /Bêtas/);
+      assert.match(issue?.guide ?? "", /111/);
+      assert.equal(issue?.depotAvailable, false);
       assert.ok(!fs.existsSync(path.join(dir("stable"), "game", "valheim.exe")));
       assert.equal(fs.readFileSync(path.join(steamDir, "valheim.exe"), "utf8"), "EXE-v2");
     });
@@ -488,6 +494,30 @@ describe("InstanceInstaller", () => {
     it("jeu absent de Steam : message clair", async () => {
       const { result } = await run(null);
       assert.match(result.failed[0]?.error ?? "", /introuvable dans Steam/);
+      assert.equal(result.failed[0]?.steamIssue?.issue, "missing");
+    });
+
+    it("depot déclaré : DepotDownloader est proposé", async () => {
+      const remote = steamRemote(false) as Record<string, any>;
+      remote["/stable.yml"]["game-base"].base.depot = { id: 7, manifest: "123456789" };
+      const { result } = await run(null, remote);
+      assert.equal(result.failed[0]?.steamIssue?.depotAvailable, true);
+      assert.match(result.failed[0]?.steamIssue?.guide ?? "", /DepotDownloader/);
+    });
+
+    it("dossier choisi par le joueur : prioritaire sur Steam, fichiers parasites ignorés", async () => {
+      const chosen = path.join(root, "chosen-game");
+      fs.rmSync(chosen, { recursive: true, force: true });
+      for (const [file, content] of Object.entries({ "valheim.exe": "EXE-v1", "data/a.dat": "A", "BepInEx/core.dll": "PARASITE" })) {
+        fs.mkdirSync(path.dirname(path.join(chosen, file)), { recursive: true });
+        fs.writeFileSync(path.join(chosen, file), content);
+      }
+      writeGameSourceDir(dir("stable"), chosen);
+      // Steam n'a que l'autre version : le dossier choisi est utilisé à la place
+      const { result } = await run({ "valheim.exe": "EXE-v2" });
+      assert.deepEqual(result.failed, []);
+      assert.equal(read("stable", "game/valheim.exe"), "EXE-v1");
+      assert.equal(fs.existsSync(path.join(dir("stable"), "game", "BepInEx")), false);
     });
   });
 

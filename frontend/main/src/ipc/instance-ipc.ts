@@ -7,7 +7,9 @@
 
 import { spawn } from "child_process";
 import fs from "fs";
-import { ipcMain, shell } from "electron";
+import os from "os";
+import path from "path";
+import { BrowserWindow, dialog, ipcMain, shell } from "electron";
 
 import type { Channel, GamePlatform, InstanceSettingValue } from "@shared/types";
 
@@ -27,6 +29,12 @@ import DirsManager from "../core/dirs";
 import LauncherManager from "../core/launcher";
 import { ensureSteamRunning, isSteamRunning } from "../instances/local/steam";
 import { cancelSync, runSync } from "./sync-registry";
+import { clearGameSourceDir, writeGameSourceDir } from "../instances/install/game-source";
+import { DEPOT_DOWNLOADER_ASSETS } from "../instances/install/depot-config";
+import { depotAssetFor, ensureDepotDownloader } from "../instances/install/depot-tool";
+import { depotOsOf, downloadWithDepot } from "../instances/install/depot-download";
+import { realDepotRunner } from "../instances/install/depot-runner";
+import { realInstallIO } from "../instances/install/real-io";
 
 const isChannel = (value: unknown): value is Channel =>
   value === "stable" || value === "beta";
@@ -153,6 +161,68 @@ const InstanceIpcHandlers = (): void => {
     if (!fs.existsSync(locations.installDir)) throw new Error("Le dossier du jeu n'existe pas !");
     const error = await shell.openPath(locations.installDir);
     if (error) throw new Error(error);
+  });
+
+  // Solution « localiser l'installation » : le joueur choisit le dossier du jeu (lu, jamais modifié).
+  ipcMain.handle("instances:pick-source", async (event, id: string, channel: Channel) => {
+    const { locations } = resolve(id, channel);
+    const window = BrowserWindow.fromWebContents(event.sender);
+    const options = { title: "Dossier d'installation du jeu", properties: ["openDirectory" as const] };
+    const result = window ? await dialog.showOpenDialog(window, options) : await dialog.showOpenDialog(options);
+    if (result.canceled || result.filePaths.length === 0) return null;
+    writeGameSourceDir(locations.installDir, result.filePaths[0]);
+    return result.filePaths[0];
+  });
+
+  ipcMain.handle("instances:clear-source", (_event, id: string, channel: Channel) => {
+    clearGameSourceDir(resolve(id, channel).locations.installDir);
+  });
+
+  // Solution « DepotDownloader » : la version exacte du jeu, connexion par QR code.
+  // La sortie (QR code inclus) est envoyée ligne à ligne à l'interface.
+  ipcMain.handle("instances:depot-download", async (event, id: string, channel: Channel) => {
+    const { config, locations } = resolve(id, channel);
+    const { release } = await getInstanceInspector().load(id, channel);
+    const entry = [...Object.values(release?.["game-base"] ?? {}), ...Object.values(release?.["game-details"] ?? {})].find(
+      (item) => item.type === "steam_library" && item.depot !== undefined
+    );
+    if (!entry?.depot || config.steamAppId === undefined) throw new Error("Ce jeu ne propose pas DepotDownloader");
+
+    const platformKey = `${process.platform}-${os.arch()}`;
+    if (!depotAssetFor(DEPOT_DOWNLOADER_ASSETS, platformKey)) {
+      throw new Error("DepotDownloader n'est pas disponible sur cette plateforme");
+    }
+    const send = (payload: { line?: string; percent?: number }) => {
+      if (!event.sender.isDestroyed()) event.sender.send("instances:depot-output", { id, channel, ...payload });
+    };
+    return runSync(`${locations.installDir}#depot`, async (signal) => {
+      send({ line: "Préparation de DepotDownloader…" });
+      const tool = await ensureDepotDownloader({
+        toolsDir: path.join(DirsManager.rootPath(), "tools"),
+        platformKey,
+        assets: DEPOT_DOWNLOADER_ASSETS,
+        io: realInstallIO,
+        signal,
+        onProgress: (percent) => send({ percent }),
+      });
+      const dir = await downloadWithDepot({
+        tool,
+        runner: realDepotRunner,
+        appId: config.steamAppId as number,
+        depot: entry.depot as NonNullable<typeof entry.depot>,
+        installDir: locations.installDir,
+        os: depotOsOf(process.platform),
+        signal,
+        onLine: (line) => send({ line }),
+        onPercent: (percent) => send({ percent }),
+      });
+      writeGameSourceDir(locations.installDir, dir);
+      return dir;
+    });
+  });
+
+  ipcMain.handle("instances:depot-cancel", (_event, id: string, channel: Channel) => {
+    cancelSync(`${resolve(id, channel).locations.installDir}#depot`);
   });
 
   ipcMain.handle("instances:uninstall", (_event, id: string, channel: Channel) => {

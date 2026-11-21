@@ -1,0 +1,114 @@
+/**
+ * @author Valkream Team
+ * @license MIT-NC
+ */
+
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { afterEach, beforeEach, describe, it } from "node:test";
+
+import { buildDepotArgs, downloadWithDepot } from "./depot-download";
+import { parseDepotPercent, type DepotRunner } from "./depot-runner";
+import { depotAssetFor, ensureDepotDownloader } from "./depot-tool";
+
+let dir: string;
+beforeEach(() => {
+  dir = fs.mkdtempSync(path.join(os.tmpdir(), "depot-"));
+});
+afterEach(() => fs.rmSync(dir, { recursive: true, force: true }));
+
+const sha = (text: string) => createHash("sha256").update(text).digest("hex");
+
+describe("arguments DepotDownloader", () => {
+  it("tableau d'arguments : app, depot, manifeste, os, dossier forcé, QR, aucun mot de passe", () => {
+    const args = buildDepotArgs(892970, { id: 892971, manifest: "1234567890123456789" }, "/out", "windows");
+    assert.deepEqual(args, [
+      "-app", "892970", "-depot", "892971", "-manifest", "1234567890123456789",
+      "-os", "windows", "-dir", "/out", "-qr", "-max-downloads", "8",
+    ]);
+    assert.ok(!args.includes("-password"));
+    assert.ok(!args.includes("-username"));
+  });
+
+  it("refuse les valeurs non numériques (pas d'injection d'option)", () => {
+    assert.throws(() => buildDepotArgs(1, { id: "1 -password x", manifest: "1" }, "/o", "linux"), /depot/);
+    assert.throws(() => buildDepotArgs(1, { id: 1, manifest: "-dir" }, "/o", "linux"), /manifeste/);
+    assert.throws(() => buildDepotArgs(-1, { id: 1, manifest: "1" }, "/o", "linux"), /appId/);
+  });
+});
+
+describe("progression", () => {
+  it("lit le pourcentage des lignes de DepotDownloader", () => {
+    assert.equal(parseDepotPercent(" 42.50% depot/file.dat"), 42.5);
+    assert.equal(parseDepotPercent("100.00% x"), 100);
+    assert.equal(parseDepotPercent("Got 12 files"), undefined);
+  });
+});
+
+describe("téléchargement", () => {
+  const input = (runner: DepotRunner, extra = {}) => ({
+    tool: "tool", runner, appId: 7, depot: { id: 8, manifest: "9" }, installDir: dir, os: "linux" as const, ...extra,
+  });
+
+  it("lance le runner, relaie les lignes et le pourcentage, retourne le dossier", async () => {
+    const lines: string[] = [];
+    const percents: number[] = [];
+    const runner: DepotRunner = async (_cmd, _args, { onLine, cwd }) => {
+      assert.ok(cwd.startsWith(dir));
+      onLine("██ QR ██");
+      onLine(" 50.00% a.dat");
+      return 0;
+    };
+    const out = await downloadWithDepot(input(runner, { onLine: (l: string) => lines.push(l), onPercent: (p: number) => percents.push(p) }));
+    assert.ok(out.startsWith(path.join(dir, ".depot")));
+    assert.deepEqual(lines, ["██ QR ██", " 50.00% a.dat"]);
+    assert.deepEqual(percents, [50]);
+  });
+
+  it("code de sortie non nul : erreur", async () => {
+    await assert.rejects(() => downloadWithDepot(input(async () => 1)), /code 1/);
+  });
+});
+
+describe("outil épinglé", () => {
+  const zip = "ZIP-CONTENT";
+  const fakeIo = (content: string) => ({
+    download: async (_url: string, dest: string) => fs.writeFileSync(dest, content),
+    extract: async (_zip: string, out: string) => {
+      fs.mkdirSync(out, { recursive: true });
+      fs.writeFileSync(path.join(out, "DepotDownloader"), "EXE");
+    },
+  });
+  const assets = { "linux-x64": { url: "https://x.test/dd.zip", sha256: sha(zip), file: "DepotDownloader" } };
+
+  it("asset absent, sans https ou au hash invalide : non configuré", () => {
+    assert.equal(depotAssetFor({}, "linux-x64"), undefined);
+    assert.equal(depotAssetFor({ "linux-x64": { url: "http://x", sha256: sha(zip), file: "a" } }, "linux-x64"), undefined);
+    assert.equal(depotAssetFor({ "linux-x64": { url: "https://x", sha256: "abc", file: "a" } }, "linux-x64"), undefined);
+    assert.equal(depotAssetFor({ "linux-x64": { url: "https://x", sha256: sha(zip), file: "../a" } }, "linux-x64"), undefined);
+    assert.ok(depotAssetFor(assets, "linux-x64"));
+  });
+
+  it("hash conforme : extrait et retourne l'exécutable", async () => {
+    const exe = await ensureDepotDownloader({ toolsDir: dir, platformKey: "linux-x64", assets, io: fakeIo(zip) });
+    assert.equal(fs.readFileSync(exe, "utf8"), "EXE");
+  });
+
+  it("hash différent : exécution refusée, rien n'est extrait", async () => {
+    await assert.rejects(
+      () => ensureDepotDownloader({ toolsDir: dir, platformKey: "linux-x64", assets, io: fakeIo("TAMPERED") }),
+      /hash.*refusée/,
+    );
+    assert.deepEqual(fs.readdirSync(path.join(dir, "depotdownloader")), []);
+  });
+
+  it("exécutable modifié après coup : retéléchargé et revérifié", async () => {
+    const exe = await ensureDepotDownloader({ toolsDir: dir, platformKey: "linux-x64", assets, io: fakeIo(zip) });
+    fs.writeFileSync(exe, "EVIL");
+    const again = await ensureDepotDownloader({ toolsDir: dir, platformKey: "linux-x64", assets, io: fakeIo(zip) });
+    assert.equal(fs.readFileSync(again, "utf8"), "EXE");
+  });
+});

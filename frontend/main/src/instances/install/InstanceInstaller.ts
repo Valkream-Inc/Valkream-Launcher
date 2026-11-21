@@ -24,11 +24,13 @@ import { loadEntryContent } from "./local-content";
 import { entryDirectory } from "../local/instance-paths";
 import { buildRow, TIERS, type InstanceInspector } from "../local/InstanceInspector";
 import { readInstallState, readInstanceSettings, recordInstalledEntry, removeInstalledEntry } from "./install-store";
+import { isPathInside } from "../../lib/paths";
 import { removeWithPlan } from "./fs-ops";
 import { HashCache } from "./hash-cache";
 import { appendInstallLog } from "./install-log";
 import type { ParamResolver } from "../remote/ParamResolver";
 import { hashProvider, steamLibraryProvider } from "./providers/hash";
+import { clearGameSourceDir, DEPOT_DIR, GameSourceError, readGameSourceDir, toSteamSourceIssue } from "./game-source";
 import { locateSteamGame, type SteamGame } from "../local/steam-library";
 import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore";
 import type { InstallIO, Provider, Uninstaller } from "./providers/types";
@@ -259,8 +261,14 @@ export class InstanceInstaller {
             previousOwned: previous?.owned ?? [],
             signal,
             archives,
-            steam: async () =>
-              loaded.config.steamAppId === undefined ? null : (this.options.steamLocator ?? locateSteamGame)(loaded.config.steamAppId),
+            steam: async () => {
+              // Dossier indiqué par le joueur (ou téléchargé par DepotDownloader) : prioritaire.
+              const chosen = readGameSourceDir(installDir);
+              if (chosen) return { dir: chosen, buildId: "", chosen: true };
+              return loaded.config.steamAppId === undefined
+                ? null
+                : (this.options.steamLocator ?? locateSteamGame)(loaded.config.steamAppId);
+            },
             loadContent: () => loadEntryContent(resolver, item.entry, installDir, loaded.release),
             beforeCommit,
             report: (step, message, transfer) => emit({ ...common, step, message, transfer }),
@@ -282,7 +290,16 @@ export class InstanceInstaller {
             break;
           }
           const message = messageOf(error);
-          result.failed.push({ name: item.name, error: message });
+          const steamIssue =
+            error instanceof GameSourceError
+              ? toSteamSourceIssue(error, {
+                  entry: item.name,
+                  appId: loaded.config.steamAppId,
+                  branch: item.entry["steam-beta"],
+                  depotAvailable: item.entry.depot !== undefined && loaded.config.steamAppId !== undefined,
+                })
+              : undefined;
+          result.failed.push({ name: item.name, error: message, ...(steamIssue ? { steamIssue } : {}) });
           emit({ ...common, step: "error", message });
           // Les entrées suivantes reposent sur la base : on s'arrête si elle échoue.
           if (item.tier === "game-base") break;
@@ -292,7 +309,14 @@ export class InstanceInstaller {
       hashes.prune();
       hashes.save();
       // Tout est passé : plus rien à garder. Sinon on garde les partiels pour reprendre.
-      if (result.failed.length === 0 && !result.cancelled) fs.rmSync(tempDir, { recursive: true, force: true });
+      if (result.failed.length === 0 && !result.cancelled) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+        // Le jeu téléchargé par DepotDownloader a été copié et vérifié : il ne sert plus (plusieurs Go).
+        const depot = path.join(installDir, DEPOT_DIR);
+        const source = readGameSourceDir(installDir);
+        if (source && isPathInside(depot, source)) clearGameSourceDir(installDir);
+        fs.rmSync(depot, { recursive: true, force: true });
+      }
       else cleanTempDir(tempDir);
       this.running.delete(lockKey);
     }

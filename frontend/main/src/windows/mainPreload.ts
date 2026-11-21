@@ -62,6 +62,12 @@ const electronAPI: ElectronAPI = {
     ipcRenderer.on("instances:progress", (_event, data) => callback(data)),
   removeInstanceProgressListeners: () =>
     ipcRenderer.removeAllListeners("instances:progress"),
+  pickInstanceSource: (id, channel) => ipcRenderer.invoke("instances:pick-source", id, channel),
+  clearInstanceSource: (id, channel) => ipcRenderer.invoke("instances:clear-source", id, channel),
+  depotDownloadInstance: (id, channel) => ipcRenderer.invoke("instances:depot-download", id, channel),
+  cancelDepotDownload: (id, channel) => ipcRenderer.invoke("instances:depot-cancel", id, channel),
+  onDepotOutput: (callback) => ipcRenderer.on("instances:depot-output", (_event, data) => callback(data)),
+  removeDepotOutputListeners: () => ipcRenderer.removeAllListeners("instances:depot-output"),
   setInstanceSetting: (id, channel, name, value) =>
     ipcRenderer.invoke("instances:set-setting", id, channel, name, value),
 
