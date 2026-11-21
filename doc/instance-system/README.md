@@ -87,6 +87,22 @@ defaultSettings: { ram: 4096, fullscreen: false },
 { type: "slider", settingsName: "ram", label: "Mémoire max", min: 1024, max: 16384, step: 512, unit: "Mo", default: 4096 }
 ```
 
+## Jeux Steam : ne pas héberger les fichiers du jeu
+
+Héberger soi-même les fichiers d'un jeu commercial (`build-game-*.zip`) revient à le redistribuer : à éviter. Il vaut mieux que chaque joueur obtienne le jeu **par sa propre licence Steam**, et que le serveur ne porte que ce qui est à nous (mods, configs, BepInEx via Thunderstore). Trois façons d'obtenir une version précise :
+
+1. **Branche bêta Steam (officiel, sans outil)** : Steam → clic droit sur le jeu → Propriétés → Bêtas. Si l'éditeur propose la version voulue (branche « legacy » / « previous version »), le joueur la choisit ; les fichiers sont dans `steamapps/common/<jeu>`. Le launcher pourrait les copier dans l'instance et vérifier la version par hash (`hash_url`) ou `buildid` (voir « À faire »).
+2. **DepotDownloader (version arbitraire, avec son compte)** : outil open source [SteamRE/DepotDownloader](https://github.com/SteamRE/DepotDownloader) qui télécharge un **manifeste précis** d'un depot avec le compte Steam du joueur (il doit posséder le jeu) :
+
+```
+DepotDownloader -app 892970 -depot <depotId> -manifest <manifestId> -username <compte> -remember-password -dir <dossier>
+```
+
+   `appId` / `depotId` / `manifestId` (un manifeste = une version du jeu) se trouvent sur [SteamDB](https://steamdb.info) (page du jeu → Depots → Manifests). Le premier lancement demande mot de passe et code Steam Guard ; `-remember-password` évite de les redemander. Options utiles : `-filelist` (ne télécharger que certains fichiers), `-os windows|linux|macos`, `-beta <branche>`.
+3. **Copie depuis l'installation Steam du joueur** : si le joueur a déjà le jeu, le launcher peut copier `steamapps/common/<jeu>` (dossier retrouvé via `libraryfolders.vdf` et `appmanifest_<appId>.acf`, qui contient le `buildid`) dans l'instance, puis appliquer nos mods par-dessus. Aucun identifiant Steam n'est manipulé par le launcher.
+
+Dans tous les cas le serveur n'héberge plus que nos fichiers (zip de config, mods Thunderstore). Ce document n'est pas un avis juridique : le contrat d'abonné Steam et les conditions de l'éditeur du jeu font foi (par exemple, ne jamais partager son compte ni distribuer les fichiers téléchargés).
+
 ## Installation atomique et reprise
 
 - **Atomique par entrée** : chaque provider (`zip_url`, `hash_url`, Thunderstore) télécharge, vérifie et extrait d'abord dans `.tmp/<entrée>.stage`. Ce n'est qu'une fois tout prêt que `gameFolderToRemove` est appliqué et que les fichiers sont basculés dans le dossier du jeu par renommages (`install/staging.ts`). Une erreur, une annulation ou un hash invalide pendant la préparation laisse l'installation exactement dans son état précédent. La bascule elle-même (quelques renommages) n'est pas transactionnelle : une coupure à cet instant précis est rattrapée par « Vérifier / Réparer ». L'espace disque temporaire nécessaire est celui des fichiers à mettre à jour (ou de l'archive et de son extraction).

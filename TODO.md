@@ -21,6 +21,8 @@
 Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 
 ### Moteur d'installation
+- [ ] (++) Provider `steam_library` : copier le jeu depuis l'installation Steam du joueur (`libraryfolders.vdf`, `appmanifest_<id>.acf`, contrôle du `buildid`) au lieu de l'héberger ; message clair si la version Steam ne correspond pas (branche bêta à choisir).
+- [ ] (+++) Provider `steam_depot` : télécharger un manifeste précis via DepotDownloader (compte Steam du joueur, Steam Guard) : à n'envisager que si la copie depuis Steam ne suffit pas.
 - [ ] (++) Provider Nexus (`nexus_url`) : aujourd'hui une entrée Nexus est un échec explicite.
 - [x] (++) Dépendances Thunderstore transitives (résoudre et installer les dépendances d'un mod). — fait : option `dependencies: { skip }` par entrée (à activer dans les latest.yml si voulu).
 - [ ] (++) Script `build-manifest --zip` / `--tar.gz` : générer aussi l'archive d'une entrée `hash_url` (le launcher sait déjà installer un `.tar.gz` en flux).
