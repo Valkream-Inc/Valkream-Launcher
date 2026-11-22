@@ -74,6 +74,10 @@ function SliderSetting({
               props,
               setting.settingsName,
               next as number,
+              t("instance.settingValue", {
+                label: t(setting.label, { defaultValue: setting.label }),
+                value: `${next}${setting.unit ? ` ${setting.unit}` : ""}`,
+              }),
             );
         }}
       />
@@ -88,6 +92,11 @@ function SliderSetting({
 function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
   const { t } = useTranslation();
   const { values } = props;
+  /** Libellé traduit de l'option choisie (sa valeur brute si elle est inconnue). */
+  const label = (setting: Extract<CustomGameSetting, { type: "select" }>, value: string) => {
+    const option = setting.options.find((item) => item.value === value);
+    return option ? t(option.label, { defaultValue: option.label }) : value;
+  };
 
   return (
     <>
@@ -116,6 +125,9 @@ function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
                       props,
                       setting.settingsName,
                       event.target.checked,
+                      t(event.target.checked ? "instance.settingOn" : "instance.settingOff", {
+                        label: t(setting.label, { defaultValue: setting.label }),
+                      }),
                     )
                   }
                 />
@@ -139,6 +151,10 @@ function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
                       props,
                       setting.settingsName,
                       event.target.value,
+                      t("instance.settingValue", {
+                        label: t(setting.label, { defaultValue: setting.label }),
+                        value: label(setting, event.target.value),
+                      }),
                     )
                   }
                 >

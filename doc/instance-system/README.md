@@ -274,3 +274,11 @@ Ajouter un texte : l'écrire dans `fr.ts` ET `en.ts` (même clé, mêmes variabl
 Aussi traduits : onglets Debug / Tools, textes des jeux (`instances.config.tsx` : les `label` / `text` des réglages sont des clés de traduction, un texte brut reste accepté), boutons de popup. Côté main, `main/src/lib/messages.ts` (même principe, test de parité) traduit la progression d'installation et les messages de mise à jour du launcher, dans la langue du réglage ; le provider reçoit `context.t(...)`.
 
 Restent en français (volontairement) : erreurs de configuration destinées aux administrateurs (validation du `latest.yml`, erreurs des providers), messages de console / développeur.
+
+## Textes traduisibles, logs, onglets
+
+- `description` d'un mod et `role` d'un contributeur (config remote) acceptent une chaîne **ou** `{ "fr": "…", "en": "…" }` (repli sur `fr`, puis `en`).
+- `label` / `text` des réglages custom (config render) sont des clés de traduction (repli sur le texte brut).
+- Chaque réglage custom affiche une snackbar à l'enregistrement (activé / désactivé / valeur choisie).
+- Journal `instance.log` : `2026-11-22 11:10:03 INFO  ▶ (1/3) base : …`, niveaux `INFO` / `WARN` / `ERROR`, ligne vide entre deux synchronisations, résumé final (durée, réussies, échecs). Les libellés suivent la langue du launcher ; les messages d'erreur des providers restent en français.
+- Onglets **Mods** et **Contributeurs** séparés, en lecture seule : visibles aussi pendant une installation.

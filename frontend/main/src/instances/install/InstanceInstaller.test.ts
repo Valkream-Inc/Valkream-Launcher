@@ -622,9 +622,10 @@ describe("InstanceInstaller", () => {
     const { installer } = build(baseRemote(), files);
     await installer.sync("g", "stable");
     const log = read("stable", "instance.log");
-    assert.match(log, /\[stable\] synchronisation : \d+ entrée\(s\)/);
-    assert.match(log, /\[stable\] base start/);
-    assert.match(log, /\[stable\] base done/);
+    assert.match(log, /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d INFO  Synchronisation \[stable\] : \d+ entrée\(s\)/m);
+    assert.match(log, /INFO  ▶ \(1\/\d+\) base/);
+    assert.match(log, /INFO  ✔ base : terminé/);
+    assert.match(log, /Fin de la synchronisation en \d+ s : \d+ réussie\(s\), 0 en échec/);
   });
 
   it("annulation : signal déjà annulé = rien n'est traité, pas d'échec", async () => {

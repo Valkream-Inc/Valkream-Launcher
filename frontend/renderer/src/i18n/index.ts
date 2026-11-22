@@ -6,6 +6,7 @@
  * (défaut : langue du système, français sinon anglais).
  */
 
+import type { LocalizedText } from "@shared/types";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
@@ -38,6 +39,12 @@ export const initI18n = async (): Promise<void> => {
 export const setLanguage = async (language: Language): Promise<void> => {
   await i18n.changeLanguage(language);
   await window.electron_API.setSettings("language", language);
+};
+
+/** Texte d'une config remote : chaîne seule, ou `{ fr, en }` (langue courante, repli sur fr puis en). */
+export const localized = (value: LocalizedText | undefined): string | undefined => {
+  if (value === undefined || typeof value === "string") return value;
+  return value[languageOf(i18n.language)] ?? value.fr ?? value.en;
 };
 
 export default i18n;

@@ -2,67 +2,28 @@
  * @author Valkream Team
  * @license MIT-NC
  *
- * Onglet Mods (affichage joueur) : mods et contributeurs décrits par la config
- * remote de l'instance. Aucun détail technique ici (voir l'onglet Debug).
+ * Onglet Mods (affichage joueur) : mods décrits par la config remote de l'instance.
+ * Lecture seule : disponible même pendant une installation (voir l'onglet Debug pour le détail technique).
  */
 
 import { Avatar, Box, Link, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 import type { InstanceReport } from "@shared/types";
 
+import { localized } from "../../../../../i18n";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
-import { useTranslation } from "react-i18next";
 
-const open = (url: string) =>
-  window.electron_API.openLink(url).catch(console.error);
+const open = (url: string) => window.electron_API.openLink(url).catch(console.error);
 
-export default function InstanceModsTab({
-  report,
-}: {
-  report: InstanceReport;
-}) {
+export default function InstanceModsTab({ report }: { report: InstanceReport }) {
   const { t } = useTranslation();
-  const { mods, contributors } = report;
+  const { mods } = report;
 
   return (
     <>
-      <SettingsTitle warn={false}>
-        Contributeurs ({contributors.length})
-      </SettingsTitle>
-      <SettingsBox warn={false}>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {contributors.map((person) => (
-            <Box
-              key={person.name}
-              sx={{ display: "flex", gap: 1, alignItems: "center" }}
-            >
-              <Avatar
-                src={person.avatar}
-                alt={person.name}
-                sx={{ width: 32, height: 32 }}
-              />
-              <Box>
-                {person.link ? (
-                  <Link
-                    component="button"
-                    onClick={() => open(person.link as string)}
-                  >
-                    {person.name}
-                  </Link>
-                ) : (
-                  <Typography>{person.name}</Typography>
-                )}
-                {person.role && (
-                  <Typography variant="caption">{person.role}</Typography>
-                )}
-              </Box>
-            </Box>
-          ))}
-        </Box>
-      </SettingsBox>
-
-      <SettingsTitle warn={false}>Mods ({mods.length})</SettingsTitle>
+      <SettingsTitle warn={false}>{t("instance.mods", { count: mods.length })}</SettingsTitle>
       {mods.length === 0 && (
         <SettingsBox warn={false}>
           <Typography>{t("instance.noMods")}</Typography>
@@ -71,20 +32,13 @@ export default function InstanceModsTab({
       {mods.map((mod) => (
         <SettingsBox key={mod.id ?? mod.name} warn={false}>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            {mod.icon && (
-              <Avatar variant="rounded" src={mod.icon} alt={mod.name} />
-            )}
+            {mod.icon && <Avatar variant="rounded" src={mod.icon} alt={mod.name} />}
             <Box>
               <Typography sx={{ fontWeight: 700 }}>{mod.name}</Typography>
-              {mod.description && (
-                <Typography variant="body2">{mod.description}</Typography>
-              )}
+              {mod.description && <Typography variant="body2">{localized(mod.description)}</Typography>}
               {mod.link && (
-                <Link
-                  component="button"
-                  onClick={() => open(mod.link as string)}
-                >
-                  Voir la page
+                <Link component="button" onClick={() => open(mod.link as string)}>
+                  {t("instance.seePage")}
                 </Link>
               )}
             </Box>

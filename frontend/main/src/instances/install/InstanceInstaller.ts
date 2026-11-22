@@ -136,6 +136,7 @@ export class InstanceInstaller {
     const hashes = new HashCache(installDir);
     const tempDir = path.join(installDir, ".tmp");
 
+    const syncStartedAt = Date.now();
     try {
       cleanTempDir(tempDir); // restes d'une synchro interrompue (les téléchargements partiels sont gardés)
       fs.mkdirSync(tempDir, { recursive: true });
@@ -198,7 +199,14 @@ export class InstanceInstaller {
         }
         // Journal : début / fin / erreur de chaque entrée (pas la progression des téléchargements).
         if (progress.step === "start" || progress.step === "done" || progress.step === "error") {
-          appendInstallLog(installDir, `[${channel}] ${progress.entry} ${progress.step}${progress.message ? ` : ${progress.message}` : ""}`);
+          const entry = progress.entry;
+          if (progress.step === "start") {
+            appendInstallLog(installDir, t("log.entryStart", { index: progress.index, total: progress.total, entry, message: progress.message ?? "" }));
+          } else if (progress.step === "done") {
+            appendInstallLog(installDir, progress.message ? t("log.entryDoneWith", { entry, message: progress.message }) : t("log.entryDone", { entry }));
+          } else {
+            appendInstallLog(installDir, t("log.entryError", { entry, message: progress.message ?? "" }), "ERROR");
+          }
         }
         onProgress?.({ id, channel, elapsedMs: now - startedAt, ...progress });
       };
@@ -211,7 +219,13 @@ export class InstanceInstaller {
       }
       const archives = new ArchiveCache(archiveUses);
 
-      appendInstallLog(installDir, `[${channel}] synchronisation${repair ? " (réparation)" : ""} : ${todo.length} entrée(s)`);
+      appendInstallLog(
+        installDir,
+        t("log.start", { channel, mode: repair ? t("log.repairMode") : "", count: todo.length }),
+        "INFO",
+        new Date(),
+        { separator: true },
+      );
 
       let index = 0;
       for (const item of todo) {
@@ -321,6 +335,16 @@ export class InstanceInstaller {
         }
       }
     } finally {
+      appendInstallLog(
+        installDir,
+        t("log.summary", {
+          seconds: Math.round((Date.now() - syncStartedAt) / 1000),
+          ok: result.installed.length,
+          failed: result.failed.length,
+          cancelled: result.cancelled ? t("log.cancelled") : "",
+        }),
+        result.failed.length > 0 ? "WARN" : "INFO",
+      );
       hashes.prune();
       hashes.save();
       // Tout est passé : plus rien à garder. Sinon on garde les partiels pour reprendre.
