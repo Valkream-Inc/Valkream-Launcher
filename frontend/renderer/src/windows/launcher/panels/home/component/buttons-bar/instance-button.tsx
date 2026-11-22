@@ -15,13 +15,14 @@ import type { InstanceSyncProgress, SteamSourceIssue } from "@shared/types";
 
 import Popup from "../../../../component/popup/popup";
 
+import { instanceText } from "@/src/i18n";
+import { useTranslation } from "react-i18next";
 import { useAction } from "../../../../context/action.context";
 import { useBackground } from "../../../../context/background.context";
 import { useGames } from "../../../../context/games.context";
 import { useInfos } from "../../../../context/infos.context";
 import type { InstanceButtonAction } from "./instance-button.types";
 import SteamSourceDialog from "./steam-source-dialog";
-import { useTranslation } from "react-i18next";
 
 /** 75 s → "1:15", 3725 s → "1:02:05". */
 const formatElapsed = (ms: number): string => {
@@ -63,7 +64,8 @@ export default function InstanceButton() {
   }>({ text: "" });
 
   // « Jouer » ou « Jouer à la vX » selon la version connue
-  const playLabel = (version?: string | null) => (version ? t("button.playVersion", { version }) : t("button.play"));
+  const playLabel = (version?: string | null) =>
+    version ? t("button.playVersion", { version }) : t("button.play");
 
   const render = () => {
     const { text, progress } = lastProgress.current;
@@ -189,7 +191,11 @@ export default function InstanceButton() {
           (setting.category?.zone ?? "normal") === "danger" &&
           activeSettings.includes(setting.settingsName),
       )
-      .map((setting) => t("button.dangerActive", { label: t(setting.label, { defaultValue: setting.label }) }))
+      .map((setting) =>
+        t("button.dangerActive", {
+          label: instanceText(actualInstanceId, setting.label),
+        }),
+      )
       .join("");
 
   useEffect(() => {
@@ -218,7 +224,9 @@ export default function InstanceButton() {
         if (!isInstalled && !isConnected)
           return setAction({
             text: t("button.cannotInstall", {
-              what: isInternetConnected ? t("button.toServer") : t("button.toInternet"),
+              what: isInternetConnected
+                ? t("button.toServer")
+                : t("button.toInternet"),
             }),
             playIcon: false,
             onClick: () => {},
@@ -239,7 +247,9 @@ export default function InstanceButton() {
               ? {
                   text: t("button.playOffline", {
                     play: playLabel(gameVersion),
-                    what: isInternetConnected ? t("button.toServer") : t("button.toInternet"),
+                    what: isInternetConnected
+                      ? t("button.toServer")
+                      : t("button.toInternet"),
                   }),
                   playIcon: true,
                   onClick: handleStart,
@@ -297,7 +307,13 @@ export default function InstanceButton() {
     };
 
     run();
-  }, [installationStatut, maintenance, actualInstanceId, actualChannel, i18n.language]);
+  }, [
+    installationStatut,
+    maintenance,
+    actualInstanceId,
+    actualChannel,
+    i18n.language,
+  ]);
 
   return (
     <>

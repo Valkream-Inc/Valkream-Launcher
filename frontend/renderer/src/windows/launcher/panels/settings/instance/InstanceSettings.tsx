@@ -12,6 +12,8 @@ import { useEffect, useRef, useState } from "react";
 
 import type { InstanceId } from "@shared/types";
 
+import { useTranslation } from "react-i18next";
+import { instanceText } from "../../../../../i18n";
 import instancesRenderConfig from "../../../../../instances/instances.config";
 import { useAction } from "../../../context/action.context";
 import { useGames } from "../../../context/games.context";
@@ -22,10 +24,10 @@ import SettingsTitle from "../component/settings-title/settings-title";
 import ButtonDebug from "../settings-list/global/button-debug";
 import ButtonOpenAppData from "../settings-list/global/button-open-appdata";
 import ButtonUninstallGlobal from "../settings-list/global/button-uninstall-global";
+import GamesRootSetting from "../settings-list/global/games-root-setting";
+import SelectLanguage from "../settings-list/global/select-language";
 import SelectLauncherBackgroundType from "../settings-list/global/select-launcher-background-type";
 import SelectLauncherTheme from "../settings-list/global/select-launcher-theme";
-import SelectLanguage from "../settings-list/global/select-language";
-import GamesRootSetting from "../settings-list/global/games-root-setting";
 import ToggleBeta from "../settings-list/global/toggle-beta";
 import ToggleDev from "../settings-list/global/toggle-dev";
 import ToggleMusic from "../settings-list/global/toggle-music";
@@ -36,13 +38,11 @@ import Instance_SelectLauncherBehavior from "../settings-list/instance/instance-
 import type { InstanceSettingValues } from "../settings-list/instance/instance-setting.types";
 import Instance_ToggleLaunchSteam from "../settings-list/instance/instance-toggle-launch-steam";
 import type { GameSettingsProps } from "../settings.types";
-import InstanceDebugTab from "./InstanceDebugTab";
 import InstanceContributorsTab from "./InstanceContributorsTab";
+import InstanceDebugTab from "./InstanceDebugTab";
 import InstanceModsTab from "./InstanceModsTab";
 import InstanceToolsTab from "./InstanceToolsTab";
 import { useInstanceReport } from "./use-instance-report";
-import { useTranslation } from "react-i18next";
-import { instanceText } from "../../../../../i18n";
 
 interface Props extends GameSettingsProps {
   instanceId: InstanceId;
@@ -121,7 +121,11 @@ export default function InstanceSettings({
         <NavButton id="launcher" label="Launcher" active={false} />
         <NavButton id="game" label="Game" active={false} />
         <NavButton id="mods" label="Mods" active={false} />
-        <NavButton id="contributors" label={t("instance.contributorsTab")} active={false} />
+        <NavButton
+          id="contributors"
+          label={t("instance.contributorsTab")}
+          active={false}
+        />
         {isDevActive && <NavButton id="dev" label="Dev" active={false} />}
         {!actionLoading && isAdminActive && (
           <NavButton id="tools" label="Tools" active={false} />
@@ -150,6 +154,7 @@ export default function InstanceSettings({
         )}
         <SettingsTitle warn={true}>{t("instance.dangerZone")}</SettingsTitle>
         {!actionLoading && <ButtonUninstallGlobal />}
+        {!actionLoading && <GamesRootSetting />}
         <ToggleDev
           devActive={isDevActive}
           setDevActive={setIsDevActive}
@@ -162,6 +167,7 @@ export default function InstanceSettings({
         <ToggleMusic />
         <SelectLauncherTheme />
         <SelectLauncherBackgroundType />
+        <SelectLanguage />
       </SettingsTab>
 
       <SettingsTab id="game" activeTab={activeTab}>
@@ -213,7 +219,11 @@ export default function InstanceSettings({
                   (setting.category?.level === "dev" && isDevActive) ||
                   (setting.category?.level === "admin" && isAdminActive) ||
                   (setting.category?.level === "special" && isSpecialActive)),
-            ) && <SettingsTitle warn={true}>{t("instance.dangerZone")}</SettingsTitle>}
+            ) && (
+              <SettingsTitle warn={true}>
+                {t("instance.dangerZone")}
+              </SettingsTitle>
+            )}
             <Instance_CustomSettings
               {...settingProps}
               settings={customSettings}
@@ -276,8 +286,6 @@ export default function InstanceSettings({
         <SettingsTitle warn={true}>{t("instance.advanced")}</SettingsTitle>
         <ButtonDebug />
         {!actionLoading && <ToggleBeta />}
-        {!actionLoading && <GamesRootSetting />}
-        <SelectLanguage />
       </SettingsTab>
 
       {/* Tools : outils de préparation du remote (hash de dossier, liste de mods) */}

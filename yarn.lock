@@ -2682,6 +2682,9 @@ __metadata:
     vite: "npm:^8.3.8"
     wait-on: "npm:^9.5.1"
     yaml: "npm:^2.9.1"
+  dependenciesMeta:
+    better-sqlite3:
+      optional: true
   languageName: unknown
   linkType: soft
 
