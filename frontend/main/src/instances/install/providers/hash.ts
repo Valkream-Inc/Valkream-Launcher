@@ -111,10 +111,10 @@ const createHashProvider = (source: "remote" | "steam"): Provider => async (cont
   // Progression globale (tous les fichiers à récupérer) : un pourcentage, pas de nom de fichier.
   // Le téléchargement compte pour 90 % d'un fichier, la vérification pour 10 %.
   const progress = createGlobalProgress(
-    (transfer) => context.report("download", `${name} : téléchargement`, transfer),
+    (transfer) => context.report("download", context.t("progress.download", { label: name }), transfer),
     () => toFetch.length,
   );
-  context.report("download", `${name} : téléchargement`);
+  context.report("download", context.t("progress.download", { label: name }));
 
   await runPool(toFetch, DOWNLOAD_CONCURRENCY, async ([file, expected]) => {
     // Nom stable (hash du chemin) : un téléchargement interrompu est repris à la synchro suivante.

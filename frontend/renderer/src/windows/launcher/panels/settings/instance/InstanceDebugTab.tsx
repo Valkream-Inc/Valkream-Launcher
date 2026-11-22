@@ -8,6 +8,7 @@
  */
 
 import {
+  Box,
   Button,
   Chip,
   FormControlLabel,
@@ -33,26 +34,33 @@ import Wait from "../../../component/wait/wait";
 import { useAction } from "../../../context/action.context";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
+import { useTranslation } from "react-i18next";
+import { formatInstallLog, formatLogTime, logMessage, parseInstallLog } from "../../../../../instances/install-log";
 
 const STATUS: Record<
   EntryStatus,
-  { label: string; color: "success" | "warning" | "error" | "default" | "info" }
+  { color: "success" | "warning" | "error" | "default" | "info" }
 > = {
-  "up-to-date": { label: "À jour", color: "success" },
-  outdated: { label: "Mise à jour", color: "warning" },
-  "not-installed": { label: "Non installé", color: "warning" },
-  modified: { label: "Modifié", color: "error" },
-  skipped: { label: "Désactivé", color: "default" },
-  invalid: { label: "Invalide", color: "error" },
+  "up-to-date": { color: "success" },
+  outdated: { color: "warning" },
+  "not-installed": { color: "warning" },
+  modified: { color: "error" },
+  skipped: { color: "default" },
+  invalid: { color: "error" },
 };
 
-const StatusChip = ({ status }: { status: EntryStatus }) => (
+const StatusChip = ({ status }: { status: EntryStatus }) => {
+  const { t } = useTranslation();
+  return (
   <Chip
     size="small"
-    label={STATUS[status].label}
+    label={t(`debug.status.${status}`)}
     color={STATUS[status].color}
   />
-);
+  );
+};
+
+const LEVEL_COLOR = { INFO: "info.main", WARN: "warning.main", ERROR: "error.main" } as const;
 
 const short = (hash?: string) => (hash ? hash.slice(0, 8) : "—");
 
@@ -73,6 +81,7 @@ export default function InstanceDebugTab({
   loading,
   onReload,
 }: Props) {
+  const { t } = useTranslation();
   const titleOf = (entry: EntryReport) =>
     debugContent.find((item) => item.entry === entry.name)?.title ?? entry.name;
   const [problemsOnly, setProblemsOnly] = useState(false);
@@ -94,10 +103,10 @@ export default function InstanceDebugTab({
       );
     } catch (error) {
       setLog(
-        `Journal illisible : ${error instanceof Error ? error.message : String(error)}`,
+        t("debug.logUnreadable", { error: error instanceof Error ? error.message : String(error) }),
       );
     }
-  }, [report.id, report.channel]);
+  }, [report.id, report.channel, t]);
   useEffect(() => {
     void loadLog();
   }, [loadLog, report]);
@@ -116,17 +125,15 @@ export default function InstanceDebugTab({
         );
         if (result.failed.length > 0) {
           enqueueSnackbar(
-            `Réparation incomplète : ${result.failed
-              .map((item) => `${item.name} (${item.error})`)
-              .join(", ")}`,
+            t("debug.repairIncomplete", { failed: result.failed.map((item) => `${item.name} (${item.error})`).join(", ") }),
             { variant: "error" },
           );
         } else {
-          enqueueSnackbar("Installation réparée !", { variant: "success" });
+          enqueueSnackbar(t("debug.repaired"), { variant: "success" });
         }
       } catch (error) {
         console.error(error);
-        enqueueSnackbar("Réparation impossible !", { variant: "error" });
+        enqueueSnackbar(t("debug.repairFailed"), { variant: "error" });
       } finally {
         await onReload({ verify: true });
       }
@@ -136,14 +143,16 @@ export default function InstanceDebugTab({
   const copy = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      enqueueSnackbar(`${label} copié !`, { variant: "success" });
+      enqueueSnackbar(t("debug.copied", { label }), { variant: "success" });
     } catch (error) {
       console.error(error);
-      enqueueSnackbar(`Impossible de copier : ${label}`, { variant: "error" });
+      enqueueSnackbar(t("debug.copyFailed", { label }), { variant: "error" });
     }
   };
-  const copyReport = () => copy(JSON.stringify(report, null, 2), "Rapport");
-  const copyLog = () => copy(log || "(journal vide)", "Journal");
+  const copyReport = () => copy(JSON.stringify(report, null, 2), t("debug.report"));
+  const logLines = parseInstallLog(log ?? "");
+  const tr = (key: string, vars?: Record<string, string | number>) => t(key, vars) as string;
+  const copyLog = () => copy(logLines.length > 0 ? formatInstallLog(logLines, tr) : t("debug.emptyLog"), t("debug.log"));
 
   return (
     <>
@@ -153,32 +162,30 @@ export default function InstanceDebugTab({
       </SettingsTitle>
 
       <SettingsBox warn={false}>
-        <Typography>Installation : {report.installDir}</Typography>
+        <Typography>{t("debug.installation", { dir: report.installDir })}</Typography>
         <Typography>
-          latest : {report.releaseVersion ?? "—"} (source :{" "}
-          {report.releaseSource})
+          {t("debug.latest", { version: report.releaseVersion ?? "—", source: report.releaseSource })}
         </Typography>
         {report.executable && (
           <Typography>
-            Exécutable : {report.executable.path} (
-            {report.executable.exists ? "présent" : "absent"})
+            {t("debug.executable", { path: report.executable.path, state: report.executable.exists ? t("debug.present") : t("debug.absent") })}
           </Typography>
         )}
         <Button disabled={loading} onClick={() => onReload()}>
-          Recharger
+          {t("debug.reload")}
         </Button>
         <Button disabled={loading} onClick={() => onReload({ verify: true })}>
-          Vérifier les fichiers
+          {t("debug.verify")}
         </Button>
         <Button
           disabled={loading || actionLoading}
           color="warning"
           onClick={repair}
         >
-          Réparer
+          {t("debug.repair")}
         </Button>
-        <Button onClick={copyReport}>Copier le rapport</Button>
-        <Button onClick={copyLog}>Copier le journal</Button>
+        <Button onClick={copyReport}>{t("debug.copyReport")}</Button>
+        <Button onClick={copyLog}>{t("debug.copyLog")}</Button>
       </SettingsBox>
 
       {report.errors.length > 0 && (
@@ -192,22 +199,22 @@ export default function InstanceDebugTab({
       )}
 
       {/* Récapitulatif */}
-      <SettingsTitle warn={false}>Récapitulatif</SettingsTitle>
+      <SettingsTitle warn={false}>{t("debug.summary")}</SettingsTitle>
       <SettingsBox warn={!summary.works}>
         <Chip
           color={summary.works ? "success" : "error"}
-          label={summary.works ? "Fonctionne" : "Ne fonctionne pas"}
+          label={summary.works ? t("debug.works") : t("debug.broken")}
         />
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Total</TableCell>
-              <TableCell>À jour</TableCell>
-              <TableCell>À mettre à jour</TableCell>
-              <TableCell>Non installé</TableCell>
-              <TableCell>Modifié</TableCell>
-              <TableCell>Désactivé</TableCell>
-              <TableCell>Invalide</TableCell>
+              <TableCell>{t("debug.total")}</TableCell>
+              <TableCell>{t("debug.status.up-to-date")}</TableCell>
+              <TableCell>{t("debug.toUpdate")}</TableCell>
+              <TableCell>{t("debug.status.not-installed")}</TableCell>
+              <TableCell>{t("debug.status.modified")}</TableCell>
+              <TableCell>{t("debug.status.skipped")}</TableCell>
+              <TableCell>{t("debug.status.invalid")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -224,7 +231,7 @@ export default function InstanceDebugTab({
         </Table>
         {summary.blocking.length > 0 && (
           <Typography color="error">
-            Bloquant : {summary.blocking.join(", ")}
+            {t("debug.blocking", { list: summary.blocking.join(", ") })}
           </Typography>
         )}
       </SettingsBox>
@@ -232,9 +239,7 @@ export default function InstanceDebugTab({
       {overlaps.length > 0 && (
         <SettingsBox warn={true}>
           <Typography>
-            Chemins imbriqués (fichiers partagés, vérifier to_ignore /
-            gameFolderToPreserve) :{" "}
-            {overlaps.map(([outer, inner]) => `${outer} ⊃ ${inner}`).join(", ")}
+            {t("debug.overlaps", { list: overlaps.map(([outer, inner]) => `${outer} ⊃ ${inner}`).join(", ") })}
           </Typography>
         </SettingsBox>
       )}
@@ -246,7 +251,7 @@ export default function InstanceDebugTab({
             onChange={(event) => setProblemsOnly(event.target.checked)}
           />
         }
-        label="Afficher seulement les problèmes"
+        label={t("debug.problemsOnly")}
       />
 
       {/* Un tableau par sous-chemin */}
@@ -257,14 +262,14 @@ export default function InstanceDebugTab({
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Entrée</TableCell>
-                  <TableCell>Niveau</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Version (installée → remote)</TableCell>
-                  <TableCell>Hash</TableCell>
-                  <TableCell>Conservé</TableCell>
-                  <TableCell>Ignoré</TableCell>
-                  <TableCell>Statut</TableCell>
+                  <TableCell>{t("debug.entry")}</TableCell>
+                  <TableCell>{t("debug.tier")}</TableCell>
+                  <TableCell>{t("debug.type")}</TableCell>
+                  <TableCell>{t("debug.version")}</TableCell>
+                  <TableCell>{t("debug.hash")}</TableCell>
+                  <TableCell>{t("debug.preserved")}</TableCell>
+                  <TableCell>{t("debug.ignored")}</TableCell>
+                  <TableCell>{t("debug.statusColumn")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -273,7 +278,7 @@ export default function InstanceDebugTab({
                     <TableCell>
                       {titleOf(entry)}
                       {entry.optionalSetting &&
-                        ` (option : ${entry.optionalSetting})`}
+                        t("debug.option", { name: entry.optionalSetting })}
                     </TableCell>
                     <TableCell>{entry.tier}</TableCell>
                     <TableCell>{entry.type}</TableCell>
@@ -295,8 +300,7 @@ export default function InstanceDebugTab({
                             variant="caption"
                             sx={{ display: "block" }}
                           >
-                            {entry.files.missing.length} manquant(s),{" "}
-                            {entry.files.changed.length} modifié(s)
+                            {t("debug.filesCount", { missing: entry.files.missing.length, changed: entry.files.changed.length })}
                           </Typography>
                         )}
                       {entry.errors.map((error) => (
@@ -320,12 +324,12 @@ export default function InstanceDebugTab({
 
       {tables.length === 0 && problemsOnly && (
         <SettingsBox warn={false}>
-          <Typography>Aucun problème détecté.</Typography>
+          <Typography>{t("debug.noProblem")}</Typography>
         </SettingsBox>
       )}
 
       {/* Réglages de l'installation */}
-      <SettingsTitle warn={false}>Réglages</SettingsTitle>
+      <SettingsTitle warn={false}>{t("debug.settings")}</SettingsTitle>
       <SettingsBox warn={false}>
         <Table size="small">
           <TableBody>
@@ -337,7 +341,7 @@ export default function InstanceDebugTab({
             ))}
             {Object.keys(report.settings).length === 0 && (
               <TableRow>
-                <TableCell>Aucun réglage enregistré</TableCell>
+                <TableCell>{t("debug.noSettings")}</TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -345,22 +349,65 @@ export default function InstanceDebugTab({
       </SettingsBox>
 
       {/* Journal d'installation */}
-      <SettingsTitle warn={false}>Journal d'installation</SettingsTitle>
+      <SettingsTitle warn={false}>{t("debug.installLog")}</SettingsTitle>
       <SettingsBox warn={false}>
-        <Button onClick={loadLog}>Actualiser</Button>
-        <Typography
-          component="pre"
-          variant="caption"
+        <Button onClick={loadLog}>{t("debug.refresh")}</Button>
+        <Box
+          component="div"
           sx={{
-            maxHeight: 300,
+            maxHeight: 360,
             overflow: "auto",
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-all",
+            fontFamily: "monospace",
+            fontSize: 12,
+            lineHeight: 1.6,
             userSelect: "text",
+            borderRadius: 1,
+            p: 1,
+            bgcolor: "rgba(0,0,0,0.25)",
           }}
         >
-          {log === null ? "Chargement…" : log.trim() || "(journal vide)"}
-        </Typography>
+          {log === null && t("common.loading")}
+          {log !== null && logLines.length === 0 && t("debug.emptyLog")}
+          {logLines.map((line, index) =>
+            line.kind === "raw" ? (
+              <Box key={index} sx={{ color: "text.secondary", wordBreak: "break-all" }}>
+                {line.text}
+              </Box>
+            ) : (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  gap: 1.5,
+                  mt: line.record.sep && index > 0 ? 1.5 : 0,
+                  pt: line.record.sep && index > 0 ? 1 : 0,
+                  borderTop: line.record.sep && index > 0 ? "1px solid rgba(255,255,255,0.12)" : "none",
+                  borderLeft: "3px solid",
+                  borderLeftColor: LEVEL_COLOR[line.record.level],
+                  pl: 1,
+                  bgcolor: line.record.level === "ERROR" ? "rgba(244,67,54,0.10)" : "transparent",
+                }}
+              >
+                <Box component="span" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>
+                  {formatLogTime(line.record.time)}
+                </Box>
+                <Box component="span" sx={{ color: LEVEL_COLOR[line.record.level], fontWeight: 700, minWidth: 44 }}>
+                  {line.record.level}
+                </Box>
+                <Box
+                  component="span"
+                  sx={{
+                    wordBreak: "break-word",
+                    color: line.record.level === "INFO" ? "text.primary" : LEVEL_COLOR[line.record.level],
+                    fontWeight: line.record.key === "log.start" || line.record.key === "log.summary" ? 700 : 400,
+                  }}
+                >
+                  {logMessage(line.record, tr)}
+                </Box>
+              </Box>
+            ),
+          )}
+        </Box>
       </SettingsBox>
     </>
   );

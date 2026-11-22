@@ -189,7 +189,7 @@ export default function InstanceButton() {
           (setting.category?.zone ?? "normal") === "danger" &&
           activeSettings.includes(setting.settingsName),
       )
-      .map((setting) => t("button.dangerActive", { label: setting.label }))
+      .map((setting) => t("button.dangerActive", { label: t(setting.label, { defaultValue: setting.label }) }))
       .join("");
 
   useEffect(() => {

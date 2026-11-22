@@ -70,4 +70,4 @@ Légende : (+) petit · (++) moyen · (+++) gros. Classées par thème.
 
 - [x] (++) Dossier des jeux modifiable (déplacement atomique), réinstallation d'une entrée dont le chemin change, nettoyage sur version majeure du launcher, contournement de la mise à jour (Ctrl+Maj+clic vidéo). Reste : valider dans Electron (dialogue, déplacement entre disques), version majeure : option de conserver aussi les dossiers `gameFolderToPreserve`.
 - [ ] (++) Provider Nexus (clé API du joueur) ; provider Hexium (doc https://hexium.gg/api/docs/ inaccessible automatiquement : robots.txt, à fournir).
-- [x] (++) Traduction FR / EN (i18next). Reste : onglets Debug / Tools, messages du processus main (progression, erreurs), textes de `instances.config.tsx`, fenêtre de mise à jour ; `yarn install` requis (i18next, react-i18next), rendu à valider dans Electron.
+- [x] (++) Traduction FR / EN (i18next). Debug / Tools, textes des jeux, progression et mises à jour du launcher traduits (erreurs admin laissées en français) ; `yarn install` requis (i18next, react-i18next), rendu à valider dans Electron.

@@ -271,4 +271,14 @@ Interface traduite avec **i18next** + **react-i18next** : `frontend/renderer/src
 
 Ajouter un texte : l'écrire dans `fr.ts` ET `en.ts` (même clé, mêmes variables `{{x}}`) ; `i18n.test.ts` échoue sinon. Le mode d'emploi Steam est généré côté main dans la langue du réglage.
 
-Pas encore traduits (français uniquement) : onglets Debug / Tools / Dev (outils admin), messages d'erreur et de progression venant du processus main, textes propres à chaque jeu (`instances.config.tsx` : descriptions, astuces, bienvenue), fenêtre de mise à jour (messages du main).
+Aussi traduits : onglets Debug / Tools, textes des jeux (`instances.config.tsx` : les `label` / `text` des réglages sont des clés de traduction, un texte brut reste accepté), boutons de popup. Côté main, `main/src/lib/messages.ts` (même principe, test de parité) traduit la progression d'installation et les messages de mise à jour du launcher, dans la langue du réglage ; le provider reçoit `context.t(...)`.
+
+Restent en français (volontairement) : erreurs de configuration destinées aux administrateurs (validation du `latest.yml`, erreurs des providers), messages de console / développeur.
+
+## Textes traduisibles, logs, onglets
+
+- `description` d'un mod et `role` d'un contributeur (config remote) acceptent une chaîne **ou** `{ "fr": "…", "en": "…" }` (repli sur `fr`, puis `en`).
+- `label` / `text` des réglages custom (config render) sont des clés de traduction (repli sur le texte brut).
+- Chaque réglage custom affiche une snackbar à l'enregistrement (activé / désactivé / valeur choisie).
+- Journal `instance.log` : une ligne JSON par évènement (`LogRecord` : date, niveau `INFO`/`WARN`/`ERROR`, clé `log.*` + variables). L'interface le traduit à l'affichage dans la langue COURANTE (changer de langue retraduit aussi les anciennes lignes), avec couleurs par niveau, séparateur entre synchronisations et résumé final. « Copier le journal » donne le texte dans la langue courante. Seuls les messages d'erreur bruts des providers (texte libre, français) ne sont pas traduits. Les journaux d'avant ce format s'affichent tels quels.
+- Onglets **Mods** et **Contributeurs** séparés, en lecture seule : visibles aussi pendant une installation.

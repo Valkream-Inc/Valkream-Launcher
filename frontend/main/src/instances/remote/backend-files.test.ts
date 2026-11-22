@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 
 import yaml from "yaml";
@@ -18,7 +19,7 @@ import { validateReleaseConfig, validateRemoteIndex } from "./validate.js";
  * pour chaque entrée, des hash de manifeste cohérents et des fichiers liés présents.
  */
 
-const backendPublic = path.resolve(__dirname, "../../../../../backend/public");
+const backendPublic = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../../../backend/public");
 const local = (link: string) =>
   path.join(backendPublic, link.replace(/^\//, ""));
 const readJson = (link: string) =>

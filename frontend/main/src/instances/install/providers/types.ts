@@ -6,6 +6,7 @@
  * Les accès réseau et zip sont injectés (`InstallIO`) pour tester sans réseau.
  */
 
+import type { Translate } from "../../../lib/messages.js";
 import type { GamePlatform, ProgressData, ReleaseEntry } from "@shared/types";
 
 import type { ParamResolver } from "../../remote/ParamResolver.js";
@@ -58,6 +59,8 @@ export interface InstallIO {
 }
 
 export interface ProviderContext {
+  /** Traduction des textes de progression affichés au joueur. */
+  t: Translate;
   name: string;
   entry: ReleaseEntry;
   /** Dossier de l'entrée (`installDir/path`), déjà validé par la liste blanche. */

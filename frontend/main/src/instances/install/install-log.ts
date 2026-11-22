@@ -2,18 +2,27 @@
  * @author Valkream Team
  * @license MIT-NC
  *
- * Journal d'installation d'un canal (`instance.log`) : une ligne par évènement
- * (début, fin, erreur d'une entrée). Tronqué à la moitié quand il dépasse 512 Ko.
- * Le journal ne doit jamais faire échouer une installation.
+ * Journal d'installation d'un canal (`instance.log`) : un évènement par ligne JSON
+ * (`LogRecord` : date, niveau, clé de traduction + variables). Le texte est traduit à
+ * l'affichage par l'interface : changer de langue change donc aussi les anciennes lignes.
+ * Tronqué à la moitié quand il dépasse 512 Ko. Le journal ne doit jamais faire échouer une installation.
  */
 
 import fs from "fs";
 import path from "path";
 
+import type { LogRecord } from "@shared/types";
+
 export const INSTALL_LOG_FILE = "instance.log";
 const MAX_BYTES = 512 * 1024;
 
-export const appendInstallLog = (installDir: string, message: string, now: Date = new Date()): void => {
+export const appendInstallLog = (
+  installDir: string,
+  key: string,
+  vars?: LogRecord["vars"],
+  level: LogRecord["level"] = "INFO",
+  options: { separator?: boolean; now?: Date } = {},
+): void => {
   try {
     const file = path.join(installDir, INSTALL_LOG_FILE);
     fs.mkdirSync(installDir, { recursive: true });
@@ -21,7 +30,14 @@ export const appendInstallLog = (installDir: string, message: string, now: Date 
       const kept = fs.readFileSync(file, "utf8").slice(-MAX_BYTES / 2);
       fs.writeFileSync(file, kept.slice(kept.indexOf("\n") + 1));
     }
-    fs.appendFileSync(file, `${now.toISOString()} ${message.replace(/\s*\n\s*/g, " ")}\n`);
+    const record: LogRecord = {
+      time: (options.now ?? new Date()).toISOString(),
+      level,
+      key,
+      ...(vars ? { vars } : {}),
+      ...(options.separator ? { sep: true as const } : {}),
+    };
+    fs.appendFileSync(file, `${JSON.stringify(record)}\n`);
   } catch {
     // journal facultatif
   }

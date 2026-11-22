@@ -7,6 +7,8 @@ import fs from "fs";
 
 import type { IpcMainEvent } from "electron";
 import { formatBytes } from "../lib/format-bytes.js";
+import SettingsManager from "../core/settings.js";
+import { translator, type Translate } from "../lib/messages.js";
 
 import { baseUrl } from "../core/constants.js";
 import InfosManager from "../core/server-infos.js";
@@ -18,6 +20,7 @@ const { autoUpdater } = electronUpdater;
 
 class CheckForUpdates {
   timeout: number;
+  t: Translate = translator("fr");
   event!: IpcMainEvent;
 
   constructor() {
@@ -26,11 +29,13 @@ class CheckForUpdates {
 
   async init(event: IpcMainEvent): Promise<void> {
     this.event = event;
+    // Langue du joueur (réglage) ; la fenêtre de mise à jour n'a pas accès aux réglages
+    this.t = translator((await SettingsManager.getSetting("language")) === "en" ? "en" : "fr");
 
     if (!(await InfosManager.getIsServerReachable()))
       return this.onError(
         "no_internet",
-        "❌ Pas de connexion au serveur. Impossible de vérifier les mises à jour.",
+        this.t("update.noServer")
       );
 
     this.configureUpdater();
@@ -39,7 +44,7 @@ class CheckForUpdates {
     try {
       await autoUpdater.checkForUpdates();
     } catch (err) {
-      this.onError(err, "❌ Échec de la vérification des mises à jour.");
+      this.onError(err, this.t("update.checkFailed"));
     }
   }
 
@@ -59,24 +64,22 @@ class CheckForUpdates {
 
   attachListeners(): void {
     autoUpdater.on("checking-for-update", () => {
-      this.onMsg("🔍 Vérification des mises à jour...");
+      this.onMsg(this.t("update.checking"));
     });
 
     autoUpdater.on("update-not-available", () => {
-      this.onMsg("🟢 Aucune mise à jour.", true);
+      this.onMsg(this.t("update.none"), true);
     });
 
     autoUpdater.on("update-available", async (info) => {
       this.onMsg(
-        `🔄 Mise à jour disponible...\n(${LauncherManager.getVersion()} --> ${
-          info.version
-        })`,
+        this.t("update.available", { from: LauncherManager.getVersion(), to: info.version })
       );
       try {
         await new Promise<void>((resolve) => setTimeout(resolve, 1000));
         await autoUpdater.downloadUpdate();
       } catch (err) {
-        this.onError(err, "❌ Échec du téléchargement de la mise à jour.");
+        this.onError(err, this.t("update.downloadFailed"));
       }
     });
 
@@ -86,11 +89,11 @@ class CheckForUpdates {
       const transferred = formatBytes(progress.transferred);
       const total = formatBytes(progress.total);
 
-      this.onMsg(`📥 ${percent}% (${transferred} / ${total})\n à ${speed}`);
+      this.onMsg(this.t("update.progress", { percent, done: transferred, total, speed }));
     });
 
     autoUpdater.on("update-downloaded", () => {
-      this.onMsg("✅ Mise à jour téléchargée. Redémarrage...");
+      this.onMsg(this.t("update.downloaded"));
       setTimeout(() => {
         try {
           fs.writeFileSync(FilesManager.updaterDetailsPath(), "update");
@@ -102,7 +105,7 @@ class CheckForUpdates {
     });
 
     autoUpdater.on("error", (err) => {
-      this.onError(err, "❌ Une erreur est survenue lors de la mise à jour.");
+      this.onError(err, this.t("update.error"));
     });
   }
 

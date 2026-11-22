@@ -30,6 +30,7 @@ import { HashCache } from "./hash-cache.js";
 import { appendInstallLog } from "./install-log.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
 import { hashProvider, steamLibraryProvider } from "./providers/hash.js";
+import { type Lang, translator } from "../../lib/messages.js";
 import { clearGameSourceDir, DEPOT_DIR, GameSourceError, type GuideLanguage, readGameSourceDir, toSteamSourceIssue } from "./game-source.js";
 import { locateSteamGame, type SteamGame } from "../local/steam-library.js";
 import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore.js";
@@ -125,14 +126,17 @@ export class InstanceInstaller {
       throw new Error(loaded.errors.join(" ; ") || "latest.yml indisponible");
     }
 
+    const lang: Lang = (await this.options.language?.()) ?? "fr";
+    const t = translator(lang);
     const lockKey = path.resolve(installDir);
-    if (this.running.has(lockKey)) throw new Error("Une installation est déjà en cours");
+    if (this.running.has(lockKey)) throw new Error(t("install.alreadyRunning"));
     this.running.add(lockKey);
 
     const result: InstanceSyncResult = { installed: [], failed: [], works: false };
     const hashes = new HashCache(installDir);
     const tempDir = path.join(installDir, ".tmp");
 
+    const syncStartedAt = Date.now();
     try {
       cleanTempDir(tempDir); // restes d'une synchro interrompue (les téléchargements partiels sont gardés)
       fs.mkdirSync(tempDir, { recursive: true });
@@ -195,7 +199,17 @@ export class InstanceInstaller {
         }
         // Journal : début / fin / erreur de chaque entrée (pas la progression des téléchargements).
         if (progress.step === "start" || progress.step === "done" || progress.step === "error") {
-          appendInstallLog(installDir, `[${channel}] ${progress.entry} ${progress.step}${progress.message ? ` : ${progress.message}` : ""}`);
+          const entry = progress.entry;
+          if (progress.step === "start") {
+            appendInstallLog(installDir, "log.entryStart", { index: progress.index, total: progress.total, entry, message: progress.message ?? "" });
+          } else if (progress.step === "done") {
+            // Un message à la fin d'une entrée = entrée optionnelle retirée.
+            appendInstallLog(installDir, progress.message ? "log.entryRemoved" : "log.entryDone", { entry });
+          } else if (progress.message === t("progress.cancelled")) {
+            appendInstallLog(installDir, "log.entryCancelled", { entry }, "WARN");
+          } else {
+            appendInstallLog(installDir, "log.entryError", { entry, message: progress.message ?? "" }, "ERROR");
+          }
         }
         onProgress?.({ id, channel, elapsedMs: now - startedAt, ...progress });
       };
@@ -208,7 +222,7 @@ export class InstanceInstaller {
       }
       const archives = new ArchiveCache(archiveUses);
 
-      appendInstallLog(installDir, `[${channel}] synchronisation${repair ? " (réparation)" : ""} : ${todo.length} entrée(s)`);
+      appendInstallLog(installDir, "log.start", { channel, repair: repair ? 1 : 0, count: todo.length }, "INFO", { separator: true });
 
       let index = 0;
       for (const item of todo) {
@@ -232,7 +246,7 @@ export class InstanceInstaller {
             });
             removeInstalledEntry(installDir, item.name);
             result.installed.push(item.name);
-            emit({ ...common, step: "done", message: `${item.name} retiré` });
+            emit({ ...common, step: "done", message: t("progress.removed", { label: item.name }) });
             continue;
           }
           const provider = providers[String(item.entry.type)];
@@ -275,6 +289,7 @@ export class InstanceInstaller {
             },
             loadContent: () => loadEntryContent(resolver, item.entry, installDir, loaded.release),
             beforeCommit,
+            t,
             report: (step, message, transfer) => emit({ ...common, step, message, transfer }),
           });
 
@@ -296,7 +311,7 @@ export class InstanceInstaller {
           // Annulation demandée : on s'arrête sans compter d'échec (l'entrée reprendra à la prochaine synchro).
           if (signal?.aborted) {
             result.cancelled = true;
-            emit({ ...common, step: "error", message: "annulé" });
+            emit({ ...common, step: "error", message: t("progress.cancelled") });
             break;
           }
           const message = messageOf(error);
@@ -307,7 +322,7 @@ export class InstanceInstaller {
                   appId: loaded.config.steamAppId,
                   branch: item.entry["steam-beta"],
                   depotAvailable: item.entry.depot !== undefined && loaded.config.steamAppId !== undefined,
-                  language: await this.options.language?.(),
+                  language: lang,
                 })
               : undefined;
           result.failed.push({ name: item.name, error: message, ...(steamIssue ? { steamIssue } : {}) });
@@ -317,6 +332,17 @@ export class InstanceInstaller {
         }
       }
     } finally {
+      appendInstallLog(
+        installDir,
+        "log.summary",
+        {
+          seconds: Math.round((Date.now() - syncStartedAt) / 1000),
+          ok: result.installed.length,
+          failed: result.failed.length,
+          cancelled: result.cancelled ? 1 : 0,
+        },
+        result.failed.length > 0 ? "WARN" : "INFO",
+      );
       hashes.prune();
       hashes.save();
       // Tout est passé : plus rien à garder. Sinon on garde les partiels pour reprendre.

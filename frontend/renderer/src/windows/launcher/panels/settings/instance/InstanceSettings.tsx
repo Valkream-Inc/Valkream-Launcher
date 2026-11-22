@@ -37,6 +37,7 @@ import type { InstanceSettingValues } from "../settings-list/instance/instance-s
 import Instance_ToggleLaunchSteam from "../settings-list/instance/instance-toggle-launch-steam";
 import type { GameSettingsProps } from "../settings.types";
 import InstanceDebugTab from "./InstanceDebugTab";
+import InstanceContributorsTab from "./InstanceContributorsTab";
 import InstanceModsTab from "./InstanceModsTab";
 import InstanceToolsTab from "./InstanceToolsTab";
 import { useInstanceReport } from "./use-instance-report";
@@ -83,7 +84,7 @@ export default function InstanceSettings({
 
   // Pendant une action (installation…), on ne reste pas sur les onglets qui modifient le jeu
   useEffect(() => {
-    if (actionLoading && ["mods", "tools", "debug"].includes(activeTab))
+    if (actionLoading && ["tools", "debug"].includes(activeTab))
       changeTab("general");
   }, [actionLoading]);
 
@@ -118,7 +119,8 @@ export default function InstanceSettings({
         <NavButton id="general" label="General" active={false} />
         <NavButton id="launcher" label="Launcher" active={false} />
         <NavButton id="game" label="Game" active={false} />
-        {!actionLoading && <NavButton id="mods" label="Mods" active={false} />}
+        <NavButton id="mods" label="Mods" active={false} />
+        <NavButton id="contributors" label={t("instance.contributorsTab")} active={false} />
         {isDevActive && <NavButton id="dev" label="Dev" active={false} />}
         {!actionLoading && isAdminActive && (
           <NavButton id="tools" label="Tools" active={false} />
@@ -241,6 +243,11 @@ export default function InstanceSettings({
       <SettingsTab id="mods" activeTab={activeTab}>
         {loading && !report && <Typography>{t("common.loading")}</Typography>}
         {report && <InstanceModsTab report={report} />}
+      </SettingsTab>
+
+      <SettingsTab id="contributors" activeTab={activeTab}>
+        {loading && !report && <Typography>{t("common.loading")}</Typography>}
+        {report && <InstanceContributorsTab report={report} />}
       </SettingsTab>
 
       {/* Dev : outils d'administration */}

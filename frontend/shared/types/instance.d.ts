@@ -31,11 +31,14 @@ export type LinkOrData<T> = string | T;
 /* Remote : games/<id>/index.config.json (un par jeu)                 */
 /* ------------------------------------------------------------------ */
 
-/** Contributeur affiché dans l'onglet Mods (`contributor.config.json`). */
+/** Texte affiché au joueur : une chaîne, ou une chaîne par langue (`{ fr, en }`, repli sur le français). */
+export type LocalizedText = string | { fr?: string; en?: string };
+
+/** Contributeur affiché dans l'onglet Contributeurs (`contributor.config.json`). */
 export interface Contributor {
   name: string;
   avatar?: string;
-  role?: string;
+  role?: LocalizedText;
   link?: string;
 }
 
@@ -45,7 +48,7 @@ export interface ModDisplay {
   id?: string;
   name: string;
   icon?: string;
-  description?: string;
+  description?: LocalizedText;
   link?: string;
 }
 
@@ -430,4 +433,16 @@ export interface ToolsHashSummary {
 export interface ModsListResult {
   mods: ModDisplay[];
   failed: { id: string; error: string }[];
+}
+
+/** Ligne du journal d'installation (`instance.log`, une par ligne JSON) : traduite à l'affichage. */
+export interface LogRecord {
+  /** Date ISO. */
+  time: string;
+  level: "INFO" | "WARN" | "ERROR";
+  /** Clé de traduction `log.*` (côté interface). */
+  key: string;
+  vars?: Record<string, string | number>;
+  /** Début d'une nouvelle synchronisation (séparateur visuel). */
+  sep?: true;
 }
