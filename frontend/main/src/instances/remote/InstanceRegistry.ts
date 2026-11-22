@@ -45,8 +45,9 @@ export class InstanceRegistry {
 
         const { index } = load;
         const channels: Channel[] = [];
-        if (isFetchableLink(index.channels?.stable)) channels.push("stable");
-        if (isFetchableLink(index.channels?.beta)) channels.push("beta");
+        for (const channel of ["stable", "beta", "alpha"] as const) {
+          if (isFetchableLink(index.channels?.[channel])) channels.push(channel);
+        }
 
         return {
           id: config.id,

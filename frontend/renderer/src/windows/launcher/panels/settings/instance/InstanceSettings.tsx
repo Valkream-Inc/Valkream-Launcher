@@ -134,7 +134,7 @@ export default function InstanceSettings({
       {/* Tabs */}
       <SettingsTab id="general" activeTab={activeTab}>
         <SettingsTitle warn={false}>
-          General{channel === "beta" && " (beta)"}
+          General{channel !== "stable" && ` (${channel})`}
         </SettingsTitle>
         {(renderConfig.description || renderConfig.descriptionContent) && (
           <SettingsBox warn={false}>

@@ -18,10 +18,10 @@ export interface GamesContextValue {
   actualInstanceId: InstanceId;
   /** Config render de l'instance active (images, fonds, 3D, textes, réglages…). */
   actualInstance: InstanceRenderConfig;
-  /** Change l'instance active (lève si elle n'a pas de config render). */
-  changeActualInstance: (instanceId: InstanceId) => void;
-  /** Canal de l'installation active : beta seulement si activée ET proposée par le remote. */
+  /** Change l'instance active et son canal (défaut : stable). Lève si elle n'a pas de config render. */
+  changeActualInstance: (instanceId: InstanceId, channel?: Channel) => void;
+  /** Canal de l'installation active (choisi dans la liste des jeux : une entrée par canal). */
   actualChannel: Channel;
-  /** Recalcule le canal (après un changement du réglage beta). */
+  /** Vérifie que le canal actif est encore proposé (réglage désactivé, canal retiré du remote) : sinon stable. */
   refreshChannel: () => Promise<void>;
 }

@@ -50,13 +50,17 @@ const en: Messages = {
     confirm:
       "You are about to enable advanced options that may damage your installation (Admin Tools, Debug Tools, Dev Tools, Alpha features). Are you sure you want to continue?",
   },
+  channel: {
+    beta: "BETA",
+    alpha: "ALPHA",
+  },
   beta: {
     panel: "You have beta testing enabled ...",
     disable: "Disable it",
-    on: "Beta testing enabled!",
-    off: "Beta testing disabled!",
-    text: "Enable beta testing (fetches beta game updates). To bypass the launcher update: Ctrl + Shift + click on the start-up video.",
-    label: "Enable beta testing",
+    on: "Test channels shown!",
+    off: "Test channels hidden!",
+    text: "Adds a separate, colored entry in the game list for each available test channel (beta, alpha): your stable game stays untouched and is not reloaded. To bypass the launcher update: Ctrl + Shift + click on the start video.",
+    label: "Show test channels (beta, alpha)",
   },
   settings: {
     music: {
@@ -78,8 +82,10 @@ const en: Messages = {
     welcome2: "If you have any problem, do not hesitate to reach us on our Discord server.",
   },
   debug: {
-      text: "You can open the debug tools (⚠️: only for debugging purposes and with qualified people :) )",
-      button: "Open debug",
+      text: "You can open the launcher console (the browser web tools). ⚠️ Only use it with qualified people. An installation's diagnostics are in the game's Debug tab.",
+      button: "Open console",
+      opened: "Console opened!",
+      notOpened: "Console not opened!",
     },
     appdata: {
       text: "You can open Valkream's AppData folder.",

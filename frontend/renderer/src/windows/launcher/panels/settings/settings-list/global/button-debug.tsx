@@ -14,11 +14,11 @@ const ButtonDebug = () => {
     await window.electron_API
       .openDevTools()
       .then(() => {
-        enqueueSnackbar("Debug ouvert !", { variant: "success" });
+        enqueueSnackbar(t("settings.debug.opened"), { variant: "success" });
       })
       .catch((error) => {
         console.error(error);
-        enqueueSnackbar("Debug non ouvert !", { variant: "error" });
+        enqueueSnackbar(t("settings.debug.notOpened"), { variant: "error" });
       });
 
   return (

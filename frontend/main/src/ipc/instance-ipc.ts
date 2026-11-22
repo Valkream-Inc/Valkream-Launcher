@@ -38,7 +38,7 @@ import { realInstallIO } from "../instances/install/real-io.js";
 import { LocalizedError } from "../lib/localized-error.js";
 
 const isChannel = (value: unknown): value is Channel =>
-  value === "stable" || value === "beta";
+  value === "stable" || value === "beta" || value === "alpha";
 
 /** Valide id et canal reçus du renderer et résout les chemins de l'installation. */
 const resolve = (id: unknown, channel: unknown) => {

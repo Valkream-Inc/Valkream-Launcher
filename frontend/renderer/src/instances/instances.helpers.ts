@@ -7,11 +7,33 @@
 
 import type { Channel, EntryReport, InstanceSummary } from "@shared/types";
 
-/** Canal à utiliser : beta seulement si le joueur l'a activée ET que l'instance en propose une. */
-export const pickChannel = (
-  betaEnabled: boolean,
+/** Canaux de test, du plus stable au plus instable (ordre d'affichage). */
+export const TEST_CHANNELS = ["beta", "alpha"] as const satisfies readonly Channel[];
+
+/** Couleur d'accent de chaque canal de test (bordure, pastille) dans le choix du jeu. */
+export const CHANNEL_COLOR: Record<Exclude<Channel, "stable">, string> = {
+  beta: "#ffb300",
+  alpha: "#ff5252",
+};
+
+/**
+ * Canaux proposés dans le choix du jeu : `stable` toujours (s'il existe), les canaux de test
+ * seulement si le joueur les a activés ET que le remote les propose.
+ */
+export const selectableChannels = (
   channels: readonly Channel[],
-): Channel => (betaEnabled && channels.includes("beta") ? "beta" : "stable");
+  testChannelsEnabled: boolean,
+): Channel[] => [
+  ...(channels.includes("stable") ? (["stable"] as const) : []),
+  ...(testChannelsEnabled ? TEST_CHANNELS.filter((channel) => channels.includes(channel)) : []),
+];
+
+/** Canal souhaité s'il est encore proposé, sinon `stable` (ex : beta retirée du remote ou désactivée). */
+export const resolveChannel = (
+  wanted: Channel,
+  channels: readonly Channel[],
+  testChannelsEnabled: boolean,
+): Channel => (selectableChannels(channels, testChannelsEnabled).includes(wanted) ? wanted : "stable");
 
 /** Une instance est affichable si le remote l'active et que le renderer sait la décrire. */
 export const isSelectable = (

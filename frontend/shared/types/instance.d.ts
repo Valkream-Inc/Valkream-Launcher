@@ -15,7 +15,8 @@ import type { CheckInfosResult } from "./infos.js";
 /** Clé commune aux trois couches (main, render, remote). Ex : `Valheim-Valkream-v2`. */
 export type InstanceId = string;
 
-export type Channel = "stable" | "beta";
+/** Canaux : `stable` + canaux de test (`beta`, `alpha`), chacun avec sa propre installation. */
+export type Channel = "stable" | "beta" | "alpha";
 
 /** Identité d'une installation locale : une instance dans un canal. */
 export type InstanceKey = `${InstanceId}@${Channel}`;

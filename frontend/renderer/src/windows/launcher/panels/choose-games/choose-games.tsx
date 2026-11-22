@@ -3,11 +3,12 @@
  * @license MIT-NC
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Card,
   CardActionArea,
+  Chip,
   Grid,
   InputAdornment,
   TextField,
@@ -17,7 +18,11 @@ import { styled } from "@mui/material/styles";
 import type { LauncherTheme } from "@shared/types";
 
 import instancesRenderConfig from "../../../../instances/instances.config";
-import { isSelectable } from "../../../../instances/instances.helpers";
+import {
+  CHANNEL_COLOR,
+  isSelectable,
+  selectableChannels,
+} from "../../../../instances/instances.helpers";
 import { useGames } from "../../context/games.context";
 import { usePanels } from "../../context/panels.context";
 import { useTheme } from "../../context/theme.context";
@@ -28,6 +33,8 @@ import type {
   SearchColors,
 } from "./choose-games.types";
 import { useTranslation } from "react-i18next";
+
+const CHANNEL_ORDER = ["stable", "beta", "alpha"];
 
 // Normalise : minuscules, sans accents, sans espaces
 const normalize = (str: string): string =>
@@ -163,11 +170,9 @@ const OldGameCard = styled(Card)(() => ({
   },
 }));
 
-const GameCard = ({ children }: GameCardProps) => {
+const ThemedCard = ({ children }: { children?: ReactNode }) => {
   const { theme } = useTheme();
   switch (theme) {
-    case "modern":
-      return <ModernGameCard>{children}</ModernGameCard>;
     case "futuristic":
       return <FuturisticGameCard>{children}</FuturisticGameCard>;
     case "old":
@@ -176,6 +181,24 @@ const GameCard = ({ children }: GameCardProps) => {
       return <ModernGameCard>{children}</ModernGameCard>;
   }
 };
+
+/** Carte d'un jeu. Un canal de test (beta, alpha) a un contour pointillé coloré et une pastille. */
+const GameCard = ({ children, accent }: GameCardProps) => (
+  <Box
+    sx={
+      accent
+        ? {
+            borderRadius: 3,
+            outline: `2px dashed ${accent}`,
+            outlineOffset: 3,
+            boxShadow: `0 0 18px ${accent}55`,
+          }
+        : undefined
+    }
+  >
+    <ThemedCard>{children}</ThemedCard>
+  </Box>
+);
 
 // Couleurs de la barre de recherche selon le thème
 const searchColors = (theme: LauncherTheme): SearchColors => {
@@ -209,23 +232,28 @@ export default function ChooseGames() {
   const { changeActualInstance } = useGames();
   const [games, setGames] = useState<GameEntry[]>([]);
 
-  // Instances du nouveau système : activées par le remote ET décrites côté render.
+  // Instances activées par le remote ET décrites côté render : une entrée par canal proposé
+  // (stable, puis beta / alpha si le joueur les a activés), pour ne jamais recharger le jeu stable.
   useEffect(() => {
-    window.electron_API
-      .getInstances()
-      .then((summaries) => {
+    Promise.all([
+      window.electron_API.getInstances(),
+      window.electron_API.getSettings("betaEnabled"),
+    ])
+      .then(([summaries, testChannelsEnabled]) => {
         const renderIds = instancesRenderConfig.map((item) => item.id);
         setGames(
           summaries
             .filter((summary) => isSelectable(summary, renderIds))
-            .map((summary) => ({
-              id: summary.id,
-              name:
-                instancesRenderConfig.find((item) => item.id === summary.id)
-                  ?.name ?? summary.id,
-              icon: instancesRenderConfig.find((item) => item.id === summary.id)
-                ?.images.name ?? "",
-            })),
+            .flatMap((summary) => {
+              const render = instancesRenderConfig.find((item) => item.id === summary.id);
+              const channels = selectableChannels(summary.channels, testChannelsEnabled);
+              return (channels.length > 0 ? channels : (["stable"] as const)).map((channel) => ({
+                id: summary.id,
+                channel,
+                name: render?.name ?? summary.id,
+                icon: render?.images.name ?? "",
+              }));
+            }),
         );
       })
       .catch(console.error);
@@ -236,7 +264,7 @@ export default function ChooseGames() {
   const [search, setSearch] = useState("");
 
   const handleClick = (game: GameEntry) => {
-    changeActualInstance(game.id);
+    changeActualInstance(game.id, game.channel);
     changePanel("home");
   };
 
@@ -258,7 +286,8 @@ export default function ChooseGames() {
     if (!query) return games;
     return games
       .map((game) => {
-        const byName = fuzzyMatch(query, normalize(game.name));
+        // « valheim beta » retrouve l'entrée beta : le canal fait partie du nom cherché
+        const byName = fuzzyMatch(query, normalize(`${game.name}${game.channel === "stable" ? "" : game.channel}`));
         const byId = fuzzyMatch(query, normalize(game.id));
         // On garde le meilleur des deux (distance la plus faible, puis position)
         const match = [byName, byId]
@@ -274,7 +303,8 @@ export default function ChooseGames() {
           // Tri par distance (pertinence), puis position, puis ordre alphabétique
           a.match.distance - b.match.distance ||
           a.match.position - b.match.position ||
-          a.game.name.localeCompare(b.game.name),
+          a.game.name.localeCompare(b.game.name) ||
+          CHANNEL_ORDER.indexOf(a.game.channel) - CHANNEL_ORDER.indexOf(b.game.channel),
       )
       .map(({ game }) => game);
   }, [search, games]);
@@ -381,8 +411,8 @@ export default function ChooseGames() {
             }}
           >
             {filteredGames.map((game) => (
-              <Grid key={game.id}>
-                <GameCard>
+              <Grid key={`${game.id}@${game.channel}`}>
+                <GameCard accent={game.channel === "stable" ? undefined : CHANNEL_COLOR[game.channel]}>
                   <CardActionArea onClick={() => handleClick(game)}>
                     <Box
                       sx={{
@@ -420,6 +450,18 @@ export default function ChooseGames() {
                       >
                         {game.name}
                       </Typography>
+                      {game.channel !== "stable" && (
+                        <Chip
+                          size="small"
+                          label={t(`channel.${game.channel}`)}
+                          sx={{
+                            bgcolor: CHANNEL_COLOR[game.channel],
+                            color: "#000",
+                            fontWeight: 700,
+                            letterSpacing: 1,
+                          }}
+                        />
+                      )}
                     </Box>
                   </CardActionArea>
                 </GameCard>

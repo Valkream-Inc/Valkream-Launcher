@@ -295,3 +295,9 @@ Restent en français (volontairement) : erreurs de configuration destinées aux 
 `event.json` (`name`, `description`), `maintenance.json` (`description`), `mods.json` (`description`), `contributors.json` (`role`).
 Exemple : `"name": { "fr": "Semaine Céleste", "en": "Celestial Week" }`. Les anciens fichiers (chaînes) restent valides.
 La date de l'évènement suit la langue du launcher.
+
+## Canaux (stable / beta / alpha)
+
+- Chaque canal d'une instance a sa propre installation. Le choix du jeu affiche **une carte par canal proposé** : le jeu stable, puis (réglage « Afficher les canaux de test ») une carte beta ou alpha au contour pointillé coloré avec une pastille. Le jeu stable n'est jamais rechargé en changeant de canal.
+- Le remote déclare les canaux dans `index.config.json` (`channels.stable`, `channels.beta`, `channels.alpha`).
+- L'accueil et l'onglet General indiquent `(beta)` / `(alpha)` quand l'installation active n'est pas la stable.

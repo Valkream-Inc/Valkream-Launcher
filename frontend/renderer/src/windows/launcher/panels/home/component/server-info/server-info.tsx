@@ -22,7 +22,7 @@ function ServerInfo() {
   // Le contexte peut renvoyer `false` quand l'info est indisponible
   const serverInfos = rawServerInfos || null;
   const maintenance = rawMaintenance || null;
-  const { actualInstance } = useGames();
+  const { actualInstance, actualChannel } = useGames();
   const [isMaintenancePopupOpen, setIsMaintenancePopupOpen] = useState(false);
 
   // Determine the display based on the state
@@ -84,6 +84,7 @@ function ServerInfo() {
           />
           <span className="logo-text">
             {actualInstance.serverLabel ?? actualInstance.name}
+            {actualChannel !== "stable" && ` (${actualChannel})`}
           </span>
           <span className="server-players">{statusText}</span>
         </div>

@@ -13,7 +13,7 @@ import {
 import type { Channel, InstanceId } from "@shared/types";
 
 import instancesRenderConfig from "../../../instances/instances.config";
-import { pickChannel } from "../../../instances/instances.helpers";
+import { resolveChannel } from "../../../instances/instances.helpers";
 import type {
   GamesContextValue,
   GamesProviderProps,
@@ -36,10 +36,11 @@ export const GamesProvider = ({ children }: GamesProviderProps) => {
     instancesRenderConfig.find((item) => item.id === actualInstanceId) ??
     instancesRenderConfig[0];
 
-  const changeActualInstance = (instanceId: InstanceId) => {
+  const changeActualInstance = (instanceId: InstanceId, channel: Channel = "stable") => {
     if (!instancesRenderConfig.some((item) => item.id === instanceId))
       throw new Error("Game not found");
 
+    setActualChannel(channel);
     return setActualInstanceId(instanceId);
   };
 
@@ -50,7 +51,8 @@ export const GamesProvider = ({ children }: GamesProviderProps) => {
         window.electron_API.getInstances(),
       ]);
       const summary = instances.find((item) => item.id === actualInstanceId);
-      setActualChannel(pickChannel(betaEnabled, summary?.channels ?? []));
+      // Le canal choisi dans la liste est conservé tant qu'il est proposé (le jeu stable n'est jamais rechargé à tort)
+      setActualChannel((current) => resolveChannel(current, summary?.channels ?? [], betaEnabled));
     } catch (error) {
       console.error("Erreur lors de la récupération du canal :", error);
     }

@@ -29,7 +29,7 @@ export type ValidationResult<T> =
   | { ok: false; errors: string[] };
 
 const PLATFORMS = ["win32", "linux", "darwin"];
-const CHANNELS = ["stable", "beta"];
+const CHANNELS = ["stable", "beta", "alpha"];
 const TIERS = RELEASE_TIERS;
 const ENTRY_TYPES = [
   "zip_url",
@@ -143,7 +143,7 @@ export const validateRemoteIndex = (
     } else {
       for (const [channel, link] of Object.entries(raw.channels)) {
         if (!CHANNELS.includes(channel)) {
-          errors.push(`${where}.channels.${channel} : canal inconnu (stable, beta)`);
+          errors.push(`${where}.channels.${channel} : canal inconnu (stable, beta, alpha)`);
         } else if (!isFetchableLink(link)) {
           errors.push(`${where}.channels.${channel} : lien invalide`);
         }

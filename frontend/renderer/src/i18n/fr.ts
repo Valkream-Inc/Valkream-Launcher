@@ -53,13 +53,17 @@ const fr: Messages = {
     confirm:
       "Vous êtes sur le point d'activer des options avancées pouvant endommager votre installation (Admin Tools, Debug Tools, Dev Tools, Fonctionnalités Alpha). Êtes-vous sûr de vouloir continuer ?",
   },
+  channel: {
+    beta: "BETA",
+    alpha: "ALPHA",
+  },
   beta: {
     panel: "Vous avez les tests betas activés ...",
     disable: "Les désactiver",
-    on: "Tests beta activés !",
-    off: "Tests beta désactivés !",
-    text: "Activer les tests beta (récupère les mises à jour beta des jeux). Pour contourner la mise à jour du launcher : Ctrl + Maj + clic sur la vidéo de démarrage.",
-    label: "Activer les tests Betas",
+    on: "Canaux de test affichés !",
+    off: "Canaux de test masqués !",
+    text: "Ajoute au choix du jeu une entrée distincte, colorée, pour chaque canal de test disponible (beta, alpha) : votre jeu stable reste intact et n'est pas rechargé. Pour contourner la mise à jour du launcher : Ctrl + Maj + clic sur la vidéo de démarrage.",
+    label: "Afficher les canaux de test (beta, alpha)",
   },
   settings: {
     music: {
@@ -81,8 +85,10 @@ const fr: Messages = {
     welcome2: "Si vous avez des problèmes, n'hésitez pas à nous joindre sur notre serveur Discord.",
   },
   debug: {
-      text: "Vous pouvez ouvrir le debug (⚠️ : à faire uniquement dans un but de debug et avec des personnes qualifiées :) )",
-      button: "Ouvrir le debug",
+      text: "Vous pouvez ouvrir la console du launcher (outils web du navigateur). ⚠️ À utiliser uniquement avec des personnes qualifiées. Le diagnostic d'une installation est dans l'onglet Debug du jeu.",
+      button: "Ouvrir la console",
+      opened: "Console ouverte !",
+      notOpened: "Console non ouverte !",
     },
     appdata: {
       text: "Vous pouvez ouvrir le dossier AppData de Valkream.",
