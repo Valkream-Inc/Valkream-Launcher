@@ -76,32 +76,6 @@ const en: Messages = {
     tips2: "News and information are available on the website and on the Discord server. (if you need help, do not hesitate to reach us on our Discord server)",
     welcome1: "You are about to install the game ...",
     welcome2: "If you have any problem, do not hesitate to reach us on our Discord server.",
-    valheim: {
-      d1: "Sharing and mutual help are key words that describe the spirit of the Valkream community well.",
-      d2: "Respecting the original developers' vision is a priority.",
-      d3: "The modpack mainly consists of additional mechanics, new creatures, armors, weapons, and all biomes are functional.",
-      d4: "The Valkream modpack can be played in a private game, a private server or the Valkream server.",
-      d5: "Guaranteeing a complete and endless experience.",
-      boostFps: {
-        label: "FPS boost mods",
-        text: "Install the mods that improve performance (greatly degrades graphics)?",
-      },
-      boostGraphic: {
-        label: "Graphics boost mods",
-        text: "Install the mods that improve graphics (requires a powerful PC)?",
-      },
-      modsAdmin: {
-        label: "Admin mods",
-        text: "Install the administration mods (reserved for server admins).",
-      },
-    },
-    sevenDays: {
-      d1: "Sharing and mutual help are key words that describe the spirit of the Valkream community well.",
-      d2: "Development is carried out by volunteers in their spare time. Respecting the original developers' vision is a priority.",
-      d3: "The 7days to Valkream modpack mainly consists of additional mechanics, new creatures, armors, weapons, and all biomes are functional.",
-      d4: "Difficulty is also increased and evolving, guaranteeing a harder, more complete and endless experience.",
-      d5: "To access it, connect to the Valkream server, through your Steam or through our Launcher.",
-    },
   },
   debug: {
       text: "You can open the debug tools (⚠️: only for debugging purposes and with qualified people :) )",
@@ -181,6 +155,7 @@ const en: Messages = {
   home: {
     tips: "Tips of the day",
     event: "Event",
+    seeOnSite: "See on the website",
     moreDetails: "See more details",
     maintenance: "Maintenance",
     loading: "🟠 Loading ...",

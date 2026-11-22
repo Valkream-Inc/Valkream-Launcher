@@ -282,3 +282,16 @@ Restent en français (volontairement) : erreurs de configuration destinées aux 
 - Chaque réglage custom affiche une snackbar à l'enregistrement (activé / désactivé / valeur choisie).
 - Journal `instance.log` : une ligne JSON par évènement (`LogRecord` : date, niveau `INFO`/`WARN`/`ERROR`, clé `log.*` + variables). L'interface le traduit à l'affichage dans la langue COURANTE (changer de langue retraduit aussi les anciennes lignes), avec couleurs par niveau, séparateur entre synchronisations et résumé final. « Copier le journal » donne le texte dans la langue courante. Seuls les messages d'erreur bruts des providers (texte libre, français) ne sont pas traduits. Les journaux d'avant ce format s'affichent tels quels.
 - Onglets **Mods** et **Contributeurs** séparés, en lecture seule : visibles aussi pendant une installation.
+
+## Traductions : ajouter un jeu, fichiers de config remote
+
+**Côté render (`instances.config.tsx`)** : tout ce qui est propre à un jeu vit dans SON entrée.
+- `translations: { fr: { "boostFps.label": "…" }, en: { … } }` : textes du jeu (clés locales à l'instance, enregistrées sous `instances.<id>.<clé>`). Une clé absente en anglais retombe sur le français.
+- `description: ["d1", "d2"]` : puces de l'onglet General (clés de `translations`, `{ fr, en }` ou texte brut).
+- `label` / `text` / `options[].label` des réglages custom acceptent : une clé de `translations`, un objet `{ fr, en }` en ligne, une clé globale (`i18n/fr.ts`) ou un texte brut.
+- Ajouter un jeu ne demande donc plus de toucher `i18n/fr.ts` / `en.ts`.
+
+**Côté remote (fichiers de config)** : ces champs acceptent une chaîne OU `{ "fr": "…", "en": "…" }` (repli sur `fr`, puis `en`) :
+`event.json` (`name`, `description`), `maintenance.json` (`description`), `mods.json` (`description`), `contributors.json` (`role`).
+Exemple : `"name": { "fr": "Semaine Céleste", "en": "Celestial Week" }`. Les anciens fichiers (chaînes) restent valides.
+La date de l'évènement suit la langue du launcher.

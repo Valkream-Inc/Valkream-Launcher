@@ -13,6 +13,7 @@ import Popup from "../../../../component/popup/popup";
 import { useInfos } from "../../../../context/infos.context";
 import EventCard from "../event-card/event-card";
 import { useTranslation } from "react-i18next";
+import { localized } from "../../../../../../i18n";
 
 function ServerInfo() {
   const { t } = useTranslation();
@@ -42,7 +43,7 @@ function ServerInfo() {
     setIsMaintenancePopupOpen(true);
   };
 
-  const maintenance_description = maintenance?.description || "";
+  const maintenance_description = localized(maintenance?.description) || "";
   const maintenance_description_lines = maintenance_description.split("\n");
 
   const maintenance_message = (

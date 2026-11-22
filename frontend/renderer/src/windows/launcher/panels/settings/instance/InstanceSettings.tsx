@@ -42,6 +42,7 @@ import InstanceModsTab from "./InstanceModsTab";
 import InstanceToolsTab from "./InstanceToolsTab";
 import { useInstanceReport } from "./use-instance-report";
 import { useTranslation } from "react-i18next";
+import { instanceText } from "../../../../../i18n";
 
 interface Props extends GameSettingsProps {
   instanceId: InstanceId;
@@ -135,8 +136,15 @@ export default function InstanceSettings({
         <SettingsTitle warn={false}>
           General{channel === "beta" && " (beta)"}
         </SettingsTitle>
-        {renderConfig.descriptionContent && (
+        {(renderConfig.description || renderConfig.descriptionContent) && (
           <SettingsBox warn={false}>
+            {renderConfig.description && (
+              <ul>
+                {renderConfig.description.map((item, index) => (
+                  <li key={index}>{instanceText(instanceId, item)}</li>
+                ))}
+              </ul>
+            )}
             {renderConfig.descriptionContent}
           </SettingsBox>
         )}

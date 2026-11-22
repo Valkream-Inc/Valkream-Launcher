@@ -3,12 +3,15 @@
  * @license MIT-NC
  */
 
+import type { LocalizedText } from "./instance.js";
+
 /** Contenu de `games/<id>/config/event.json` (l'image est normalisée côté main). */
 export interface GameEvent {
-  name: string;
+  /** Chaîne, ou `{ "fr": "…", "en": "…" }` (repli sur le français). */
+  name: LocalizedText;
   enabled: boolean;
   date: string;
-  description: string;
+  description: LocalizedText;
   image: string;
   link: string;
 }
@@ -16,7 +19,7 @@ export interface GameEvent {
 /** Contenu de `games/<id>/config/maintenance.json`. */
 export interface Maintenance {
   enabled: boolean;
-  description: string;
+  description: LocalizedText;
   end_date: string;
 }
 

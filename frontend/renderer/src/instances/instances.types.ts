@@ -8,7 +8,7 @@
 
 import type { ReactNode } from "react";
 
-import type { InstanceId } from "@shared/types";
+import type { InstanceId, LocalizedText } from "@shared/types";
 
 import type { GltfGameData } from "../windows/launcher/component/background/gltf-background/gltf-background.types";
 
@@ -63,27 +63,27 @@ export type CustomGameSetting =
       type: "toggle";
       /** Nom du réglage, stocké par instance. Une entrée `optional.setting` du latest.yml s'y rattache. */
       settingsName: string;
-      label: string;
-      /** Texte d'aide affiché au-dessus du réglage. */
-      text?: string;
+      label: LocalizedText;
+      /** Texte d'aide affiché au-dessus du réglage (clé de `translations`, `{ fr, en }` ou texte brut). */
+      text?: LocalizedText;
       category?: SettingCategory;
       default?: boolean;
     }
   | {
       type: "select";
       settingsName: string;
-      label: string;
-      text?: string;
+      label: LocalizedText;
+      text?: LocalizedText;
       category?: SettingCategory;
-      options: { value: string; label: string }[];
+      options: { value: string; label: LocalizedText }[];
       default?: string;
     }
   | {
       /** Curseur numérique (ex : mémoire max d'un jeu Java, utilisable dans `launchArgs` du main : `-Xmx{ram}M`). */
       type: "slider";
       settingsName: string;
-      label: string;
-      text?: string;
+      label: LocalizedText;
+      text?: LocalizedText;
       category?: SettingCategory;
       min: number;
       max: number;
@@ -114,8 +114,16 @@ export interface InstanceRenderConfig {
   tipContent?: ReactNode;
   /** Contenu de la popup de bienvenue avant la première installation. */
   welcomeContent?: ReactNode;
-  /** Présentation affichée dans l'onglet General. */
+  /** Présentation affichée dans l'onglet General : une puce par élément (clé de `translations`, `{ fr, en }` ou texte brut). */
+  description?: LocalizedText[];
+  /** Présentation libre (ReactNode), affichée après `description`. */
   descriptionContent?: ReactNode;
+  /**
+   * Textes propres au jeu, par langue (clés locales à l'instance : `"boostFps.label"`).
+   * Utilisables partout où un texte est attendu (`label`, `text`, `description`…). Ajouter une langue
+   * ou un texte = une ligne ici ; une clé absente dans une langue retombe sur le français.
+   */
+  translations?: Partial<Record<"fr" | "en", Record<string, string>>>;
   links?: { discord?: string; topserver?: string; site?: string };
   customGamesSettings?: CustomGameSetting[];
   debugContent?: DebugContent[];

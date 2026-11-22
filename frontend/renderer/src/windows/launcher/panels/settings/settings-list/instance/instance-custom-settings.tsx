@@ -26,6 +26,7 @@ import SettingsBox from "../../component/settings-box/settings-box";
 import { saveInstanceSetting } from "./instance-save-setting";
 import type { InstanceSettingProps } from "./instance-setting.types";
 import { useTranslation } from "react-i18next";
+import { instanceText } from "../../../../../../i18n";
 
 interface Props extends InstanceSettingProps {
   settings: CustomGameSetting[];
@@ -59,7 +60,7 @@ function SliderSetting({
         maxWidth: 420,
       }}
     >
-      <Typography sx={{ whiteSpace: "nowrap" }}>{t(setting.label, { defaultValue: setting.label })}</Typography>
+      <Typography sx={{ whiteSpace: "nowrap" }}>{instanceText(props.id, setting.label)!}</Typography>
       <Slider
         size="small"
         min={setting.min}
@@ -75,7 +76,7 @@ function SliderSetting({
               setting.settingsName,
               next as number,
               t("instance.settingValue", {
-                label: t(setting.label, { defaultValue: setting.label }),
+                label: instanceText(props.id, setting.label)!,
                 value: `${next}${setting.unit ? ` ${setting.unit}` : ""}`,
               }),
             );
@@ -95,7 +96,7 @@ function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
   /** Libellé traduit de l'option choisie (sa valeur brute si elle est inconnue). */
   const label = (setting: Extract<CustomGameSetting, { type: "select" }>, value: string) => {
     const option = setting.options.find((item) => item.value === value);
-    return option ? t(option.label, { defaultValue: option.label }) : value;
+    return option ? instanceText(props.id, option.label)! : value;
   };
 
   return (
@@ -110,7 +111,7 @@ function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
           <SettingsBox
             key={setting.settingsName}
             warn={setting.category?.zone === "danger"}
-            text={setting.text ? t(setting.text, { defaultValue: setting.text }) : undefined}
+            text={setting.text ? instanceText(props.id, setting.text)! : undefined}
           >
             {setting.type === "toggle" ? (
               <>
@@ -126,18 +127,18 @@ function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
                       setting.settingsName,
                       event.target.checked,
                       t(event.target.checked ? "instance.settingOn" : "instance.settingOff", {
-                        label: t(setting.label, { defaultValue: setting.label }),
+                        label: instanceText(props.id, setting.label)!,
                       }),
                     )
                   }
                 />
-                <span>{t(setting.label, { defaultValue: setting.label })}</span>
+                <span>{instanceText(props.id, setting.label)!}</span>
               </>
             ) : setting.type === "slider" ? (
               <SliderSetting setting={setting} props={props} />
             ) : (
               <>
-                <span>{t(setting.label, { defaultValue: setting.label })}</span>
+                <span>{instanceText(props.id, setting.label)!}</span>
                 <Select
                   size="small"
                   value={String(
@@ -152,7 +153,7 @@ function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
                       setting.settingsName,
                       event.target.value,
                       t("instance.settingValue", {
-                        label: t(setting.label, { defaultValue: setting.label }),
+                        label: instanceText(props.id, setting.label)!,
                         value: label(setting, event.target.value),
                       }),
                     )
@@ -160,7 +161,7 @@ function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
                 >
                   {setting.options.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
-                      {t(option.label, { defaultValue: option.label })}
+                      {instanceText(props.id, option.label)!}
                     </MenuItem>
                   ))}
                 </Select>

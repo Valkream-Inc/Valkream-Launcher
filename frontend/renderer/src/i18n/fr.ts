@@ -79,32 +79,6 @@ const fr: Messages = {
     tips2: "Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous joindre sur notre serveur Discord)",
     welcome1: "Vous êtes sur le point d'installer le jeu ...",
     welcome2: "Si vous avez des problèmes, n'hésitez pas à nous joindre sur notre serveur Discord.",
-    valheim: {
-      d1: "Le partage et l'entraide sont des mots clés qui définissent bien l'esprit de la communauté Valkream.",
-      d2: "Le respect de l'idéologie des développeurs originaux est une priorité.",
-      d3: "Le mode pack est essentiellement constitué de mécaniques additionnelles, de nouvelles créatures, d'armures, d'armes et tous les biomes sont fonctionnels.",
-      d4: "Le mode pack Valkream est jouable en partie privée, serveur privé ou serveur Valkream.",
-      d5: "Garantissant une expérience complète et sans fin.",
-      boostFps: {
-        label: "Mods boost FPS",
-        text: "Installer les mods qui améliorent les performances (dégrade grandement les graphismes) ?",
-      },
-      boostGraphic: {
-        label: "Mods boost graphismes",
-        text: "Installer les mods qui améliorent les graphismes (demande un PC performant) ?",
-      },
-      modsAdmin: {
-        label: "Mods admin",
-        text: "Installer les mods d'administration (réservé aux admins du serveur).",
-      },
-    },
-    sevenDays: {
-      d1: "Le partage et l'entraide sont des mots clés qui définissent bien l'esprit de la communauté Valkream.",
-      d2: "Le développement est assuré par des bénévoles sur leur temps personnel. Le respect de l'idéologie des développeurs originaux est une priorité.",
-      d3: "Le modpack 7days to Valkream est essentiellement constitué de mécaniques additionnelles, de nouvelles créatures, d'armures, d'armes et tous les biomes sont fonctionnels.",
-      d4: "La difficulté est aussi augmentée et évolutive, garantissant une expérience plus difficile, complète et sans fin.",
-      d5: "Pour y accéder, connectez-vous au serveur Valkream. Via votre Steam ou via notre Launcher.",
-    },
   },
   debug: {
       text: "Vous pouvez ouvrir le debug (⚠️ : à faire uniquement dans un but de debug et avec des personnes qualifiées :) )",
@@ -184,6 +158,7 @@ const fr: Messages = {
   home: {
     tips: "Astuces du jour",
     event: "Évènement",
+    seeOnSite: "Voir sur le site Web",
     moreDetails: "Voir plus de détails",
     maintenance: "Maintenance",
     loading: "🟠 Chargement ...",
