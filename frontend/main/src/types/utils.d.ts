@@ -27,12 +27,3 @@ export interface NetworkErrorLike {
   /** `fetch` place le code système (ECONNRESET…) dans `cause`. */
   cause?: { code?: string };
 }
-
-/** Ligne brute de la table SQLite (`id`, `json_data`). */
-export interface DatabaseRow {
-  id: number;
-  json_data: string;
-}
-
-/** Donnée JSON lue en base, enrichie de son identifiant. */
-export type DatabaseRecord<T extends object> = T & { ID: number | bigint };

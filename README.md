@@ -108,13 +108,13 @@ Le projet est entièrement en **TypeScript** (`.ts` / `.tsx`). Les types sont s�
 ```bash
 yarn dev          # backend + launcher : Vite, esbuild (main), Electron, typecheck en watch (turbo)
 yarn dev:fast     # idem sans les typecheck en watch (le plus léger)
-yarn dev:fresh    # electron-rebuild puis yarn dev (après un changement d'Electron / better-sqlite3)
+yarn dev:fresh    # electron-rebuild puis yarn dev (après un changement d'Electron)
 yarn dev:front    # launcher seul
 yarn dev:back     # serveur de fichiers seul (http://localhost:3000)
 yarn typecheck    # vérification des types (main, renderer, scripts, backend)
 yarn lint         # ESLint
 yarn build        # installeurs du launcher
-yarn rebuild      # recompilation des modules natifs (better-sqlite3) pour Electron
+yarn rebuild      # recompilation des modules natifs pour Electron
 ```
 
 Des tâches équivalentes sont disponibles dans VS Code (`Terminal > Exécuter la tâche...`) et un profil de debug Electron est fourni dans `.vscode/launch.json`.

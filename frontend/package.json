@@ -47,7 +47,6 @@
     "@mui/material": "^9.5.0",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
-    "better-sqlite3": "^13.2.0",
     "electron-updater": "6.8.12",
     "fs-extra": "^11.4.1",
     "gamedig": "^5.3.3",
@@ -60,6 +59,9 @@
     "three": "^0.187.0",
     "unzipper": "^0.12.5",
     "yaml": "^2.9.1"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^13.2.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",
