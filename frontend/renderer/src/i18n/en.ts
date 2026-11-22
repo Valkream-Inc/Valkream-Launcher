@@ -280,6 +280,7 @@ const en: Messages = {
     refresh: "Refresh",
   },
   tools: {
+    withDependencies: "Include its dependencies (modpack)",
     keyLabel: "JSON key (optional)",
     keyHelp: "Path of the array inside the JSON: dependencies, packs.0.mods… Empty: the file or link is itself the list.",
     stepOptions: "Options",
@@ -288,7 +289,7 @@ const en: Messages = {
     stepSource: "Source",
     working: "Working…",
     progress: "{{done}} / {{total}}",
-    urlLabel: "Link to the list (JSON or text)",
+    urlLabel: "Link to the list (JSON, text) or a Thunderstore mod page",
     urlInvalid: "The link must start with http:// or https://",
     pickFile: "Choose a file…",
     fileLoaded: "File: {{name}}",

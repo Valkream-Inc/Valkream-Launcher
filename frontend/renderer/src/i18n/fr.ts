@@ -283,6 +283,7 @@ const fr: Messages = {
     refresh: "Actualiser",
   },
   tools: {
+    withDependencies: "Inclure ses dépendances (modpack)",
     keyLabel: "Clé JSON (facultatif)",
     keyHelp: "Chemin du tableau dans le JSON : dependencies, packs.0.mods… Vide : le fichier ou le lien est lui-même la liste.",
     stepOptions: "Options",
@@ -291,7 +292,7 @@ const fr: Messages = {
     stepSource: "Source",
     working: "Traitement en cours…",
     progress: "{{done}} / {{total}}",
-    urlLabel: "Lien vers la liste (JSON ou texte)",
+    urlLabel: "Lien vers la liste (JSON, texte) ou la page d'un mod Thunderstore",
     urlInvalid: "Le lien doit commencer par http:// ou https://",
     pickFile: "Choisir un fichier…",
     fileLoaded: "Fichier : {{name}}",

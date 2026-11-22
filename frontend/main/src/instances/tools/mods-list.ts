@@ -59,9 +59,55 @@ export type JsonFetcher = (url: string) => Promise<unknown>;
 
 export interface ModsListResult {
   mods: ModDisplay[];
-  /** Mods dont les infos n'ont pas pu être lues (l'entrée est quand même générée, sans image). */
+  /** Mods dont les infos n'ont pas pu être lues (l'entrée est quand même générée, avec l'image du CDN). */
   failed: { id: string; error: string }[];
 }
+
+/** Image d'un mod sur le CDN Thunderstore (repli quand l'API n'en donne pas). */
+export const cdnIcon = (ref: ModRef): string =>
+  `https://gcdn.thunderstore.io/live/repository/icons/${ref.author}-${ref.name}-${ref.version}.png`;
+
+export interface PackagePage {
+  author: string;
+  name: string;
+  /** Version indiquée dans le lien (sinon : la dernière). */
+  version?: string;
+}
+
+const PACKAGE_PAGE = /^https:\/\/(?:www\.)?thunderstore\.io\/(?:c\/[\w-]+\/)?(?:p|package)\/([^/?#\s]+)\/([^/?#\s]+)(?:\/([\d.]+))?\/?(?:[?#]\S*)?$/;
+
+/** Lien vers la page d'un mod Thunderstore (`/c/valheim/p/Auteur/Nom/`) : `null` pour tout autre lien. */
+export const parsePackagePage = (url: string): PackagePage | null => {
+  const match = PACKAGE_PAGE.exec(url.trim());
+  return match ? { author: match[1], name: match[2], version: match[3] } : null;
+};
+
+interface PackageInfo {
+  version_number?: string;
+  dependencies?: string[];
+  latest?: { version_number?: string; dependencies?: string[] };
+}
+
+/**
+ * Mods d'une page Thunderstore : le mod lui-même (dernière version) puis, si demandé,
+ * ses dépendances (cas d'un modpack). Les doublons sont retirés.
+ */
+export const refsFromPackagePage = async (
+  page: PackagePage,
+  fetchJson: JsonFetcher,
+  apiUrl = "https://thunderstore.io",
+  withDependencies = true,
+): Promise<ModRef[]> => {
+  const base = apiUrl.replace(/\/+$/, "");
+  const path = `${encodeURIComponent(page.author)}/${encodeURIComponent(page.name)}/`;
+  const info = (await fetchJson(
+    `${base}/api/experimental/package/${path}${page.version ? `${encodeURIComponent(page.version)}/` : ""}`,
+  )) as PackageInfo;
+  const version = page.version ?? info.latest?.version_number ?? info.version_number;
+  if (!version) throw new LocalizedError("err.packageNotFound", { name: `${page.author}-${page.name}` });
+  const dependencies = withDependencies ? (page.version ? info.dependencies : info.latest?.dependencies) ?? [] : [];
+  return parseModList(JSON.stringify([`${page.author}-${page.name}-${version}`, ...dependencies]));
+};
 
 /** Infos d'affichage de chaque mod via l'API Thunderstore (image, description, page). */
 export const buildModsDisplay = async (
@@ -87,9 +133,10 @@ export const buildModsDisplay = async (
         const info = (await fetchJson(
           `${base}/api/experimental/package/${encodeURIComponent(ref.author)}/${encodeURIComponent(ref.name)}/${encodeURIComponent(ref.version)}/`,
         )) as PackageVersion;
-        if (info.icon) display.icon = info.icon;
+        display.icon = info.icon || cdnIcon(ref);
         if (info.description) display.description = info.description;
       } catch (error) {
+        display.icon = cdnIcon(ref); // l'image est servie par le CDN même si l'API ne répond pas
         failed.push({ id, error: error instanceof Error ? error.message : String(error) });
       }
       onProgress?.(++done, refs.length);

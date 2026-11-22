@@ -14,7 +14,7 @@ import { BrowserWindow, dialog, ipcMain, type WebContents } from "electron";
 import type { ModsListResult, ToolsHashSummary } from "@shared/types";
 
 import { exportHashFolder, hashFolder } from "../instances/tools/hash-folder.js";
-import { buildModsDisplay, parseModList } from "../instances/tools/mods-list.js";
+import { buildModsDisplay, parseModList, parsePackagePage, refsFromPackagePage } from "../instances/tools/mods-list.js";
 import { httpGetText } from "../lib/http.js";
 import { LocalizedError } from "../lib/localized-error.js";
 
@@ -57,14 +57,20 @@ export default function registerAdminToolsIpc(): void {
     return { output };
   });
 
-  ipcMain.handle("tools:mods-list", async (event, source: unknown, apiUrl?: unknown, key?: unknown): Promise<ModsListResult> => {
+  ipcMain.handle("tools:mods-list", async (event, source: unknown, apiUrl?: unknown, key?: unknown, withDependencies?: unknown): Promise<ModsListResult> => {
     let text = String(source ?? "").trim();
+    const api = typeof apiUrl === "string" && /^https?:\/\//.test(apiUrl) ? apiUrl : undefined;
+    const fetchJson = async (url: string) => JSON.parse(await httpGetText(url, { timeout: 10_000 })) as unknown;
+    // Page d'un mod Thunderstore : le mod (et ses dépendances) sont lus via l'API, hôte fixe
+    const page = parsePackagePage(text);
+    if (page) {
+      return buildModsDisplay(await refsFromPackagePage(page, fetchJson, api, withDependencies !== false), fetchJson, api, reporter(event.sender, "mods"));
+    }
     // Un lien vers la liste (JSON ou texte) est aussi accepté
     if (/^https?:\/\/\S+$/.test(text)) text = await httpGetText(text, { timeout: 10_000 });
-    const api = typeof apiUrl === "string" && /^https?:\/\//.test(apiUrl) ? apiUrl : undefined;
     return buildModsDisplay(
       parseModList(text, typeof key === "string" ? key : undefined),
-      async (url) => JSON.parse(await httpGetText(url, { timeout: 10_000 })),
+      fetchJson,
       api,
       reporter(event.sender, "mods"),
     );

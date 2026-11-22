@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 
 import { manifestHash } from "../install/manifest.js";
 import { exportHashFolder, exportManifestOnly, hashFolder } from "./hash-folder.js";
-import { buildModsDisplay, parseModList } from "./mods-list.js";
+import { buildModsDisplay, cdnIcon, parseModList, parsePackagePage, refsFromPackagePage } from "./mods-list.js";
 
 let dir: string;
 beforeEach(() => {
@@ -49,6 +49,39 @@ describe("hashFolder / exportHashFolder", () => {
 
   it("dossier absent : erreur claire", async () => {
     await assert.rejects(hashFolder(path.join(dir, "nope")), /introuvable/);
+  });
+});
+
+describe("page de mod Thunderstore", () => {
+  it("reconnaît les liens de page (avec ou sans communauté, avec version) et rejette le reste", () => {
+    assert.deepEqual(parsePackagePage("https://thunderstore.io/c/valheim/p/DirtyGames/TheGoodCitizen/"), { author: "DirtyGames", name: "TheGoodCitizen", version: undefined });
+    assert.deepEqual(parsePackagePage("https://thunderstore.io/package/A/B/1.2.3/"), { author: "A", name: "B", version: "1.2.3" });
+    assert.equal(parsePackagePage("https://evil.example/c/valheim/p/A/B/"), null);
+    assert.equal(parsePackagePage("http://thunderstore.io/c/valheim/p/A/B/"), null);
+    assert.equal(parsePackagePage("https://thunderstore.io/c/valheim/"), null);
+  });
+
+  const api = async (url: string): Promise<unknown> => {
+    assert.match(url, /^https:\/\/thunderstore\.io\/api\/experimental\/package\/DirtyGames\/TheGoodCitizen\/$/);
+    return { latest: { version_number: "1.4.0", dependencies: ["denikson-BepInExPack_Valheim-5.4.2202", "A-One-1.0.0"] } };
+  };
+
+  it("mod + dépendances (dernière version), ou le mod seul", async () => {
+    const page = { author: "DirtyGames", name: "TheGoodCitizen" };
+    const all = await refsFromPackagePage(page, api);
+    assert.deepEqual(all.map((ref) => `${ref.author}-${ref.name}-${ref.version}`), ["DirtyGames-TheGoodCitizen-1.4.0", "denikson-BepInExPack_Valheim-5.4.2202", "A-One-1.0.0"]);
+    assert.equal((await refsFromPackagePage(page, api, undefined, false)).length, 1);
+  });
+
+  it("l'image vient du CDN quand l'API n'en donne pas ou échoue", async () => {
+    const ref = { author: "A", name: "One", version: "1.0.0" };
+    assert.equal(cdnIcon(ref), "https://gcdn.thunderstore.io/live/repository/icons/A-One-1.0.0.png");
+    const noIcon = await buildModsDisplay([ref], async () => ({ description: "d" }));
+    assert.equal(noIcon.mods[0].icon, cdnIcon(ref));
+    const failing = await buildModsDisplay([ref], async () => { throw new Error("503"); });
+    assert.equal(failing.mods[0].icon, cdnIcon(ref));
+    const withIcon = await buildModsDisplay([ref], async () => ({ icon: "https://x/i.png" }));
+    assert.equal(withIcon.mods[0].icon, "https://x/i.png");
   });
 });
 
@@ -106,7 +139,7 @@ describe("buildModsDisplay", () => {
       icon: "https://cdn/x.png",
       description: "Un mod",
     });
-    assert.equal(result.mods[1].icon, undefined);
+    assert.equal(result.mods[1].icon, "https://gcdn.thunderstore.io/live/repository/icons/B-Broken-1.0.0.png"); // repli CDN
     assert.equal(result.failed.length, 1);
   });
 

@@ -320,3 +320,5 @@ Seuls les réglages utiles au joueur sont dans les onglets General, Launcher et 
 - Les réglages d'un jeu sont dans `instance.settings.json` de son installation (un par canal).
 - Tools : source (liste collée, lien ou fichier) → clé JSON facultative pour un lien ou un fichier (`dependencies`, `packs.0.mods`…) → lancer avec barre de progression → résultat.
 - Debug : barre d'outils collante (recherche, problèmes seulement, recharger / vérifier / réparer, copier).
+
+Tools, liste de mods : le lien peut être celui d'une **page Thunderstore** (`https://thunderstore.io/c/valheim/p/Auteur/Nom/`) : le mod (et, au choix, ses dépendances) est lu via l'API. Les images viennent de l'API, sinon du CDN Thunderstore (`gcdn.thunderstore.io/live/repository/icons/Auteur-Nom-Version.png`).

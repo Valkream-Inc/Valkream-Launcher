@@ -13,8 +13,10 @@ import {
   Avatar,
   Box,
   Button,
+  FormControlLabel,
   LinearProgress,
   Stack,
+  Switch,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -246,6 +248,9 @@ function ModsListTool() {
   const [file, setFile] = useState<{ name: string; text: string } | null>(null);
   /** Chemin du tableau dans un JSON (liens et fichiers : `dependencies`, `packs.0.mods`…). */
   const [key, setKey] = useState("");
+  const [withDependencies, setWithDependencies] = useState(true);
+  /** Lien de page Thunderstore : le mod (et ses dépendances) sont lus via l'API, pas de clé à donner. */
+  const isPackagePage = mode === "url" && /^https:\/\/(www\.)?thunderstore\.io\/(c\/[\w-]+\/)?(p|package)\//.test(url.trim());
   const [result, setResult] = useState<ModsListResult | null>(null);
   const [busy, setBusy] = useState(false);
   const progress = useToolProgress("mods", busy);
@@ -266,7 +271,7 @@ function ModsListTool() {
   const generate = async () => {
     setBusy(true);
     try {
-      setResult(await window.electron_API.toolsModsList(source, undefined, mode === "list" ? undefined : key.trim() || undefined));
+      setResult(await window.electron_API.toolsModsList(source, undefined, mode === "list" ? undefined : key.trim() || undefined, withDependencies));
     } catch (error) {
       fail(error);
     } finally {
@@ -322,7 +327,13 @@ function ModsListTool() {
               </Typography>
             </Box>
           )}
-          {mode !== "list" && (
+          {isPackagePage && (
+            <FormControlLabel
+              control={<Switch checked={withDependencies} onChange={(event) => setWithDependencies(event.target.checked)} />}
+              label={t("tools.withDependencies")}
+            />
+          )}
+          {mode !== "list" && !isPackagePage && (
             <TextField
               size="small"
               label={t("tools.keyLabel")}
