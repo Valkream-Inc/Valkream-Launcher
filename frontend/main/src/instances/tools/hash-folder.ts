@@ -10,6 +10,7 @@ import fs from "fs";
 import path from "path";
 
 import { manifestHash, scanManifest, type Manifest } from "../install/manifest.js";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export interface FolderHash {
   /** Hash de l'entrée (`hash` du latest.yml). */
@@ -21,7 +22,7 @@ export interface FolderHash {
 
 const assertDirectory = (directory: string): void => {
   if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
-    throw new Error(`Dossier introuvable : ${directory}`);
+    throw new LocalizedError("err.folderMissing", { directory });
   }
 };
 

@@ -24,6 +24,7 @@ import * as UpdateWindow from "../windows/updateWindow.js";
 
 import registerAdminToolsIpc from "./admin-tools-ipc.js";
 import InstanceIpcHandlers from "./instance-ipc.js";
+import { LocalizedError } from "../lib/localized-error.js";
 
 // Fenêtre principale (supposée ouverte quand les handlers sont appelés)
 const mainWindow = () => MainWindow.getWindow() as BrowserWindow;
@@ -35,11 +36,11 @@ class IpcHandlers {
 
     if (fs.existsSync(valkreamLauncherPath))
       return await shell.openPath(valkreamLauncherPath);
-    else throw new Error("Le dossier AppData n'existe pas !");
+    else throw new LocalizedError("err.appdataMissing");
   }
 
   async openLink(event: IpcMainInvokeEvent, url = ""): Promise<void> {
-    if (!isSafeExternalUrl(url)) throw new Error("URL invalide");
+    if (!isSafeExternalUrl(url)) throw new LocalizedError("err.invalidUrl");
     await shell.openExternal(url);
   }
 

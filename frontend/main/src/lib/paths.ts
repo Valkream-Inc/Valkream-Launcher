@@ -9,6 +9,7 @@
 import path from "path";
 
 import type { Channel, InstanceId } from "@shared/types";
+import { LocalizedError } from "./localized-error.js";
 
 /**
  * `target` est-il `root` ou un descendant de `root` ?
@@ -31,7 +32,7 @@ export const resolveInside = (root: string, relativePath: string): string => {
   const cleaned = relativePath.replace(/^[/\\]+/, "");
   const fullPath = path.resolve(root, cleaned);
   if (!isPathInside(root, fullPath)) {
-    throw new Error(`Chemin hors de la racine autorisée : ${relativePath}`);
+    throw new LocalizedError("err.pathOutside", { path: relativePath });
   }
   return fullPath;
 };
@@ -60,7 +61,7 @@ export const instanceRootPath = (
   channel: Channel,
 ): string => {
   if (!isSafeSegment(instanceId)) {
-    throw new Error(`Identifiant d'instance invalide : ${instanceId}`);
+    throw new LocalizedError("err.invalidInstanceId", { id: instanceId });
   }
   return path.join(rootPath, "instances", instanceId, channel);
 };

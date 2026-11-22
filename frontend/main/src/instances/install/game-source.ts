@@ -16,13 +16,17 @@ import path from "path";
 
 import type { SteamSourceIssue } from "@shared/types";
 
+import { type ErrorVars, LocalizedError } from "../../lib/localized-error.js";
+import type { MessageKey } from "../../lib/messages.js";
+
 export const SOURCE_FILE = "instance.source.json";
 /** Dossier (dans l'installation) où DepotDownloader dépose le jeu avant la copie vérifiée. */
 export const DEPOT_DIR = ".depot";
 
-export class GameSourceError extends Error {
+export class GameSourceError extends LocalizedError {
   constructor(
-    message: string,
+    key: MessageKey,
+    vars: ErrorVars,
     readonly issue: "missing" | "version",
     readonly details: {
       expectedBuild?: string | number;
@@ -33,7 +37,7 @@ export class GameSourceError extends Error {
       chosenFolder?: boolean;
     } = {},
   ) {
-    super(message);
+    super(key, vars);
     this.name = "GameSourceError";
   }
 }

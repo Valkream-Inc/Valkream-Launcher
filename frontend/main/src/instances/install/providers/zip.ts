@@ -14,13 +14,14 @@ import { shouldWriteFile } from "../preserve.js";
 import { commitStaged } from "../staging.js";
 import { fetchArchive } from "./archive.js";
 import type { Provider } from "./types.js";
+import { LocalizedError } from "../../../lib/localized-error.js";
 
 export const zipProvider: Provider = async (context) => {
   const { entry, entryDir, tempDir, plan, platform, name, beforeCommit } = context;
 
   const content = entry.content;
   if (typeof content !== "string") {
-    throw new Error(`${name} : pas de lien d'archive pour la plateforme ${platform}`);
+    throw new LocalizedError("err.zipLinkMissing", { name, platform });
   }
 
   // Préparation dans un dossier dédié : l'installation n'est touchée qu'à la bascule.

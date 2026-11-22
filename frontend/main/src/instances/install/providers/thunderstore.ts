@@ -18,12 +18,13 @@ import { resolveInside } from "../../../lib/paths.js";
 import { commitStaged } from "../staging.js";
 import { createGlobalProgress } from "./global-progress.js";
 import type { Provider, Uninstaller } from "./types.js";
+import { LocalizedError } from "../../../lib/localized-error.js";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
 
 const parseDependency = (dependency: string) => {
   const match = DEPENDENCY.exec(dependency);
-  if (!match) throw new Error(`Dépendance invalide : ${dependency}`);
+  if (!match) throw new LocalizedError("err.dependencyInvalid", { dependency });
   return { author: match[1], name: match[2], version: match[3], folder: `${match[1]}-${match[2]}` };
 };
 
@@ -50,10 +51,10 @@ export const thunderstoreProvider: Provider = async (context) => {
 
   const content = entry.content;
   if (content === undefined || (typeof content === "object" && !Array.isArray(content))) {
-    throw new Error(`${name} : liste de mods absente pour la plateforme ${platform}`);
+    throw new LocalizedError("err.modsListMissing", { name, platform });
   }
   const list = await context.loadContent<string[]>();
-  if (!Array.isArray(list)) throw new Error(`${name} : liste de mods invalide`);
+  if (!Array.isArray(list)) throw new LocalizedError("err.modsListInvalid", { name });
 
   const apiUrl = (entry["api-url"] ?? "https://thunderstore.io").replace(/\/+$/, "");
   const mods = list.map(parseDependency);

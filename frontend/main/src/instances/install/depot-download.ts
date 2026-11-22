@@ -16,6 +16,7 @@ import type { DepotOptions } from "@shared/types";
 
 import { DEPOT_DIR } from "./game-source.js";
 import { parseDepotPercent, type DepotRunner } from "./depot-runner.js";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export interface DepotDownloadInput {
   tool: string;
@@ -37,9 +38,9 @@ export const depotOsOf = (platform: string): "windows" | "linux" | "macos" =>
 
 /** Arguments validés ; lève si une valeur n'est pas numérique. */
 export const buildDepotArgs = (appId: number, depot: DepotOptions, outDir: string, os: string): string[] => {
-  if (!Number.isInteger(appId) || appId <= 0) throw new Error("DepotDownloader : appId invalide");
-  if (!DIGITS.test(String(depot.id))) throw new Error("DepotDownloader : identifiant de depot invalide");
-  if (!DIGITS.test(String(depot.manifest))) throw new Error("DepotDownloader : identifiant de manifeste invalide");
+  if (!Number.isInteger(appId) || appId <= 0) throw new LocalizedError("err.depotAppId");
+  if (!DIGITS.test(String(depot.id))) throw new LocalizedError("err.depotId");
+  if (!DIGITS.test(String(depot.manifest))) throw new LocalizedError("err.depotManifest");
   return [
     "-app", String(appId),
     "-depot", String(depot.id),
@@ -67,9 +68,9 @@ export const downloadWithDepot = async (input: DepotDownloadInput): Promise<stri
       if (percent !== undefined) input.onPercent?.(percent);
     },
   });
-  if (input.signal?.aborted) throw new Error("Téléchargement annulé");
+  if (input.signal?.aborted) throw new LocalizedError("err.downloadCancelled");
   if (code !== 0) {
-    throw new Error(`DepotDownloader a échoué (code ${code}) : connexion refusée, jeu absent du compte ou manifeste invalide`);
+    throw new LocalizedError("err.depotFailed", { code });
   }
   return outDir;
 };

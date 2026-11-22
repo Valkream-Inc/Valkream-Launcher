@@ -12,6 +12,7 @@ import yaml from "yaml";
 import type { LinkOrData } from "@shared/types";
 
 import { resolveLinkUrl } from "./link.js";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export interface ParamCache {
   read(key: string): Promise<string | null>;
@@ -52,7 +53,7 @@ export class ParamResolver {
   urlOf(link: string): string {
     const url = resolveLinkUrl(link, this.options.baseUrl);
     if (!this.options.allowInsecure && !/^https:\/\//i.test(url)) {
-      throw new Error(`HTTPS obligatoire : ${url}`);
+      throw new LocalizedError("err.httpsRequired", { url });
     }
     return url;
   }

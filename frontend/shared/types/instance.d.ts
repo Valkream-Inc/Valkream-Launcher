@@ -443,6 +443,8 @@ export interface LogRecord {
   /** Clé de traduction `log.*` (côté interface). */
   key: string;
   vars?: Record<string, string | number>;
+  /** Texte de l'erreur dans chaque langue : remplace `vars.message` selon la langue courante. */
+  texts?: { fr: string; en: string };
   /** Début d'une nouvelle synchronisation (séparateur visuel). */
   sep?: true;
 }

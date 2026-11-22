@@ -19,6 +19,7 @@ import type { ServerQueryConfig } from "../../types/core.js";
 import type { InstanceMainConfig } from "../instances.types.js";
 import { loadRemoteIndex } from "../remote/InstanceRegistry.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export interface InfosOptions {
   configs: readonly InstanceMainConfig[];
@@ -46,7 +47,7 @@ export class InstanceInfos {
 
   async get(id: string): Promise<CheckInfosResult> {
     const config = this.options.configs.find((item) => item.id === id);
-    if (!config) throw new Error(`Instance inconnue : ${id}`);
+    if (!config) throw new LocalizedError("err.unknownInstance", { id });
 
     const [serverInfos, remote] = await Promise.all([
       this.options.queryServer(config.server),

@@ -15,6 +15,7 @@
  */
 
 import type { GamePlatform, InstanceSettingValue } from "@shared/types";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export type LaunchArg =
   | string
@@ -39,7 +40,7 @@ const isOn = (value: InstanceSettingValue | undefined): boolean =>
 const interpolate = (template: string, settings: Settings): string =>
   template.replace(/\{([A-Za-z0-9_]+)\}/g, (_match, name: string) => {
     const value = settings[name];
-    if (value === undefined) throw new Error(`argument de lancement « ${template} » : réglage « ${name} » inconnu`);
+    if (value === undefined) throw new LocalizedError("err.launchArg", { template, name });
     return String(value);
   });
 

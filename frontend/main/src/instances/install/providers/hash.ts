@@ -25,6 +25,7 @@ import path from "path";
 import { createHash } from "crypto";
 
 import { GameSourceError } from "../game-source.js";
+import { LocalizedError } from "../../../lib/localized-error.js";
 import { hashFile, manifestHash, type Manifest } from "../manifest.js";
 import { runPool } from "../../../lib/concurrency.js";
 import { resolveInside } from "../../../lib/paths.js";
@@ -60,21 +61,21 @@ const createHashProvider = (source: "remote" | "steam"): Provider => async (cont
 
   const content = entry.content;
   if (content === undefined || Array.isArray(content)) {
-    throw new Error(`${name} : manifeste de hash absent pour la plateforme ${platform}`);
+    throw new LocalizedError("err.manifestMissing", { name, platform });
   }
   const manifest = await context.loadContent<Manifest>();
 
   // Intégrité du manifeste lui-même : le hash déclaré par le latest.yml fait foi.
   const computed = manifestHash(manifest, plan.ignored);
   if (entry.hash !== undefined && entry.hash.toLowerCase() !== computed) {
-    throw new Error(`${name} : le manifeste ne correspond pas au hash déclaré`);
+    throw new LocalizedError("err.manifestMismatch", { name });
   }
 
   const folderLink = entry["hash-folder"];
   const baseUrl = folderLink !== undefined ? String(folderLink).replace(/\/*$/, "/") : undefined;
   const steamGame = source === "steam" ? await context.steam() : null;
   if (source === "steam" && !steamGame) {
-    throw new GameSourceError(`${name} : jeu introuvable dans Steam : installez-le (Steam → Bibliothèque) puis relancez`, "missing", {
+    throw new GameSourceError("err.steamMissing", { name }, "missing", {
       expectedBuild: entry.buildid,
     });
   }
@@ -148,7 +149,7 @@ const createHashProvider = (source: "remote" | "steam"): Provider => async (cont
         return;
       }
     }
-    if (baseUrl === undefined) throw new Error(`${name} : hash-folder absent pour ${file}`);
+    if (baseUrl === undefined) throw new LocalizedError("err.hashFolderMissing", { name, file });
 
     let bytes = 0;
     await io.download(resolver.urlOf(baseUrl + encodePath(file)), partial, signal, (transfer) => {
@@ -159,7 +160,7 @@ const createHashProvider = (source: "remote" | "steam"): Provider => async (cont
     progress.update(file, 0.9, bytes);
     if ((await hashFile(partial)) !== expected) {
       fs.rmSync(partial, { force: true });
-      throw new Error(`${name} : hash invalide pour ${file}`);
+      throw new LocalizedError("err.hashInvalid", { name, file });
     }
     stageVerified(file, partial);
     progress.finish(file, bytes);
@@ -168,9 +169,16 @@ const createHashProvider = (source: "remote" | "steam"): Provider => async (cont
   if (unzipped) fs.rmSync(unzipped, { recursive: true, force: true });
 
   if (mismatched.length > 0) {
-    const expectedBuild = entry.buildid !== undefined ? ` (build attendu : ${entry.buildid}, installé : ${steamGame?.buildId || "inconnu"})` : "";
+    // `build` : texte traduit à la construction du message (fr par défaut), voir `GameSourceError`.
     throw new GameSourceError(
-      `${name} : la version du jeu ne correspond pas${expectedBuild} : ${mismatched.length} fichier(s) différent(s) ou absent(s), ex : ${mismatched.slice(0, 3).join(", ")}.`,
+      entry.buildid === undefined ? "err.versionMismatch" : steamGame?.buildId ? "err.versionMismatchBuild" : "err.versionMismatchBuildUnknown",
+      {
+        name,
+        count: mismatched.length,
+        files: mismatched.slice(0, 3).join(", "),
+        expected: String(entry.buildid ?? ""),
+        installed: steamGame?.buildId ?? "",
+      },
       "version",
       { expectedBuild: entry.buildid, installedBuild: steamGame?.buildId, files: mismatched.slice(0, 3), chosenFolder: steamGame?.chosen },
     );

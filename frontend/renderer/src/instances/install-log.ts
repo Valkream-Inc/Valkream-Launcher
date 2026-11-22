@@ -51,15 +51,15 @@ const keyOf = (record: LogRecord): string => {
   return record.key;
 };
 
-export const logMessage = (record: LogRecord, t: Translate): string =>
-  t(keyOf(record), record.vars).replace(/\s*\n\s*/g, " ");
+export const logMessage = (record: LogRecord, t: Translate, language: "fr" | "en" = "fr"): string =>
+  t(keyOf(record), { ...record.vars, ...(record.texts ? { message: record.texts[language] } : {}) }).replace(/\s*\n\s*/g, " ");
 
 /** Texte brut (copie pour le support) : `2026-11-22 11:10:03 INFO  message`, ligne vide entre synchronisations. */
-export const formatInstallLog = (lines: ParsedLogLine[], t: Translate): string =>
+export const formatInstallLog = (lines: ParsedLogLine[], t: Translate, language: "fr" | "en" = "fr"): string =>
   lines
     .map((line, index) =>
       line.kind === "raw"
         ? line.text
-        : `${line.record.sep && index > 0 ? "\n" : ""}${formatLogTime(line.record.time)} ${line.record.level.padEnd(5)} ${logMessage(line.record, t)}`,
+        : `${line.record.sep && index > 0 ? "\n" : ""}${formatLogTime(line.record.time)} ${line.record.level.padEnd(5)} ${logMessage(line.record, t, language)}`,
     )
     .join("\n");

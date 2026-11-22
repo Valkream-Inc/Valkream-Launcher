@@ -41,6 +41,12 @@ import Wait from "../../../component/wait/wait";
 import { useAction } from "../../../context/action.context";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
+<<<<<<< HEAD
+=======
+import { useTranslation } from "react-i18next";
+import i18n, { languageOf } from "../../../../../i18n";
+import { formatInstallLog, formatLogTime, logMessage, parseInstallLog } from "../../../../../instances/install-log";
+>>>>>>> fe89780 (feat: erreurs traduisibles (LocalizedError) pour providers, installateur, outils et IPC)
 
 const STATUS: Record<
   EntryStatus,
@@ -167,6 +173,7 @@ export default function InstanceDebugTab({
   const copyReport = () =>
     copy(JSON.stringify(report, null, 2), t("debug.report"));
   const logLines = parseInstallLog(log ?? "");
+<<<<<<< HEAD
   const tr = (key: string, vars?: Record<string, string | number>): string =>
     String(vars ? t(key, vars) : t(key));
   const copyLog = () =>
@@ -176,6 +183,10 @@ export default function InstanceDebugTab({
         : t("debug.emptyLog"),
       t("debug.log"),
     );
+=======
+  const tr = (key: string, vars?: Record<string, string | number>) => t(key, vars) as string;
+  const copyLog = () => copy(logLines.length > 0 ? formatInstallLog(logLines, tr, languageOf(i18n.language)) : t("debug.emptyLog"), t("debug.log"));
+>>>>>>> fe89780 (feat: erreurs traduisibles (LocalizedError) pour providers, installateur, outils et IPC)
 
   return (
     <>
@@ -468,7 +479,7 @@ export default function InstanceDebugTab({
                         : 400,
                   }}
                 >
-                  {logMessage(line.record, tr)}
+                  {logMessage(line.record, tr, languageOf(i18n.language))}
                 </Box>
               </Box>
             ),

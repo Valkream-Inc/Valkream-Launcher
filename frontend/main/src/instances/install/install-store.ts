@@ -12,6 +12,7 @@ import fs from "fs";
 import path from "path";
 
 import type { InstanceSettingValue } from "@shared/types";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export interface InstalledEntry {
   version: string;
@@ -125,9 +126,9 @@ export const writeInstanceSetting = (
   value: InstanceSettingValue,
   defaults: Readonly<Record<string, InstanceSettingValue>> = {},
 ): Record<string, InstanceSettingValue> => {
-  if (!SETTING_NAME.test(name)) throw new Error(`Nom de réglage invalide : ${name}`);
+  if (!SETTING_NAME.test(name)) throw new LocalizedError("err.settingName", { name });
   if (!isSettingValue(value)) {
-    throw new Error(`Valeur de réglage invalide pour ${name}`);
+    throw new LocalizedError("err.settingValue", { name });
   }
   const settings = { ...defaults, ...readInstanceSettings(installDir), [name]: value };
   writeJsonFile(path.join(installDir, SETTINGS_FILE), settings);

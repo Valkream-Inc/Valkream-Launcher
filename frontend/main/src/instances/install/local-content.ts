@@ -21,6 +21,7 @@ import { pickKey } from "../../lib/json-key.js";
 import { isSafeRelativePath, resolveInside } from "../../lib/paths.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
 import { entryDirectory } from "../local/instance-paths.js";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export const LOCAL_PREFIX = "local:";
 
@@ -37,16 +38,16 @@ export const parseLocalContent = (value: string): { entry: string; file: string 
 /** Chemin absolu du fichier local désigné ; erreur claire si l'entrée ou le fichier manque. */
 export const localContentPath = (spec: string, installDir: string, release: ReleaseConfig | undefined): string => {
   const parsed = parseLocalContent(spec);
-  if (!parsed) throw new Error(`contenu local invalide (attendu local:<entrée>/<fichier>) : ${spec}`);
+  if (!parsed) throw new LocalizedError("err.localInvalid", { spec });
 
   const source = (["game-base", "game-details"] as const)
     .map((tier) => release?.[tier]?.[parsed.entry])
     .find((entry): entry is ReleaseEntry => entry !== undefined);
-  if (!source) throw new Error(`contenu local : entrée « ${parsed.entry} » inconnue`);
+  if (!source) throw new LocalizedError("err.localUnknown", { entry: parsed.entry });
 
   const fullPath = resolveInside(entryDirectory(installDir, source.path), parsed.file);
   if (!fs.existsSync(fullPath)) {
-    throw new Error(`contenu local : « ${parsed.file} » absent (l'entrée « ${parsed.entry} » doit être installée avant)`);
+    throw new LocalizedError("err.localAbsent", { file: parsed.file, entry: parsed.entry });
   }
   return fullPath;
 };

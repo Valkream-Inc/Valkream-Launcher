@@ -15,6 +15,7 @@ import { resolveInside } from "../../lib/paths.js";
 import type { InstanceMainConfig } from "../instances.types.js";
 import type { InstallLocations } from "./instance-paths.js";
 import { buildLaunchArgs } from "./launch-args.js";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export type LaunchPlan =
   /** Jeu sans exécutable déclaré, lancé par Steam (`launchSteam` actif). */
@@ -55,10 +56,10 @@ export const planLaunch = (
 
   if (!locations.executable) {
     if (ensureSteam) return { kind: "steam", url: `steam://rungameid/${config.steamAppId}` };
-    throw new Error("Aucun exécutable déclaré pour cette plateforme");
+    throw new LocalizedError("err.noExecutable");
   }
   if (!exists(locations.executable)) {
-    throw new Error(`Exécutable introuvable : ${locations.executable}`);
+    throw new LocalizedError("err.executableMissing", { path: locations.executable });
   }
   return {
     kind: "executable",

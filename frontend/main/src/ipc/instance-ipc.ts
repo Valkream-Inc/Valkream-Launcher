@@ -35,6 +35,7 @@ import { depotAssetFor, ensureDepotDownloader } from "../instances/install/depot
 import { depotOsOf, downloadWithDepot } from "../instances/install/depot-download.js";
 import { realDepotRunner } from "../instances/install/depot-runner.js";
 import { realInstallIO } from "../instances/install/real-io.js";
+import { LocalizedError } from "../lib/localized-error.js";
 
 const isChannel = (value: unknown): value is Channel =>
   value === "stable" || value === "beta";
@@ -42,8 +43,8 @@ const isChannel = (value: unknown): value is Channel =>
 /** Valide id et canal reçus du renderer et résout les chemins de l'installation. */
 const resolve = (id: unknown, channel: unknown) => {
   const config = instancesConfig.find((item) => item.id === id);
-  if (!config) throw new Error(`Instance inconnue : ${String(id)}`);
-  if (!isChannel(channel)) throw new Error(`Canal invalide : ${String(channel)}`);
+  if (!config) throw new LocalizedError("err.unknownInstance", { id: String(id) });
+  if (!isChannel(channel)) throw new LocalizedError("err.invalidChannel", { channel: String(channel) });
   return {
     config,
     channel,
@@ -118,7 +119,7 @@ const InstanceIpcHandlers = (): void => {
     // On ne lance jamais un jeu dont une partie bloquante manque (sauf hors ligne : on joue l'installé).
     const status = await getInstanceStatus(id, channel);
     if (!status.canPlay) {
-      throw new Error("Le jeu n'est pas à jour : installez ou mettez à jour avant de lancer");
+      throw new LocalizedError("err.notUpToDate");
     }
 
     const settings = { ...config.defaultSettings, ...readInstanceSettings(locations.installDir) };
@@ -158,7 +159,7 @@ const InstanceIpcHandlers = (): void => {
 
   ipcMain.handle("instances:open-folder", async (_event, id: string, channel: Channel) => {
     const { locations } = resolve(id, channel);
-    if (!fs.existsSync(locations.installDir)) throw new Error("Le dossier du jeu n'existe pas !");
+    if (!fs.existsSync(locations.installDir)) throw new LocalizedError("err.gameDirMissing");
     const error = await shell.openPath(locations.installDir);
     if (error) throw new Error(error);
   });
@@ -186,11 +187,11 @@ const InstanceIpcHandlers = (): void => {
     const entry = [...Object.values(release?.["game-base"] ?? {}), ...Object.values(release?.["game-details"] ?? {})].find(
       (item) => item.type === "steam_library" && item.depot !== undefined
     );
-    if (!entry?.depot || config.steamAppId === undefined) throw new Error("Ce jeu ne propose pas DepotDownloader");
+    if (!entry?.depot || config.steamAppId === undefined) throw new LocalizedError("err.noDepot");
 
     const platformKey = `${process.platform}-${os.arch()}`;
     if (!depotAssetFor(DEPOT_DOWNLOADER_ASSETS, platformKey)) {
-      throw new Error("DepotDownloader n'est pas disponible sur cette plateforme");
+      throw new LocalizedError("err.depotUnavailable");
     }
     const send = (payload: { line?: string; percent?: number }) => {
       if (!event.sender.isDestroyed()) event.sender.send("instances:depot-output", { id, channel, ...payload });
@@ -239,7 +240,7 @@ const InstanceIpcHandlers = (): void => {
   ipcMain.handle("instances:uninstall", (_event, id: string, channel: Channel) => {
     const { locations } = resolve(id, channel);
     if (getInstanceInstaller().isBusy(locations.installDir)) {
-      throw new Error("Une installation est en cours");
+      throw new LocalizedError("install.alreadyRunning");
     }
     // Un seul canal est supprimé : l'autre (stable/beta) n'est jamais touché.
     fs.rmSync(locations.installDir, { recursive: true, force: true });

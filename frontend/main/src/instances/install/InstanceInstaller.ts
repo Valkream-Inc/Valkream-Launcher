@@ -56,6 +56,7 @@ import {
 } from "./providers/thunderstore.js";
 import type { InstallIO, Provider, Uninstaller } from "./providers/types.js";
 import { zipProvider } from "./providers/zip.js";
+import { errorText, errorTexts, LocalizedError } from "../../lib/localized-error.js";
 
 const DEFAULT_PROVIDERS: Record<string, Provider> = {
   zip_url: zipProvider,
@@ -120,9 +121,6 @@ const cleanTempDir = (tempDir: string): void => {
   }
 };
 
-const messageOf = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
 /** Intervalle minimal entre deux événements de progression envoyés à l'interface. */
 const PROGRESS_INTERVAL_MS = 250;
 
@@ -148,13 +146,13 @@ export class InstanceInstaller {
     const loaded = await inspector.load(id, channel);
     const { installDir } = loaded.locations;
     if (!loaded.release) {
-      throw new Error(loaded.errors.join(" ; ") || "latest.yml indisponible");
+      throw loaded.errors.length > 0 ? new Error(loaded.errors.join(" ; ")) : new LocalizedError("err.latestUnavailable");
     }
 
     const lang: Lang = (await this.options.language?.()) ?? "fr";
     const t = translator(lang);
     const lockKey = path.resolve(installDir);
-    if (this.running.has(lockKey)) throw new Error(t("install.alreadyRunning"));
+    if (this.running.has(lockKey)) throw new LocalizedError("install.alreadyRunning");
     this.running.add(lockKey);
 
     const result: InstanceSyncResult = {
@@ -236,9 +234,7 @@ export class InstanceInstaller {
       ) {
         const free = (this.options.freeSpace ?? diskFreeBytes)(installDir);
         if (free < loaded.requiredSpaceMb * 1024 ** 2) {
-          throw new Error(
-            `espace disque insuffisant : ${Math.floor(free / 1024 ** 2)} Mo libres, ${loaded.requiredSpaceMb} Mo nécessaires`,
-          );
+          throw new LocalizedError("err.diskSpace", { free: Math.floor(free / 1024 ** 2), needed: loaded.requiredSpaceMb });
         }
       }
 
@@ -246,9 +242,12 @@ export class InstanceInstaller {
       // des dizaines d'événements par seconde) ; début / fin / erreur / 100 % passent toujours.
       const startedAt = Date.now();
       let lastProgress = 0;
-      const emit = (
-        progress: Omit<InstanceSyncProgress, "id" | "channel" | "elapsedMs">,
-      ) => {
+      const emit = ({
+        texts,
+        ...progress
+      }: Omit<InstanceSyncProgress, "id" | "channel" | "elapsedMs"> & {
+        texts?: Record<Lang, string>;
+      }) => {
         const now = Date.now();
         const frequent =
           !["start", "done", "error"].includes(progress.step) &&
@@ -291,6 +290,7 @@ export class InstanceInstaller {
               "log.entryError",
               { entry, message: progress.message ?? "" },
               "ERROR",
+              { texts },
             );
           }
         }
@@ -330,7 +330,7 @@ export class InstanceInstaller {
         });
 
         try {
-          if (item.error) throw new Error(`entrée invalide : ${item.error}`);
+          if (item.error) throw new LocalizedError("err.entryInvalid", { error: item.error });
 
           if (item.remove) {
             // Entrée optionnelle désactivée par le joueur : on retire ses mods puis on l'oublie.
@@ -351,7 +351,9 @@ export class InstanceInstaller {
           }
           const provider = providers[String(item.entry.type)];
           if (!provider)
-            throw new Error(`type « ${item.entry.type} » non pris en charge`);
+            throw new LocalizedError("err.typeUnsupported", {
+              type: String(item.entry.type),
+            });
 
           const entryDir = entryDirectory(installDir, item.entry.path);
           const previous = state.entries[item.name];
@@ -436,7 +438,7 @@ export class InstanceInstaller {
             });
             break;
           }
-          const message = messageOf(error);
+          const message = errorText(error, lang);
           const steamIssue =
             error instanceof GameSourceError
               ? toSteamSourceIssue(error, {
@@ -454,7 +456,12 @@ export class InstanceInstaller {
             error: message,
             ...(steamIssue ? { steamIssue } : {}),
           });
-          emit({ ...common, step: "error", message });
+          emit({
+            ...common,
+            step: "error",
+            message,
+            texts: errorTexts(error),
+          });
           // Les entrées suivantes reposent sur la base : on s'arrête si elle échoue.
           if (item.tier === "game-base") break;
         }

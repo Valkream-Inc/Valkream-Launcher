@@ -21,7 +21,7 @@ export const appendInstallLog = (
   key: string,
   vars?: LogRecord["vars"],
   level: LogRecord["level"] = "INFO",
-  options: { separator?: boolean; now?: Date } = {},
+  options: { separator?: boolean; now?: Date; texts?: LogRecord["texts"] } = {},
 ): void => {
   try {
     const file = path.join(installDir, INSTALL_LOG_FILE);
@@ -35,6 +35,7 @@ export const appendInstallLog = (
       level,
       key,
       ...(vars ? { vars } : {}),
+      ...(options.texts ? { texts: options.texts } : {}),
       ...(options.separator ? { sep: true as const } : {}),
     };
     fs.appendFileSync(file, `${JSON.stringify(record)}\n`);

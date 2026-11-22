@@ -14,6 +14,7 @@ import fs from "fs";
 import path from "path";
 
 import { isPathInside } from "./paths.js";
+import { LocalizedError } from "./localized-error.js";
 
 export const INSTANCES_DIR = "instances";
 const MOVING_SUFFIX = ".moving";
@@ -55,16 +56,16 @@ export interface MoveOptions {
 export const moveGamesRoot = async ({ fromRoot, toRoot, configFile, isBusy, record }: MoveOptions): Promise<void> => {
   const from = path.resolve(fromRoot);
   const to = path.resolve(toRoot);
-  if (!path.isAbsolute(toRoot)) throw new Error("Le nouveau dossier doit être un chemin absolu");
-  if (from === to) throw new Error("Le nouveau dossier est identique à l'actuel");
+  if (!path.isAbsolute(toRoot)) throw new LocalizedError("err.rootAbsolute");
+  if (from === to) throw new LocalizedError("err.rootSame");
   if (isPathInside(from, to) || isPathInside(to, from)) {
-    throw new Error("Le nouveau dossier ne peut pas contenir l'ancien ni être à l'intérieur");
+    throw new LocalizedError("err.rootNested");
   }
-  if (isBusy?.()) throw new Error("Une installation est en cours : réessayez quand elle est terminée");
+  if (isBusy?.()) throw new LocalizedError("err.rootBusy");
 
   const source = path.join(from, INSTANCES_DIR);
   const target = path.join(to, INSTANCES_DIR);
-  if (fs.existsSync(target) && !isEmptyDir(target)) throw new Error(`Le dossier ${target} n'est pas vide`);
+  if (fs.existsSync(target) && !isEmptyDir(target)) throw new LocalizedError("err.rootNotEmpty", { target });
 
   fs.mkdirSync(to, { recursive: true });
   const moving = target + MOVING_SUFFIX;

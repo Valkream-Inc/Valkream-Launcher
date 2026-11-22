@@ -7,13 +7,15 @@
  */
 
 import type { NoCacheConfig } from "../types/core.js";
+import { LocalizedError } from "./localized-error.js";
+import { translate } from "./messages.js";
 
 export class HttpError extends Error {
   constructor(
     readonly status: number,
     readonly url: string,
   ) {
-    super(`HTTP ${status} pour ${url}`);
+    super(translate("fr", "err.http", { status, url }));
     this.name = "HttpError";
   }
 }
@@ -44,7 +46,7 @@ export const httpGet = async (url: string, options: HttpGetOptions = {}): Promis
   if (signal?.aborted) onAbort();
   signal?.addEventListener("abort", onAbort, { once: true });
   const timer = setTimeout(
-    () => controller.abort(Object.assign(new Error(`Délai dépassé (${timeout} ms) pour ${url}`), { code: "ETIMEDOUT" })),
+    () => controller.abort(Object.assign(new LocalizedError("err.timeout", { ms: timeout, url }), { code: "ETIMEDOUT" })),
     timeout,
   );
 

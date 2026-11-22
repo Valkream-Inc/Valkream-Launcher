@@ -8,6 +8,7 @@
  */
 
 import type { ModDisplay } from "@shared/types";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
 
@@ -23,7 +24,7 @@ export const parseModList = (text: string): ModRef[] => {
   let items: string[];
   if (trimmed.startsWith("[")) {
     const parsed: unknown = JSON.parse(trimmed);
-    if (!Array.isArray(parsed)) throw new Error("La liste JSON doit être un tableau de chaînes");
+    if (!Array.isArray(parsed)) throw new LocalizedError("err.jsonArray");
     items = parsed.map(String);
   } else {
     items = trimmed.split(/\r?\n/).map((line) => line.replace(/#.*/, "").trim().replace(/^[-*]\s+/, ""));
@@ -33,7 +34,7 @@ export const parseModList = (text: string): ModRef[] => {
   const refs: ModRef[] = [];
   for (const item of items.filter(Boolean)) {
     const match = DEPENDENCY.exec(item.replace(/[",]/g, "").trim());
-    if (!match) throw new Error(`Dépendance invalide : ${item}`);
+    if (!match) throw new LocalizedError("err.dependencyInvalid", { dependency: item });
     const key = `${match[1]}-${match[2]}`;
     if (seen.has(key)) continue;
     seen.add(key);

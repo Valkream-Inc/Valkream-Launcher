@@ -13,6 +13,7 @@ import path from "path";
 import { hashFile } from "./manifest.js";
 import type { InstallIO } from "./providers/types.js";
 import type { DepotAsset } from "./depot-config.js";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export interface DepotToolOptions {
   /** Dossier des outils du launcher (`<racine>/tools`). */
@@ -60,9 +61,7 @@ export const ensureDepotDownloader = async ({
 }: DepotToolOptions): Promise<string> => {
   const asset = depotAssetFor(assets, platformKey);
   if (!asset) {
-    throw new Error(
-      "DepotDownloader n'est pas configuré pour cette plateforme (url + sha256 à renseigner dans depot-config.ts)",
-    );
+    throw new LocalizedError("err.depotNotConfigured");
   }
   const sha = asset.sha256.toLowerCase();
   const base = path.join(toolsDir, "depotdownloader");
@@ -84,12 +83,12 @@ export const ensureDepotDownloader = async ({
   await io.download(asset.url, zipPath, signal, (transfer) => onProgress?.(transfer.percent));
   if ((await hashFile(zipPath)) !== sha) {
     fs.rmSync(zipPath, { force: true });
-    throw new Error("DepotDownloader : le hash de l'archive téléchargée ne correspond pas : exécution refusée");
+    throw new LocalizedError("err.depotHash");
   }
 
   fs.rmSync(outDir, { recursive: true, force: true });
   await io.extract(zipPath, outDir, { accept: () => true });
-  if (!fs.existsSync(exe)) throw new Error(`DepotDownloader : ${asset.file} absent de l'archive`);
+  if (!fs.existsSync(exe)) throw new LocalizedError("err.depotExeMissing", { file: asset.file });
   if (process.platform !== "win32") fs.chmodSync(exe, 0o755);
   fs.writeFileSync(marker, await hashFile(exe));
   fs.rmSync(zipPath, { force: true });

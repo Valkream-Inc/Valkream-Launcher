@@ -16,6 +16,7 @@ import type { ModsListResult, ToolsHashSummary } from "@shared/types";
 import { exportHashFolder, hashFolder } from "../instances/tools/hash-folder.js";
 import { buildModsDisplay, parseModList } from "../instances/tools/mods-list.js";
 import { httpGetText } from "../lib/http.js";
+import { LocalizedError } from "../lib/localized-error.js";
 
 const window = () => BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0];
 
@@ -36,14 +37,14 @@ export default function registerAdminToolsIpc(): void {
   // Écrit hash.json + hash/ pour le dossier choisi précédemment
   ipcMain.handle("tools:export-hash", async (_event, ignore: unknown): Promise<{ output: string } | null> => {
     const source = lastFolder;
-    if (!source) throw new Error("Choisissez d'abord un dossier à hasher");
+    if (!source) throw new LocalizedError("err.pickFolder");
     const picked = await dialog.showOpenDialog(window(), {
       properties: ["openDirectory", "createDirectory"],
       title: "Dossier de sortie (hash.json + hash/)",
     });
     if (picked.canceled || !picked.filePaths[0]) return null;
     const output = picked.filePaths[0];
-    if (path.resolve(output) === path.resolve(source)) throw new Error("La sortie doit être différente du dossier source");
+    if (path.resolve(output) === path.resolve(source)) throw new LocalizedError("err.sameOutput");
     await exportHashFolder(source, output, patterns(ignore));
     return { output };
   });

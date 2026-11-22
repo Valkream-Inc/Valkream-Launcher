@@ -18,6 +18,7 @@ import { normalizeRelative } from "../../lib/patterns.js";
 import { extractTar } from "../../lib/tar-extract.js";
 import { progressOf } from "./progress.js";
 import type { InstallIO, TransferProgress } from "./providers/types.js";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 const STREAM_STALL_MS = 30_000;
 const STREAM_ATTEMPTS = 3;
@@ -51,7 +52,7 @@ const streamTarGz = async (
   onProgress: ((progress: TransferProgress) => void) | undefined,
 ): Promise<void> => {
   const response = await httpGet(url, { timeout: 10_000, headers: { "Accept-Encoding": "identity" }, signal });
-  if (!response.body) throw new Error(`Réponse sans contenu pour ${url}`);
+  if (!response.body) throw new LocalizedError("err.noBody", { url });
   const total = parseInt(response.headers.get("content-length") ?? "0", 10);
   const startedAt = Date.now();
   let received = 0;
@@ -61,7 +62,7 @@ const streamTarGz = async (
   const arm = () => {
     clearTimeout(stall);
     stall = setTimeout(
-      () => source.destroy(Object.assign(new Error(`Aucune donnée reçue depuis ${STREAM_STALL_MS} ms`), { code: "ETIMEDOUT" })),
+      () => source.destroy(Object.assign(new LocalizedError("err.stall", { ms: STREAM_STALL_MS }), { code: "ETIMEDOUT" })),
       STREAM_STALL_MS,
     );
   };

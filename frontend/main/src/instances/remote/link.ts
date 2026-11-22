@@ -10,6 +10,7 @@
  */
 
 import type { EntryContent, EntryContentByPlatform, GamePlatform } from "@shared/types";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export type LinkKind = "url" | "relative" | "data" | "invalid";
 
@@ -37,16 +38,14 @@ export const resolveLinkUrl = (value: string, baseUrl: string): string => {
   if (kind === "relative") {
     const segments = trimmed.split(/[/\\]/);
     if (segments.includes("..")) {
-      throw new Error(`Lien relatif refusé (« .. ») : ${value}`);
+      throw new LocalizedError("err.relativeLink", { value });
     }
     return baseUrl.replace(/\/+$/, "") + "/" + trimmed.replace(/^\/+/, "");
   }
 
-  throw new Error(
-    kind === "data"
-      ? `Un lien data: ne peut pas être téléchargé : ${value.slice(0, 30)}…`
-      : `Lien invalide (attendu http(s)://… ou /chemin) : ${value}`,
-  );
+  throw kind === "data"
+    ? new LocalizedError("err.dataLink", { value: value.slice(0, 30) })
+    : new LocalizedError("err.badLink", { value });
 };
 
 const PLATFORM_KEYS: readonly string[] = ["win32", "linux", "darwin", "default"];

@@ -6,8 +6,12 @@
 import type { SettingKey, Settings } from "@shared/types";
 
 import Database from "../lib/database.js";
+import { setErrorLanguage } from "../lib/localized-error.js";
+import type { Lang } from "../lib/messages.js";
 
 class SettingsManager {
+  /** Langue en cache : les erreurs traduites (`LocalizedError`) la lisent de façon synchrone. */
+  private language: Lang = "fr";
   db: Database;
   defaultSettings: Settings;
 
@@ -28,6 +32,8 @@ class SettingsManager {
     if (!configData) {
       await this.db.createData("configClient", this.defaultSettings);
     }
+    this.language = (await this.getSetting("language")) === "en" ? "en" : "fr";
+    setErrorLanguage(() => this.language);
   }
 
   async getSetting<K extends SettingKey>(setting: K): Promise<Settings[K]> {
@@ -51,6 +57,7 @@ class SettingsManager {
     config[setting] = value;
 
     await this.db.updateData("configClient", config);
+    if (setting === "language") this.language = value === "en" ? "en" : "fr";
     return true;
   }
 }

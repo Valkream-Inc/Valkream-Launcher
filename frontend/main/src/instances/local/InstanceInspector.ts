@@ -33,6 +33,7 @@ import { resolvePreserved } from "../install/preserve.js";
 import { loadEntryContent } from "../install/local-content.js";
 import { flattenRelease, RELEASE_TIERS } from "../remote/release-options.js";
 import { validateReleaseConfig } from "../remote/validate.js";
+import { LocalizedError } from "../../lib/localized-error.js";
 
 export interface InspectorOptions {
   configs: readonly InstanceMainConfig[];
@@ -69,7 +70,7 @@ export class InstanceInspector {
   async load(id: string, channel: Channel): Promise<LoadedInstance> {
     const { configs, resolver, platform, rootPath } = this.options;
     const config = configs.find((item) => item.id === id);
-    if (!config) throw new Error(`Instance inconnue : ${id}`);
+    if (!config) throw new LocalizedError("err.unknownInstance", { id });
 
     const locations = installLocations(rootPath(), config, channel, platform);
     const errors: string[] = [];

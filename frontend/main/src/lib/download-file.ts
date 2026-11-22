@@ -18,6 +18,7 @@ import { completePartial, discardPartial, rememberPartial, resumePoint, validato
 import { consoleStreamAnswer } from "./console-stream.js";
 import { formatBytes } from "./format-bytes.js";
 import { HttpError, httpGet } from "./http.js";
+import { LocalizedError } from "./localized-error.js";
 
 const REQUEST_TIMEOUT = 10 * 1000;
 const STALL_TIMEOUT = 30 * 1000;
@@ -111,7 +112,7 @@ const attemptDownload = async (
       continue;
     }
 
-    if (!response.body) throw new Error(`Réponse sans contenu pour ${downloadUrl}`);
+    if (!response.body) throw new LocalizedError("err.noBody", { url: downloadUrl });
     rememberPartial(destPath, downloadUrl, validatorOf(Object.fromEntries(response.headers)));
 
     const remainingSize = parseInt(response.headers.get("content-length") ?? "0", 10);
@@ -132,7 +133,7 @@ const attemptDownload = async (
     const armStall = () => {
       clearTimeout(stallTimer);
       stallTimer = setTimeout(
-        () => source.destroy(Object.assign(new Error(`Aucune donnée reçue depuis ${stallTimeoutMs} ms`), { code: "ETIMEDOUT" })),
+        () => source.destroy(Object.assign(new LocalizedError("err.stall", { ms: stallTimeoutMs }), { code: "ETIMEDOUT" })),
         stallTimeoutMs,
       );
     };
