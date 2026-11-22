@@ -20,10 +20,10 @@ const TipsMessage = () => {
   const { t } = useTranslation();
   return (
     <>
-      {t("content.tips1")}
+      {t("settings.content.tips1")}
       <br />
       <br />
-      {t("content.tips2")}
+      {t("settings.content.tips2")}
     </>
   );
 };
@@ -32,21 +32,21 @@ const WelcomeMessage = () => {
   const { t } = useTranslation();
   return (
     <>
-      {t("content.welcome1")}
+      {t("settings.content.welcome1")}
       <br />
       <br />
-      {t("content.welcome2")}
+      {t("settings.content.welcome2")}
     </>
   );
 };
 
-/** Liste de paragraphes traduits (`content.<jeu>.d1…dN`). */
+/** Liste de paragraphes traduits (`settings.content.<jeu>.d1…dN`). */
 const Description = ({ game, count }: { game: string; count: number }) => {
   const { t } = useTranslation();
   return (
     <ul>
       {Array.from({ length: count }, (_, index) => (
-        <li key={index}>{t(`content.${game}.d${index + 1}`)}</li>
+        <li key={index}>{t(`settings.content.${game}.d${index + 1}`)}</li>
       ))}
     </ul>
   );
@@ -88,21 +88,21 @@ const instancesRenderConfig: InstanceRenderConfig[] = [
       {
         type: "toggle",
         settingsName: "boostFps",
-        label: "content.valheim.boostFps.label",
-        text: "content.valheim.boostFps.text",
+        label: "settings.content.valheim.boostFps.label",
+        text: "settings.content.valheim.boostFps.text",
       },
       {
         type: "toggle",
         settingsName: "boostGraphic",
-        label: "content.valheim.boostGraphic.label",
-        text: "content.valheim.boostGraphic.text",
+        label: "settings.content.valheim.boostGraphic.label",
+        text: "settings.content.valheim.boostGraphic.text",
         category: { level: "admin" },
       },
       {
         type: "toggle",
         settingsName: "modsAdmin",
-        label: "content.valheim.modsAdmin.label",
-        text: "content.valheim.modsAdmin.text",
+        label: "settings.content.valheim.modsAdmin.label",
+        text: "settings.content.valheim.modsAdmin.text",
         category: { level: "admin", zone: "danger" },
       },
     ],

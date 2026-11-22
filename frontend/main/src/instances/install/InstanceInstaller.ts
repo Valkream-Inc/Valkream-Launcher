@@ -19,24 +19,43 @@ import type {
   ReleaseEntry,
 } from "@shared/types";
 
-import { ArchiveCache } from "./providers/archive-cache.js";
-import { loadEntryContent } from "./local-content.js";
-import { entryDirectory } from "../local/instance-paths.js";
-import { buildRow, TIERS, type InstanceInspector } from "../local/InstanceInspector.js";
-import { readInstallState, readInstanceSettings, recordInstalledEntry, removeInstalledEntry } from "./install-store.js";
+import { type Lang, translator } from "../../lib/messages.js";
 import { isPathInside } from "../../lib/paths.js";
+import { entryDirectory } from "../local/instance-paths.js";
+import {
+  buildRow,
+  type InstanceInspector,
+  TIERS,
+} from "../local/InstanceInspector.js";
+import { locateSteamGame, type SteamGame } from "../local/steam-library.js";
+import type { ParamResolver } from "../remote/ParamResolver.js";
 import { removeWithPlan } from "./fs-ops.js";
+import {
+  clearGameSourceDir,
+  DEPOT_DIR,
+  GameSourceError,
+  type GuideLanguage,
+  readGameSourceDir,
+  toSteamSourceIssue,
+} from "./game-source.js";
 import { HashCache } from "./hash-cache.js";
 import { appendInstallLog } from "./install-log.js";
-import type { ParamResolver } from "../remote/ParamResolver.js";
+import {
+  readInstallState,
+  readInstanceSettings,
+  recordInstalledEntry,
+  removeInstalledEntry,
+} from "./install-store.js";
+import { loadEntryContent } from "./local-content.js";
+import { planEntryUpdate } from "./preserve.js";
+import { ArchiveCache } from "./providers/archive-cache.js";
 import { hashProvider, steamLibraryProvider } from "./providers/hash.js";
-import { type Lang, translator } from "../../lib/messages.js";
-import { clearGameSourceDir, DEPOT_DIR, GameSourceError, type GuideLanguage, readGameSourceDir, toSteamSourceIssue } from "./game-source.js";
-import { locateSteamGame, type SteamGame } from "../local/steam-library.js";
-import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore.js";
+import {
+  thunderstoreProvider,
+  thunderstoreUninstall,
+} from "./providers/thunderstore.js";
 import type { InstallIO, Provider, Uninstaller } from "./providers/types.js";
 import { zipProvider } from "./providers/zip.js";
-import { planEntryUpdate } from "./preserve.js";
 
 const DEFAULT_PROVIDERS: Record<string, Provider> = {
   zip_url: zipProvider,
@@ -76,7 +95,8 @@ export interface SyncOptions {
 /** Octets libres du disque qui contient `directory` (ou son premier parent existant). */
 const diskFreeBytes = (directory: string): number => {
   let current = path.resolve(directory);
-  while (!fs.existsSync(current) && path.dirname(current) !== current) current = path.dirname(current);
+  while (!fs.existsSync(current) && path.dirname(current) !== current)
+    current = path.dirname(current);
   const stats = fs.statfsSync(current);
   return stats.bavail * stats.bsize;
 };
@@ -95,7 +115,8 @@ const cleanTempDir = (tempDir: string): void => {
   for (const name of names) {
     const file = path.join(tempDir, name);
     const stale = Date.now() - fs.statSync(file).mtimeMs > PARTIAL_MAX_AGE_MS;
-    if (!isPartial(name) || stale) fs.rmSync(file, { recursive: true, force: true });
+    if (!isPartial(name) || stale)
+      fs.rmSync(file, { recursive: true, force: true });
   }
 };
 
@@ -116,7 +137,11 @@ export class InstanceInstaller {
     return this.running.has(path.resolve(installDir));
   }
 
-  async sync(id: string, channel: Channel, { onProgress, signal, repair = false }: SyncOptions = {}): Promise<InstanceSyncResult> {
+  async sync(
+    id: string,
+    channel: Channel,
+    { onProgress, signal, repair = false }: SyncOptions = {},
+  ): Promise<InstanceSyncResult> {
     const { inspector, resolver, platform, io } = this.options;
     const providers = this.options.providers ?? DEFAULT_PROVIDERS;
 
@@ -132,7 +157,11 @@ export class InstanceInstaller {
     if (this.running.has(lockKey)) throw new Error(t("install.alreadyRunning"));
     this.running.add(lockKey);
 
-    const result: InstanceSyncResult = { installed: [], failed: [], works: false };
+    const result: InstanceSyncResult = {
+      installed: [],
+      failed: [],
+      works: false,
+    };
     const hashes = new HashCache(installDir);
     const tempDir = path.join(installDir, ".tmp");
 
@@ -141,11 +170,16 @@ export class InstanceInstaller {
       cleanTempDir(tempDir); // restes d'une synchro interrompue (les téléchargements partiels sont gardés)
       fs.mkdirSync(tempDir, { recursive: true });
 
-      const settings = { ...loaded.config.defaultSettings, ...readInstanceSettings(installDir) };
+      const settings = {
+        ...loaded.config.defaultSettings,
+        ...readInstanceSettings(installDir),
+      };
       const state = readInstallState(installDir);
       const modified = repair
         ? new Set(
-            (await inspector.report(id, channel, { verify: true, fresh: true })).entries
+            (
+              await inspector.report(id, channel, { verify: true, fresh: true })
+            ).entries
               .filter((row) => row.status === "modified")
               .map((row) => row.name),
           )
@@ -160,24 +194,46 @@ export class InstanceInstaller {
         remove?: boolean;
       }[] = [];
       for (const tier of TIERS) {
-        for (const [name, entry] of Object.entries(loaded.release[tier] ?? {})) {
+        for (const [name, entry] of Object.entries(
+          loaded.release[tier] ?? {},
+        )) {
           const prefix = `latest.${tier}.${name}`;
           const entryErrors = loaded.releaseErrors.filter(
-            (error) => error.startsWith(`${prefix}.`) || error.startsWith(`${prefix} `),
+            (error) =>
+              error.startsWith(`${prefix}.`) || error.startsWith(`${prefix} `),
           );
-          const row = buildRow(name, tier, entry, entryErrors, state.entries[name], settings);
+          const row = buildRow(
+            name,
+            tier,
+            entry,
+            entryErrors,
+            state.entries[name],
+            settings,
+          );
           if (row.status === "invalid") {
             todo.push({ name, entry, tier, error: entryErrors.join(" ; ") });
           } else if (row.pendingRemoval) {
             todo.push({ name, entry, tier, remove: true });
-          } else if (row.status === "outdated" || row.status === "not-installed" || modified.has(name)) {
+          } else if (
+            row.status === "outdated" ||
+            row.status === "not-installed" ||
+            modified.has(name)
+          ) {
             todo.push({ name, entry, tier });
           }
         }
       }
 
       // Première installation du jeu : l'espace disque exigé par l'index doit être disponible.
-      if (loaded.requiredSpaceMb && todo.some((item) => item.tier === "game-base" && !item.remove && !state.entries[item.name])) {
+      if (
+        loaded.requiredSpaceMb &&
+        todo.some(
+          (item) =>
+            item.tier === "game-base" &&
+            !item.remove &&
+            !state.entries[item.name],
+        )
+      ) {
         const free = (this.options.freeSpace ?? diskFreeBytes)(installDir);
         if (free < loaded.requiredSpaceMb * 1024 ** 2) {
           throw new Error(
@@ -190,25 +246,52 @@ export class InstanceInstaller {
       // des dizaines d'événements par seconde) ; début / fin / erreur / 100 % passent toujours.
       const startedAt = Date.now();
       let lastProgress = 0;
-      const emit = (progress: Omit<InstanceSyncProgress, "id" | "channel" | "elapsedMs">) => {
+      const emit = (
+        progress: Omit<InstanceSyncProgress, "id" | "channel" | "elapsedMs">,
+      ) => {
         const now = Date.now();
-        const frequent = !["start", "done", "error"].includes(progress.step) && progress.transfer?.percent !== 100;
+        const frequent =
+          !["start", "done", "error"].includes(progress.step) &&
+          progress.transfer?.percent !== 100;
         if (frequent) {
           if (now - lastProgress < PROGRESS_INTERVAL_MS) return;
           lastProgress = now;
         }
         // Journal : début / fin / erreur de chaque entrée (pas la progression des téléchargements).
-        if (progress.step === "start" || progress.step === "done" || progress.step === "error") {
-          const entry = progress.entry;
+        if (
+          progress.step === "start" ||
+          progress.step === "done" ||
+          progress.step === "error"
+        ) {
+          const entry = progress.entry ?? "";
           if (progress.step === "start") {
-            appendInstallLog(installDir, "log.entryStart", { index: progress.index, total: progress.total, entry, message: progress.message ?? "" });
+            appendInstallLog(installDir, "log.entryStart", {
+              index: progress.index ?? 0,
+              total: progress.total ?? 0,
+              entry,
+              message: progress.message ?? "",
+            });
           } else if (progress.step === "done") {
             // Un message à la fin d'une entrée = entrée optionnelle retirée.
-            appendInstallLog(installDir, progress.message ? "log.entryRemoved" : "log.entryDone", { entry });
+            appendInstallLog(
+              installDir,
+              progress.message ? "log.entryRemoved" : "log.entryDone",
+              { entry },
+            );
           } else if (progress.message === t("progress.cancelled")) {
-            appendInstallLog(installDir, "log.entryCancelled", { entry }, "WARN");
+            appendInstallLog(
+              installDir,
+              "log.entryCancelled",
+              { entry },
+              "WARN",
+            );
           } else {
-            appendInstallLog(installDir, "log.entryError", { entry, message: progress.message ?? "" }, "ERROR");
+            appendInstallLog(
+              installDir,
+              "log.entryError",
+              { entry, message: progress.message ?? "" },
+              "ERROR",
+            );
           }
         }
         onProgress?.({ id, channel, elapsedMs: now - startedAt, ...progress });
@@ -217,12 +300,20 @@ export class InstanceInstaller {
       const archiveUses = new Map<string, number>();
       for (const item of todo) {
         if (item.remove || item.error) continue;
-        const link = item.entry.type === "zip_url" ? item.entry.content : item.entry.zip;
-        if (typeof link === "string") archiveUses.set(link, (archiveUses.get(link) ?? 0) + 1);
+        const link =
+          item.entry.type === "zip_url" ? item.entry.content : item.entry.zip;
+        if (typeof link === "string")
+          archiveUses.set(link, (archiveUses.get(link) ?? 0) + 1);
       }
       const archives = new ArchiveCache(archiveUses);
 
-      appendInstallLog(installDir, "log.start", { channel, repair: repair ? 1 : 0, count: todo.length }, "INFO", { separator: true });
+      appendInstallLog(
+        installDir,
+        "log.start",
+        { channel, repair: repair ? 1 : 0, count: todo.length },
+        "INFO",
+        { separator: true },
+      );
 
       let index = 0;
       for (const item of todo) {
@@ -232,31 +323,45 @@ export class InstanceInstaller {
         }
         index++;
         const common = { entry: item.name, index, total: todo.length };
-        emit({ ...common, step: "start", message: `${item.name} (${item.entry.version})` });
+        emit({
+          ...common,
+          step: "start",
+          message: `${item.name} (${item.entry.version})`,
+        });
 
         try {
           if (item.error) throw new Error(`entrée invalide : ${item.error}`);
 
           if (item.remove) {
             // Entrée optionnelle désactivée par le joueur : on retire ses mods puis on l'oublie.
-            const uninstall = (this.options.uninstallers ?? DEFAULT_UNINSTALLERS)[String(item.entry.type)];
+            const uninstall = (this.options.uninstallers ??
+              DEFAULT_UNINSTALLERS)[String(item.entry.type)];
             await uninstall?.({
               entryDir: entryDirectory(installDir, item.entry.path),
               previousOwned: state.entries[item.name]?.owned ?? [],
             });
             removeInstalledEntry(installDir, item.name);
             result.installed.push(item.name);
-            emit({ ...common, step: "done", message: t("progress.removed", { label: item.name }) });
+            emit({
+              ...common,
+              step: "done",
+              message: t("progress.removed", { label: item.name }),
+            });
             continue;
           }
           const provider = providers[String(item.entry.type)];
-          if (!provider) throw new Error(`type « ${item.entry.type} » non pris en charge`);
+          if (!provider)
+            throw new Error(`type « ${item.entry.type} » non pris en charge`);
 
           const entryDir = entryDirectory(installDir, item.entry.path);
           const previous = state.entries[item.name];
           // Dossier changé depuis l'installation : réinstallation complète, l'ancien dossier est nettoyé.
-          const pathChanged = previous?.path !== undefined && previous.path !== item.entry.path;
-          const plan = planEntryUpdate(item.entry, pathChanged ? undefined : previous?.version);
+          const pathChanged =
+            previous?.path !== undefined && previous.path !== item.entry.path;
+          const plan = planEntryUpdate(
+            item.entry,
+            pathChanged ? undefined : previous?.version,
+          );
 
           // Rien n'est retiré ni écrit dans l'installation avant que tout soit prêt (voir staging.ts).
           let removed = false;
@@ -285,19 +390,32 @@ export class InstanceInstaller {
               if (chosen) return { dir: chosen, buildId: "", chosen: true };
               return loaded.config.steamAppId === undefined
                 ? null
-                : (this.options.steamLocator ?? locateSteamGame)(loaded.config.steamAppId);
+                : (this.options.steamLocator ?? locateSteamGame)(
+                    loaded.config.steamAppId,
+                  );
             },
-            loadContent: () => loadEntryContent(resolver, item.entry, installDir, loaded.release),
+            loadContent: () =>
+              loadEntryContent(
+                resolver,
+                item.entry,
+                installDir,
+                loaded.release,
+              ),
             beforeCommit,
             t,
-            report: (step, message, transfer) => emit({ ...common, step, message, transfer }),
+            report: (step, message, transfer) =>
+              emit({ ...common, step, message, transfer }),
           });
 
           beforeCommit();
           if (pathChanged && previous?.path !== undefined) {
             // Ancien dossier : on retire seulement ce que l'entrée possédait (mods listés), jamais le reste.
-            const uninstall = (this.options.uninstallers ?? DEFAULT_UNINSTALLERS)[String(item.entry.type)];
-            await uninstall?.({ entryDir: entryDirectory(installDir, previous.path), previousOwned: previous.owned ?? [] });
+            const uninstall = (this.options.uninstallers ??
+              DEFAULT_UNINSTALLERS)[String(item.entry.type)];
+            await uninstall?.({
+              entryDir: entryDirectory(installDir, previous.path),
+              previousOwned: previous.owned ?? [],
+            });
           }
           recordInstalledEntry(installDir, item.name, {
             version: String(item.entry.version),
@@ -311,7 +429,11 @@ export class InstanceInstaller {
           // Annulation demandée : on s'arrête sans compter d'échec (l'entrée reprendra à la prochaine synchro).
           if (signal?.aborted) {
             result.cancelled = true;
-            emit({ ...common, step: "error", message: t("progress.cancelled") });
+            emit({
+              ...common,
+              step: "error",
+              message: t("progress.cancelled"),
+            });
             break;
           }
           const message = messageOf(error);
@@ -321,11 +443,17 @@ export class InstanceInstaller {
                   entry: item.name,
                   appId: loaded.config.steamAppId,
                   branch: item.entry["steam-beta"],
-                  depotAvailable: item.entry.depot !== undefined && loaded.config.steamAppId !== undefined,
+                  depotAvailable:
+                    item.entry.depot !== undefined &&
+                    loaded.config.steamAppId !== undefined,
                   language: lang,
                 })
               : undefined;
-          result.failed.push({ name: item.name, error: message, ...(steamIssue ? { steamIssue } : {}) });
+          result.failed.push({
+            name: item.name,
+            error: message,
+            ...(steamIssue ? { steamIssue } : {}),
+          });
           emit({ ...common, step: "error", message });
           // Les entrées suivantes reposent sur la base : on s'arrête si elle échoue.
           if (item.tier === "game-base") break;
@@ -351,10 +479,10 @@ export class InstanceInstaller {
         // Le jeu téléchargé par DepotDownloader a été copié et vérifié : il ne sert plus (plusieurs Go).
         const depot = path.join(installDir, DEPOT_DIR);
         const source = readGameSourceDir(installDir);
-        if (source && isPathInside(depot, source)) clearGameSourceDir(installDir);
+        if (source && isPathInside(depot, source))
+          clearGameSourceDir(installDir);
         fs.rmSync(depot, { recursive: true, force: true });
-      }
-      else cleanTempDir(tempDir);
+      } else cleanTempDir(tempDir);
       this.running.delete(lockKey);
     }
 

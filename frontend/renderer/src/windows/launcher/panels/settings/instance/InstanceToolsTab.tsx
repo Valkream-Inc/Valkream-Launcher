@@ -21,10 +21,10 @@ import { useState } from "react";
 
 import type { ModsListResult, ToolsHashSummary } from "@shared/types";
 
-import SettingsBox from "../component/settings-box/settings-box";
-import SettingsTitle from "../component/settings-title/settings-title";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../../../i18n";
+import SettingsBox from "../component/settings-box/settings-box";
+import SettingsTitle from "../component/settings-title/settings-title";
 
 const fail = (error: unknown) =>
   enqueueSnackbar(error instanceof Error ? error.message : String(error), {
@@ -44,14 +44,21 @@ const save = async (name: string, text: string) => {
   try {
     const target = await window.electron_API.toolsSaveText(name, text);
     if (target)
-      enqueueSnackbar(i18n.t("tools.saved", { target }), { variant: "success" });
+      enqueueSnackbar(i18n.t("tools.saved", { target }), {
+        variant: "success",
+      });
   } catch (error) {
     fail(error);
   }
 };
 
 const formatBytes = (bytes: number): string => {
-  const units = [i18n.t("tools.units.b"), i18n.t("tools.units.kb"), i18n.t("tools.units.mb"), i18n.t("tools.units.gb")];
+  const units = [
+    i18n.t("tools.units.b"),
+    i18n.t("tools.units.kb"),
+    i18n.t("tools.units.mb"),
+    i18n.t("tools.units.gb"),
+  ];
   let value = bytes;
   let unit = 0;
   while (value >= 1024 && unit < units.length - 1) ((value /= 1024), unit++);
@@ -127,7 +134,10 @@ function HashFolderTool() {
               >
                 {result.folder}
                 <br />
-                {t("tools.files", { count: result.fileCount, size: formatBytes(result.totalBytes) })}
+                {t("tools.files", {
+                  count: result.fileCount,
+                  size: formatBytes(result.totalBytes),
+                })}
               </Typography>
               <Typography
                 variant="caption"
@@ -183,9 +193,7 @@ function ModsListTool() {
 
   return (
     <>
-      <SettingsTitle warn={false}>
-        {t("tools.modsTitle")}
-      </SettingsTitle>
+      <SettingsTitle warn={false}>{t("tools.modsTitle")}</SettingsTitle>
       <SettingsBox warn={false}>
         <Stack spacing={1}>
           <TextField
@@ -224,21 +232,30 @@ function ModsListTool() {
           <SettingsTitle warn={false}>
             {t("tools.preview", { count: result.mods.length })}
           </SettingsTitle>
-          {result.mods.map((mod) => (
-            <SettingsBox key={mod.id ?? mod.name} warn={false}>
-              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                <Avatar variant="rounded" src={mod.icon} alt={mod.name}>
-                  {mod.name.charAt(0)}
-                </Avatar>
-                <Box>
-                  <Typography sx={{ fontWeight: 700 }}>{mod.name}</Typography>
-                  {mod.description && (
-                    <Typography variant="body2">{mod.description}</Typography>
-                  )}
+          {result.mods.map((mod) => {
+            const description =
+              typeof mod.description === "string"
+                ? mod.description
+                : (mod.description?.[i18n.language as "fr" | "en"] ??
+                  mod.description?.en ??
+                  mod.description?.fr);
+
+            return (
+              <SettingsBox key={mod.id ?? mod.name} warn={false}>
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                  <Avatar variant="rounded" src={mod.icon} alt={mod.name}>
+                    {mod.name.charAt(0)}
+                  </Avatar>
+                  <Box>
+                    <Typography sx={{ fontWeight: 700 }}>{mod.name}</Typography>
+                    {description && (
+                      <Typography variant="body2">{description}</Typography>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            </SettingsBox>
-          ))}
+              </SettingsBox>
+            );
+          })}
         </>
       )}
     </>

@@ -25,6 +25,13 @@ import { useCallback, useEffect, useState } from "react";
 import type { EntryReport, EntryStatus, InstanceReport } from "@shared/types";
 import { enqueueSnackbar } from "notistack";
 
+import { useTranslation } from "react-i18next";
+import {
+  formatInstallLog,
+  formatLogTime,
+  logMessage,
+  parseInstallLog,
+} from "../../../../../instances/install-log";
 import {
   groupEntriesByPath,
   overlappingPaths,
@@ -34,8 +41,6 @@ import Wait from "../../../component/wait/wait";
 import { useAction } from "../../../context/action.context";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
-import { useTranslation } from "react-i18next";
-import { formatInstallLog, formatLogTime, logMessage, parseInstallLog } from "../../../../../instances/install-log";
 
 const STATUS: Record<
   EntryStatus,
@@ -52,15 +57,19 @@ const STATUS: Record<
 const StatusChip = ({ status }: { status: EntryStatus }) => {
   const { t } = useTranslation();
   return (
-  <Chip
-    size="small"
-    label={t(`debug.status.${status}`)}
-    color={STATUS[status].color}
-  />
+    <Chip
+      size="small"
+      label={t(`debug.status.${status}`)}
+      color={STATUS[status].color}
+    />
   );
 };
 
-const LEVEL_COLOR = { INFO: "info.main", WARN: "warning.main", ERROR: "error.main" } as const;
+const LEVEL_COLOR = {
+  INFO: "info.main",
+  WARN: "warning.main",
+  ERROR: "error.main",
+} as const;
 
 const short = (hash?: string) => (hash ? hash.slice(0, 8) : "—");
 
@@ -103,7 +112,9 @@ export default function InstanceDebugTab({
       );
     } catch (error) {
       setLog(
-        t("debug.logUnreadable", { error: error instanceof Error ? error.message : String(error) }),
+        t("debug.logUnreadable", {
+          error: error instanceof Error ? error.message : String(error),
+        }),
       );
     }
   }, [report.id, report.channel, t]);
@@ -125,7 +136,11 @@ export default function InstanceDebugTab({
         );
         if (result.failed.length > 0) {
           enqueueSnackbar(
-            t("debug.repairIncomplete", { failed: result.failed.map((item) => `${item.name} (${item.error})`).join(", ") }),
+            t("debug.repairIncomplete", {
+              failed: result.failed
+                .map((item) => `${item.name} (${item.error})`)
+                .join(", "),
+            }),
             { variant: "error" },
           );
         } else {
@@ -149,10 +164,18 @@ export default function InstanceDebugTab({
       enqueueSnackbar(t("debug.copyFailed", { label }), { variant: "error" });
     }
   };
-  const copyReport = () => copy(JSON.stringify(report, null, 2), t("debug.report"));
+  const copyReport = () =>
+    copy(JSON.stringify(report, null, 2), t("debug.report"));
   const logLines = parseInstallLog(log ?? "");
-  const tr = (key: string, vars?: Record<string, string | number>) => t(key, vars) as string;
-  const copyLog = () => copy(logLines.length > 0 ? formatInstallLog(logLines, tr) : t("debug.emptyLog"), t("debug.log"));
+  const tr = (key: string, vars?: Record<string, string | number>): string =>
+    String(vars ? t(key, vars) : t(key));
+  const copyLog = () =>
+    copy(
+      logLines.length > 0
+        ? formatInstallLog(logLines, tr)
+        : t("debug.emptyLog"),
+      t("debug.log"),
+    );
 
   return (
     <>
@@ -162,13 +185,23 @@ export default function InstanceDebugTab({
       </SettingsTitle>
 
       <SettingsBox warn={false}>
-        <Typography>{t("debug.installation", { dir: report.installDir })}</Typography>
         <Typography>
-          {t("debug.latest", { version: report.releaseVersion ?? "—", source: report.releaseSource })}
+          {t("debug.installation", { dir: report.installDir })}
+        </Typography>
+        <Typography>
+          {t("debug.latest", {
+            version: report.releaseVersion ?? "—",
+            source: report.releaseSource,
+          })}
         </Typography>
         {report.executable && (
           <Typography>
-            {t("debug.executable", { path: report.executable.path, state: report.executable.exists ? t("debug.present") : t("debug.absent") })}
+            {t("debug.executable", {
+              path: report.executable.path,
+              state: report.executable.exists
+                ? t("debug.present")
+                : t("debug.absent"),
+            })}
           </Typography>
         )}
         <Button disabled={loading} onClick={() => onReload()}>
@@ -239,7 +272,11 @@ export default function InstanceDebugTab({
       {overlaps.length > 0 && (
         <SettingsBox warn={true}>
           <Typography>
-            {t("debug.overlaps", { list: overlaps.map(([outer, inner]) => `${outer} ⊃ ${inner}`).join(", ") })}
+            {t("debug.overlaps", {
+              list: overlaps
+                .map(([outer, inner]) => `${outer} ⊃ ${inner}`)
+                .join(", "),
+            })}
           </Typography>
         </SettingsBox>
       )}
@@ -300,7 +337,10 @@ export default function InstanceDebugTab({
                             variant="caption"
                             sx={{ display: "block" }}
                           >
-                            {t("debug.filesCount", { missing: entry.files.missing.length, changed: entry.files.changed.length })}
+                            {t("debug.filesCount", {
+                              missing: entry.files.missing.length,
+                              changed: entry.files.changed.length,
+                            })}
                           </Typography>
                         )}
                       {entry.errors.map((error) => (
@@ -370,7 +410,10 @@ export default function InstanceDebugTab({
           {log !== null && logLines.length === 0 && t("debug.emptyLog")}
           {logLines.map((line, index) =>
             line.kind === "raw" ? (
-              <Box key={index} sx={{ color: "text.secondary", wordBreak: "break-all" }}>
+              <Box
+                key={index}
+                sx={{ color: "text.secondary", wordBreak: "break-all" }}
+              >
                 {line.text}
               </Box>
             ) : (
@@ -381,25 +424,48 @@ export default function InstanceDebugTab({
                   gap: 1.5,
                   mt: line.record.sep && index > 0 ? 1.5 : 0,
                   pt: line.record.sep && index > 0 ? 1 : 0,
-                  borderTop: line.record.sep && index > 0 ? "1px solid rgba(255,255,255,0.12)" : "none",
+                  borderTop:
+                    line.record.sep && index > 0
+                      ? "1px solid rgba(255,255,255,0.12)"
+                      : "none",
                   borderLeft: "3px solid",
                   borderLeftColor: LEVEL_COLOR[line.record.level],
                   pl: 1,
-                  bgcolor: line.record.level === "ERROR" ? "rgba(244,67,54,0.10)" : "transparent",
+                  bgcolor:
+                    line.record.level === "ERROR"
+                      ? "rgba(244,67,54,0.10)"
+                      : "transparent",
                 }}
               >
-                <Box component="span" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>
+                <Box
+                  component="span"
+                  sx={{ color: "text.secondary", whiteSpace: "nowrap" }}
+                >
                   {formatLogTime(line.record.time)}
                 </Box>
-                <Box component="span" sx={{ color: LEVEL_COLOR[line.record.level], fontWeight: 700, minWidth: 44 }}>
+                <Box
+                  component="span"
+                  sx={{
+                    color: LEVEL_COLOR[line.record.level],
+                    fontWeight: 700,
+                    minWidth: 44,
+                  }}
+                >
                   {line.record.level}
                 </Box>
                 <Box
                   component="span"
                   sx={{
                     wordBreak: "break-word",
-                    color: line.record.level === "INFO" ? "text.primary" : LEVEL_COLOR[line.record.level],
-                    fontWeight: line.record.key === "log.start" || line.record.key === "log.summary" ? 700 : 400,
+                    color:
+                      line.record.level === "INFO"
+                        ? "text.primary"
+                        : LEVEL_COLOR[line.record.level],
+                    fontWeight:
+                      line.record.key === "log.start" ||
+                      line.record.key === "log.summary"
+                        ? 700
+                        : 400,
                   }}
                 >
                   {logMessage(line.record, tr)}
