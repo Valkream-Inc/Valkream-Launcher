@@ -52,6 +52,26 @@ describe("hashFolder / exportHashFolder", () => {
   });
 });
 
+describe("parseModList avec clé", () => {
+  const manifest = JSON.stringify({ name: "pack", dependencies: ["A-One-1.0.0", "B-Two-2.0.0"], packs: [{ mods: ["C-Three-3.0.0"] }] });
+
+  it("extrait le tableau désigné par la clé (chemin à points, index de tableau)", () => {
+    assert.deepEqual(parseModList(manifest, "dependencies").map((ref) => ref.name), ["One", "Two"]);
+    assert.deepEqual(parseModList(manifest, "packs.0.mods").map((ref) => ref.name), ["Three"]);
+  });
+
+  it("objet sans clé ou clé qui ne mène pas à un tableau : erreur claire", () => {
+    assert.throws(() => parseModList(manifest), /clé/);
+    assert.throws(() => parseModList(manifest, "name"), /tableau/);
+    assert.throws(() => parseModList(manifest, "absente"), /introuvable/);
+  });
+
+  it("tableau JSON simple : clé inutile", () => {
+    assert.equal(parseModList('["A-One-1.0.0"]').length, 1);
+    assert.equal(parseModList('["A-One-1.0.0"]', ".").length, 1);
+  });
+});
+
 describe("parseModList", () => {
   it("lignes, commentaires, puces et doublons", () => {
     const refs = parseModList("# modpack\nBepInEx-BepInExPack_Valheim-5.4.2202\n- Author-Mod-1.0.0 # note\n\nAuthor-Mod-1.0.1\n");

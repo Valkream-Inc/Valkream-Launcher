@@ -244,6 +244,8 @@ function ModsListTool() {
   const [text, setText] = useState("");
   const [url, setUrl] = useState("");
   const [file, setFile] = useState<{ name: string; text: string } | null>(null);
+  /** Chemin du tableau dans un JSON (liens et fichiers : `dependencies`, `packs.0.mods`…). */
+  const [key, setKey] = useState("");
   const [result, setResult] = useState<ModsListResult | null>(null);
   const [busy, setBusy] = useState(false);
   const progress = useToolProgress("mods", busy);
@@ -264,7 +266,7 @@ function ModsListTool() {
   const generate = async () => {
     setBusy(true);
     try {
-      setResult(await window.electron_API.toolsModsList(source));
+      setResult(await window.electron_API.toolsModsList(source, undefined, mode === "list" ? undefined : key.trim() || undefined));
     } catch (error) {
       fail(error);
     } finally {
@@ -319,6 +321,16 @@ function ModsListTool() {
                 {file ? t("tools.fileLoaded", { name: file.name }) : t("tools.noFile")}
               </Typography>
             </Box>
+          )}
+          {mode !== "list" && (
+            <TextField
+              size="small"
+              label={t("tools.keyLabel")}
+              placeholder="dependencies"
+              helperText={t("tools.keyHelp")}
+              value={key}
+              onChange={(event) => setKey(event.target.value)}
+            />
           )}
           <Step index={2} label={t("tools.stepRun")} />
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>

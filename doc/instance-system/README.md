@@ -308,13 +308,15 @@ Chaque section affiche une pastille de **portée** :
 
 | Onglet | Portée | Contenu |
 | --- | --- | --- |
-| General | Ce jeu | Présentation du jeu, activation du mode avancé |
-| Launcher | Tous les jeux | Langue, thème, fond, musique, dossier des jeux, canaux de test (beta / alpha), dossier AppData, zone danger (désinstaller le launcher) |
-| Game | Ce jeu (par canal) | Lancement via Steam, comportement du launcher, dossier du jeu, options propres au jeu (`customGamesSettings`, certaines liées à une entrée `optional` du latest.yml), zone danger du jeu |
+| General | Ce jeu | Présentation du jeu, activation du mode avancé, zone danger (désinstaller le launcher) |
+| Launcher | Tous les jeux | Langue, thème, fond, musique, dossier des jeux, canaux de test (beta / alpha) |
+| Game | Ce jeu (par canal) | Lancement via Steam, comportement du launcher, dossier du jeu, options « normal » du jeu (`customGamesSettings`) |
 | Mods / Contributeurs | Ce jeu | Lecture seule, visibles pendant une installation |
-| Dev / Tools / Debug | Avancé | Désinstaller l'installation, console, outils de préparation du remote, diagnostic |
+| Dev / Tools / Debug | Avancé | Désinstaller l'installation, AppData, console, options du jeu de niveau dev / special / admin, outils de préparation du remote, diagnostic |
+
+Seuls les réglages utiles au joueur sont dans les onglets General, Launcher et Game ; tout le reste est dans Dev. Une barre d'outils en haut des réglages offre Actualiser et le zoom (− / + / 100 %, ou Ctrl + molette, conservé entre deux lancements). Un contenu trop large défile horizontalement.
 
 - Les réglages globaux sont dans `settings.json` (dossier de données du launcher, écriture atomique). L'ancienne base SQLite est reprise automatiquement au premier lancement (`better-sqlite3` est optionnel et pourra être retiré).
 - Les réglages d'un jeu sont dans `instance.settings.json` de son installation (un par canal).
-- Tools : source (liste collée, lien ou fichier) → lancer avec barre de progression → résultat.
+- Tools : source (liste collée, lien ou fichier) → clé JSON facultative pour un lien ou un fichier (`dependencies`, `packs.0.mods`…) → lancer avec barre de progression → résultat.
 - Debug : barre d'outils collante (recherche, problèmes seulement, recharger / vérifier / réparer, copier).

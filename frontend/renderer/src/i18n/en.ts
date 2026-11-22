@@ -50,6 +50,13 @@ const en: Messages = {
     confirm:
       "You are about to enable advanced options that may damage your installation (Admin Tools, Debug Tools, Dev Tools, Alpha features). Are you sure you want to continue?",
   },
+  toolbar: {
+    label: "Display tools",
+    refresh: "Refresh",
+    zoomOut: "Zoom out",
+    zoomIn: "Zoom in",
+    zoomReset: "Reset zoom 100%",
+  },
   scope: {
     global: "All games",
     game: "This game",
@@ -125,6 +132,7 @@ const en: Messages = {
   },
   instance: {
     noConfig: "Instance “{{id}}” has no render config.",
+    advancedGameOptions: "Game options (advanced)",
     advancedMode: "Advanced mode",
     dangerZone: "⚠️ Danger zone!",
     advanced: "⚠️ Advanced!",
@@ -272,6 +280,8 @@ const en: Messages = {
     refresh: "Refresh",
   },
   tools: {
+    keyLabel: "JSON key (optional)",
+    keyHelp: "Path of the array inside the JSON: dependencies, packs.0.mods… Empty: the file or link is itself the list.",
     stepOptions: "Options",
     stepRun: "Run",
     stepResult: "Result",

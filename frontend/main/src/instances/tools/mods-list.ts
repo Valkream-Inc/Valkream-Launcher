@@ -8,6 +8,7 @@
  */
 
 import type { ModDisplay } from "@shared/types";
+import { pickKey } from "../../lib/json-key.js";
 import { LocalizedError } from "../../lib/localized-error.js";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
@@ -18,12 +19,16 @@ export interface ModRef {
   version: string;
 }
 
-/** Une dépendance par ligne, ou un tableau JSON ; lignes vides et `# commentaires` ignorés. */
-export const parseModList = (text: string): ModRef[] => {
+/**
+ * Une dépendance par ligne, ou un tableau JSON ; lignes vides et `# commentaires` ignorés.
+ * `key` désigne le tableau dans un document JSON (`dependencies`, `packs.0.mods`… voir `pickKey`) :
+ * c'est le cas d'un manifest Thunderstore complet ou d'un fichier de config.
+ */
+export const parseModList = (text: string, key?: string): ModRef[] => {
   const trimmed = text.trim();
   let items: string[];
-  if (trimmed.startsWith("[")) {
-    const parsed: unknown = JSON.parse(trimmed);
+  if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+    const parsed = pickKey(JSON.parse(trimmed), key?.trim() || undefined);
     if (!Array.isArray(parsed)) throw new LocalizedError("err.jsonArray");
     items = parsed.map(String);
   } else {

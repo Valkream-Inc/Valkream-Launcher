@@ -53,6 +53,13 @@ const fr: Messages = {
     confirm:
       "Vous êtes sur le point d'activer des options avancées pouvant endommager votre installation (Admin Tools, Debug Tools, Dev Tools, Fonctionnalités Alpha). Êtes-vous sûr de vouloir continuer ?",
   },
+  toolbar: {
+    label: "Outils d'affichage",
+    refresh: "Actualiser",
+    zoomOut: "Réduire",
+    zoomIn: "Agrandir",
+    zoomReset: "Zoom 100 %",
+  },
   scope: {
     global: "Tous les jeux",
     game: "Ce jeu",
@@ -128,6 +135,7 @@ const fr: Messages = {
   },
   instance: {
     noConfig: "Instance « {{id}} » sans config render.",
+    advancedGameOptions: "Options du jeu (avancées)",
     advancedMode: "Mode avancé",
     dangerZone: "⚠️ Danger zone !",
     advanced: "⚠️ Advanced !",
@@ -275,6 +283,8 @@ const fr: Messages = {
     refresh: "Actualiser",
   },
   tools: {
+    keyLabel: "Clé JSON (facultatif)",
+    keyHelp: "Chemin du tableau dans le JSON : dependencies, packs.0.mods… Vide : le fichier ou le lien est lui-même la liste.",
     stepOptions: "Options",
     stepRun: "Lancer",
     stepResult: "Résultat",

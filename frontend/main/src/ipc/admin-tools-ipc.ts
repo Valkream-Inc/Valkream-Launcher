@@ -57,13 +57,13 @@ export default function registerAdminToolsIpc(): void {
     return { output };
   });
 
-  ipcMain.handle("tools:mods-list", async (event, source: unknown, apiUrl?: unknown): Promise<ModsListResult> => {
+  ipcMain.handle("tools:mods-list", async (event, source: unknown, apiUrl?: unknown, key?: unknown): Promise<ModsListResult> => {
     let text = String(source ?? "").trim();
     // Un lien vers la liste (JSON ou texte) est aussi accepté
     if (/^https?:\/\/\S+$/.test(text)) text = await httpGetText(text, { timeout: 10_000 });
     const api = typeof apiUrl === "string" && /^https?:\/\//.test(apiUrl) ? apiUrl : undefined;
     return buildModsDisplay(
-      parseModList(text),
+      parseModList(text, typeof key === "string" ? key : undefined),
       async (url) => JSON.parse(await httpGetText(url, { timeout: 10_000 })),
       api,
       reporter(event.sender, "mods"),

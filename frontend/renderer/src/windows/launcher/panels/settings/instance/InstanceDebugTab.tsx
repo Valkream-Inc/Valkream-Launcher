@@ -282,7 +282,7 @@ export default function InstanceDebugTab({
         <div key={table.path}>
           <SettingsTitle warn={table.failing}>/{table.path}</SettingsTitle>
           <SettingsBox warn={false} layout="column">
-            <Table size="small">
+            <Table size="small" sx={{ minWidth: 760 }}>
               <TableHead>
                 <TableRow>
                   <TableCell>{t("debug.entry")}</TableCell>

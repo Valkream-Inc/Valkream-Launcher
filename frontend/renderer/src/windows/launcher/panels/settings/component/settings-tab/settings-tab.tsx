@@ -14,8 +14,11 @@ function SettingsTab({ id, activeTab, children }: SettingsTabProps) {
       <Box>
         <Box className="settings-tab-top-bar"></Box>
         <Box className="settings-tab">
-          {children}
-          <Box sx={{ minHeight: "1cm" }}></Box>
+          {/* Le zoom s'applique au contenu, pas au conteneur qui défile (sinon la hauteur déborde) */}
+          <Box className="settings-tab-content">
+            {children}
+            <Box sx={{ minHeight: "1cm" }}></Box>
+          </Box>
         </Box>
       </Box>
     </Fade>

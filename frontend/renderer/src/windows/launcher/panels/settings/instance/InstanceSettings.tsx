@@ -8,7 +8,7 @@
  */
 
 import { Typography } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import type { InstanceId } from "@shared/types";
 
@@ -20,6 +20,8 @@ import { useGames } from "../../../context/games.context";
 import { NavButton, NavSettings } from "../component/nav-settings/nav-settings";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTab from "../component/settings-tab/settings-tab";
+import SettingsToolbar from "../component/settings-toolbar/settings-toolbar";
+import { clampZoom, loadZoom, saveZoom, ZOOM_STEP } from "../component/settings-toolbar/zoom";
 import SettingsTitle from "../component/settings-title/settings-title";
 import ButtonDebug from "../settings-list/global/button-debug";
 import ButtonOpenAppData from "../settings-list/global/button-open-appdata";
@@ -70,6 +72,31 @@ export default function InstanceSettings({
     channel,
   );
   const isSpecialActive = isDevActive || isAdminActive;
+
+  // Zoom des réglages : variable CSS sur le document, conservée entre deux lancements ; Ctrl + molette
+  const [zoom, setZoomState] = useState(loadZoom);
+  const setZoom = (next: number) => {
+    const value = clampZoom(next);
+    setZoomState(value);
+    saveZoom(value);
+  };
+  useEffect(() => {
+    document.documentElement.style.setProperty("--settings-zoom", String(zoom));
+    return () => document.documentElement.style.removeProperty("--settings-zoom");
+  }, [zoom]);
+  useEffect(() => {
+    const onWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey) return;
+      event.preventDefault();
+      setZoomState((current) => {
+        const value = clampZoom(current + (event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+        saveZoom(value);
+        return value;
+      });
+    };
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel);
+  }, []);
   const customSettings = renderConfig?.customGamesSettings ?? [];
 
   // Les réglages viennent du rapport au premier chargement de chaque instance / canal seulement :
@@ -110,6 +137,12 @@ export default function InstanceSettings({
 
   return (
     <>
+      <SettingsToolbar
+        zoom={zoom}
+        onZoom={setZoom}
+        onRefresh={() => reload({ verify: false })}
+        refreshing={loading}
+      />
       {/* Navs */}
       <NavSettings
         onSave={returnToHome}
@@ -164,6 +197,10 @@ export default function InstanceSettings({
           setDevActive={setIsDevActive}
           setTab={changeTab}
         />
+        <SettingsTitle warn={true} scope="global">
+          {t("instance.dangerZone")}
+        </SettingsTitle>
+        {!actionLoading && <ButtonUninstallGlobal />}
       </SettingsTab>
 
       <SettingsTab id="launcher" activeTab={activeTab}>
@@ -176,11 +213,6 @@ export default function InstanceSettings({
         <ToggleMusic />
         {!actionLoading && <GamesRootSetting />}
         {!actionLoading && <ToggleBeta />}
-        <ButtonOpenAppData />
-        <SettingsTitle warn={true} scope="global">
-          {t("instance.dangerZone")}
-        </SettingsTitle>
-        {!actionLoading && <ButtonUninstallGlobal />}
       </SettingsTab>
 
       <SettingsTab id="game" activeTab={activeTab}>
@@ -202,45 +234,16 @@ export default function InstanceSettings({
         )}
         {!actionLoading && (
           <>
-            {/* affichage normal */}
             <Instance_CustomSettings
               {...settingProps}
               settings={customSettings}
               level="normal"
               zone="normal"
-            />{" "}
-            {isDevActive && (
-              <Instance_CustomSettings
-                {...settingProps}
-                settings={customSettings}
-                level="dev"
-                zone="normal"
-              />
-            )}
-            {isSpecialActive && (
-              <Instance_CustomSettings
-                {...settingProps}
-                settings={customSettings}
-                level="special"
-                zone="normal"
-              />
-            )}
-            {isAdminActive && (
-              <Instance_CustomSettings
-                {...settingProps}
-                settings={customSettings}
-                level="admin"
-                zone="normal"
-              />
-            )}
-            {/* affichage danger */}
+            />
             {customSettings.some(
               (setting) =>
                 setting.category?.zone === "danger" &&
-                (setting.category?.level === "normal" ||
-                  (setting.category?.level === "dev" && isDevActive) ||
-                  (setting.category?.level === "admin" && isAdminActive) ||
-                  (setting.category?.level === "special" && isSpecialActive)),
+                setting.category?.level === "normal",
             ) && (
               <SettingsTitle warn={true} scope="game">
                 {t("instance.dangerZone")}
@@ -251,31 +254,7 @@ export default function InstanceSettings({
               settings={customSettings}
               level="normal"
               zone="danger"
-            />{" "}
-            {isDevActive && (
-              <Instance_CustomSettings
-                {...settingProps}
-                settings={customSettings}
-                level="dev"
-                zone="danger"
-              />
-            )}
-            {isSpecialActive && (
-              <Instance_CustomSettings
-                {...settingProps}
-                settings={customSettings}
-                level="special"
-                zone="danger"
-              />
-            )}
-            {isAdminActive && (
-              <Instance_CustomSettings
-                {...settingProps}
-                settings={customSettings}
-                level="admin"
-                zone="danger"
-              />
-            )}
+            />
           </>
         )}
       </SettingsTab>
@@ -302,7 +281,38 @@ export default function InstanceSettings({
             onDone={reload}
           />
         )}
+        <ButtonOpenAppData />
         <ButtonDebug />
+
+        {/* Options du jeu réservées au dev / admin (le joueur ne voit que les options « normal » dans Game) */}
+        {!actionLoading && (
+          <>
+            <SettingsTitle warn={false} scope="advanced">
+              {t("instance.advancedGameOptions")}
+            </SettingsTitle>
+            {(["dev", "special", "admin"] as const).map(
+              (level) =>
+                ((level === "dev" && isDevActive) ||
+                  (level === "special" && isSpecialActive) ||
+                  (level === "admin" && isAdminActive)) && (
+                  <Fragment key={level}>
+                    <Instance_CustomSettings
+                      {...settingProps}
+                      settings={customSettings}
+                      level={level}
+                      zone="normal"
+                    />
+                    <Instance_CustomSettings
+                      {...settingProps}
+                      settings={customSettings}
+                      level={level}
+                      zone="danger"
+                    />
+                  </Fragment>
+                ),
+            )}
+          </>
+        )}
       </SettingsTab>
 
       {/* Tools : outils de préparation du remote (hash de dossier, liste de mods) */}

@@ -79,8 +79,8 @@ export interface ElectronAPI {
   toolsHashFolder(ignore: string[]): Promise<ToolsHashSummary | null>;
   /** Écrit `hash.json` + `hash/` du dernier dossier hashé dans un dossier choisi. `null` si annulé. */
   toolsExportHash(ignore: string[]): Promise<{ output: string } | null>;
-  /** Liste `Auteur-Nom-Version` (texte, JSON ou lien) → mods avec image, description et lien. */
-  toolsModsList(source: string, apiUrl?: string): Promise<ModsListResult>;
+  /** Liste `Auteur-Nom-Version` (texte, JSON ou lien) → mods avec image, description et lien. `key` : chemin du tableau dans un JSON (ex : `dependencies`). */
+  toolsModsList(source: string, apiUrl?: string, key?: string): Promise<ModsListResult>;
   /** Choisit un fichier de liste (txt / json / md, 1 Mo max) et renvoie son texte. `null` si annulé. */
   toolsOpenTextFile(): Promise<{ name: string; text: string } | null>;
   /** Progression de l'outil en cours (hash d'un dossier, liste de mods). */
