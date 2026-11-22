@@ -301,3 +301,20 @@ La date de l'évènement suit la langue du launcher.
 - Chaque canal d'une instance a sa propre installation. Le choix du jeu affiche **une carte par canal proposé** : le jeu stable, puis (réglage « Afficher les canaux de test ») une carte beta ou alpha au contour pointillé coloré avec une pastille. Le jeu stable n'est jamais rechargé en changeant de canal.
 - Le remote déclare les canaux dans `index.config.json` (`channels.stable`, `channels.beta`, `channels.alpha`).
 - L'accueil et l'onglet General indiquent `(beta)` / `(alpha)` quand l'installation active n'est pas la stable.
+
+## Arborescence des réglages
+
+Chaque section affiche une pastille de **portée** :
+
+| Onglet | Portée | Contenu |
+| --- | --- | --- |
+| General | Ce jeu | Présentation du jeu, activation du mode avancé |
+| Launcher | Tous les jeux | Langue, thème, fond, musique, dossier des jeux, canaux de test (beta / alpha), dossier AppData, zone danger (désinstaller le launcher) |
+| Game | Ce jeu (par canal) | Lancement via Steam, comportement du launcher, dossier du jeu, options propres au jeu (`customGamesSettings`, certaines liées à une entrée `optional` du latest.yml), zone danger du jeu |
+| Mods / Contributeurs | Ce jeu | Lecture seule, visibles pendant une installation |
+| Dev / Tools / Debug | Avancé | Désinstaller l'installation, console, outils de préparation du remote, diagnostic |
+
+- Les réglages globaux sont dans `settings.json` (dossier de données du launcher, écriture atomique). L'ancienne base SQLite est reprise automatiquement au premier lancement (`better-sqlite3` est optionnel et pourra être retiré).
+- Les réglages d'un jeu sont dans `instance.settings.json` de son installation (un par canal).
+- Tools : source (liste collée, lien ou fichier) → lancer avec barre de progression → résultat.
+- Debug : barre d'outils collante (recherche, problèmes seulement, recharger / vérifier / réparer, copier).

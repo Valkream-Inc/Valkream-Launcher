@@ -1,31 +1,59 @@
+/* Colonne centrée de largeur maximale : tous les blocs de réglages s'alignent sur la même largeur. */
 .settings-elements-box {
+  box-sizing: border-box;
   background: var(--background-element);
-  width: 80%;
-  border-radius: 10px;
-  padding: 1.5rem 2rem;
-  margin: 0.5rem;
+  width: min(100%, 860px);
+  border-radius: 12px;
+  padding: 1.25rem 1.75rem;
+  margin: 0.6rem auto;
   color: var(--color);
+  display: flex;
+  gap: 0.9rem 2rem;
 }
 .futuristic-theme .settings-elements-box {
   color: white;
 }
 
 .settings-elements-box.warn {
-  background: rgb(143, 61, 31); /* Orange clair avec transparence */
-  border: 4px solid #ff9800; /* Orange vif */
+  background: rgb(143, 61, 31);
+  border: 4px solid #ff9800;
   color: white;
+}
+
+/* row : description à gauche, contrôle à droite ; passe en colonne si l'espace manque */
+.settings-elements-box.row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.settings-elements-box.row .setting-text {
+  flex: 1 1 280px;
+  margin: 0;
+}
+.settings-elements-box.row .settings-elements {
+  flex: 0 1 auto;
+  justify-content: flex-end;
+}
+
+/* column : texte puis contenu sur toute la largeur */
+.settings-elements-box.column {
+  flex-direction: column;
+  align-items: stretch;
+}
+.settings-elements-box.column .settings-elements {
+  justify-content: flex-start;
 }
 
 .setting-text {
   display: block;
-  font-size: 0.8rem;
-  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
 }
 
 .settings-elements {
   display: flex;
   align-items: center;
-  width: 100%;
-  gap: "0.5rem";
-  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }

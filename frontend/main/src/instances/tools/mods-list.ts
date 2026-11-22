@@ -63,7 +63,10 @@ export const buildModsDisplay = async (
   refs: readonly ModRef[],
   fetchJson: JsonFetcher,
   apiUrl = "https://thunderstore.io",
+  /** Appelé après chaque mod interrogé : (faits, total). */
+  onProgress?: (done: number, total: number) => void,
 ): Promise<ModsListResult> => {
+  let done = 0;
   const base = apiUrl.replace(/\/+$/, "");
   const failed: ModsListResult["failed"] = [];
 
@@ -84,6 +87,7 @@ export const buildModsDisplay = async (
       } catch (error) {
         failed.push({ id, error: error instanceof Error ? error.message : String(error) });
       }
+      onProgress?.(++done, refs.length);
       return display;
     }),
   );

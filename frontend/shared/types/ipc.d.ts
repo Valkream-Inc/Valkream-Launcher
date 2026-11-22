@@ -21,6 +21,7 @@ import type {
   DepotInfo,
   ModsListResult,
   ToolsHashSummary,
+  ToolsProgress,
 } from "./instance.js";
 import type { SettingKey, Settings } from "./settings.js";
 
@@ -80,6 +81,11 @@ export interface ElectronAPI {
   toolsExportHash(ignore: string[]): Promise<{ output: string } | null>;
   /** Liste `Auteur-Nom-Version` (texte, JSON ou lien) → mods avec image, description et lien. */
   toolsModsList(source: string, apiUrl?: string): Promise<ModsListResult>;
+  /** Choisit un fichier de liste (txt / json / md, 1 Mo max) et renvoie son texte. `null` si annulé. */
+  toolsOpenTextFile(): Promise<{ name: string; text: string } | null>;
+  /** Progression de l'outil en cours (hash d'un dossier, liste de mods). */
+  onToolsProgress(callback: (data: ToolsProgress) => void): void;
+  removeToolsProgressListeners(): void;
   /** Enregistre un texte via « Enregistrer sous ». Retourne le chemin, `null` si annulé. */
   toolsSaveText(defaultName: string, text: string): Promise<string | null>;
   /** Journal d'installation du canal (texte). */

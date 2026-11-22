@@ -137,8 +137,12 @@ export default function InstanceSettings({
 
       {/* Tabs */}
       <SettingsTab id="general" activeTab={activeTab}>
-        <SettingsTitle warn={false}>
-          General{channel !== "stable" && ` (${channel})`}
+        <SettingsTitle
+          warn={false}
+          scope="game"
+          scopeDetail={channel !== "stable" ? channel : undefined}
+        >
+          General
         </SettingsTitle>
         {(renderConfig.description || renderConfig.descriptionContent) && (
           <SettingsBox warn={false}>
@@ -152,9 +156,9 @@ export default function InstanceSettings({
             {renderConfig.descriptionContent}
           </SettingsBox>
         )}
-        <SettingsTitle warn={true}>{t("instance.dangerZone")}</SettingsTitle>
-        {!actionLoading && <ButtonUninstallGlobal />}
-        {!actionLoading && <GamesRootSetting />}
+        <SettingsTitle warn={false} scope="advanced">
+          {t("instance.advancedMode")}
+        </SettingsTitle>
         <ToggleDev
           devActive={isDevActive}
           setDevActive={setIsDevActive}
@@ -163,21 +167,39 @@ export default function InstanceSettings({
       </SettingsTab>
 
       <SettingsTab id="launcher" activeTab={activeTab}>
-        <SettingsTitle warn={false}>Launcher</SettingsTitle>
-        <ToggleMusic />
+        <SettingsTitle warn={false} scope="global">
+          Launcher
+        </SettingsTitle>
+        <SelectLanguage />
         <SelectLauncherTheme />
         <SelectLauncherBackgroundType />
-        <SelectLanguage />
+        <ToggleMusic />
+        {!actionLoading && <GamesRootSetting />}
+        {!actionLoading && <ToggleBeta />}
+        <ButtonOpenAppData />
+        <SettingsTitle warn={true} scope="global">
+          {t("instance.dangerZone")}
+        </SettingsTitle>
+        {!actionLoading && <ButtonUninstallGlobal />}
       </SettingsTab>
 
       <SettingsTab id="game" activeTab={activeTab}>
-        <SettingsTitle warn={false}>Game</SettingsTitle>
+        <SettingsTitle
+          warn={false}
+          scope="game"
+          scopeDetail={channel !== "stable" ? channel : undefined}
+        >
+          Game
+        </SettingsTitle>
         {error && <Typography color="error">{error}</Typography>}
         <Instance_ToggleLaunchSteam
           {...settingProps}
           steamAppId={report?.steamAppId}
         />
         <Instance_SelectLauncherBehavior {...settingProps} />
+        {!actionLoading && (
+          <Instance_ButtonOpenGame id={instanceId} channel={channel} />
+        )}
         {!actionLoading && (
           <>
             {/* affichage normal */}
@@ -220,7 +242,7 @@ export default function InstanceSettings({
                   (setting.category?.level === "admin" && isAdminActive) ||
                   (setting.category?.level === "special" && isSpecialActive)),
             ) && (
-              <SettingsTitle warn={true}>
+              <SettingsTitle warn={true} scope="game">
                 {t("instance.dangerZone")}
               </SettingsTitle>
             )}
@@ -270,7 +292,9 @@ export default function InstanceSettings({
 
       {/* Dev : outils d'administration */}
       <SettingsTab id="dev" activeTab={activeTab}>
-        <SettingsTitle warn={true}>Dev</SettingsTitle>
+        <SettingsTitle warn={true} scope="advanced">
+          Dev
+        </SettingsTitle>
         {!actionLoading && (
           <Instance_ButtonUninstallGame
             id={instanceId}
@@ -278,14 +302,7 @@ export default function InstanceSettings({
             onDone={reload}
           />
         )}
-        {!actionLoading && (
-          <Instance_ButtonOpenGame id={instanceId} channel={channel} />
-        )}
-        <ButtonOpenAppData />
-
-        <SettingsTitle warn={true}>{t("instance.advanced")}</SettingsTitle>
         <ButtonDebug />
-        {!actionLoading && <ToggleBeta />}
       </SettingsTab>
 
       {/* Tools : outils de préparation du remote (hash de dossier, liste de mods) */}

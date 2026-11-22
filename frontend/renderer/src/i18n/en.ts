@@ -50,6 +50,11 @@ const en: Messages = {
     confirm:
       "You are about to enable advanced options that may damage your installation (Admin Tools, Debug Tools, Dev Tools, Alpha features). Are you sure you want to continue?",
   },
+  scope: {
+    global: "All games",
+    game: "This game",
+    advanced: "Advanced",
+  },
   channel: {
     beta: "BETA",
     alpha: "ALPHA",
@@ -120,6 +125,7 @@ const en: Messages = {
   },
   instance: {
     noConfig: "Instance “{{id}}” has no render config.",
+    advancedMode: "Advanced mode",
     dangerZone: "⚠️ Danger zone!",
     advanced: "⚠️ Advanced!",
     noMods: "No mod to display for this instance.",
@@ -212,6 +218,8 @@ const en: Messages = {
     summaryCancelled: "Cancelled after {{seconds}}s: {{ok}} succeeded, {{failed}} failed",
   },
   debug: {
+    search: "Search an entry…",
+    toolbar: "Diagnostics toolbar",
     status: {
       "up-to-date": "Up to date",
       outdated: "Update",
@@ -264,6 +272,18 @@ const en: Messages = {
     refresh: "Refresh",
   },
   tools: {
+    stepOptions: "Options",
+    stepRun: "Run",
+    stepResult: "Result",
+    stepSource: "Source",
+    working: "Working…",
+    progress: "{{done}} / {{total}}",
+    urlLabel: "Link to the list (JSON or text)",
+    urlInvalid: "The link must start with http:// or https://",
+    pickFile: "Choose a file…",
+    fileLoaded: "File: {{name}}",
+    noFile: "No file chosen (txt, json or md, 1 MB max)",
+    mode: { list: "List", url: "Link", file: "File" },
     copied: "{{label}} copied",
     saved: "Saved: {{target}}",
     units: { b: "B", kb: "KB", mb: "MB", gb: "GB" },

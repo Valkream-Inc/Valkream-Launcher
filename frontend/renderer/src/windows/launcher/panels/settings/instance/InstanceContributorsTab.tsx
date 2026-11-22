@@ -23,7 +23,7 @@ export default function InstanceContributorsTab({ report }: { report: InstanceRe
 
   return (
     <>
-      <SettingsTitle warn={false}>{t("instance.contributors", { count: contributors.length })}</SettingsTitle>
+      <SettingsTitle warn={false} scope="game">{t("instance.contributors", { count: contributors.length })}</SettingsTitle>
       <SettingsBox warn={false}>
         {contributors.length === 0 && <Typography>{t("instance.noContributors")}</Typography>}
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>

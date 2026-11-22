@@ -10,6 +10,7 @@
 import {
   Box,
   Button,
+  ButtonGroup,
   Chip,
   FormControlLabel,
   Switch,
@@ -18,6 +19,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
@@ -95,15 +97,23 @@ export default function InstanceDebugTab({
   const titleOf = (entry: EntryReport) =>
     debugContent.find((item) => item.entry === entry.name)?.title ?? entry.name;
   const [problemsOnly, setProblemsOnly] = useState(false);
+  const [query, setQuery] = useState("");
   const [log, setLog] = useState<string | null>(null);
   const isProblem = (entry: EntryReport) =>
     !["up-to-date", "skipped"].includes(entry.status);
+  const needle = query.trim().toLowerCase();
+  const matches = (entry: EntryReport) =>
+    needle === "" ||
+    [entry.name, titleOf(entry), entry.type, entry.tier, entry.path].some((value) =>
+      String(value ?? "").toLowerCase().includes(needle),
+    );
   const tables = groupEntriesByPath(report.entries)
-    .map((table) =>
-      problemsOnly
-        ? { ...table, entries: table.entries.filter(isProblem) }
-        : table,
-    )
+    .map((table) => ({
+      ...table,
+      entries: table.entries.filter(
+        (entry) => (!problemsOnly || isProblem(entry)) && matches(entry),
+      ),
+    }))
     .filter((table) => table.entries.length > 0);
 
   const loadLog = useCallback(async () => {
@@ -205,21 +215,6 @@ export default function InstanceDebugTab({
             })}
           </Typography>
         )}
-        <Button disabled={loading} onClick={() => onReload()}>
-          {t("debug.reload")}
-        </Button>
-        <Button disabled={loading} onClick={() => onReload({ verify: true })}>
-          {t("debug.verify")}
-        </Button>
-        <Button
-          disabled={loading || actionLoading}
-          color="warning"
-          onClick={repair}
-        >
-          {t("debug.repair")}
-        </Button>
-        <Button onClick={copyReport}>{t("debug.copyReport")}</Button>
-        <Button onClick={copyLog}>{t("debug.copyLog")}</Button>
       </SettingsBox>
 
       {report.errors.length > 0 && (
@@ -234,7 +229,7 @@ export default function InstanceDebugTab({
 
       {/* Récapitulatif */}
       <SettingsTitle warn={false}>{t("debug.summary")}</SettingsTitle>
-      <SettingsBox warn={!summary.works}>
+      <SettingsBox warn={!summary.works} layout="column">
         <Chip
           color={summary.works ? "success" : "error"}
           label={summary.works ? t("debug.works") : t("debug.broken")}
@@ -282,21 +277,11 @@ export default function InstanceDebugTab({
         </SettingsBox>
       )}
 
-      <FormControlLabel
-        control={
-          <Switch
-            checked={problemsOnly}
-            onChange={(event) => setProblemsOnly(event.target.checked)}
-          />
-        }
-        label={t("debug.problemsOnly")}
-      />
-
       {/* Un tableau par sous-chemin */}
       {tables.map((table) => (
         <div key={table.path}>
           <SettingsTitle warn={table.failing}>/{table.path}</SettingsTitle>
-          <SettingsBox warn={false}>
+          <SettingsBox warn={false} layout="column">
             <Table size="small">
               <TableHead>
                 <TableRow>
@@ -363,7 +348,7 @@ export default function InstanceDebugTab({
         </div>
       ))}
 
-      {tables.length === 0 && problemsOnly && (
+      {tables.length === 0 && (problemsOnly || needle !== "") && (
         <SettingsBox warn={false}>
           <Typography>{t("debug.noProblem")}</Typography>
         </SettingsBox>

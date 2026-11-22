@@ -78,4 +78,16 @@ describe("scanManifest", () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it("signale la progression : un appel par fichier hashé (hors fichiers ignorés)", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "scan-"));
+    try {
+      for (const name of ["a.txt", "b.txt", "skip.log"]) fs.writeFileSync(path.join(dir, name), name);
+      const calls: [number, number][] = [];
+      await scanManifest(dir, ["*.log"], (done, total) => calls.push([done, total]));
+      assert.deepEqual(calls, [[1, 2], [2, 2]]);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

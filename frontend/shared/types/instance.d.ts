@@ -449,3 +449,10 @@ export interface LogRecord {
   /** Début d'une nouvelle synchronisation (séparateur visuel). */
   sep?: true;
 }
+
+/** Progression d'un outil admin (onglet Tools). */
+export interface ToolsProgress {
+  tool: "hash" | "mods";
+  done: number;
+  total: number;
+}

@@ -1,4 +1,6 @@
 .settings-tab {
+  box-sizing: border-box;
+  padding: 0 1rem 3rem;
   position: absolute;
   top: 1cm;
   right: 0;

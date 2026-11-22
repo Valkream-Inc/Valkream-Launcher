@@ -69,11 +69,17 @@ export const verifyManifest = async (
 export const scanManifest = async (
   directory: string,
   toIgnore: readonly string[] = [],
+  /** Appelé après chaque fichier hashé : (fichiers faits, total à hasher). */
+  onProgress?: (done: number, total: number) => void,
 ): Promise<Manifest> => {
   const manifest: Manifest = {};
-  for (const file of listFiles(directory).sort()) {
-    if (matchesAny(file, toIgnore)) continue;
+  const files = listFiles(directory)
+    .sort()
+    .filter((file) => !matchesAny(file, toIgnore));
+  let done = 0;
+  for (const file of files) {
     manifest[file] = await hashFile(path.join(directory, file));
+    onProgress?.(++done, files.length);
   }
   return manifest;
 };

@@ -23,7 +23,7 @@ export default function InstanceModsTab({ report }: { report: InstanceReport }) 
 
   return (
     <>
-      <SettingsTitle warn={false}>{t("instance.mods", { count: mods.length })}</SettingsTitle>
+      <SettingsTitle warn={false} scope="game">{t("instance.mods", { count: mods.length })}</SettingsTitle>
       {mods.length === 0 && (
         <SettingsBox warn={false}>
           <Typography>{t("instance.noMods")}</Typography>

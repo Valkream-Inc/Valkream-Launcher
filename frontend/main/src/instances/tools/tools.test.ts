@@ -89,4 +89,20 @@ describe("buildModsDisplay", () => {
     assert.equal(result.mods[1].icon, undefined);
     assert.equal(result.failed.length, 1);
   });
+
+  it("signale la progression mod par mod, même quand un mod est indisponible", async () => {
+    const calls: [number, number][] = [];
+    const refs = parseModList("A-One-1.0.0\nB-Two-2.0.0");
+    await buildModsDisplay(
+      refs,
+      async (url) => {
+        if (url.includes("/Two/")) throw new Error("introuvable");
+        return {};
+      },
+      undefined,
+      (done, total) => calls.push([done, total]),
+    );
+    assert.deepEqual(calls.map(([, total]) => total), [2, 2]);
+    assert.deepEqual(calls.map(([done]) => done).sort(), [1, 2]);
+  });
 });

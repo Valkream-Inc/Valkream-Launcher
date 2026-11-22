@@ -53,6 +53,11 @@ const fr: Messages = {
     confirm:
       "Vous êtes sur le point d'activer des options avancées pouvant endommager votre installation (Admin Tools, Debug Tools, Dev Tools, Fonctionnalités Alpha). Êtes-vous sûr de vouloir continuer ?",
   },
+  scope: {
+    global: "Tous les jeux",
+    game: "Ce jeu",
+    advanced: "Avancé",
+  },
   channel: {
     beta: "BETA",
     alpha: "ALPHA",
@@ -123,6 +128,7 @@ const fr: Messages = {
   },
   instance: {
     noConfig: "Instance « {{id}} » sans config render.",
+    advancedMode: "Mode avancé",
     dangerZone: "⚠️ Danger zone !",
     advanced: "⚠️ Advanced !",
     noMods: "Aucun mod à afficher pour cette instance.",
@@ -215,6 +221,8 @@ const fr: Messages = {
     summaryCancelled: "Annulée après {{seconds}} s : {{ok}} réussie(s), {{failed}} en échec",
   },
   debug: {
+    search: "Rechercher une entrée…",
+    toolbar: "Barre d'outils du diagnostic",
     status: {
       "up-to-date": "À jour",
       outdated: "Mise à jour",
@@ -267,6 +275,18 @@ const fr: Messages = {
     refresh: "Actualiser",
   },
   tools: {
+    stepOptions: "Options",
+    stepRun: "Lancer",
+    stepResult: "Résultat",
+    stepSource: "Source",
+    working: "Traitement en cours…",
+    progress: "{{done}} / {{total}}",
+    urlLabel: "Lien vers la liste (JSON ou texte)",
+    urlInvalid: "Le lien doit commencer par http:// ou https://",
+    pickFile: "Choisir un fichier…",
+    fileLoaded: "Fichier : {{name}}",
+    noFile: "Aucun fichier choisi (txt, json ou md, 1 Mo max)",
+    mode: { list: "Liste", url: "Lien", file: "Fichier" },
     copied: "{{label}} copié",
     saved: "Enregistré : {{target}}",
     units: { b: "o", kb: "Ko", mb: "Mo", gb: "Go" },

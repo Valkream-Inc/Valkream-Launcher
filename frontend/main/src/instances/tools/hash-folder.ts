@@ -27,9 +27,13 @@ const assertDirectory = (directory: string): void => {
 };
 
 /** Manifeste + hash d'entrée d'un dossier (les motifs `ignore` correspondent au `to_ignore`). */
-export const hashFolder = async (directory: string, ignore: readonly string[] = []): Promise<FolderHash> => {
+export const hashFolder = async (
+  directory: string,
+  ignore: readonly string[] = [],
+  onProgress?: (done: number, total: number) => void,
+): Promise<FolderHash> => {
   assertDirectory(directory);
-  const manifest = await scanManifest(directory, ignore);
+  const manifest = await scanManifest(directory, ignore, onProgress);
   const files = Object.keys(manifest);
   const totalBytes = files.reduce((sum, file) => sum + fs.statSync(path.join(directory, file)).size, 0);
   return { hash: manifestHash(manifest, ignore), fileCount: files.length, totalBytes, manifest };
@@ -43,8 +47,9 @@ export const exportHashFolder = async (
   directory: string,
   output: string,
   ignore: readonly string[] = [],
+  onProgress?: (done: number, total: number) => void,
 ): Promise<FolderHash> => {
-  const result = await hashFolder(directory, ignore);
+  const result = await hashFolder(directory, ignore, onProgress);
   fs.rmSync(path.join(output, "hash"), { recursive: true, force: true });
   for (const file of Object.keys(result.manifest)) {
     const destination = path.join(output, "hash", file);

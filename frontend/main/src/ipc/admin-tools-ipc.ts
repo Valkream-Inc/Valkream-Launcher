@@ -9,7 +9,7 @@
 
 import fs from "fs";
 import path from "path";
-import { BrowserWindow, dialog, ipcMain } from "electron";
+import { BrowserWindow, dialog, ipcMain, type WebContents } from "electron";
 
 import type { ModsListResult, ToolsHashSummary } from "@shared/types";
 
@@ -20,22 +20,30 @@ import { LocalizedError } from "../lib/localized-error.js";
 
 const window = () => BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0];
 
+/** Progression d'un outil, affichée par une barre dans l'onglet Tools. */
+const reporter = (sender: WebContents, tool: "hash" | "mods") => (done: number, total: number) => {
+  if (!sender.isDestroyed()) sender.send("tools:progress", { tool, done, total });
+};
+
+/** Taille maximale d'un fichier de liste ouvert depuis l'outil (évite de charger un gros fichier par erreur). */
+const MAX_TEXT_FILE_BYTES = 1024 * 1024;
+
 const patterns = (value: unknown): string[] =>
   Array.isArray(value) ? value.map(String).map((item) => item.trim()).filter(Boolean) : [];
 
 export default function registerAdminToolsIpc(): void {
   let lastFolder: string | null = null;
 
-  ipcMain.handle("tools:hash-folder", async (_event, ignore: unknown): Promise<ToolsHashSummary | null> => {
+  ipcMain.handle("tools:hash-folder", async (event, ignore: unknown): Promise<ToolsHashSummary | null> => {
     const picked = await dialog.showOpenDialog(window(), { properties: ["openDirectory"], title: "Dossier à hasher" });
     if (picked.canceled || !picked.filePaths[0]) return null;
     const folder = picked.filePaths[0];
     lastFolder = folder;
-    return { folder, ...(await hashFolder(folder, patterns(ignore))) };
+    return { folder, ...(await hashFolder(folder, patterns(ignore), reporter(event.sender, "hash"))) };
   });
 
   // Écrit hash.json + hash/ pour le dossier choisi précédemment
-  ipcMain.handle("tools:export-hash", async (_event, ignore: unknown): Promise<{ output: string } | null> => {
+  ipcMain.handle("tools:export-hash", async (event, ignore: unknown): Promise<{ output: string } | null> => {
     const source = lastFolder;
     if (!source) throw new LocalizedError("err.pickFolder");
     const picked = await dialog.showOpenDialog(window(), {
@@ -45,11 +53,11 @@ export default function registerAdminToolsIpc(): void {
     if (picked.canceled || !picked.filePaths[0]) return null;
     const output = picked.filePaths[0];
     if (path.resolve(output) === path.resolve(source)) throw new LocalizedError("err.sameOutput");
-    await exportHashFolder(source, output, patterns(ignore));
+    await exportHashFolder(source, output, patterns(ignore), reporter(event.sender, "hash"));
     return { output };
   });
 
-  ipcMain.handle("tools:mods-list", async (_event, source: unknown, apiUrl?: unknown): Promise<ModsListResult> => {
+  ipcMain.handle("tools:mods-list", async (event, source: unknown, apiUrl?: unknown): Promise<ModsListResult> => {
     let text = String(source ?? "").trim();
     // Un lien vers la liste (JSON ou texte) est aussi accepté
     if (/^https?:\/\/\S+$/.test(text)) text = await httpGetText(text, { timeout: 10_000 });
@@ -58,7 +66,20 @@ export default function registerAdminToolsIpc(): void {
       parseModList(text),
       async (url) => JSON.parse(await httpGetText(url, { timeout: 10_000 })),
       api,
+      reporter(event.sender, "mods"),
     );
+  });
+
+  // Fichier de liste (texte ou JSON) choisi par boîte de dialogue : le renderer ne fournit jamais de chemin
+  ipcMain.handle("tools:open-text-file", async (): Promise<{ name: string; text: string } | null> => {
+    const picked = await dialog.showOpenDialog(window(), {
+      properties: ["openFile"],
+      filters: [{ name: "Liste", extensions: ["txt", "json", "md"] }],
+    });
+    if (picked.canceled || !picked.filePaths[0]) return null;
+    const file = picked.filePaths[0];
+    if (fs.statSync(file).size > MAX_TEXT_FILE_BYTES) throw new LocalizedError("err.fileTooLarge", { max: "1 Mo" });
+    return { name: path.basename(file), text: fs.readFileSync(file, "utf8") };
   });
 
   ipcMain.handle("tools:save-text", async (_event, defaultName: unknown, text: unknown): Promise<string | null> => {

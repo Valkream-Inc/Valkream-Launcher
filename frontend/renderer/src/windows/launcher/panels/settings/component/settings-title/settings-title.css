@@ -1,18 +1,49 @@
 .titre-tab {
+  box-sizing: border-box;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  font-size: 2rem;
-  margin: 1.5rem 0;
-  padding: 0.5rem 2rem;
-  border-radius: 2rem;
-  text-align: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  width: min(100%, 860px);
+  font-size: 1.5rem;
+  margin: 1.5rem auto 0.25rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
+  text-align: left;
   background: var(--background-transparent);
   color: var(--color);
+}
+
+.titre-tab:first-child {
   margin-top: 1cm;
 }
 
 .titre-tab.warn {
   background: red;
+  color: white;
+}
+
+/* Pastille de portée : tous les jeux / ce jeu / avancé */
+.scope-chip {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.scope-global {
+  color: #64b5f6;
+}
+.scope-game {
+  color: #81c784;
+}
+.scope-advanced {
+  color: #ffb74d;
+}
+.titre-tab.warn .scope-chip {
   color: white;
 }
