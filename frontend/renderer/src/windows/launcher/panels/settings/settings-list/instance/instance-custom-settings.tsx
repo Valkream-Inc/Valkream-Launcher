@@ -25,6 +25,7 @@ import type {
 import SettingsBox from "../../component/settings-box/settings-box";
 import { saveInstanceSetting } from "./instance-save-setting";
 import type { InstanceSettingProps } from "./instance-setting.types";
+import { useTranslation } from "react-i18next";
 
 interface Props extends InstanceSettingProps {
   settings: CustomGameSetting[];
@@ -41,6 +42,7 @@ function SliderSetting({
   setting: Extract<CustomGameSetting, { type: "slider" }>;
   props: InstanceSettingProps;
 }) {
+  const { t } = useTranslation();
   const saved = Number(
     props.values[setting.settingsName] ?? setting.default ?? setting.min,
   );
@@ -57,7 +59,7 @@ function SliderSetting({
         maxWidth: 420,
       }}
     >
-      <Typography sx={{ whiteSpace: "nowrap" }}>{setting.label}</Typography>
+      <Typography sx={{ whiteSpace: "nowrap" }}>{t(setting.label, { defaultValue: setting.label })}</Typography>
       <Slider
         size="small"
         min={setting.min}
@@ -84,6 +86,7 @@ function SliderSetting({
 }
 
 function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
+  const { t } = useTranslation();
   const { values } = props;
 
   return (
@@ -98,7 +101,7 @@ function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
           <SettingsBox
             key={setting.settingsName}
             warn={setting.category?.zone === "danger"}
-            text={setting.text}
+            text={setting.text ? t(setting.text, { defaultValue: setting.text }) : undefined}
           >
             {setting.type === "toggle" ? (
               <>
@@ -116,13 +119,13 @@ function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
                     )
                   }
                 />
-                <span>{setting.label}</span>
+                <span>{t(setting.label, { defaultValue: setting.label })}</span>
               </>
             ) : setting.type === "slider" ? (
               <SliderSetting setting={setting} props={props} />
             ) : (
               <>
-                <span>{setting.label}</span>
+                <span>{t(setting.label, { defaultValue: setting.label })}</span>
                 <Select
                   size="small"
                   value={String(
@@ -141,7 +144,7 @@ function Instance_CustomSettings({ settings, level, zone, ...props }: Props) {
                 >
                   {setting.options.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
-                      {option.label}
+                      {t(option.label, { defaultValue: option.label })}
                     </MenuItem>
                   ))}
                 </Select>

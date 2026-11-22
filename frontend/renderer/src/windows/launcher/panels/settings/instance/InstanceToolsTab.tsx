@@ -23,6 +23,8 @@ import type { ModsListResult, ToolsHashSummary } from "@shared/types";
 
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../../../i18n";
 
 const fail = (error: unknown) =>
   enqueueSnackbar(error instanceof Error ? error.message : String(error), {
@@ -32,7 +34,7 @@ const fail = (error: unknown) =>
 const copy = async (text: string, label: string) => {
   try {
     await navigator.clipboard.writeText(text);
-    enqueueSnackbar(`${label} copié`, { variant: "success" });
+    enqueueSnackbar(i18n.t("tools.copied", { label }), { variant: "success" });
   } catch (error) {
     fail(error);
   }
@@ -42,14 +44,14 @@ const save = async (name: string, text: string) => {
   try {
     const target = await window.electron_API.toolsSaveText(name, text);
     if (target)
-      enqueueSnackbar(`Enregistré : ${target}`, { variant: "success" });
+      enqueueSnackbar(i18n.t("tools.saved", { target }), { variant: "success" });
   } catch (error) {
     fail(error);
   }
 };
 
 const formatBytes = (bytes: number): string => {
-  const units = ["o", "Ko", "Mo", "Go"];
+  const units = [i18n.t("tools.units.b"), i18n.t("tools.units.kb"), i18n.t("tools.units.mb"), i18n.t("tools.units.gb")];
   let value = bytes;
   let unit = 0;
   while (value >= 1024 && unit < units.length - 1) ((value /= 1024), unit++);
@@ -63,6 +65,7 @@ const lines = (text: string) =>
     .filter(Boolean);
 
 function HashFolderTool() {
+  const { t } = useTranslation();
   const [ignoreText, setIgnoreText] = useState("");
   const [result, setResult] = useState<ToolsHashSummary | null>(null);
   const [busy, setBusy] = useState(false);
@@ -88,31 +91,31 @@ function HashFolderTool() {
     run(async () => {
       const done = await window.electron_API.toolsExportHash(lines(ignoreText));
       if (done)
-        enqueueSnackbar(`hash.json et hash/ écrits dans ${done.output}`, {
+        enqueueSnackbar(t("tools.exported", { output: done.output }), {
           variant: "success",
         });
     });
 
   return (
     <>
-      <SettingsTitle warn={false}>Hash d'un dossier</SettingsTitle>
+      <SettingsTitle warn={false}>{t("tools.hashTitle")}</SettingsTitle>
       <SettingsBox warn={false}>
         <Stack spacing={1}>
           <TextField
             size="small"
             multiline
             minRows={2}
-            label="to_ignore (un motif par ligne : logs, *.cfg, config/client.cfg…)"
+            label={t("tools.ignoreLabel")}
             value={ignoreText}
             onChange={(event) => setIgnoreText(event.target.value)}
           />
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
             <Button disabled={busy} onClick={pick}>
-              {busy ? "Calcul…" : "Choisir un dossier et hasher"}
+              {busy ? t("tools.computing") : t("tools.pick")}
             </Button>
             {result && (
               <Button disabled={busy} onClick={exportFiles}>
-                Exporter hash.json + fichiers
+                {t("tools.exportFiles")}
               </Button>
             )}
           </Box>
@@ -124,31 +127,31 @@ function HashFolderTool() {
               >
                 {result.folder}
                 <br />
-                {result.fileCount} fichier(s) · {formatBytes(result.totalBytes)}
+                {t("tools.files", { count: result.fileCount, size: formatBytes(result.totalBytes) })}
               </Typography>
               <Typography
                 variant="caption"
                 sx={{ wordBreak: "break-all", userSelect: "text" }}
               >
-                hash : {result.hash}
+                {t("tools.hashLine", { hash: result.hash })}
               </Typography>
               <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                <Button onClick={() => copy(result.hash, "Hash")}>
-                  Copier le hash
+                <Button onClick={() => copy(result.hash, t("tools.hashName"))}>
+                  {t("tools.copyHash")}
                 </Button>
                 <Button
                   onClick={() =>
                     copy(JSON.stringify(result.manifest, null, 2), "hash.json")
                   }
                 >
-                  Copier hash.json
+                  {t("tools.copyManifest")}
                 </Button>
                 <Button
                   onClick={() =>
                     save("hash.json", JSON.stringify(result.manifest, null, 2))
                   }
                 >
-                  Enregistrer hash.json
+                  {t("tools.saveManifest")}
                 </Button>
               </Box>
             </>
@@ -160,6 +163,7 @@ function HashFolderTool() {
 }
 
 function ModsListTool() {
+  const { t } = useTranslation();
   const [source, setSource] = useState("");
   const [result, setResult] = useState<ModsListResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -180,7 +184,7 @@ function ModsListTool() {
   return (
     <>
       <SettingsTitle warn={false}>
-        Liste de mods depuis un manifest
+        {t("tools.modsTitle")}
       </SettingsTitle>
       <SettingsBox warn={false}>
         <Stack spacing={1}>
@@ -188,28 +192,28 @@ function ModsListTool() {
             size="small"
             multiline
             minRows={4}
-            label="Dépendances Thunderstore (Auteur-Nom-Version, une par ligne, tableau JSON ou lien)"
+            label={t("tools.depsLabel")}
             value={source}
             onChange={(event) => setSource(event.target.value)}
           />
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
             <Button disabled={busy || source.trim() === ""} onClick={generate}>
-              {busy ? "Récupération…" : "Générer la liste"}
+              {busy ? t("tools.fetching") : t("tools.generate")}
             </Button>
             {result && (
               <>
                 <Button onClick={() => copy(json, "mods.config.json")}>
-                  Copier le JSON
+                  {t("tools.copyJson")}
                 </Button>
                 <Button onClick={() => save("mods.config.json", json)}>
-                  Enregistrer
+                  {t("tools.save")}
                 </Button>
               </>
             )}
           </Box>
           {result?.failed.map((item) => (
             <Typography key={item.id} color="warning.main" variant="caption">
-              ⚠️ {item.id} : infos indisponibles ({item.error})
+              {t("tools.unavailable", { id: item.id, error: item.error })}
             </Typography>
           ))}
         </Stack>
@@ -218,7 +222,7 @@ function ModsListTool() {
       {result && (
         <>
           <SettingsTitle warn={false}>
-            Aperçu ({result.mods.length})
+            {t("tools.preview", { count: result.mods.length })}
           </SettingsTitle>
           {result.mods.map((mod) => (
             <SettingsBox key={mod.id ?? mod.name} warn={false}>

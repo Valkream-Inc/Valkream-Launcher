@@ -70,10 +70,10 @@ export const thunderstoreProvider: Provider = async (context) => {
   // téléchargement = 80 % d'un mod, extraction = 20 %. Aucun nom de mod affiché.
   let total = queue.length;
   const progress = createGlobalProgress(
-    (transfer) => context.report("download", `${name} : mods`, transfer),
+    (transfer) => context.report("download", context.t("progress.mods", { label: name }), transfer),
     () => total,
   );
-  context.report("download", `${name} : mods`);
+  context.report("download", context.t("progress.mods", { label: name }));
 
   while (queue.length > 0) {
     const mod = queue.shift()!;

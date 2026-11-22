@@ -3,6 +3,7 @@
  * @license MIT-NC
  */
 
+import i18n from "../../../../../i18n";
 import type { PopupButton, PopupConfirm } from "../popup.types";
 
 export function createButtons(
@@ -17,6 +18,6 @@ export function createButtons(
   const confirmText = (Array.isArray(onConfirm) && onConfirm[1]) || "OK";
   return [
     { text: confirmText, action: confirmAction, variant: "main" },
-    { text: "Annuler", action: onClose, variant: "secondary" },
+    { text: i18n.t("common.cancel"), action: onClose, variant: "secondary" },
   ];
 }

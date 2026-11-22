@@ -27,7 +27,7 @@ export const fetchArchive = async (
   fs.mkdirSync(outDir, { recursive: true });
 
   if (isTarGz(url)) {
-    const text = `${label} : téléchargement + extraction`;
+    const text = context.t("progress.downloadExtract", { label });
     context.report("download", text);
     await io.streamExtract(url, outDir, { folderInZip: entry.folder_in_zip, accept }, signal, (transfer) =>
       context.report("download", text, transfer),
@@ -39,16 +39,16 @@ export const fetchArchive = async (
   let zipPath = archives.get(link);
   if (!zipPath) {
     zipPath = path.join(tempDir, `archive-${createHash("sha1").update(url).digest("hex").slice(0, 12)}.zip`);
-    context.report("download", `${label} : téléchargement`);
-    await io.download(url, zipPath, signal, (transfer) => context.report("download", `${label} : téléchargement`, transfer));
+    context.report("download", context.t("progress.download", { label }));
+    await io.download(url, zipPath, signal, (transfer) => context.report("download", context.t("progress.download", { label }), transfer));
     archives.set(link, zipPath);
   }
 
-  context.report("extract", `${label} : extraction`);
+  context.report("extract", context.t("progress.extract", { label }));
   await io.extract(zipPath, outDir, {
     folderInZip: entry.folder_in_zip,
     accept,
-    onProgress: (transfer) => context.report("extract", `${label} : extraction`, transfer),
+    onProgress: (transfer) => context.report("extract", context.t("progress.extract", { label }), transfer),
   });
   archives.release(link);
 };

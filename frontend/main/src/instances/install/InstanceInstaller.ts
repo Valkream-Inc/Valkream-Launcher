@@ -30,6 +30,7 @@ import { HashCache } from "./hash-cache.js";
 import { appendInstallLog } from "./install-log.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
 import { hashProvider, steamLibraryProvider } from "./providers/hash.js";
+import { type Lang, translator } from "../../lib/messages.js";
 import { clearGameSourceDir, DEPOT_DIR, GameSourceError, type GuideLanguage, readGameSourceDir, toSteamSourceIssue } from "./game-source.js";
 import { locateSteamGame, type SteamGame } from "../local/steam-library.js";
 import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore.js";
@@ -125,8 +126,10 @@ export class InstanceInstaller {
       throw new Error(loaded.errors.join(" ; ") || "latest.yml indisponible");
     }
 
+    const lang: Lang = (await this.options.language?.()) ?? "fr";
+    const t = translator(lang);
     const lockKey = path.resolve(installDir);
-    if (this.running.has(lockKey)) throw new Error("Une installation est déjà en cours");
+    if (this.running.has(lockKey)) throw new Error(t("install.alreadyRunning"));
     this.running.add(lockKey);
 
     const result: InstanceSyncResult = { installed: [], failed: [], works: false };
@@ -232,7 +235,7 @@ export class InstanceInstaller {
             });
             removeInstalledEntry(installDir, item.name);
             result.installed.push(item.name);
-            emit({ ...common, step: "done", message: `${item.name} retiré` });
+            emit({ ...common, step: "done", message: t("progress.removed", { label: item.name }) });
             continue;
           }
           const provider = providers[String(item.entry.type)];
@@ -275,6 +278,7 @@ export class InstanceInstaller {
             },
             loadContent: () => loadEntryContent(resolver, item.entry, installDir, loaded.release),
             beforeCommit,
+            t,
             report: (step, message, transfer) => emit({ ...common, step, message, transfer }),
           });
 
@@ -296,7 +300,7 @@ export class InstanceInstaller {
           // Annulation demandée : on s'arrête sans compter d'échec (l'entrée reprendra à la prochaine synchro).
           if (signal?.aborted) {
             result.cancelled = true;
-            emit({ ...common, step: "error", message: "annulé" });
+            emit({ ...common, step: "error", message: t("progress.cancelled") });
             break;
           }
           const message = messageOf(error);
@@ -307,7 +311,7 @@ export class InstanceInstaller {
                   appId: loaded.config.steamAppId,
                   branch: item.entry["steam-beta"],
                   depotAvailable: item.entry.depot !== undefined && loaded.config.steamAppId !== undefined,
-                  language: await this.options.language?.(),
+                  language: lang,
                 })
               : undefined;
           result.failed.push({ name: item.name, error: message, ...(steamIssue ? { steamIssue } : {}) });
