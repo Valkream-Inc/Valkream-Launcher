@@ -27,10 +27,10 @@
     "typescript-eslint": "^8.73.0"
   },
   "scripts": {
-    "dev": "turbo run dev dev:react dev:main dev:electron dev:types:main dev:types:renderer --concurrency=12",
+    "dev": "turbo run dev:back dev:react dev:main dev:electron dev:types:main dev:types:renderer --concurrency=12",
     "dev:fast": "turbo run dev dev:react dev:main dev:electron --concurrency=12",
     "dev:front": "turbo run dev:react dev:main dev:electron dev:types:main dev:types:renderer --filter=Valkream-Launcher --concurrency=12",
-    "dev:back": "turbo run dev --filter=dev-file-server",
+    "dev:back": "turbo run dev:back",
     "dev:fresh": "yarn rebuild && yarn dev",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",

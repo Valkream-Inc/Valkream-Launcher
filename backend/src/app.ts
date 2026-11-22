@@ -8,7 +8,7 @@
 import type { Request, Response } from "express";
 import express from "express";
 
-import { requestLogger } from "./lib/request-log";
+import { requestLogger } from "./lib/request-log.ts";
 
 const DEBUG = false;
 

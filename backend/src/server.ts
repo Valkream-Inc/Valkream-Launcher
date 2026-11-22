@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import { createApp } from "./app";
+import { createApp } from "./app.ts";
 
 const PORT = 3000;
 
