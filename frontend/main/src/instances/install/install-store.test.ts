@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 
 import {
   readInstallState, readInstanceSettings, recordInstalledEntry, writeInstanceSetting, SETTINGS_FILE, STATE_FILE,
-} from "./install-store";
+} from "./install-store.js";
 
 let dir: string;
 beforeEach(() => { dir = fs.mkdtempSync(path.join(os.tmpdir(), "store-")); });

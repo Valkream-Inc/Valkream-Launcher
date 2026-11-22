@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import type { EntryReport, InstanceReport } from "@shared/types";
-import { computeStatus } from "./status";
+import { computeStatus } from "./status.js";
 
 const entry = (name: string, tier: EntryReport["tier"], status: EntryReport["status"], optionalSetting?: string): EntryReport => ({
   name, tier, type: "zip_url", path: "game", declaredVersion: "1", status,

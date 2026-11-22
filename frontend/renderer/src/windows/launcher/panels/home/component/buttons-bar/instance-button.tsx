@@ -63,7 +63,7 @@ export default function InstanceButton() {
   }>({ text: "" });
 
   // « Jouer » ou « Jouer à la vX » selon la version connue
-  const playLabel = (version?: string) => (version ? t("button.playVersion", { version }) : t("button.play"));
+  const playLabel = (version?: string | null) => (version ? t("button.playVersion", { version }) : t("button.play"));
 
   const render = () => {
     const { text, progress } = lastProgress.current;

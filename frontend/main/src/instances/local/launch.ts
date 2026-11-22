@@ -10,11 +10,11 @@ import path from "path";
 
 import type { GamePlatform, InstanceSettingValue } from "@shared/types";
 
-import { resolveInside } from "../../lib/paths";
+import { resolveInside } from "../../lib/paths.js";
 
-import type { InstanceMainConfig } from "../instances.types";
-import type { InstallLocations } from "./instance-paths";
-import { buildLaunchArgs } from "./launch-args";
+import type { InstanceMainConfig } from "../instances.types.js";
+import type { InstallLocations } from "./instance-paths.js";
+import { buildLaunchArgs } from "./launch-args.js";
 
 export type LaunchPlan =
   /** Jeu sans exécutable déclaré, lancé par Steam (`launchSteam` actif). */

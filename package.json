@@ -3,31 +3,28 @@
   "description": "Launcher Multi-Gaming moddé pour Valkream",
   "license": "MIT-NC",
   "private": true,
+  "type": "module",
   "packageManager": "yarn@4.18.1",
   "engines": {
-    "node": ">=22.17.0"
+    "node": ">=26.13.1"
   },
   "workspaces": {
     "packages": [
       "./backend",
       "./frontend"
-    ],
-    "nohoist": [
-      "**/better-sqlite3",
-      "**/better-sqlite3/**"
     ]
   },
   "installConfig": {
     "hoistingLimits": "workspaces"
   },
   "devDependencies": {
-    "@eslint-react/eslint-plugin": "^5.30.2",
+    "@eslint-react/eslint-plugin": "^5.30.5",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.15.0",
     "globals": "^17.14.0",
-    "turbo": "^2.11.11",
-    "typescript": "^6.0.0",
-    "typescript-eslint": "^8.72.2"
+    "turbo": "^2.11.13",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.73.0"
   },
   "scripts": {
     "dev": "turbo run dev dev:react dev:main dev:electron dev:types:main dev:types:renderer --concurrency=12",

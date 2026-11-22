@@ -11,8 +11,8 @@ import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
-import { listFiles } from "./fs-ops";
-import { matchesAny, normalizeRelative } from "../../lib/patterns";
+import { listFiles } from "./fs-ops.js";
+import { matchesAny, normalizeRelative } from "../../lib/patterns.js";
 
 export type Manifest = Record<string, string>;
 

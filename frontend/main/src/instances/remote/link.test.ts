@@ -6,7 +6,7 @@ import {
   isFetchableLink,
   isPerPlatformContent,
   resolveLinkUrl,
-} from "./link";
+} from "./link.js";
 
 describe("classifyLink", () => {
   it("reconnaît URL, relatif et data", () => {

@@ -13,7 +13,7 @@
 import fs from "fs";
 import path from "path";
 
-import { isPathInside } from "./paths";
+import { isPathInside } from "./paths.js";
 
 export const INSTANCES_DIR = "instances";
 const MOVING_SUFFIX = ".moving";

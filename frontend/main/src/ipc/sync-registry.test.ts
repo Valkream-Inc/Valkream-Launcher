@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { abortAllSyncs, cancelSync, isSyncRunning, runSync } from "./sync-registry";
+import { abortAllSyncs, cancelSync, isSyncRunning, runSync } from "./sync-registry.js";
 
 const untilAborted = (signal: AbortSignal) =>
   new Promise<string>((resolve) => signal.addEventListener("abort", () => resolve("aborted"), { once: true }));

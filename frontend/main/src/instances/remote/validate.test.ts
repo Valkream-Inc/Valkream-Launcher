@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { validateReleaseConfig, validateRemoteIndex } from "./validate";
+import { validateReleaseConfig, validateRemoteIndex } from "./validate.js";
 
 const validIndex = () => ({
   schemaVersion: 1,

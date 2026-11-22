@@ -11,7 +11,7 @@ import yaml from "yaml";
 
 import type { LinkOrData } from "@shared/types";
 
-import { resolveLinkUrl } from "./link";
+import { resolveLinkUrl } from "./link.js";
 
 export interface ParamCache {
   read(key: string): Promise<string | null>;

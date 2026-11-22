@@ -8,7 +8,7 @@ import {
   isSafeRelativePath,
   isSafeSegment,
   resolveInside,
-} from "./paths";
+} from "./paths.js";
 
 describe("isPathInside", () => {
   it("accepte la racine et ses descendants", () => {

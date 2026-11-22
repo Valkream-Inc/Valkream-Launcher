@@ -9,7 +9,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { completePartial, discardPartial, rememberPartial, resumePoint, validatorOf } from "./download-resume";
+import { completePartial, discardPartial, rememberPartial, resumePoint, validatorOf } from "./download-resume.js";
 
 let dir: string;
 let dest: string;

@@ -7,7 +7,7 @@
  * CALCULÉ sur le zip téléchargé. Aucun hash n'est écrit sans avoir été calculé.
  */
 
-import type { DepotAsset } from "./depot-config";
+import type { DepotAsset } from "./depot-config.js";
 
 export interface ReleaseAsset {
   name: string;

@@ -9,11 +9,11 @@ import fs from "fs";
 
 import type { ActionResult } from "@shared/types";
 
-import * as MainWindow from "../windows/mainWindow";
+import * as MainWindow from "../windows/mainWindow.js";
 
-import { pkg } from "./constants";
-import DirsManager from "./dirs";
-import FilesManager from "./files";
+import { pkg } from "./constants.js";
+import DirsManager from "./dirs.js";
+import FilesManager from "./files.js";
 
 class LauncherManager {
   initialized: boolean;

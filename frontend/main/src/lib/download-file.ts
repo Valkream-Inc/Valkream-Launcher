@@ -12,12 +12,12 @@ import path from "path";
 import { Readable, Transform } from "stream";
 import { pipeline } from "stream/promises";
 
-import type { FileProgressCallback, NetworkErrorLike } from "../types/utils";
+import type { FileProgressCallback, NetworkErrorLike } from "../types/utils.js";
 
-import { completePartial, discardPartial, rememberPartial, resumePoint, validatorOf } from "./download-resume";
-import { consoleStreamAnswer } from "./console-stream";
-import { formatBytes } from "./format-bytes";
-import { HttpError, httpGet } from "./http";
+import { completePartial, discardPartial, rememberPartial, resumePoint, validatorOf } from "./download-resume.js";
+import { consoleStreamAnswer } from "./console-stream.js";
+import { formatBytes } from "./format-bytes.js";
+import { HttpError, httpGet } from "./http.js";
 
 const REQUEST_TIMEOUT = 10 * 1000;
 const STALL_TIMEOUT = 30 * 1000;

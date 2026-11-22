@@ -6,8 +6,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { createGlobalProgress } from "./global-progress";
-import type { TransferProgress } from "./types";
+import { createGlobalProgress } from "./global-progress.js";
+import type { TransferProgress } from "./types.js";
 
 describe("createGlobalProgress", () => {
   it("un pourcentage global sur plusieurs unités en parallèle", () => {

@@ -17,12 +17,12 @@ import type {
   RemoteIndex,
 } from "@shared/types";
 
-import { isLocalContent, parseLocalContent } from "../install/local-content";
-import { isValidKey } from "../../lib/json-key";
-import { classifyLink, isFetchableLink, isPerPlatformContent } from "./link";
-import { RELEASE_TIERS } from "./release-options";
-import { isSafeRelativePath, isSafeSegment } from "../../lib/paths";
-import { isValidRange } from "../../lib/version";
+import { isLocalContent, parseLocalContent } from "../install/local-content.js";
+import { isValidKey } from "../../lib/json-key.js";
+import { classifyLink, isFetchableLink, isPerPlatformContent } from "./link.js";
+import { RELEASE_TIERS } from "./release-options.js";
+import { isSafeRelativePath, isSafeSegment } from "../../lib/paths.js";
+import { isValidRange } from "../../lib/version.js";
 
 export type ValidationResult<T> =
   | { ok: true; value: T; errors: [] }

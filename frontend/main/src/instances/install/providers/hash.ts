@@ -24,16 +24,16 @@ import path from "path";
 
 import { createHash } from "crypto";
 
-import { GameSourceError } from "../game-source";
-import { hashFile, manifestHash, type Manifest } from "../manifest";
-import { runPool } from "../../../lib/concurrency";
-import { resolveInside } from "../../../lib/paths";
-import { matchesAny, normalizeRelative } from "../../../lib/patterns";
-import { shouldWriteFile } from "../preserve";
-import { commitStaged, stageFile } from "../staging";
-import { fetchArchive } from "./archive";
-import { createGlobalProgress } from "./global-progress";
-import type { Provider, ProviderContext } from "./types";
+import { GameSourceError } from "../game-source.js";
+import { hashFile, manifestHash, type Manifest } from "../manifest.js";
+import { runPool } from "../../../lib/concurrency.js";
+import { resolveInside } from "../../../lib/paths.js";
+import { matchesAny, normalizeRelative } from "../../../lib/patterns.js";
+import { shouldWriteFile } from "../preserve.js";
+import { commitStaged, stageFile } from "../staging.js";
+import { fetchArchive } from "./archive.js";
+import { createGlobalProgress } from "./global-progress.js";
+import type { Provider, ProviderContext } from "./types.js";
 
 /** Téléchargements simultanés de fichiers individuels. */
 const DOWNLOAD_CONCURRENCY = 4;

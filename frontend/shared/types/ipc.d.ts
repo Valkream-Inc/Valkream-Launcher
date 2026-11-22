@@ -6,7 +6,7 @@
  * Le preload implémente ces interfaces, le renderer les consomme via `window`.
  */
 
-import type { ActionResult } from "./common";
+import type { ActionResult } from "./common.js";
 import type {
   Channel,
   InstanceId,
@@ -21,8 +21,8 @@ import type {
   DepotInfo,
   ModsListResult,
   ToolsHashSummary,
-} from "./instance";
-import type { SettingKey, Settings } from "./settings";
+} from "./instance.js";
+import type { SettingKey, Settings } from "./settings.js";
 
 export type Listener<T> = (data: T) => void;
 

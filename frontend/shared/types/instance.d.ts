@@ -7,10 +7,10 @@
  * Ce dossier ne contient QUE des types (fichiers .d.ts) : aucun code exécutable.
  */
 
-import type { GamePlatform, ProgressData } from "./common";
-import type { GameEvent, Maintenance } from "./infos";
+import type { GamePlatform, ProgressData } from "./common.js";
+import type { GameEvent, Maintenance } from "./infos.js";
 
-import type { CheckInfosResult } from "./infos";
+import type { CheckInfosResult } from "./infos.js";
 
 /** Clé commune aux trois couches (main, render, remote). Ex : `Valheim-Valkream-v2`. */
 export type InstanceId = string;

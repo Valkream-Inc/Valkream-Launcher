@@ -5,7 +5,7 @@ import path from "node:path";
 import { describe, it } from "node:test";
 import { createHash } from "node:crypto";
 
-import { hashFile, manifestHash, scanManifest, verifyManifest } from "./manifest";
+import { hashFile, manifestHash, scanManifest, verifyManifest } from "./manifest.js";
 
 const sha = (text: string) => createHash("sha256").update(text).digest("hex");
 

@@ -18,8 +18,8 @@
 
 import type { GamePlatform, RawOption, ReleaseConfig } from "@shared/types";
 
-import { isFetchableLink } from "./link";
-import type { ParamResolver } from "./ParamResolver";
+import { isFetchableLink } from "./link.js";
+import type { ParamResolver } from "./ParamResolver.js";
 
 export const RELEASE_TIERS = ["game-base", "game-details"] as const;
 

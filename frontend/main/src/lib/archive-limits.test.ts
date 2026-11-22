@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { assertArchiveWithinLimits } from "./archive-limits";
+import { assertArchiveWithinLimits } from "./archive-limits.js";
 
 describe("assertArchiveWithinLimits", () => {
   const limits = { maxFiles: 3, maxBytes: 100 };

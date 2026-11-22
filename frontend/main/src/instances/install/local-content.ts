@@ -17,10 +17,10 @@ import fs from "fs";
 
 import type { ReleaseConfig, ReleaseEntry } from "@shared/types";
 
-import { pickKey } from "../../lib/json-key";
-import { isSafeRelativePath, resolveInside } from "../../lib/paths";
-import type { ParamResolver } from "../remote/ParamResolver";
-import { entryDirectory } from "../local/instance-paths";
+import { pickKey } from "../../lib/json-key.js";
+import { isSafeRelativePath, resolveInside } from "../../lib/paths.js";
+import type { ParamResolver } from "../remote/ParamResolver.js";
+import { entryDirectory } from "../local/instance-paths.js";
 
 export const LOCAL_PREFIX = "local:";
 

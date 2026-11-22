@@ -6,14 +6,16 @@
  * en-têtes anti-cache des requêtes HTTP.
  */
 
-import type { NoCacheConfig, PackageJson } from "../types/core";
+import type { NoCacheConfig, PackageJson } from "../types/core.js";
 
 export const isDev = process.env.NODE_ENV === "dev";
 
-export const baseUrl = isDev ? "http://localhost:3000" : "https://play.valkream.com";
+export const baseUrl = isDev
+  ? "http://localhost:3000"
+  : "https://play.valkream.com";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-export const pkg = require("../../../package.json") as PackageJson;
+import pkgJson from "../../../package.json" with { type: "json" };
+export const pkg = pkgJson as PackageJson;
 
 export const noCache: NoCacheConfig = {
   headers: {

@@ -6,7 +6,7 @@
  * annulation et en-têtes anti-cache. Remplace axios.
  */
 
-import type { NoCacheConfig } from "../types/core";
+import type { NoCacheConfig } from "../types/core.js";
 
 export class HttpError extends Error {
   constructor(

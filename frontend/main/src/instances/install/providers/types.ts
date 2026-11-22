@@ -8,11 +8,11 @@
 
 import type { GamePlatform, ProgressData, ReleaseEntry } from "@shared/types";
 
-import type { ParamResolver } from "../../remote/ParamResolver";
-import type { SteamGame } from "../../local/steam-library";
-import type { ArchiveCache } from "./archive-cache";
-import type { HashCache } from "../hash-cache";
-import type { UpdatePlan } from "../preserve";
+import type { ParamResolver } from "../../remote/ParamResolver.js";
+import type { SteamGame } from "../../local/steam-library.js";
+import type { ArchiveCache } from "./archive-cache.js";
+import type { HashCache } from "../hash-cache.js";
+import type { UpdatePlan } from "../preserve.js";
 
 /** Progression d'un téléchargement : valeurs déjà formatées pour l'affichage. */
 export type TransferProgress = Pick<ProgressData, "processedBytes" | "totalBytes" | "percent" | "speed"> & {

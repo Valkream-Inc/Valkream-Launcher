@@ -17,7 +17,7 @@ import { promisify } from "util";
 
 import type { GamePlatform } from "@shared/types";
 
-import { parseVdf, type VdfValue } from "../../lib/vdf";
+import { parseVdf, type VdfValue } from "../../lib/vdf.js";
 
 const run = promisify(execFile);
 

@@ -6,7 +6,7 @@
  * Le texte reste brut : le parsing (JSON ou YAML) est fait par l'appelant.
  */
 
-import { noCache } from "../../core/constants";
-import { httpGetText } from "../../lib/http";
+import { noCache } from "../../core/constants.js";
+import { httpGetText } from "../../lib/http.js";
 
 export const httpFetchText = (url: string): Promise<string> => httpGetText(url, { noCache, timeout: 5000 });

@@ -9,11 +9,11 @@ import http from "node:http";
 import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
-import zlib from "node:zlib";
 import { after, afterEach, before, beforeEach, describe, it } from "node:test";
+import zlib from "node:zlib";
 
-import { extractTar } from "../../lib/tar-extract";
-import { streamExtractTarGz } from "./stream-extract";
+import { extractTar } from "../../lib/tar-extract.js";
+import { streamExtractTarGz } from "./stream-extract.js";
 const realInstallIO = { streamExtract: streamExtractTarGz };
 
 /** Construit une archive tar minimale (ustar) en mémoire. */
@@ -34,7 +34,8 @@ const entry = (name: string, content: string | Buffer, type = "0"): Buffer => {
   const pad = Buffer.alloc((512 - (data.length % 512)) % 512);
   return Buffer.concat([header(name, data.length, type), data, pad]);
 };
-const tar = (...entries: Buffer[]): Buffer => Buffer.concat([...entries, Buffer.alloc(1024)]);
+const tar = (...entries: Buffer[]): Buffer =>
+  Buffer.concat([...entries, Buffer.alloc(1024)]);
 
 const big = Buffer.alloc(300_000, "0123456789");
 const archive = tar(
@@ -51,16 +52,22 @@ const gz = zlib.gzipSync(archive);
 describe("extractTar", () => {
   it("lit les fichiers même découpés en petits morceaux", async () => {
     const chunks = (function* () {
-      for (let i = 0; i < archive.length; i += 333) yield archive.subarray(i, i + 333);
+      for (let i = 0; i < archive.length; i += 333)
+        yield archive.subarray(i, i + 333);
     })();
     const seen: Record<string, Buffer[]> = {};
-    const { files } = await extractTar(chunks as unknown as AsyncIterable<Buffer>, {
-      onFile: ({ path: name }) => {
-        const parts: Buffer[] = (seen[name] = []);
-        const { Writable } = require("node:stream") as typeof import("node:stream");
-        return new Writable({ write: (chunk, _e, done) => (parts.push(chunk), done()) });
+    const { files } = await extractTar(
+      chunks as unknown as AsyncIterable<Buffer>,
+      {
+        onFile: async ({ path: name }) => {
+          const parts: Buffer[] = (seen[name] = []);
+          const { Writable } = await import("node:stream");
+          return new Writable({
+            write: (chunk, _e, done) => (parts.push(chunk), done()),
+          });
+        },
       },
-    });
+    );
     assert.equal(files, 5);
     assert.equal(Buffer.concat(seen["pack/a.txt"]).toString(), "hello");
     assert.ok(Buffer.concat(seen["pack/sub/b.bin"]).equals(big));
@@ -69,9 +76,12 @@ describe("extractTar", () => {
   it("archive tronquée : erreur", async () => {
     const { Writable } = await import("node:stream");
     await assert.rejects(
-      extractTar([archive.subarray(0, 700)] as unknown as AsyncIterable<Buffer>, {
-        onFile: () => new Writable({ write: (_c, _e, done) => done() }),
-      }),
+      extractTar(
+        [archive.subarray(0, 700)] as unknown as AsyncIterable<Buffer>,
+        {
+          onFile: () => new Writable({ write: (_c, _e, done) => done() }),
+        },
+      ),
       /tronquée/,
     );
   });
@@ -79,7 +89,11 @@ describe("extractTar", () => {
   it("limite de fichiers", async () => {
     const { Writable } = await import("node:stream");
     await assert.rejects(
-      extractTar([archive] as unknown as AsyncIterable<Buffer>, { onFile: () => new Writable({ write: (_c, _e, d) => d() }) }, { maxFiles: 2, maxBytes: 1e12 }),
+      extractTar(
+        [archive] as unknown as AsyncIterable<Buffer>,
+        { onFile: () => new Writable({ write: (_c, _e, d) => d() }) },
+        { maxFiles: 2, maxBytes: 1e12 },
+      ),
       /fichiers/,
     );
   });
@@ -101,7 +115,9 @@ describe("realInstallIO.streamExtract", () => {
       res.writeHead(200, { "Content-Length": gz.length });
       res.end(gz);
     });
-    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    await new Promise<void>((resolve) =>
+      server.listen(0, "127.0.0.1", resolve),
+    );
     base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
   });
   after(() => {
@@ -135,7 +151,10 @@ describe("realInstallIO.streamExtract", () => {
   it("coupure réseau : recommence proprement", async () => {
     failures = 1;
     const out = path.join(dir, "out2");
-    await realInstallIO.streamExtract(`${base}/pack.tar.gz`, out, { folderInZip: "pack", accept: () => true });
+    await realInstallIO.streamExtract(`${base}/pack.tar.gz`, out, {
+      folderInZip: "pack",
+      accept: () => true,
+    });
     assert.equal(fs.readFileSync(path.join(out, "a.txt"), "utf8"), "hello");
   });
 });

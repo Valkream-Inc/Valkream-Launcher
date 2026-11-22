@@ -9,9 +9,9 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { manifestHash } from "../install/manifest";
-import { exportHashFolder, exportManifestOnly, hashFolder } from "./hash-folder";
-import { buildModsDisplay, parseModList } from "./mods-list";
+import { manifestHash } from "../install/manifest.js";
+import { exportHashFolder, exportManifestOnly, hashFolder } from "./hash-folder.js";
+import { buildModsDisplay, parseModList } from "./mods-list.js";
 
 let dir: string;
 beforeEach(() => {

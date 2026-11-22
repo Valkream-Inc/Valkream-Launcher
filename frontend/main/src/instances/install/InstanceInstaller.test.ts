@@ -5,15 +5,15 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import type { InstanceMainConfig } from "../instances.types";
-import { InstanceInspector } from "../local/InstanceInspector";
-import { InstanceInstaller } from "./InstanceInstaller";
-import { readInstallState, readInstanceSettings, writeInstallState, writeInstanceSetting } from "./install-store";
-import { writeGameSourceDir } from "./game-source";
-import { manifestHash } from "./manifest";
-import { instanceRootPath } from "../../lib/paths";
-import type { ParamResolver } from "../remote/ParamResolver";
-import type { InstallIO } from "./providers/types";
+import type { InstanceMainConfig } from "../instances.types.js";
+import { InstanceInspector } from "../local/InstanceInspector.js";
+import { InstanceInstaller } from "./InstanceInstaller.js";
+import { readInstallState, readInstanceSettings, writeInstallState, writeInstanceSetting } from "./install-store.js";
+import { writeGameSourceDir } from "./game-source.js";
+import { manifestHash } from "./manifest.js";
+import { instanceRootPath } from "../../lib/paths.js";
+import type { ParamResolver } from "../remote/ParamResolver.js";
+import type { InstallIO } from "./providers/types.js";
 
 const sha = (text: string) => createHash("sha256").update(text).digest("hex");
 const config: InstanceMainConfig = {
@@ -478,7 +478,7 @@ describe("InstanceInstaller", () => {
       },
       "/manifest.json": gameManifest,
     });
-    const run = async (steamFiles: Record<string, string> | null, remote = steamRemote()) => {
+    const run = async (steamFiles: Record<string, string> | null, remote: Record<string, unknown> = steamRemote()) => {
       const steamDir = path.join(root, "steam-game");
       fs.rmSync(steamDir, { recursive: true, force: true });
       for (const [file, content] of Object.entries(steamFiles ?? {})) {
@@ -525,7 +525,7 @@ describe("InstanceInstaller", () => {
     });
 
     it("depot déclaré : DepotDownloader est proposé", async () => {
-      const remote = steamRemote(false) as Record<string, any>;
+      const remote = steamRemote(false);
       remote["/stable.yml"]["game-base"].base.depot = { id: 7, manifest: "123456789" };
       const { result } = await run(null, remote);
       assert.equal(result.failed[0]?.steamIssue?.depotAvailable, true);

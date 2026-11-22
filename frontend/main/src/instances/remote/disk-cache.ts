@@ -9,7 +9,7 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 
-import type { ParamCache } from "./ParamResolver";
+import type { ParamCache } from "./ParamResolver.js";
 
 const fileFor = (dir: string, key: string): string =>
   path.join(dir, crypto.createHash("sha1").update(key).digest("hex") + ".cache");

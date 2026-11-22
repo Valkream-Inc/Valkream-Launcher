@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import type { InstanceMainConfig } from "../instances.types";
-import { InstanceRegistry } from "./InstanceRegistry";
-import type { ParamResolver } from "./ParamResolver";
+import type { InstanceMainConfig } from "../instances.types.js";
+import { InstanceRegistry } from "./InstanceRegistry.js";
+import type { ParamResolver } from "./ParamResolver.js";
 
 const server = { type: "valheim", host: "h", port: 1, timeout: 1 };
 const config = (id: string, extra: Partial<InstanceMainConfig> = {}): InstanceMainConfig => ({

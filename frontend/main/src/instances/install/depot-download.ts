@@ -14,8 +14,8 @@ import path from "path";
 
 import type { DepotOptions } from "@shared/types";
 
-import { DEPOT_DIR } from "./game-source";
-import { parseDepotPercent, type DepotRunner } from "./depot-runner";
+import { DEPOT_DIR } from "./game-source.js";
+import { parseDepotPercent, type DepotRunner } from "./depot-runner.js";
 
 export interface DepotDownloadInput {
   tool: string;

@@ -11,7 +11,7 @@ import os from "node:os";
 import path from "node:path";
 import { after, afterEach, before, beforeEach, describe, it } from "node:test";
 
-import { downloadFile } from "./download-file";
+import { downloadFile } from "./download-file.js";
 
 const content = Buffer.alloc(200_000, "abcdefghij");
 let body = content;

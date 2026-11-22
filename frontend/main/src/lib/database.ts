@@ -7,10 +7,10 @@ import DatabaseLib from "better-sqlite3";
 import fs from "fs";
 import path from "path";
 
-import type { DatabaseRecord, DatabaseRow } from "../types/utils";
+import type { DatabaseRecord, DatabaseRow } from "../types/utils.js";
 
-import { isDev } from "../core/constants";
-import DirsManager from "../core/dirs";
+import { isDev } from "../core/constants.js";
+import DirsManager from "../core/dirs.js";
 
 class Database {
   db: DatabaseLib.Database;

@@ -7,8 +7,8 @@
  * octets et le débit moyen. Les unités peuvent progresser en parallèle.
  */
 
-import { formatBytes } from "../../../lib/format-bytes";
-import type { TransferProgress } from "./types";
+import { formatBytes } from "../../../lib/format-bytes.js";
+import type { TransferProgress } from "./types.js";
 
 export interface GlobalProgress {
   /** Avancement d'une unité en cours : `fraction` entre 0 et 1, `bytes` déjà traités. */

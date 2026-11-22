@@ -14,10 +14,10 @@ import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
-import { resolveInside } from "../../../lib/paths";
-import { commitStaged } from "../staging";
-import { createGlobalProgress } from "./global-progress";
-import type { Provider, Uninstaller } from "./types";
+import { resolveInside } from "../../../lib/paths.js";
+import { commitStaged } from "../staging.js";
+import { createGlobalProgress } from "./global-progress.js";
+import type { Provider, Uninstaller } from "./types.js";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
 

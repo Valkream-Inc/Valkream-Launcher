@@ -5,11 +5,11 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 import { createHash } from "node:crypto";
 
-import type { InstanceMainConfig } from "../instances.types";
-import { InstanceInspector } from "./InstanceInspector";
-import { recordInstalledEntry, writeInstanceSetting } from "../install/install-store";
-import { instanceRootPath } from "../../lib/paths";
-import type { ParamResolver } from "../remote/ParamResolver";
+import type { InstanceMainConfig } from "../instances.types.js";
+import { InstanceInspector } from "./InstanceInspector.js";
+import { recordInstalledEntry, writeInstanceSetting } from "../install/install-store.js";
+import { instanceRootPath } from "../../lib/paths.js";
+import type { ParamResolver } from "../remote/ParamResolver.js";
 
 const sha = (text: string) => createHash("sha256").update(text).digest("hex");
 const server = { type: "valheim", host: "h", port: 1, timeout: 1 };

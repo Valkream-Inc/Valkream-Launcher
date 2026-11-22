@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { buildLaunchArgs } from "./launch-args";
-import { planLaunch } from "./launch";
-import { ensureSteamRunning } from "./steam";
+import { buildLaunchArgs } from "./launch-args.js";
+import { planLaunch } from "./launch.js";
+import { ensureSteamRunning } from "./steam.js";
 
 const locations = { installDir: "/d", executable: "/d/game/run.exe" };
 const yes = { platform: "win32" as const, exists: () => true };

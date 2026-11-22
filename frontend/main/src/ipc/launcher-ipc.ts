@@ -10,20 +10,20 @@ import type { BrowserWindow, IpcMainInvokeEvent } from "electron";
 
 import type { SettingKey, Settings } from "@shared/types";
 
-import CheckForUpdates from "./check-for-updates";
+import CheckForUpdates from "./check-for-updates.js";
 
-import SettingsManager from "../core/settings";
-import LauncherManager from "../core/launcher";
-import DirsManager from "../core/dirs";
-import { moveGamesRoot, writeGamesRoot } from "../lib/games-root";
-import { anySyncRunning } from "./sync-registry";
-import { isSafeExternalUrl } from "../lib/safe-link";
+import SettingsManager from "../core/settings.js";
+import LauncherManager from "../core/launcher.js";
+import DirsManager from "../core/dirs.js";
+import { moveGamesRoot, writeGamesRoot } from "../lib/games-root.js";
+import { anySyncRunning } from "./sync-registry.js";
+import { isSafeExternalUrl } from "../lib/safe-link.js";
 
-import * as MainWindow from "../windows/mainWindow";
-import * as UpdateWindow from "../windows/updateWindow";
+import * as MainWindow from "../windows/mainWindow.js";
+import * as UpdateWindow from "../windows/updateWindow.js";
 
-import registerAdminToolsIpc from "./admin-tools-ipc";
-import InstanceIpcHandlers from "./instance-ipc";
+import registerAdminToolsIpc from "./admin-tools-ipc.js";
+import InstanceIpcHandlers from "./instance-ipc.js";
 
 // Fenêtre principale (supposée ouverte quand les handlers sont appelés)
 const mainWindow = () => MainWindow.getWindow() as BrowserWindow;

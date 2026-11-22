@@ -22,17 +22,17 @@ import type {
   ReleaseTier,
 } from "@shared/types";
 
-import type { InstanceMainConfig } from "../instances.types";
-import { entryDirectory, installLocations, type InstallLocations } from "./instance-paths";
-import { loadRemoteIndex } from "../remote/InstanceRegistry";
-import { readInstallState, readInstanceSettings } from "../install/install-store";
-import { HashCache } from "../install/hash-cache";
-import { verifyManifest, type Manifest } from "../install/manifest";
-import type { ParamResolver } from "../remote/ParamResolver";
-import { resolvePreserved } from "../install/preserve";
-import { loadEntryContent } from "../install/local-content";
-import { flattenRelease, RELEASE_TIERS } from "../remote/release-options";
-import { validateReleaseConfig } from "../remote/validate";
+import type { InstanceMainConfig } from "../instances.types.js";
+import { entryDirectory, installLocations, type InstallLocations } from "./instance-paths.js";
+import { loadRemoteIndex } from "../remote/InstanceRegistry.js";
+import { readInstallState, readInstanceSettings } from "../install/install-store.js";
+import { HashCache } from "../install/hash-cache.js";
+import { verifyManifest, type Manifest } from "../install/manifest.js";
+import type { ParamResolver } from "../remote/ParamResolver.js";
+import { resolvePreserved } from "../install/preserve.js";
+import { loadEntryContent } from "../install/local-content.js";
+import { flattenRelease, RELEASE_TIERS } from "../remote/release-options.js";
+import { validateReleaseConfig } from "../remote/validate.js";
 
 export interface InspectorOptions {
   configs: readonly InstanceMainConfig[];

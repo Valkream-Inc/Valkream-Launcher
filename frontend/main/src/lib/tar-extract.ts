@@ -10,7 +10,7 @@
 import { once } from "events";
 import type { Writable } from "stream";
 
-import { DEFAULT_ARCHIVE_LIMITS, type ArchiveLimits } from "./archive-limits";
+import { DEFAULT_ARCHIVE_LIMITS, type ArchiveLimits } from "./archive-limits.js";
 
 const BLOCK = 512;
 

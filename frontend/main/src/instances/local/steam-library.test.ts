@@ -7,8 +7,8 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import { describe, it } from "node:test";
 
-import { parseVdf } from "../../lib/vdf";
-import { locateSteamGame, type SteamLocateDeps } from "./steam-library";
+import { parseVdf } from "../../lib/vdf.js";
+import { locateSteamGame, type SteamLocateDeps } from "./steam-library.js";
 
 describe("parseVdf", () => {
   it("blocs, commentaires, échappements", () => {

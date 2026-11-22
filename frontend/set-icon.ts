@@ -6,11 +6,14 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import Jimp from "jimp";
+import { Jimp } from "jimp";
 import * as png2icons from "png2icons";
 
 async function iconSet(): Promise<void> {
-  const imageDir = path.join(__dirname, "renderer/public/images/icon/");
+  const imageDir = path.join(
+    import.meta.dirname,
+    "renderer/public/images/icon/",
+  );
   const pngImg = path.join(imageDir, "icon.png");
   const icoImg = path.join(imageDir, "icon.ico");
   const icnsImg = path.join(imageDir, "icon.icns");

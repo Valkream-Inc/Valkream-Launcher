@@ -5,10 +5,10 @@
 
 import path from "path";
 import { app } from "electron";
-import { readGamesRoot } from "../lib/games-root";
-import newDir from "../lib/platform-dir";
+import { readGamesRoot } from "../lib/games-root.js";
+import newDir from "../lib/platform-dir.js";
 
-import { isDev } from "./constants";
+import { isDev } from "./constants.js";
 
 class DirsManager {
   launcherRootPath = (): string => process.cwd();

@@ -6,7 +6,7 @@
 import fs from "fs";
 import { platform } from "os";
 
-import type { PlatformValues } from "../types/utils";
+import type { PlatformValues } from "../types/utils.js";
 
 const newDir = (valueForAllPlatforms: PlatformValues): string => {
   const dirPath = valueForAllPlatforms[platform() as keyof PlatformValues];

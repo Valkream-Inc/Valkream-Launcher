@@ -6,7 +6,7 @@ import { groupEntriesByPath, isSelectable, overlappingPaths, pickChannel } from 
 
 const entry = (name: string, path: string, status: EntryReport["status"]): EntryReport => ({
   name, tier: "game-base", type: "zip_url", path, declaredVersion: "1", status,
-  blocking: true, preserved: [], toIgnore: [], errors: [],
+  preserved: [], toIgnore: [], errors: [],
 });
 
 describe("pickChannel", () => {

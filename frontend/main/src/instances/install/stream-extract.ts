@@ -11,13 +11,13 @@ import path from "path";
 import { pipeline, Readable, Transform } from "stream";
 import zlib from "zlib";
 
-import { isNetworkError } from "../../lib/download-file";
-import { HttpError, httpGet } from "../../lib/http";
-import { isPathInside } from "../../lib/paths";
-import { normalizeRelative } from "../../lib/patterns";
-import { extractTar } from "../../lib/tar-extract";
-import { progressOf } from "./progress";
-import type { InstallIO, TransferProgress } from "./providers/types";
+import { isNetworkError } from "../../lib/download-file.js";
+import { HttpError, httpGet } from "../../lib/http.js";
+import { isPathInside } from "../../lib/paths.js";
+import { normalizeRelative } from "../../lib/patterns.js";
+import { extractTar } from "../../lib/tar-extract.js";
+import { progressOf } from "./progress.js";
+import type { InstallIO, TransferProgress } from "./providers/types.js";
 
 const STREAM_STALL_MS = 30_000;
 const STREAM_ATTEMPTS = 3;

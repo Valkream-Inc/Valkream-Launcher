@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { runPool } from "./concurrency";
+import { runPool } from "./concurrency.js";
 
 const tick = () => new Promise<void>((resolve) => setTimeout(resolve, 2));
 

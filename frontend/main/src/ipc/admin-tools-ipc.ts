@@ -13,9 +13,9 @@ import { BrowserWindow, dialog, ipcMain } from "electron";
 
 import type { ModsListResult, ToolsHashSummary } from "@shared/types";
 
-import { exportHashFolder, hashFolder } from "../instances/tools/hash-folder";
-import { buildModsDisplay, parseModList } from "../instances/tools/mods-list";
-import { httpGetText } from "../lib/http";
+import { exportHashFolder, hashFolder } from "../instances/tools/hash-folder.js";
+import { buildModsDisplay, parseModList } from "../instances/tools/mods-list.js";
+import { httpGetText } from "../lib/http.js";
 
 const window = () => BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0];
 

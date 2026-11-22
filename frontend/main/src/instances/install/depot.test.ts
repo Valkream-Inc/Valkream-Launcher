@@ -10,9 +10,9 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { buildDepotArgs, downloadWithDepot } from "./depot-download";
-import { parseDepotPercent, type DepotRunner } from "./depot-runner";
-import { depotAssetFor, ensureDepotDownloader } from "./depot-tool";
+import { buildDepotArgs, downloadWithDepot } from "./depot-download.js";
+import { parseDepotPercent, type DepotRunner } from "./depot-runner.js";
+import { depotAssetFor, ensureDepotDownloader } from "./depot-tool.js";
 
 let dir: string;
 beforeEach(() => {
@@ -122,7 +122,7 @@ describe("outil épinglé", () => {
   });
 });
 
-import { platformOfAsset, renderDepotConfig } from "./depot-pins";
+import { platformOfAsset, renderDepotConfig } from "./depot-pins.js";
 
 describe("épinglage d'une release", () => {
   it("reconnaît les assets par plateforme, ignore le reste", () => {

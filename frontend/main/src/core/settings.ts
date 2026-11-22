@@ -5,7 +5,7 @@
 
 import type { SettingKey, Settings } from "@shared/types";
 
-import Database from "../lib/database";
+import Database from "../lib/database.js";
 
 class SettingsManager {
   db: Database;

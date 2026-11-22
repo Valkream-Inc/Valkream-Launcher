@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { isValidKey, pickKey } from "./json-key";
+import { isValidKey, pickKey } from "./json-key.js";
 
 describe("pickKey", () => {
   const data = { dependencies: { mods: ["A-B-1.0.0"] }, packs: [{ list: [1] }] };

@@ -5,16 +5,16 @@
 
 import { app } from "electron";
 
-import * as UpdateWindow from "./src/windows/updateWindow";
-import * as MainWindow from "./src/windows/mainWindow";
-import IpcHandlers from "./src/ipc/launcher-ipc";
-import { isDev } from "./src/core/constants";
+import * as UpdateWindow from "./src/windows/updateWindow.js";
+import * as MainWindow from "./src/windows/mainWindow.js";
+import IpcHandlers from "./src/ipc/launcher-ipc.js";
+import { isDev } from "./src/core/constants.js";
 import path from "path";
-import DirsManager from "./src/core/dirs";
-import LauncherManager from "./src/core/launcher";
-import { cleanupInterruptedMove, INSTANCES_DIR } from "./src/lib/games-root";
-import { applyLauncherVersion } from "./src/lib/launcher-version";
-import { abortAllSyncs } from "./src/ipc/sync-registry";
+import DirsManager from "./src/core/dirs.js";
+import LauncherManager from "./src/core/launcher.js";
+import { cleanupInterruptedMove, INSTANCES_DIR } from "./src/lib/games-root.js";
+import { applyLauncherVersion } from "./src/lib/launcher-version.js";
+import { abortAllSyncs } from "./src/ipc/sync-registry.js";
 
 if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
 

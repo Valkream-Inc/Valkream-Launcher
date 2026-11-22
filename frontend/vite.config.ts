@@ -16,12 +16,12 @@ export default defineConfig({
   // index.html et d'autres fichiers de configuration dans ce répertoire.
   // Ce doit être le dossier parent qui contient à la fois le code source (p. ex., 'src')
   // et le dossier public.
-  root: path.resolve(__dirname, "renderer"),
+  root: path.resolve(import.meta.dirname, "renderer"),
 
   // Définit le répertoire public pour les assets statiques qui ne
   // seront pas traités par le bundler, comme les images et les polices.
   // Il est important que ce chemin soit relatif au 'root' défini ci-dessus.
-  publicDir: path.resolve(__dirname, "renderer/public"),
+  publicDir: path.resolve(import.meta.dirname, "renderer/public"),
 
   // Les plugins à utiliser, ici React pour gérer le JSX.
   plugins: [react()],
@@ -29,7 +29,7 @@ export default defineConfig({
   // Options de build pour la production.
   build: {
     // Spécifie le répertoire de sortie pour la production.
-    outDir: path.resolve(__dirname, "renderer/build"),
+    outDir: path.resolve(import.meta.dirname, "renderer/build"),
     // Vide le répertoire de sortie avant chaque construction.
     emptyOutDir: true,
     // Configuration de Rollup pour les dépendances externes.
@@ -51,8 +51,8 @@ export default defineConfig({
     // Permet d'accéder aux fichiers en dehors du répertoire 'root'.
     fs: {
       allow: [
-        path.resolve(__dirname, "renderer"),
-        path.resolve(__dirname, "shared"),
+        path.resolve(import.meta.dirname, "renderer"),
+        path.resolve(import.meta.dirname, "shared"),
       ],
     },
     // Remarque : le repli des routes (404) vers index.html, nécessaire à React Router,
@@ -69,9 +69,9 @@ export default defineConfig({
   resolve: {
     alias: {
       // "@" pointe vers le répertoire racine de votre application.
-      "@": path.resolve(__dirname, "renderer"),
+      "@": path.resolve(import.meta.dirname, "renderer"),
       // Types partagés main / preload / renderer (import type uniquement).
-      "@shared": path.resolve(__dirname, "shared"),
+      "@shared": path.resolve(import.meta.dirname, "shared"),
     },
   },
 });

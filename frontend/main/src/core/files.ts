@@ -6,7 +6,7 @@
 import path from "path";
 import { platform } from "os";
 
-import DirsManager from "./dirs";
+import DirsManager from "./dirs.js";
 
 class FilesManager {
   uninstallerPath = (): string => {

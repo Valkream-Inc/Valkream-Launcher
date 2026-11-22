@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { isSafeExternalUrl } from "./safe-link";
+import { isSafeExternalUrl } from "./safe-link.js";
 
 describe("isSafeExternalUrl", () => {
   it("accepte http, https et steam", () => {

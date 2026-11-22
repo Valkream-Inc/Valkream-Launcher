@@ -6,13 +6,15 @@
 import fs from "fs";
 
 import type { IpcMainEvent } from "electron";
-import { autoUpdater } from "electron-updater";
-import { formatBytes } from "../lib/format-bytes";
+import { formatBytes } from "../lib/format-bytes.js";
 
-import { baseUrl } from "../core/constants";
-import InfosManager from "../core/server-infos";
-import FilesManager from "../core/files";
-import LauncherManager from "../core/launcher";
+import { baseUrl } from "../core/constants.js";
+import InfosManager from "../core/server-infos.js";
+import FilesManager from "../core/files.js";
+import LauncherManager from "../core/launcher.js";
+
+import electronUpdater from "electron-updater";
+const { autoUpdater } = electronUpdater;
 
 class CheckForUpdates {
   timeout: number;
@@ -28,7 +30,7 @@ class CheckForUpdates {
     if (!(await InfosManager.getIsServerReachable()))
       return this.onError(
         "no_internet",
-        "❌ Pas de connexion au serveur. Impossible de vérifier les mises à jour."
+        "❌ Pas de connexion au serveur. Impossible de vérifier les mises à jour.",
       );
 
     this.configureUpdater();
@@ -68,7 +70,7 @@ class CheckForUpdates {
       this.onMsg(
         `🔄 Mise à jour disponible...\n(${LauncherManager.getVersion()} --> ${
           info.version
-        })`
+        })`,
       );
       try {
         await new Promise<void>((resolve) => setTimeout(resolve, 1000));

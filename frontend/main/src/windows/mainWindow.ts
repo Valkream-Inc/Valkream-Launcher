@@ -6,9 +6,9 @@
 import { BrowserWindow, Menu, ipcMain } from "electron";
 import path from "path";
 
-const rendererPath = path.join(__dirname, "../../../renderer");
+const rendererPath = path.join(import.meta.dirname, "../../../renderer");
 
-import { pkg, isDev } from "../core/constants";
+import { isDev, pkg } from "../core/constants.js";
 let mainWindow: BrowserWindow | undefined = undefined;
 
 function getWindow(): BrowserWindow | undefined {
@@ -36,11 +36,11 @@ function createWindow(): void {
     resizable: true,
     icon: isDev
       ? path.join(rendererPath, "public/images/icon/icon.png")
-      : path.join(__dirname, "../../frontend/images/icon/icon.png"),
+      : path.join(import.meta.dirname, "../../frontend/images/icon/icon.png"),
     frame: false,
     show: false,
     webPreferences: {
-      preload: path.join(__dirname, "mainPreload.js"),
+      preload: path.join(import.meta.dirname, "mainPreload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -51,7 +51,7 @@ function createWindow(): void {
   mainWindow.loadURL(
     isDev
       ? "http://localhost:8080"
-      : `file://${path.join(__dirname, "../../frontend", "index.html")}`
+      : `file://${path.join(import.meta.dirname, "../../frontend", "index.html")}`,
   );
   mainWindow.once("ready-to-show", () => {
     if (mainWindow) {
@@ -75,9 +75,4 @@ function createWindow(): void {
   });
 }
 
-export {
-  getWindow,
-  isWindowOpen,
-  createWindow,
-  destroyWindow,
-};
+export { createWindow, destroyWindow, getWindow, isWindowOpen };

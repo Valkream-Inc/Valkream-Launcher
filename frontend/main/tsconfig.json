@@ -1,6 +1,6 @@
 {
   // Process main + preload (Electron). Compilé en CommonJS vers ../.tsbuild
-  // (même profondeur de dossiers qu'avant : les chemins relatifs __dirname restent valides).
+  // (même profondeur de dossiers qu'avant : les chemins relatifs import.meta.dirname restent valides).
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "module": "nodenext",
@@ -12,11 +12,20 @@
     "sourceMap": true,
     "removeComments": false,
     "paths": {
-      "@shared/types": ["../shared/types/index"],
+      "@shared/types": ["../shared/types/index.js"],
       "@shared/*": ["../shared/*"]
     }
   },
-  "include": ["app.ts", "src/**/*.ts", "src/**/*.d.ts", "../shared/**/*.d.ts", "../types/**/*.d.ts"],
+  "include": [
+    "app.ts",
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.cts",
+    "src/**/*.d.cts",
+    "../shared/**/*.d.ts",
+    "../types/**/*.d.ts",
+    "src/windows/mainPreload.cts"
+  ],
   // Les tests (node:test, lancés via `yarn test`) ne sont ni compilés ni embarqués : voir tsconfig.test.json.
   "exclude": ["src/**/*.test.ts"]
 }

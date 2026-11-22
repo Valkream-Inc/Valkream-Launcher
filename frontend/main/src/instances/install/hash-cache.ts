@@ -11,7 +11,7 @@
 import fs from "fs";
 import path from "path";
 
-import { hashFile } from "./manifest";
+import { hashFile } from "./manifest.js";
 
 const HASH_CACHE_FILE = "instance.hashes.json";
 

@@ -3,8 +3,8 @@
  * @license MIT-NC
  */
 
-import { formatBytes } from "../../lib/format-bytes";
-import type { TransferProgress } from "./providers/types";
+import { formatBytes } from "../../lib/format-bytes.js";
+import type { TransferProgress } from "./providers/types.js";
 
 /** Progression formatée pour l'affichage (octets traités / total, débit moyen depuis `startedAt`). */
 export const progressOf = (processed: number, total: number, startedAt: number): TransferProgress => {

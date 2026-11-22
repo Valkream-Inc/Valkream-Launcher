@@ -19,23 +19,23 @@ import type {
   ReleaseEntry,
 } from "@shared/types";
 
-import { ArchiveCache } from "./providers/archive-cache";
-import { loadEntryContent } from "./local-content";
-import { entryDirectory } from "../local/instance-paths";
-import { buildRow, TIERS, type InstanceInspector } from "../local/InstanceInspector";
-import { readInstallState, readInstanceSettings, recordInstalledEntry, removeInstalledEntry } from "./install-store";
-import { isPathInside } from "../../lib/paths";
-import { removeWithPlan } from "./fs-ops";
-import { HashCache } from "./hash-cache";
-import { appendInstallLog } from "./install-log";
-import type { ParamResolver } from "../remote/ParamResolver";
-import { hashProvider, steamLibraryProvider } from "./providers/hash";
-import { clearGameSourceDir, DEPOT_DIR, GameSourceError, type GuideLanguage, readGameSourceDir, toSteamSourceIssue } from "./game-source";
-import { locateSteamGame, type SteamGame } from "../local/steam-library";
-import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore";
-import type { InstallIO, Provider, Uninstaller } from "./providers/types";
-import { zipProvider } from "./providers/zip";
-import { planEntryUpdate } from "./preserve";
+import { ArchiveCache } from "./providers/archive-cache.js";
+import { loadEntryContent } from "./local-content.js";
+import { entryDirectory } from "../local/instance-paths.js";
+import { buildRow, TIERS, type InstanceInspector } from "../local/InstanceInspector.js";
+import { readInstallState, readInstanceSettings, recordInstalledEntry, removeInstalledEntry } from "./install-store.js";
+import { isPathInside } from "../../lib/paths.js";
+import { removeWithPlan } from "./fs-ops.js";
+import { HashCache } from "./hash-cache.js";
+import { appendInstallLog } from "./install-log.js";
+import type { ParamResolver } from "../remote/ParamResolver.js";
+import { hashProvider, steamLibraryProvider } from "./providers/hash.js";
+import { clearGameSourceDir, DEPOT_DIR, GameSourceError, type GuideLanguage, readGameSourceDir, toSteamSourceIssue } from "./game-source.js";
+import { locateSteamGame, type SteamGame } from "../local/steam-library.js";
+import { thunderstoreProvider, thunderstoreUninstall } from "./providers/thunderstore.js";
+import type { InstallIO, Provider, Uninstaller } from "./providers/types.js";
+import { zipProvider } from "./providers/zip.js";
+import { planEntryUpdate } from "./preserve.js";
 
 const DEFAULT_PROVIDERS: Record<string, Provider> = {
   zip_url: zipProvider,

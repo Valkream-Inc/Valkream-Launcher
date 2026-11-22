@@ -9,8 +9,8 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { cleanupInterruptedMove, moveGamesRoot, readGamesRoot } from "./games-root";
-import { applyLauncherVersion, compareVersions } from "./launcher-version";
+import { cleanupInterruptedMove, moveGamesRoot, readGamesRoot } from "./games-root.js";
+import { applyLauncherVersion, compareVersions } from "./launcher-version.js";
 
 let dir: string;
 beforeEach(() => {

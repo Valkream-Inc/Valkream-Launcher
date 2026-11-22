@@ -9,7 +9,7 @@
 import fs from "fs";
 import path from "path";
 
-import { manifestHash, scanManifest, type Manifest } from "../install/manifest";
+import { manifestHash, scanManifest, type Manifest } from "../install/manifest.js";
 
 export interface FolderHash {
   /** Hash de l'entrée (`hash` du latest.yml). */

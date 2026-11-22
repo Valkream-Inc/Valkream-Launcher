@@ -15,10 +15,10 @@ import type {
   ServerInfos,
 } from "@shared/types";
 
-import type { ServerQueryConfig } from "../../types/core";
-import type { InstanceMainConfig } from "../instances.types";
-import { loadRemoteIndex } from "../remote/InstanceRegistry";
-import type { ParamResolver } from "../remote/ParamResolver";
+import type { ServerQueryConfig } from "../../types/core.js";
+import type { InstanceMainConfig } from "../instances.types.js";
+import { loadRemoteIndex } from "../remote/InstanceRegistry.js";
+import type { ParamResolver } from "../remote/ParamResolver.js";
 
 export interface InfosOptions {
   configs: readonly InstanceMainConfig[];

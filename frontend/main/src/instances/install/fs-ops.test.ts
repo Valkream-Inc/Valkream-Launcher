@@ -4,8 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { listFiles, removeWithPlan } from "./fs-ops";
-import { planEntryUpdate } from "./preserve";
+import { listFiles, removeWithPlan } from "./fs-ops.js";
+import { planEntryUpdate } from "./preserve.js";
 
 let dir: string;
 beforeEach(() => { dir = fs.mkdtempSync(path.join(os.tmpdir(), "fsops-")); });

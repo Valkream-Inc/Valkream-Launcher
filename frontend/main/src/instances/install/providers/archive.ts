@@ -11,7 +11,7 @@ import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
-import type { ProviderContext } from "./types";
+import type { ProviderContext } from "./types.js";
 
 export const isTarGz = (url: string): boolean => /\.(tar\.gz|tgz)(?:[?#].*)?$/i.test(url);
 

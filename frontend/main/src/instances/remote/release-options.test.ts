@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { ParamResolver } from "./ParamResolver";
+import { ParamResolver } from "./ParamResolver.js";
 import {
   flattenRelease,
   isPlatformTable,
   pickPlatform,
   selectEntryPlatform,
-} from "./release-options";
-import { validateReleaseConfig } from "./validate";
+} from "./release-options.js";
+import { validateReleaseConfig } from "./validate.js";
 
 const files: Record<string, string> = {
   "/ignore.json": JSON.stringify(["*.log", "cache"]),

@@ -6,11 +6,11 @@ import { describe, it } from "node:test";
 import yaml from "yaml";
 
 import type { GamePlatform, ReleaseEntry } from "@shared/types";
-import instancesConfig from "../instances.config";
-import { manifestHash } from "../install/manifest";
-import { ParamResolver } from "./ParamResolver";
-import { flattenRelease, RELEASE_TIERS } from "./release-options";
-import { validateReleaseConfig, validateRemoteIndex } from "./validate";
+import { manifestHash } from "../install/manifest.js";
+import instancesConfig from "../instances.config.js";
+import { ParamResolver } from "./ParamResolver.js";
+import { flattenRelease, RELEASE_TIERS } from "./release-options.js";
+import { validateReleaseConfig, validateRemoteIndex } from "./validate.js";
 
 /**
  * Vérifie le dossier `backend/public` contre la config main : chaque instance du main a son
@@ -19,12 +19,15 @@ import { validateReleaseConfig, validateRemoteIndex } from "./validate";
  */
 
 const backendPublic = path.resolve(__dirname, "../../../../../backend/public");
-const local = (link: string) => path.join(backendPublic, link.replace(/^\//, ""));
-const readJson = (link: string) => JSON.parse(fs.readFileSync(local(link), "utf8"));
+const local = (link: string) =>
+  path.join(backendPublic, link.replace(/^\//, ""));
+const readJson = (link: string) =>
+  JSON.parse(fs.readFileSync(local(link), "utf8"));
 
 const resolver = new ParamResolver({
   baseUrl: "https://files.test",
-  fetchText: async (url) => fs.readFileSync(local(new URL(url).pathname), "utf8"),
+  fetchText: async (url) =>
+    fs.readFileSync(local(new URL(url).pathname), "utf8"),
 });
 
 const PLATFORMS: GamePlatform[] = ["win32", "linux", "darwin"];
@@ -41,15 +44,23 @@ for (const config of instancesConfig) {
 
     it("les fichiers liés par l'index existent et sont du JSON", () => {
       for (const key of ["event", "maintenance", "contributors", "mods"]) {
-        if (typeof index[key] === "string") JSON.parse(fs.readFileSync(local(index[key]), "utf8"));
+        if (typeof index[key] === "string")
+          JSON.parse(fs.readFileSync(local(index[key]), "utf8"));
       }
     });
 
-    for (const [channel, link] of Object.entries<string>(index.channels ?? {})) {
+    for (const [channel, link] of Object.entries<string>(
+      index.channels ?? {},
+    )) {
       for (const platform of PLATFORMS) {
         it(`${channel} / ${platform} : latest valide, chaque entrée a son dossier dans la config main`, async () => {
           const raw = yaml.parse(fs.readFileSync(local(link), "utf8"));
-          const { release, errors } = await flattenRelease(raw, platform, resolver, config.entryPaths);
+          const { release, errors } = await flattenRelease(
+            raw,
+            platform,
+            resolver,
+            config.entryPaths,
+          );
           const validation = validateReleaseConfig(release);
           assert.deepEqual([...errors, ...validation.errors], []);
         });
@@ -58,10 +69,20 @@ for (const config of instancesConfig) {
       it(`${channel} : hash des manifestes du dépôt cohérents`, () => {
         const raw = yaml.parse(fs.readFileSync(local(link), "utf8"));
         for (const tier of RELEASE_TIERS) {
-          for (const [name, entry] of Object.entries<ReleaseEntry>(raw[tier] ?? {})) {
-            if (entry.type === "hash_url" && typeof entry.content === "string" && fs.existsSync(local(entry.content))) {
+          for (const [name, entry] of Object.entries<ReleaseEntry>(
+            raw[tier] ?? {},
+          )) {
+            if (
+              entry.type === "hash_url" &&
+              typeof entry.content === "string" &&
+              fs.existsSync(local(entry.content))
+            ) {
               const manifest = readJson(entry.content);
-              assert.equal(entry.hash, manifestHash(manifest, entry.to_ignore ?? []), `${channel}.${name}`);
+              assert.equal(
+                entry.hash,
+                manifestHash(manifest, entry.to_ignore ?? []),
+                `${channel}.${name}`,
+              );
             }
           }
         }
@@ -72,10 +93,14 @@ for (const config of instancesConfig) {
       const names = new Set<string>();
       for (const link of Object.values<string>(index.channels ?? {})) {
         const raw = yaml.parse(fs.readFileSync(local(link), "utf8"));
-        for (const tier of RELEASE_TIERS) Object.keys(raw[tier] ?? {}).forEach((name) => names.add(name));
+        for (const tier of RELEASE_TIERS)
+          Object.keys(raw[tier] ?? {}).forEach((name) => names.add(name));
       }
       for (const name of Object.keys(config.entryPaths)) {
-        assert.ok(names.has(name), `entryPaths.${name} : aucune entrée du même nom dans les latest`);
+        assert.ok(
+          names.has(name),
+          `entryPaths.${name} : aucune entrée du même nom dans les latest`,
+        );
       }
     });
   });

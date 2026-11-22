@@ -11,20 +11,20 @@ import path from "path";
 
 import type { Channel, GamePlatform } from "@shared/types";
 
-import { baseUrl, isDev } from "../core/constants";
-import instancesConfig from "./instances.config";
-import SettingsManager from "../core/settings";
-import DirsManager from "../core/dirs";
-import { createDiskCache } from "./remote/disk-cache";
-import { httpFetchText } from "./remote/http-fetcher";
-import InfosManager from "../core/server-infos";
-import { InstanceInfos } from "./local/InstanceInfos";
-import { InstanceInspector } from "./local/InstanceInspector";
-import { InstanceInstaller } from "./install/InstanceInstaller";
-import { realInstallIO } from "./install/real-io";
-import { InstanceRegistry } from "./remote/InstanceRegistry";
-import { ParamResolver } from "./remote/ParamResolver";
-import { computeStatus } from "./local/status";
+import { baseUrl, isDev } from "../core/constants.js";
+import instancesConfig from "./instances.config.js";
+import SettingsManager from "../core/settings.js";
+import DirsManager from "../core/dirs.js";
+import { createDiskCache } from "./remote/disk-cache.js";
+import { httpFetchText } from "./remote/http-fetcher.js";
+import InfosManager from "../core/server-infos.js";
+import { InstanceInfos } from "./local/InstanceInfos.js";
+import { InstanceInspector } from "./local/InstanceInspector.js";
+import { InstanceInstaller } from "./install/InstanceInstaller.js";
+import { realInstallIO } from "./install/real-io.js";
+import { InstanceRegistry } from "./remote/InstanceRegistry.js";
+import { ParamResolver } from "./remote/ParamResolver.js";
+import { computeStatus } from "./local/status.js";
 
 let resolver: ParamResolver | null = null;
 let registry: InstanceRegistry | null = null;

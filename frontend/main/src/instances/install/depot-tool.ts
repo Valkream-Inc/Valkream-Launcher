@@ -10,9 +10,9 @@
 import fs from "fs";
 import path from "path";
 
-import { hashFile } from "./manifest";
-import type { InstallIO } from "./providers/types";
-import type { DepotAsset } from "./depot-config";
+import { hashFile } from "./manifest.js";
+import type { InstallIO } from "./providers/types.js";
+import type { DepotAsset } from "./depot-config.js";
 
 export interface DepotToolOptions {
   /** Dossier des outils du launcher (`<racine>/tools`). */

@@ -9,10 +9,10 @@
 
 import type { Channel, GamePlatform, InstanceSummary, RemoteIndex } from "@shared/types";
 
-import type { InstanceMainConfig } from "../instances.types";
-import { isFetchableLink } from "./link";
-import type { ParamResolver } from "./ParamResolver";
-import { validateRemoteIndex } from "./validate";
+import type { InstanceMainConfig } from "../instances.types.js";
+import { isFetchableLink } from "./link.js";
+import type { ParamResolver } from "./ParamResolver.js";
+import { validateRemoteIndex } from "./validate.js";
 
 export interface InstanceRegistryOptions {
   configs: readonly InstanceMainConfig[];

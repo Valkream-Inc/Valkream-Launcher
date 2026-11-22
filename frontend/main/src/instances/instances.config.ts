@@ -7,7 +7,7 @@
  * et un dossier `backend/public/games/<id>/` avec son `index.config.json`.
  */
 
-import type { InstanceMainConfig } from "./instances.types";
+import type { InstanceMainConfig } from "./instances.types.js";
 
 /** Réglages par défaut d'une instance (le joueur peut les changer dans Réglages > Game). */
 const DEFAULT_SETTINGS = { launchSteam: true, launcherBehavior: "close" } as const;

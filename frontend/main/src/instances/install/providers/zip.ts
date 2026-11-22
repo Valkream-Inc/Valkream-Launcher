@@ -10,10 +10,10 @@
 import fs from "fs";
 import path from "path";
 
-import { shouldWriteFile } from "../preserve";
-import { commitStaged } from "../staging";
-import { fetchArchive } from "./archive";
-import type { Provider } from "./types";
+import { shouldWriteFile } from "../preserve.js";
+import { commitStaged } from "../staging.js";
+import { fetchArchive } from "./archive.js";
+import type { Provider } from "./types.js";
 
 export const zipProvider: Provider = async (context) => {
   const { entry, entryDir, tempDir, plan, platform, name, beforeCommit } = context;
