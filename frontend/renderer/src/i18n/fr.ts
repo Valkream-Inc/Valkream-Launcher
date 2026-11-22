@@ -222,6 +222,17 @@ const fr: Messages = {
     errorDuring: "Erreur lors de {{action}} !",
     speed: "{{percent}}% ({{done}}{{total}}) à {{speed}}/s",
   },
+  log: {
+    start: "Synchronisation [{{channel}}] : {{count}} entrée(s)",
+    startRepair: "Réparation [{{channel}}] : {{count}} entrée(s)",
+    entryStart: "({{index}}/{{total}}) {{entry}} : {{message}}",
+    entryDone: "{{entry}} : terminé",
+    entryRemoved: "{{entry}} : retiré",
+    entryCancelled: "{{entry}} : annulé",
+    entryError: "{{entry}} : {{message}}",
+    summary: "Fin en {{seconds}} s : {{ok}} réussie(s), {{failed}} en échec",
+    summaryCancelled: "Annulée après {{seconds}} s : {{ok}} réussie(s), {{failed}} en échec",
+  },
   debug: {
     status: {
       "up-to-date": "À jour",

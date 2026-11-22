@@ -219,6 +219,17 @@ const en: Messages = {
     errorDuring: "Error during {{action}}!",
     speed: "{{percent}}% ({{done}}{{total}}) at {{speed}}/s",
   },
+  log: {
+    start: "Sync [{{channel}}]: {{count}} entries",
+    startRepair: "Repair [{{channel}}]: {{count}} entries",
+    entryStart: "({{index}}/{{total}}) {{entry}}: {{message}}",
+    entryDone: "{{entry}}: done",
+    entryRemoved: "{{entry}}: removed",
+    entryCancelled: "{{entry}}: cancelled",
+    entryError: "{{entry}}: {{message}}",
+    summary: "Finished in {{seconds}}s: {{ok}} succeeded, {{failed}} failed",
+    summaryCancelled: "Cancelled after {{seconds}}s: {{ok}} succeeded, {{failed}} failed",
+  },
   debug: {
     status: {
       "up-to-date": "Up to date",

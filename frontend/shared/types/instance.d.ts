@@ -434,3 +434,15 @@ export interface ModsListResult {
   mods: ModDisplay[];
   failed: { id: string; error: string }[];
 }
+
+/** Ligne du journal d'installation (`instance.log`, une par ligne JSON) : traduite à l'affichage. */
+export interface LogRecord {
+  /** Date ISO. */
+  time: string;
+  level: "INFO" | "WARN" | "ERROR";
+  /** Clé de traduction `log.*` (côté interface). */
+  key: string;
+  vars?: Record<string, string | number>;
+  /** Début d'une nouvelle synchronisation (séparateur visuel). */
+  sep?: true;
+}

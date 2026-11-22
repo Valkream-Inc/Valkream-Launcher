@@ -9,23 +9,29 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 
-import { appendInstallLog, formatLogLine, readInstallLog } from "./install-log.js";
+import { appendInstallLog, readInstallLog } from "./install-log.js";
 
 describe("journal d'installation", () => {
-  it("format : date locale, niveau aligné, message sur une ligne", () => {
-    const line = formatLogLine("ERROR", "a\n  b", new Date(2026, 10, 22, 11, 10, 3));
-    assert.equal(line, "2026-11-22 11:10:03 ERROR a b\n");
-    assert.equal(formatLogLine("INFO", "x", new Date(2026, 0, 2, 3, 4, 5)), "2026-01-02 03:04:05 INFO  x\n");
+  it("écrit un évènement JSON par ligne (clé + variables, pas de texte traduit)", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "log-"));
+    appendInstallLog(dir, "log.start", { count: 2 }, "INFO", { separator: true, now: new Date("2026-11-22T10:10:03Z") });
+    appendInstallLog(dir, "log.entryError", { entry: "base", message: "boom\nsuite" }, "ERROR");
+    const [first, second] = readInstallLog(dir).trim().split("\n").map((line) => JSON.parse(line));
+    assert.deepEqual(first, { time: "2026-11-22T10:10:03.000Z", level: "INFO", key: "log.start", vars: { count: 2 }, sep: true });
+    assert.equal(second.level, "ERROR");
+    assert.equal(second.vars.message, "boom\nsuite");
+    assert.equal(second.sep, undefined);
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 
-  it("sépare deux synchronisations par une ligne vide (pas avant la première)", () => {
+  it("tronque le journal à la moitié au-delà de 512 Ko sans casser les lignes", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "log-"));
-    appendInstallLog(dir, "un", "INFO", new Date(), { separator: true });
-    appendInstallLog(dir, "deux");
-    appendInstallLog(dir, "trois", "INFO", new Date(), { separator: true });
-    const lines = readInstallLog(dir).split("\n");
-    assert.equal(lines[2], "");
-    assert.equal(lines.filter((line) => line === "").length, 2); // séparateur + fin de fichier
+    const filler = JSON.stringify({ time: "x", level: "INFO", key: "k", vars: { a: "a".repeat(1000) } });
+    fs.writeFileSync(path.join(dir, "instance.log"), `${Array(600).fill(filler).join("\n")}\n`);
+    appendInstallLog(dir, "log.entryDone", { entry: "e" });
+    const lines = readInstallLog(dir).trim().split("\n");
+    assert.ok(lines.length < 400);
+    for (const line of lines) JSON.parse(line);
     fs.rmSync(dir, { recursive: true, force: true });
   });
 });

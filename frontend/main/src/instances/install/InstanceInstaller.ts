@@ -201,11 +201,14 @@ export class InstanceInstaller {
         if (progress.step === "start" || progress.step === "done" || progress.step === "error") {
           const entry = progress.entry;
           if (progress.step === "start") {
-            appendInstallLog(installDir, t("log.entryStart", { index: progress.index, total: progress.total, entry, message: progress.message ?? "" }));
+            appendInstallLog(installDir, "log.entryStart", { index: progress.index, total: progress.total, entry, message: progress.message ?? "" });
           } else if (progress.step === "done") {
-            appendInstallLog(installDir, progress.message ? t("log.entryDoneWith", { entry, message: progress.message }) : t("log.entryDone", { entry }));
+            // Un message à la fin d'une entrée = entrée optionnelle retirée.
+            appendInstallLog(installDir, progress.message ? "log.entryRemoved" : "log.entryDone", { entry });
+          } else if (progress.message === t("progress.cancelled")) {
+            appendInstallLog(installDir, "log.entryCancelled", { entry }, "WARN");
           } else {
-            appendInstallLog(installDir, t("log.entryError", { entry, message: progress.message ?? "" }), "ERROR");
+            appendInstallLog(installDir, "log.entryError", { entry, message: progress.message ?? "" }, "ERROR");
           }
         }
         onProgress?.({ id, channel, elapsedMs: now - startedAt, ...progress });
@@ -219,13 +222,7 @@ export class InstanceInstaller {
       }
       const archives = new ArchiveCache(archiveUses);
 
-      appendInstallLog(
-        installDir,
-        t("log.start", { channel, mode: repair ? t("log.repairMode") : "", count: todo.length }),
-        "INFO",
-        new Date(),
-        { separator: true },
-      );
+      appendInstallLog(installDir, "log.start", { channel, repair: repair ? 1 : 0, count: todo.length }, "INFO", { separator: true });
 
       let index = 0;
       for (const item of todo) {
@@ -337,12 +334,13 @@ export class InstanceInstaller {
     } finally {
       appendInstallLog(
         installDir,
-        t("log.summary", {
+        "log.summary",
+        {
           seconds: Math.round((Date.now() - syncStartedAt) / 1000),
           ok: result.installed.length,
           failed: result.failed.length,
-          cancelled: result.cancelled ? t("log.cancelled") : "",
-        }),
+          cancelled: result.cancelled ? 1 : 0,
+        },
         result.failed.length > 0 ? "WARN" : "INFO",
       );
       hashes.prune();

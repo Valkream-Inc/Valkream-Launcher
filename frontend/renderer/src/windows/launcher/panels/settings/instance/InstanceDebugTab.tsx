@@ -8,6 +8,7 @@
  */
 
 import {
+  Box,
   Button,
   Chip,
   FormControlLabel,
@@ -34,6 +35,7 @@ import { useAction } from "../../../context/action.context";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
 import { useTranslation } from "react-i18next";
+import { formatInstallLog, formatLogTime, logMessage, parseInstallLog } from "../../../../../instances/install-log";
 
 const STATUS: Record<
   EntryStatus,
@@ -57,6 +59,8 @@ const StatusChip = ({ status }: { status: EntryStatus }) => {
   />
   );
 };
+
+const LEVEL_COLOR = { INFO: "info.main", WARN: "warning.main", ERROR: "error.main" } as const;
 
 const short = (hash?: string) => (hash ? hash.slice(0, 8) : "—");
 
@@ -146,7 +150,9 @@ export default function InstanceDebugTab({
     }
   };
   const copyReport = () => copy(JSON.stringify(report, null, 2), t("debug.report"));
-  const copyLog = () => copy(log || t("debug.emptyLog"), t("debug.log"));
+  const logLines = parseInstallLog(log ?? "");
+  const tr = (key: string, vars?: Record<string, string | number>) => t(key, vars) as string;
+  const copyLog = () => copy(logLines.length > 0 ? formatInstallLog(logLines, tr) : t("debug.emptyLog"), t("debug.log"));
 
   return (
     <>
@@ -346,19 +352,62 @@ export default function InstanceDebugTab({
       <SettingsTitle warn={false}>{t("debug.installLog")}</SettingsTitle>
       <SettingsBox warn={false}>
         <Button onClick={loadLog}>{t("debug.refresh")}</Button>
-        <Typography
-          component="pre"
-          variant="caption"
+        <Box
+          component="div"
           sx={{
-            maxHeight: 300,
+            maxHeight: 360,
             overflow: "auto",
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-all",
+            fontFamily: "monospace",
+            fontSize: 12,
+            lineHeight: 1.6,
             userSelect: "text",
+            borderRadius: 1,
+            p: 1,
+            bgcolor: "rgba(0,0,0,0.25)",
           }}
         >
-          {log === null ? t("common.loading") : log.trim() || t("debug.emptyLog")}
-        </Typography>
+          {log === null && t("common.loading")}
+          {log !== null && logLines.length === 0 && t("debug.emptyLog")}
+          {logLines.map((line, index) =>
+            line.kind === "raw" ? (
+              <Box key={index} sx={{ color: "text.secondary", wordBreak: "break-all" }}>
+                {line.text}
+              </Box>
+            ) : (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  gap: 1.5,
+                  mt: line.record.sep && index > 0 ? 1.5 : 0,
+                  pt: line.record.sep && index > 0 ? 1 : 0,
+                  borderTop: line.record.sep && index > 0 ? "1px solid rgba(255,255,255,0.12)" : "none",
+                  borderLeft: "3px solid",
+                  borderLeftColor: LEVEL_COLOR[line.record.level],
+                  pl: 1,
+                  bgcolor: line.record.level === "ERROR" ? "rgba(244,67,54,0.10)" : "transparent",
+                }}
+              >
+                <Box component="span" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>
+                  {formatLogTime(line.record.time)}
+                </Box>
+                <Box component="span" sx={{ color: LEVEL_COLOR[line.record.level], fontWeight: 700, minWidth: 44 }}>
+                  {line.record.level}
+                </Box>
+                <Box
+                  component="span"
+                  sx={{
+                    wordBreak: "break-word",
+                    color: line.record.level === "INFO" ? "text.primary" : LEVEL_COLOR[line.record.level],
+                    fontWeight: line.record.key === "log.start" || line.record.key === "log.summary" ? 700 : 400,
+                  }}
+                >
+                  {logMessage(line.record, tr)}
+                </Box>
+              </Box>
+            ),
+          )}
+        </Box>
       </SettingsBox>
     </>
   );

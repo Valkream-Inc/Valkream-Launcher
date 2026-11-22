@@ -622,10 +622,14 @@ describe("InstanceInstaller", () => {
     const { installer } = build(baseRemote(), files);
     await installer.sync("g", "stable");
     const log = read("stable", "instance.log");
-    assert.match(log, /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d INFO  Synchronisation \[stable\] : \d+ entrée\(s\)/m);
-    assert.match(log, /INFO  ▶ \(1\/\d+\) base/);
-    assert.match(log, /INFO  ✔ base : terminé/);
-    assert.match(log, /Fin de la synchronisation en \d+ s : \d+ réussie\(s\), 0 en échec/);
+    const records = log.trim().split("\n").map((line) => JSON.parse(line) as { key: string; level: string; time: string; sep?: boolean; vars?: Record<string, unknown> });
+    assert.equal(records[0].key, "log.start");
+    assert.equal(records[0].sep, true);
+    assert.ok(!Number.isNaN(Date.parse(records[0].time)));
+    assert.ok(records.some((record) => record.key === "log.entryStart" && record.vars?.entry === "base"));
+    assert.ok(records.some((record) => record.key === "log.entryDone" && record.vars?.entry === "base"));
+    assert.equal(records.at(-1)?.key, "log.summary");
+    assert.equal(records.at(-1)?.vars?.failed, 0);
   });
 
   it("annulation : signal déjà annulé = rien n'est traité, pas d'échec", async () => {
