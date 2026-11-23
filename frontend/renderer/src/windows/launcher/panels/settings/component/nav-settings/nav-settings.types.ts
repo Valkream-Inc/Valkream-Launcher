@@ -19,4 +19,5 @@ export interface NavSettingsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   ToggleIsConfirmAdminVisible: () => void;
+  ToolBar?: ReactNode;
 }

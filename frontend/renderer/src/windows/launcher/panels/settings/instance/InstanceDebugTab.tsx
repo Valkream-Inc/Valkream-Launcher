@@ -11,14 +11,16 @@ import {
   Box,
   Button,
   Chip,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 
 import type { EntryReport, EntryStatus, InstanceReport } from "@shared/types";
 import { enqueueSnackbar } from "notistack";
@@ -81,6 +83,7 @@ interface Props {
     verify?: boolean;
     silent?: boolean;
   }) => void | Promise<void>;
+  changeTab: (tab: string) => void;
 }
 
 export default function InstanceDebugTab({
@@ -88,6 +91,7 @@ export default function InstanceDebugTab({
   debugContent = [],
   loading,
   onReload,
+  changeTab,
 }: Props) {
   const { t } = useTranslation();
   const titleOf = (entry: EntryReport) =>
@@ -95,6 +99,7 @@ export default function InstanceDebugTab({
   const [problemsOnly, setProblemsOnly] = useState(false);
   const [query, setQuery] = useState("");
   const [log, setLog] = useState<string | null>(null);
+
   const isProblem = (entry: EntryReport) =>
     !["up-to-date", "skipped"].includes(entry.status);
   const needle = query.trim().toLowerCase();
@@ -106,6 +111,7 @@ export default function InstanceDebugTab({
           .toLowerCase()
           .includes(needle),
     );
+
   const tables = groupEntriesByPath(report.entries)
     .map((table) => ({
       ...table,
@@ -128,9 +134,11 @@ export default function InstanceDebugTab({
       );
     }
   }, [report.id, report.channel, t]);
+
   useEffect(() => {
     void loadLog();
   }, [loadLog, report]);
+
   const overlaps = overlappingPaths(report.entries);
   const { summary } = report;
   const { actionLoading, runAction } = useAction();
@@ -161,8 +169,15 @@ export default function InstanceDebugTab({
         enqueueSnackbar(t("debug.repairFailed"), { variant: "error" });
       } finally {
         await onReload({ verify: true });
+        changeTab("debug");
       }
     }, "repair-instance");
+
+  const verify = () =>
+    runAction(async () => {
+      await onReload({ verify: true });
+      changeTab("debug");
+    }, "verify-instance");
 
   // Pour le support : rapport complet (JSON) ou journal d'installation, copiés dans le presse-papiers
   const copy = async (text: string, label: string) => {
@@ -174,11 +189,14 @@ export default function InstanceDebugTab({
       enqueueSnackbar(t("debug.copyFailed", { label }), { variant: "error" });
     }
   };
+
   const copyReport = () =>
     copy(JSON.stringify(report, null, 2), t("debug.report"));
+
   const logLines = parseInstallLog(log ?? "");
   const tr = (key: string, vars?: Record<string, string | number>): string =>
     String(vars ? t(key, vars) : t(key));
+
   const copyLog = () =>
     copy(
       logLines.length > 0
@@ -189,10 +207,34 @@ export default function InstanceDebugTab({
 
   return (
     <>
-      <Wait isVisible={actionLoading} />
+      <Wait isVisible={actionLoading || loading} />
       <SettingsTitle warn={true}>
         Debug — {report.id} ({report.channel})
       </SettingsTitle>
+
+      {/* Outils de support */}
+      <SettingsTitle warn={false}>{t("debug.toolbar")}</SettingsTitle>
+      <SettingsBox warn={false}>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }} useFlexGap>
+          <Button variant="outlined" onClick={verify} disabled={actionLoading}>
+            {t("debug.verify")}
+          </Button>
+          <Button
+            variant="contained"
+            color="warning"
+            onClick={repair}
+            disabled={actionLoading}
+          >
+            {t("debug.repair")}
+          </Button>
+          <Button variant="outlined" onClick={copyReport}>
+            {t("debug.copyReport")}
+          </Button>
+          <Button variant="outlined" onClick={copyLog}>
+            {t("debug.copyLog")}
+          </Button>
+        </Stack>
+      </SettingsBox>
 
       <SettingsBox warn={false}>
         <Typography>
@@ -218,8 +260,8 @@ export default function InstanceDebugTab({
 
       {report.errors.length > 0 && (
         <SettingsBox warn={true}>
-          {report.errors.map((error) => (
-            <Typography key={error} color="error">
+          {report.errors.map((error, index) => (
+            <Typography key={`${index}-${error}`} color="error">
               {error}
             </Typography>
           ))}
@@ -276,9 +318,34 @@ export default function InstanceDebugTab({
         </SettingsBox>
       )}
 
+      {/* Filtres des entrées */}
+      <SettingsBox warn={false}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ alignItems: "center", flexWrap: "wrap" }}
+          useFlexGap
+        >
+          <Button
+            size="small"
+            variant={problemsOnly ? "contained" : "outlined"}
+            color={problemsOnly ? "warning" : "primary"}
+            onClick={() => setProblemsOnly((prev) => !prev)}
+          >
+            {t("debug.problemsOnly")}
+          </Button>
+          <TextField
+            size="small"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("debug.search")}
+          />
+        </Stack>
+      </SettingsBox>
+
       {/* Un tableau par sous-chemin */}
       {tables.map((table) => (
-        <>
+        <Fragment key={table.path || "__root__"}>
           <SettingsTitle warn={table.failing}>/{table.path}</SettingsTitle>
           <SettingsBox warn={false} layout="column">
             <Table size="small" sx={{ minWidth: 760 }}>
@@ -295,8 +362,8 @@ export default function InstanceDebugTab({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {table.entries.map((entry) => (
-                  <TableRow key={entry.name}>
+                {table.entries.map((entry, entryIndex) => (
+                  <TableRow key={`${entry.name}-${entryIndex}`}>
                     <TableCell>
                       {titleOf(entry)}
                       {entry.optionalSetting &&
@@ -328,9 +395,9 @@ export default function InstanceDebugTab({
                             })}
                           </Typography>
                         )}
-                      {entry.errors.map((error) => (
+                      {entry.errors.map((error, errIndex) => (
                         <Typography
-                          key={error}
+                          key={`${errIndex}-${error}`}
                           variant="caption"
                           color="error"
                           sx={{ display: "block" }}
@@ -344,7 +411,7 @@ export default function InstanceDebugTab({
               </TableBody>
             </Table>
           </SettingsBox>
-        </>
+        </Fragment>
       ))}
 
       {tables.length === 0 && (problemsOnly || needle !== "") && (
@@ -396,14 +463,14 @@ export default function InstanceDebugTab({
           {logLines.map((line, index) =>
             line.kind === "raw" ? (
               <Box
-                key={index}
+                key={`raw-${index}`}
                 sx={{ color: "text.secondary", wordBreak: "break-all" }}
               >
                 {line.text}
               </Box>
             ) : (
               <Box
-                key={index}
+                key={`rec-${line.record.time}-${index}`}
                 sx={{
                   display: "flex",
                   gap: 1.5,

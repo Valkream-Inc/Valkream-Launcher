@@ -3,17 +3,17 @@
  * @license MIT-NC
  */
 
-import React from "react";
 import type { MouseEvent } from "react";
+import React from "react";
 import "./css/nav-settings.css";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 
-import { usePanels } from "../../../../context/panels.context";
-import { useGames } from "../../../../context/games.context";
-import type { NavButtonProps, NavSettingsProps } from "./nav-settings.types";
 import { useTranslation } from "react-i18next";
+import { useGames } from "../../../../context/games.context";
+import { usePanels } from "../../../../context/panels.context";
+import type { NavButtonProps, NavSettingsProps } from "./nav-settings.types";
 
 export const NavButton = ({
   id,
@@ -39,6 +39,7 @@ export const NavSettings = ({
   activeTab,
   setActiveTab,
   ToggleIsConfirmAdminVisible,
+  ToolBar,
 }: NavSettingsProps) => {
   const { t } = useTranslation();
   const { changePanel } = usePanels();
@@ -69,7 +70,9 @@ export const NavSettings = ({
         alt="Logo Valkream"
         className="menu-header"
       />
-      <div className="menu-header">{t("nav.title")}</div>
+      <div className="menu-header">
+        {t("nav.title")} {ToolBar}
+      </div>
 
       {/* Boutons */}
       <Box className="nav-box">

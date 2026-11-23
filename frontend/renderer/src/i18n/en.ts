@@ -88,12 +88,15 @@ const en: Messages = {
       label: "Enable developer tools",
     },
     content: {
-    tips1: "While in game, be connected to the Mumble server and in the “In-game voice” channel of the Valkream Discord server.",
-    tips2: "News and information are available on the website and on the Discord server. (if you need help, do not hesitate to reach us on our Discord server)",
-    welcome1: "You are about to install the game ...",
-    welcome2: "If you have any problem, do not hesitate to reach us on our Discord server.",
-  },
-  debug: {
+      tips1:
+        "While in game, be connected to the Mumble server and in the “In-game voice” channel of the Valkream Discord server.",
+      tips2:
+        "News and information are available on the website and on the Discord server. (if you need help, do not hesitate to reach us on our Discord server)",
+      welcome1: "You are about to install the game ...",
+      welcome2:
+        "If you have any problem, do not hesitate to reach us on our Discord server.",
+    },
+    debug: {
       text: "You can open the launcher console (the browser web tools). ⚠️ Only use it with qualified people. An installation's diagnostics are in the game's Debug tab.",
       button: "Open console",
       opened: "Console opened!",
@@ -130,7 +133,8 @@ const en: Messages = {
       cleared: "Nexus key cleared",
     },
     gamesRoot: {
-      progress: "Moving: {{done}} / {{total}} files ({{percent}}%). Do not launch a game until it is finished.",
+      progress:
+        "Moving: {{done}} / {{total}} files ({{percent}}%). Do not launch a game until it is finished.",
       text: "Games installation folder. Changing the folder moves the games already installed (can take several minutes on another drive).",
       change: "Change",
       moving: "Moving…",
@@ -145,9 +149,14 @@ const en: Messages = {
     dangerZone: "⚠️ Danger zone!",
     advanced: "⚠️ Advanced!",
     noMods: "No mod to display for this instance.",
+    noMatchingMods: "No matching mod found.",
+    searchMods: "Search mods...",
     mods: "Mods ({{count}})",
     contributors: "Contributors ({{count}})",
     contributorsTab: "Contributors",
+    searchContributors: "Search contributors...",
+    noMatchingContributors: "No matching contributor found.",
+    clearSearch: "Clear search",
     seePage: "See the page",
     noContributors: "No contributors to display for this instance.",
     settingOn: "“{{label}}” enabled.",
@@ -240,7 +249,8 @@ const en: Messages = {
     entryCancelled: "{{entry}}: cancelled",
     entryError: "{{entry}}: {{message}}",
     summary: "Finished in {{seconds}}s: {{ok}} succeeded, {{failed}} failed",
-    summaryCancelled: "Cancelled after {{seconds}}s: {{ok}} succeeded, {{failed}} failed",
+    summaryCancelled:
+      "Cancelled after {{seconds}}s: {{ok}} succeeded, {{failed}} failed",
   },
   debug: {
     search: "Search an entry…",
@@ -278,7 +288,8 @@ const en: Messages = {
     total: "Total",
     toUpdate: "To update",
     blocking: "Blocking: {{list}}",
-    overlaps: "Nested paths (shared files, check to_ignore / gameFolderToPreserve): {{list}}",
+    overlaps:
+      "Nested paths (shared files, check to_ignore / gameFolderToPreserve): {{list}}",
     problemsOnly: "Show problems only",
     entry: "Entry",
     tier: "Tier",
@@ -299,14 +310,16 @@ const en: Messages = {
   tools: {
     withDependencies: "Include its dependencies (modpack)",
     keyLabel: "JSON key (optional)",
-    keyHelp: "Path of the array inside the JSON: dependencies, packs.0.mods… Empty: the file or link is itself the list.",
+    keyHelp:
+      "Path of the array inside the JSON: dependencies, packs.0.mods… Empty: the file or link is itself the list.",
     stepOptions: "Options",
     stepRun: "Run",
     stepResult: "Result",
     stepSource: "Source",
     working: "Working…",
     progress: "{{done}} / {{total}}",
-    urlLabel: "Link to the list (JSON, text) or a Thunderstore or Hexium mod page",
+    urlLabel:
+      "Link to the list (JSON, text) or a Thunderstore or Hexium mod page",
     urlInvalid: "The link must start with http:// or https://",
     pickFile: "Choose a file…",
     fileLoaded: "File: {{name}}",
@@ -316,7 +329,8 @@ const en: Messages = {
     saved: "Saved: {{target}}",
     units: { b: "B", kb: "KB", mb: "MB", gb: "GB" },
     hashTitle: "Folder hash",
-    ignoreLabel: "to_ignore (one pattern per line: logs, *.cfg, config/client.cfg…)",
+    ignoreLabel:
+      "to_ignore (one pattern per line: logs, *.cfg, config/client.cfg…)",
     computing: "Computing…",
     pick: "Choose a folder and hash it",
     exportFiles: "Export hash.json + files",
@@ -328,17 +342,20 @@ const en: Messages = {
     saveManifest: "Save hash.json",
     hashName: "Hash",
     modsTitle: "Mod list from a manifest",
-    depsLabelNexus: "Nexus mods (game-modId-fileId, one per line, JSON array or nexusmods.com page link)",
+    depsLabelNexus:
+      "Nexus mods (game-modId-fileId, one per line, JSON array or nexusmods.com page link)",
     api: {
       label: "Mods API",
       help: "Automatic detection, or force an API.",
-      nexusHelp: "Nexus Mods: API key required (Settings → Launcher); line game-modId-fileId (e.g. valheim-1234-5678) or a nexusmods.com page link.",
+      nexusHelp:
+        "Nexus Mods: API key required (Settings → Launcher); line game-modId-fileId (e.g. valheim-1234-5678) or a nexusmods.com page link.",
       auto: "Automatic detection",
       thunderstore: "Thunderstore",
       hexium: "Hexium",
       nexus: "Nexus Mods",
     },
-    depsLabel: "Thunderstore dependencies (Author-Name-Version, one per line, JSON array or link)",
+    depsLabel:
+      "Thunderstore dependencies (Author-Name-Version, one per line, JSON array or link)",
     fetching: "Fetching…",
     generate: "Generate the list",
     copyJson: "Copy the JSON",
@@ -359,10 +376,14 @@ const en: Messages = {
       what: "**DepotDownloader** is an open source tool (GPL-2.0 license) that downloads a specific version of a game from Steam's servers.",
       source: "Source code: {{url}}",
       title: "What happens",
-      step1: "1. The launcher downloads the official **{{version}}** version of the tool, checks its sha256 fingerprint, then stores it in `{{dir}}`. If it was modified, it is refused.",
-      step2: "2. A window shows a **QR code**: scan it with the Steam mobile app. Your password and Steam Guard code never go through the launcher.",
-      step3: "3. The game is downloaded into `{{dir}}`, then each file is verified before being copied into the instance. This folder is then deleted.",
-      step4: "4. The game must belong to your Steam account. Never share the downloaded files.",
+      step1:
+        "1. The launcher downloads the official **{{version}}** version of the tool, checks its sha256 fingerprint, then stores it in `{{dir}}`. If it was modified, it is refused.",
+      step2:
+        "2. A window shows a **QR code**: scan it with the Steam mobile app. Your password and Steam Guard code never go through the launcher.",
+      step3:
+        "3. The game is downloaded into `{{dir}}`, then each file is verified before being copied into the instance. This folder is then deleted.",
+      step4:
+        "4. The game must belong to your Steam account. Never share the downloaded files.",
       cancel: "You can cancel at any time.",
       notConfigured: "not configured",
     },

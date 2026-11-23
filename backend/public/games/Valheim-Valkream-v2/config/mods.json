@@ -23,7 +23,9 @@
   {
     "id": "Smoothbrain-SmoothSave",
     "name": "SmoothSave",
-    "link": "https://thunderstore.io/package/Smoothbrain/SmoothSave/"
+    "link": "https://thunderstore.io/package/Smoothbrain/SmoothSave/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-SmoothSave-1.0.5.png",
+    "description": "Removes the freeze that happens if the world is being saved."
   },
   {
     "id": "shudnal-MoreGatesExtended",
@@ -91,7 +93,9 @@
   {
     "id": "Therzie-Warfare",
     "name": "Warfare",
-    "link": "https://thunderstore.io/package/Therzie/Warfare/"
+    "link": "https://thunderstore.io/package/Therzie/Warfare/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Therzie-Warfare-1.8.9.png",
+    "description": "Fills the weapon and shields gap in vanilla Valheim and with MANY new weapons and unique extras!"
   },
   {
     "id": "Therzie-Wizardry",
@@ -103,7 +107,9 @@
   {
     "id": "Therzie-Armory",
     "name": "Armory",
-    "link": "https://thunderstore.io/package/Therzie/Armory/"
+    "link": "https://thunderstore.io/package/Therzie/Armory/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Therzie-Armory-1.3.1.png",
+    "description": "Adds the Armory forge that offers new variants of original armors that upgrade to the next biome."
   },
   {
     "id": "Therzie-Monstrum",
@@ -185,7 +191,9 @@
   {
     "id": "Azumatt-PvPAlwaysOn",
     "name": "PvPAlwaysOn",
-    "link": "https://thunderstore.io/package/Azumatt/PvPAlwaysOn/"
+    "link": "https://thunderstore.io/package/Azumatt/PvPAlwaysOn/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-PvPAlwaysOn-2.1.2.png",
+    "description": "Remake of mine and TheDefiance2017's mod on nexus made again by request. This is a mod that is intended to be used on a forced PvP server. This mod makes it to where PvP cannot be toggled by the player, and PvP is set to always be on."
   },
   {
     "id": "Azumatt-AzuAntiCheat",
@@ -246,7 +254,9 @@
   {
     "id": "ValheimModding-YamlDotNet",
     "name": "YamlDotNet",
-    "link": "https://thunderstore.io/package/ValheimModding/YamlDotNet/"
+    "link": "https://thunderstore.io/package/ValheimModding/YamlDotNet/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/ValheimModding-YamlDotNet-16.3.1.png",
+    "description": "Shared version 16.3.0 of YamlDotNet from Antoine Aubry and contributors, net47 package for use in Valheim mods. Maintained by the ValheimModding team."
   },
   {
     "id": "ValheimModding-JsonDotNET",
@@ -286,7 +296,9 @@
   {
     "id": "Tristan-Player_Activity",
     "name": "Player Activity",
-    "link": "https://thunderstore.io/package/Tristan/Player_Activity/"
+    "link": "https://thunderstore.io/package/Tristan/Player_Activity/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Tristan-Player_Activity-1.2.1.png",
+    "description": "Saves a detailed history of player actions on the server."
   },
   {
     "id": "blacks7ar-WieldEquipmentWhileSwimming",
@@ -298,7 +310,9 @@
   {
     "id": "Azumatt-FastLink",
     "name": "FastLink",
-    "link": "https://thunderstore.io/package/Azumatt/FastLink/"
+    "link": "https://thunderstore.io/package/Azumatt/FastLink/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-FastLink-1.4.8.png",
+    "description": "Vanilla UI to quickly join servers configured in a YAML file. Live edit using BepInEx Configuration manager or directly to the file."
   },
   {
     "id": "nwesterhausen-DiscordConnector_Client",
@@ -324,7 +338,9 @@
   {
     "id": "southsil-SouthsilArmor",
     "name": "SouthsilArmor",
-    "link": "https://thunderstore.io/package/southsil/SouthsilArmor/"
+    "link": "https://thunderstore.io/package/southsil/SouthsilArmor/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/southsil-SouthsilArmor-3.1.8.png",
+    "description": "Adds over 30 entirely new armor sets, spread across all biomes!"
   },
   {
     "id": "KGvalheim-No_More_Crashes",
@@ -336,7 +352,9 @@
   {
     "id": "Azumatt-Azus_UnOfficial_ConfigManager",
     "name": "Azus UnOfficial ConfigManager",
-    "link": "https://thunderstore.io/package/Azumatt/Azus_UnOfficial_ConfigManager/"
+    "link": "https://thunderstore.io/package/Azumatt/Azus_UnOfficial_ConfigManager/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-Azus_UnOfficial_ConfigManager-18.4.4.png",
+    "description": "Mod to assist with configuration of BepInEx mods"
   },
   {
     "id": "Dzk-ValkreamPlus",
@@ -355,7 +373,9 @@
   {
     "id": "Azumatt-Build_Camera_Custom_Hammers_Edition",
     "name": "Build Camera Custom Hammers Edition",
-    "link": "https://thunderstore.io/package/Azumatt/Build_Camera_Custom_Hammers_Edition/"
+    "link": "https://thunderstore.io/package/Azumatt/Build_Camera_Custom_Hammers_Edition/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-Build_Camera_Custom_Hammers_Edition-1.2.10.png",
+    "description": "Adds a build camera to your vanilla and custom hammers. Taken over from the original mod by Azumatt."
   },
   {
     "id": "WackyMole-RareMagicPortalPlus",
@@ -367,12 +387,16 @@
   {
     "id": "Azumatt-BindOnEquip",
     "name": "BindOnEquip",
-    "link": "https://thunderstore.io/package/Azumatt/BindOnEquip/"
+    "link": "https://thunderstore.io/package/Azumatt/BindOnEquip/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-BindOnEquip-1.3.11.png",
+    "description": "A mod for Valheim that allows players to bind items to their account on a character-specific basis, making the items\nunusable by others. The server can enforce what categories of items are bindable."
   },
   {
     "id": "MonsterLabZFix-MonsterLabZ",
     "name": "MonsterLabZ",
-    "link": "https://thunderstore.io/package/MonsterLabZFix/MonsterLabZ/"
+    "link": "https://thunderstore.io/package/MonsterLabZFix/MonsterLabZ/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/MonsterLabZFix-MonsterLabZ-3.0.12.png",
+    "description": "Explore Valheim with new monsters to fight! This version is temporary fix until original mod is updated."
   },
   {
     "id": "Smoothbrain-Groups",
@@ -384,7 +408,9 @@
   {
     "id": "OdinPlus-OdinCampsite",
     "name": "OdinCampsite",
-    "link": "https://thunderstore.io/package/OdinPlus/OdinCampsite/"
+    "link": "https://thunderstore.io/package/OdinPlus/OdinCampsite/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/OdinPlus-OdinCampsite-1.6.3.png",
+    "description": "Campsite is just simple mod for additional camping style peices!"
   },
   {
     "id": "OdinPlus-OdinBanners",
@@ -396,27 +422,37 @@
   {
     "id": "Smoothbrain-Blacksmithing",
     "name": "Blacksmithing",
-    "link": "https://thunderstore.io/package/Smoothbrain/Blacksmithing/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Blacksmithing/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Blacksmithing-1.3.3.png",
+    "description": "Adds a skill that increases the durability of armor and weapons and other perks for blacksmithing."
   },
   {
     "id": "Smoothbrain-Building",
     "name": "Building",
-    "link": "https://thunderstore.io/package/Smoothbrain/Building/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Building/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Building-1.2.6.png",
+    "description": "Adds a skill that increases the health of pieces built by you."
   },
   {
     "id": "Smoothbrain-Foraging",
     "name": "Foraging",
-    "link": "https://thunderstore.io/package/Smoothbrain/Foraging/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Foraging/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Foraging-1.0.10.png",
+    "description": "Adds a skill that increases item yield while foraging and makes berries and mushrooms respawn faster."
   },
   {
     "id": "Smoothbrain-Lumberjacking",
     "name": "Lumberjacking",
-    "link": "https://thunderstore.io/package/Smoothbrain/Lumberjacking/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Lumberjacking/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Lumberjacking-1.0.6.png",
+    "description": "Replaces the wood cutting skill with a Lumberjacking skill."
   },
   {
     "id": "Smoothbrain-Mining",
     "name": "Mining",
-    "link": "https://thunderstore.io/package/Smoothbrain/Mining/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Mining/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Mining-1.1.6.png",
+    "description": "Adds a skill that increases damage dealt while mining and item yield from ore deposits."
   },
   {
     "id": "Smoothbrain-Sailing",
@@ -428,12 +464,16 @@
   {
     "id": "Smoothbrain-Vitality",
     "name": "Vitality",
-    "link": "https://thunderstore.io/package/Smoothbrain/Vitality/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Vitality/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Vitality-1.1.3.png",
+    "description": "Adds a skill that increases the base health."
   },
   {
     "id": "Smoothbrain-Exploration",
     "name": "Exploration",
-    "link": "https://thunderstore.io/package/Smoothbrain/Exploration/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Exploration/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Exploration-1.0.4.png",
+    "description": "Adds a skill that increases exploration radius and movement speed."
   },
   {
     "id": "Smoothbrain-Farming",
@@ -445,7 +485,9 @@
   {
     "id": "Smoothbrain-Cooking",
     "name": "Cooking",
-    "link": "https://thunderstore.io/package/Smoothbrain/Cooking/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Cooking/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Cooking-1.2.2.png",
+    "description": "Adds a skill that increases health, stamina, eitr and HP regeneration for cooked food."
   },
   {
     "id": "Smoothbrain-Resurrection",
@@ -457,32 +499,44 @@
   {
     "id": "OdinPlus-CrystalLights",
     "name": "CrystalLights",
-    "link": "https://thunderstore.io/package/OdinPlus/CrystalLights/"
+    "link": "https://thunderstore.io/package/OdinPlus/CrystalLights/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/OdinPlus-CrystalLights-1.1.8.png",
+    "description": "A Custom Build Piece Expansion for Jewelcrafting! Use Uncut Gemstones and Iron to create light sources! HUGE FPS difference with configurable range."
   },
   {
     "id": "OdinPlus-BeeQueen",
     "name": "BeeQueen",
-    "link": "https://thunderstore.io/package/OdinPlus/BeeQueen/"
+    "link": "https://thunderstore.io/package/OdinPlus/BeeQueen/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/OdinPlus-BeeQueen-1.1.0.png",
+    "description": "A Bee Queen that will spawn around meadows on Clear Sky days!"
   },
   {
     "id": "blacks7ar-VikingsDoSwim",
     "name": "VikingsDoSwim",
-    "link": "https://thunderstore.io/package/blacks7ar/VikingsDoSwim/"
+    "link": "https://thunderstore.io/package/blacks7ar/VikingsDoSwim/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/blacks7ar-VikingsDoSwim-1.4.1.png",
+    "description": "A simple mod that lets you configure Max Swim Speed at max swim skill level. Scales your swim speed, stamina regen and stamina consumption to your swim skill level. Adds a new diving mechanic that lets you swim underwater."
   },
   {
     "id": "blacks7ar-MagicRevamp",
     "name": "MagicRevamp",
-    "link": "https://thunderstore.io/package/blacks7ar/MagicRevamp/"
+    "link": "https://thunderstore.io/package/blacks7ar/MagicRevamp/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/blacks7ar-MagicRevamp-1.4.9.png",
+    "description": "An alternative to my MagicPlugin mod, for those who wants a vanilla-like progression, adds 7 staves, 7 wands, 6 armor sets, 7 new materials, 1 crafting station with 2 extensions, a spellbook and 96 spells."
   },
   {
     "id": "blacks7ar-BoatAdditions",
     "name": "BoatAdditions",
-    "link": "https://thunderstore.io/package/blacks7ar/BoatAdditions/"
+    "link": "https://thunderstore.io/package/blacks7ar/BoatAdditions/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/blacks7ar-BoatAdditions-1.4.2.png",
+    "description": "Adds 3 small and 5 new large boats with anchors and lamps and a boatyard that can help you on your journey."
   },
   {
     "id": "Smoothbrain-Ranching",
     "name": "Ranching",
-    "link": "https://thunderstore.io/package/Smoothbrain/Ranching/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Ranching/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Ranching-1.1.6.png",
+    "description": "Adds a skill that makes taming animals faster and increases item yield of tamed creatures."
   },
   {
     "id": "Azumatt-FirstPersonMode",
@@ -494,12 +548,16 @@
   {
     "id": "Smoothbrain-Backpacks",
     "name": "Backpacks",
-    "link": "https://thunderstore.io/package/Smoothbrain/Backpacks/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Backpacks/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Backpacks-1.3.8.png",
+    "description": "Adds a very nice backpack and Build Your Own Backpack™!"
   },
   {
     "id": "JereKuusela-Expand_World_Size",
     "name": "Expand World Size",
-    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Size/"
+    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Size/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/JereKuusela-Expand_World_Size-1.30.0.png",
+    "description": "Allows configuring the world size and altitude settings."
   },
   {
     "id": "ASharpPen-Drop_That",
@@ -511,7 +569,9 @@
   {
     "id": "Smoothbrain-Guilds",
     "name": "Guilds",
-    "link": "https://thunderstore.io/package/Smoothbrain/Guilds/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Guilds/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Guilds-1.1.13.png",
+    "description": "Adds basic guild features to the game."
   },
   {
     "id": "Smoothbrain-TargetPortal",
@@ -523,12 +583,16 @@
   {
     "id": "OdinPlus-OdinHorse",
     "name": "OdinHorse",
-    "link": "https://thunderstore.io/package/OdinPlus/OdinHorse/"
+    "link": "https://thunderstore.io/package/OdinPlus/OdinHorse/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/OdinPlus-OdinHorse-1.6.1.png",
+    "description": "Horse mount and new items! You can tame it, You can ride it, You can attach the Horse Cart, You can breed it, Add armor to your horse!"
   },
   {
     "id": "Meldurson-PortablePals",
     "name": "PortablePals",
-    "link": "https://thunderstore.io/package/Meldurson/PortablePals/"
+    "link": "https://thunderstore.io/package/Meldurson/PortablePals/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Meldurson-PortablePals-0.2.0.png",
+    "description": "Take your tames with you, wherever you go, in your trusty Pal Stone!"
   },
   {
     "id": "Marlthon-SeaAnimals",
@@ -540,32 +604,44 @@
   {
     "id": "Marlthon-TheFisher",
     "name": "TheFisher",
-    "link": "https://thunderstore.io/package/Marlthon/TheFisher/"
+    "link": "https://thunderstore.io/package/Marlthon/TheFisher/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Marlthon-TheFisher-0.3.5.png",
+    "description": "Transforms Valheim’s seas and rivers into a vibrant ecosystem filled with new species of fish, aquatic creatures, and fully functional aquariums!"
   },
   {
     "id": "Radamanto-LootBox",
     "name": "LootBox",
-    "link": "https://thunderstore.io/package/Radamanto/LootBox/"
+    "link": "https://thunderstore.io/package/Radamanto/LootBox/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Radamanto-LootBox-1.1.6.png",
+    "description": "Configurable reward boxes."
   },
   {
     "id": "shudnal-LongshipUpgrades",
     "name": "LongshipUpgrades",
-    "link": "https://thunderstore.io/package/shudnal/LongshipUpgrades/"
+    "link": "https://thunderstore.io/package/shudnal/LongshipUpgrades/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/shudnal-LongshipUpgrades-1.0.16.png",
+    "description": "Upgrade your vanilla Longship piece by piece with lantern, changeable sails, tent, shields, extended storage and more."
   },
   {
     "id": "Soloredis-RtDOcean",
     "name": "RtDOcean",
-    "link": "https://thunderstore.io/package/Soloredis/RtDOcean/"
+    "link": "https://thunderstore.io/package/Soloredis/RtDOcean/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Soloredis-RtDOcean-2.1.1.png",
+    "description": "This expansion adds new crops, sea life, sushi, stews, wraps, friendly ocean creatures, aggressive predators, underwater exploration content, relic crafting, and a full ocean boss encounter."
   },
   {
     "id": "KGvalheim-Arcane_Ward",
     "name": "Arcane Ward",
-    "link": "https://thunderstore.io/package/KGvalheim/Arcane_Ward/"
+    "link": "https://thunderstore.io/package/KGvalheim/Arcane_Ward/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/KGvalheim-Arcane_Ward-0.7.0.png",
+    "description": "Ward with configurable UI protection features and distanced view / control by map click"
   },
   {
     "id": "JereKuusela-Expand_World_Data",
     "name": "Expand World Data",
-    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Data/"
+    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Data/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/JereKuusela-Expand_World_Data-1.63.0.png",
+    "description": "Allows adding new biomes and changing most of the world generation."
   },
   {
     "id": "ValheimModding-Jotunn",
@@ -577,7 +653,9 @@
   {
     "id": "OdinPlus-PotionPlus",
     "name": "PotionPlus",
-    "link": "https://thunderstore.io/package/OdinPlus/PotionPlus/"
+    "link": "https://thunderstore.io/package/OdinPlus/PotionPlus/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/OdinPlus-PotionPlus-4.3.0.png",
+    "description": "Adds several potions to the game, now with improved skills, new potions, new config options, and server sync!!"
   },
   {
     "id": "JereKuusela-Expand_World_Prefabs",
@@ -589,47 +667,65 @@
   {
     "id": "shudnal-ExtraSlotsCustomSlots",
     "name": "ExtraSlotsCustomSlots",
-    "link": "https://thunderstore.io/package/shudnal/ExtraSlotsCustomSlots/"
+    "link": "https://thunderstore.io/package/shudnal/ExtraSlotsCustomSlots/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/shudnal-ExtraSlotsCustomSlots-1.0.18.png",
+    "description": "Custom slots for various mods that support custom items."
   },
   {
     "id": "JereKuusela-Expand_World_Spawns",
     "name": "Expand World Spawns",
-    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Spawns/"
+    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Spawns/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/JereKuusela-Expand_World_Spawns-1.16.0.png",
+    "description": "Allows changing spawns."
   },
   {
     "id": "Dzk-BossNBows",
     "name": "BossNBows",
-    "link": "https://thunderstore.io/package/Dzk/BossNBows/"
+    "link": "https://thunderstore.io/package/Dzk/BossNBows/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Dzk-BossNBows-1.0.5.png",
+    "description": "For bow lovers"
   },
   {
     "id": "KGvalheim-Marketplace_And_Server_NPCs_Revamped",
     "name": "Marketplace And Server NPCs Revamped",
-    "link": "https://thunderstore.io/package/KGvalheim/Marketplace_And_Server_NPCs_Revamped/"
+    "link": "https://thunderstore.io/package/KGvalheim/Marketplace_And_Server_NPCs_Revamped/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/KGvalheim-Marketplace_And_Server_NPCs_Revamped-9.8.1.png",
+    "description": "Mod adds Marketplace where people can sell/buy items and 8 more NPC's: Quests/ Trader / Banker / Teleporter / Info / Feedback / Gambler / Buffer"
   },
   {
     "id": "Smoothbrain-Jewelcrafting",
     "name": "Jewelcrafting",
-    "link": "https://thunderstore.io/package/Smoothbrain/Jewelcrafting/"
+    "link": "https://thunderstore.io/package/Smoothbrain/Jewelcrafting/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Jewelcrafting-2.0.1.png",
+    "description": "Adds a risk / reward socket system to Valheim."
   },
   {
     "id": "WackyMole-WackyItemRequiresSkillLevel",
     "name": "WackyItemRequiresSkillLevel",
-    "link": "https://thunderstore.io/package/WackyMole/WackyItemRequiresSkillLevel/"
+    "link": "https://thunderstore.io/package/WackyMole/WackyItemRequiresSkillLevel/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/WackyMole-WackyItemRequiresSkillLevel-1.4.6.png",
+    "description": "Wacky Item Requires Skill Level allows you to set your items to require skills / WackyEpicMMO / VLS / Global Keys attributes to be equipped or crafted."
   },
   {
     "id": "WackyMole-WackyEpicMMOSystem",
     "name": "WackyEpicMMOSystem",
-    "link": "https://thunderstore.io/package/WackyMole/WackyEpicMMOSystem/"
+    "link": "https://thunderstore.io/package/WackyMole/WackyEpicMMOSystem/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/WackyMole-WackyEpicMMOSystem-1.9.60.png",
+    "description": "Adds to your Valheim world a system of levels and distribution of characteristics"
   },
   {
     "id": "shudnal-ExtraSlots",
     "name": "ExtraSlots",
-    "link": "https://thunderstore.io/package/shudnal/ExtraSlots/"
+    "link": "https://thunderstore.io/package/shudnal/ExtraSlots/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/shudnal-ExtraSlots-1.1.15.png",
+    "description": "More inventory slots dedicated for equipment, food, ammo and misc items. Extra utility slots. Quick slots. Custom slots API. Player inventory resize. Gamepad friendly. Slot obtaining progression."
   },
   {
     "id": "VerdantsAscent-FiresGhettoNetworking",
     "name": "FiresGhettoNetworking",
-    "link": "https://thunderstore.io/package/VerdantsAscent/FiresGhettoNetworking/"
+    "link": "https://thunderstore.io/package/VerdantsAscent/FiresGhettoNetworking/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/VerdantsAscent-FiresGhettoNetworking-1.3.2.png",
+    "description": "Comprehensive networking + server-authority mod with ZDO delta compression, WearNTear server/client CPU skips for invulnerable pieces, AoI-filtered RPC broadcasts, and a built-in per-client config auto-tuner."
   },
   {
     "id": "WackyMole-WackysDatabase",

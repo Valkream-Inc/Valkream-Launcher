@@ -10,7 +10,7 @@
  */
 import { contextBridge, ipcRenderer } from "electron";
 
-import type { ElectronAPI } from "@shared/types";
+import type { ElectronAPI, GamesRootMove } from "@shared/types";
 
 // Expose these window control functions to the renderer process (your React app).
 // They will be available in the renderer as `window.electron_API.close()`, `window.electron_API.minimize()`, etc.
@@ -25,10 +25,8 @@ const electronAPI: ElectronAPI = {
   minimize: () => ipcRenderer.send("main-window-minimize"),
   maximize: () => ipcRenderer.send("main-window-maximize"),
   isMaximized: () => ipcRenderer.invoke("get-is-maximized"),
-  onMaximize: (callback) =>
-    ipcRenderer.on("on-maximize", () => callback()),
-  onUnmaximize: (callback) =>
-    ipcRenderer.on("on-unmaximize", () => callback()),
+  onMaximize: (callback) => ipcRenderer.on("on-maximize", () => callback()),
+  onUnmaximize: (callback) => ipcRenderer.on("on-unmaximize", () => callback()),
   removeOnMaximize: (callback) =>
     ipcRenderer.removeListener("on-maximize", callback),
   removeOnUnmaximize: (callback) =>
@@ -49,14 +47,27 @@ const electronAPI: ElectronAPI = {
   // outils admin
   toolsHashFolder: (ignore) => ipcRenderer.invoke("tools:hash-folder", ignore),
   toolsExportHash: (ignore) => ipcRenderer.invoke("tools:export-hash", ignore),
-  toolsModsList: (source, apiUrl, key, withDependencies) => ipcRenderer.invoke("tools:mods-list", source, apiUrl, key, withDependencies),
+  toolsModsList: (source, apiUrl, key, withDependencies) =>
+    ipcRenderer.invoke(
+      "tools:mods-list",
+      source,
+      apiUrl,
+      key,
+      withDependencies,
+    ),
   toolsOpenTextFile: () => ipcRenderer.invoke("tools:open-text-file"),
-  onToolsProgress: (callback) => ipcRenderer.on("tools:progress", (_event, data) => callback(data)),
-  removeToolsProgressListeners: () => ipcRenderer.removeAllListeners("tools:progress"),
-  toolsSaveText: (defaultName, text) => ipcRenderer.invoke("tools:save-text", defaultName, text),
-  getInstanceLog: (id, channel) => ipcRenderer.invoke("instances:log", id, channel),
-  cancelInstanceSync: (id, channel) => ipcRenderer.invoke("instances:cancel", id, channel),
-  launchInstance: (id, channel) => ipcRenderer.invoke("instances:launch", id, channel),
+  onToolsProgress: (callback) =>
+    ipcRenderer.on("tools:progress", (_event, data) => callback(data)),
+  removeToolsProgressListeners: () =>
+    ipcRenderer.removeAllListeners("tools:progress"),
+  toolsSaveText: (defaultName, text) =>
+    ipcRenderer.invoke("tools:save-text", defaultName, text),
+  getInstanceLog: (id, channel) =>
+    ipcRenderer.invoke("instances:log", id, channel),
+  cancelInstanceSync: (id, channel) =>
+    ipcRenderer.invoke("instances:cancel", id, channel),
+  launchInstance: (id, channel) =>
+    ipcRenderer.invoke("instances:launch", id, channel),
   openInstanceFolder: (id, channel) =>
     ipcRenderer.invoke("instances:open-folder", id, channel),
   uninstallInstance: (id, channel) =>
@@ -65,13 +76,20 @@ const electronAPI: ElectronAPI = {
     ipcRenderer.on("instances:progress", (_event, data) => callback(data)),
   removeInstanceProgressListeners: () =>
     ipcRenderer.removeAllListeners("instances:progress"),
-  pickInstanceSource: (id, channel) => ipcRenderer.invoke("instances:pick-source", id, channel),
-  clearInstanceSource: (id, channel) => ipcRenderer.invoke("instances:clear-source", id, channel),
-  depotDownloadInstance: (id, channel) => ipcRenderer.invoke("instances:depot-download", id, channel),
-  getDepotInfo: (id, channel) => ipcRenderer.invoke("instances:depot-info", id, channel),
-  cancelDepotDownload: (id, channel) => ipcRenderer.invoke("instances:depot-cancel", id, channel),
-  onDepotOutput: (callback) => ipcRenderer.on("instances:depot-output", (_event, data) => callback(data)),
-  removeDepotOutputListeners: () => ipcRenderer.removeAllListeners("instances:depot-output"),
+  pickInstanceSource: (id, channel) =>
+    ipcRenderer.invoke("instances:pick-source", id, channel),
+  clearInstanceSource: (id, channel) =>
+    ipcRenderer.invoke("instances:clear-source", id, channel),
+  depotDownloadInstance: (id, channel) =>
+    ipcRenderer.invoke("instances:depot-download", id, channel),
+  getDepotInfo: (id, channel) =>
+    ipcRenderer.invoke("instances:depot-info", id, channel),
+  cancelDepotDownload: (id, channel) =>
+    ipcRenderer.invoke("instances:depot-cancel", id, channel),
+  onDepotOutput: (callback) =>
+    ipcRenderer.on("instances:depot-output", (_event, data) => callback(data)),
+  removeDepotOutputListeners: () =>
+    ipcRenderer.removeAllListeners("instances:depot-output"),
   setInstanceSetting: (id, channel, name, value) =>
     ipcRenderer.invoke("instances:set-setting", id, channel, name, value),
 
@@ -84,9 +102,13 @@ const electronAPI: ElectronAPI = {
   uninstallLauncher: () => ipcRenderer.invoke("uninstall-launcher"),
   getGamesRoot: () => ipcRenderer.invoke("games-root:get"),
   getGamesRootMove: () => ipcRenderer.invoke("games-root:move-state"),
-  onGamesRootProgress: (callback: (progress: unknown) => void) =>
-    ipcRenderer.on("games-root:progress", (_event, progress) => callback(progress)),
-  removeGamesRootProgressListeners: () => ipcRenderer.removeAllListeners("games-root:progress"),
+  onGamesRootProgress: (callback: (progress: GamesRootMove) => void): void => {
+    ipcRenderer.on("games-root:progress", (_event, progress: unknown) => {
+      callback(progress as GamesRootMove);
+    });
+  },
+  removeGamesRootProgressListeners: () =>
+    ipcRenderer.removeAllListeners("games-root:progress"),
   changeGamesRoot: () => ipcRenderer.invoke("games-root:change"),
   resetGamesRoot: () => ipcRenderer.invoke("games-root:reset"),
   chooseFolder: () => ipcRenderer.invoke("choose-folder"),

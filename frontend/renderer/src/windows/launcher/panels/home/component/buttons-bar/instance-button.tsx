@@ -46,7 +46,8 @@ export default function InstanceButton() {
   const { t, i18n } = useTranslation();
   const { actionLoading, runAction } = useAction();
   const { pause, play } = useBackground();
-  const { actualInstanceId, actualInstance, actualChannel, gamesRootMove } = useGames();
+  const { actualInstanceId, actualInstance, actualChannel, gamesRootMove } =
+    useGames();
   const { installationStatut, maintenance } = useInfos();
 
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
@@ -71,9 +72,21 @@ export default function InstanceButton() {
     const { text: actionName, progress } = lastProgress.current;
     // Message traduit ICI (pas dans le main) : un changement de langue en cours de synchronisation
     // est pris en compte au prochain rafraîchissement (chaque seconde au plus).
-    const rank = progress && progress.total > 0 ? ` (${progress.index}/${progress.total})` : "";
+    const rank =
+      progress && progress.total > 0
+        ? ` (${progress.index}/${progress.total})`
+        : "";
+    const translateProgress = (key: string, vars?: object): string => {
+      const translate = t as unknown as (
+        k: string,
+        options?: Record<string, unknown>,
+      ) => string;
+
+      return translate(key, vars as Record<string, unknown> | undefined);
+    };
+
     const text = progress
-      ? `${progress.messageKey ? (t as (key: string, vars?: object) => string)(progress.messageKey, progress.messageVars) : (progress.message ?? actionName)}${rank}`
+      ? `${progress.messageKey ? translateProgress(progress.messageKey, progress.messageVars) : (progress.message ?? actionName)}${rank}`
       : actionName;
     const transfer = progress?.transfer;
     const elapsed = `⏱ ${formatElapsed(Date.now() - syncStartedAt.current)}`;
@@ -209,7 +222,10 @@ export default function InstanceButton() {
 
         // Déplacement du dossier des jeux : ni lancement ni installation tant qu'il n'est pas terminé
         if (gamesRootMove.active) {
-          const percent = gamesRootMove.total > 0 ? Math.floor((gamesRootMove.done / gamesRootMove.total) * 100) : 0;
+          const percent =
+            gamesRootMove.total > 0
+              ? Math.floor((gamesRootMove.done / gamesRootMove.total) * 100)
+              : 0;
           return setAction({
             text: t("button.moving", { percent }),
             playIcon: false,

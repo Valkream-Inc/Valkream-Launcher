@@ -92,7 +92,7 @@ game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
       - JereKuusela-World_Edit_Commands-1.70.0
       - Astropilot-ValheimTooler-1.11.0
   mods-boostfps:
-    version: 2.34.38
+    version: 2.34.37
     optional:
       setting: boostFps
     type: thunderstore_modpack_url

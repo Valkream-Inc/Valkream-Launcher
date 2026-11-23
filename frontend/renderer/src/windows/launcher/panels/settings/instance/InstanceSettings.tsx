@@ -158,18 +158,20 @@ export default function InstanceSettings({
 
   return (
     <>
-      <SettingsToolbar
-        zoom={zoom}
-        onZoom={setZoom}
-        onRefresh={() => reload({ verify: false })}
-        refreshing={loading}
-      />
       {/* Navs */}
       <NavSettings
         onSave={returnToHome}
         activeTab={activeTab}
         ToggleIsConfirmAdminVisible={ToggleIsConfirmAdminVisible}
         setActiveTab={changeTab}
+        ToolBar={
+          <SettingsToolbar
+            zoom={zoom}
+            onZoom={setZoom}
+            onRefresh={() => reload({ verify: false })}
+            refreshing={loading}
+          />
+        }
       >
         <NavButton id="general" label="General" active={false} />
         <NavButton id="launcher" label="Launcher" active={false} />
@@ -316,12 +318,12 @@ export default function InstanceSettings({
         )}
       </SettingsTab>
 
-      <SettingsTab id="mods" activeTab={activeTab}>
+      <SettingsTab id="mods" activeTab={activeTab} isScrollable={false}>
         {loading && !report && <Typography>{t("common.loading")}</Typography>}
         {report && <InstanceModsTab report={report} />}
       </SettingsTab>
 
-      <SettingsTab id="contributors" activeTab={activeTab}>
+      <SettingsTab id="contributors" activeTab={activeTab} isScrollable={false}>
         {loading && !report && <Typography>{t("common.loading")}</Typography>}
         {report && <InstanceContributorsTab report={report} />}
       </SettingsTab>
@@ -359,6 +361,7 @@ export default function InstanceSettings({
             debugContent={renderConfig.debugContent}
             loading={loading}
             onReload={reload}
+            changeTab={changeTab}
           />
         )}
       </SettingsTab>

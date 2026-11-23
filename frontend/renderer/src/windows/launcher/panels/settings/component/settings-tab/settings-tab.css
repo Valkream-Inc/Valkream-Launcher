@@ -32,10 +32,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Largeur = celle de la page (pas celle du contenu) : sinon un contenu large élargit tout le panneau */
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  /* Zoom des réglages (barre d'outils) : variable posée sur le document */
+  /* Permet au contenu de remplir la zone disponible et de borner l'enfant scrollable */
+  flex: 1;
   zoom: var(--settings-zoom, 1);
 }

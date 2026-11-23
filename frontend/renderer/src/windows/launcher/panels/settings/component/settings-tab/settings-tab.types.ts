@@ -9,4 +9,5 @@ export interface SettingsTabProps {
   id: string;
   activeTab: string;
   children?: ReactNode;
+  isScrollable?: boolean;
 }

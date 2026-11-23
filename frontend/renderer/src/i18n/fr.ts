@@ -91,12 +91,15 @@ const fr: Messages = {
       label: "Activer les outils de développement",
     },
     content: {
-    tips1: "Lorsque vous êtes en jeu, soyez connecté sur le serveur Mumble et dans le canal « Vocal en jeu » du serveur Discord Valkream.",
-    tips2: "Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous joindre sur notre serveur Discord)",
-    welcome1: "Vous êtes sur le point d'installer le jeu ...",
-    welcome2: "Si vous avez des problèmes, n'hésitez pas à nous joindre sur notre serveur Discord.",
-  },
-  debug: {
+      tips1:
+        "Lorsque vous êtes en jeu, soyez connecté sur le serveur Mumble et dans le canal « Vocal en jeu » du serveur Discord Valkream.",
+      tips2:
+        "Les informations et actualités sont disponibles sur la page Web et sur le serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous joindre sur notre serveur Discord)",
+      welcome1: "Vous êtes sur le point d'installer le jeu ...",
+      welcome2:
+        "Si vous avez des problèmes, n'hésitez pas à nous joindre sur notre serveur Discord.",
+    },
+    debug: {
       text: "Vous pouvez ouvrir la console du launcher (outils web du navigateur). ⚠️ À utiliser uniquement avec des personnes qualifiées. Le diagnostic d'une installation est dans l'onglet Debug du jeu.",
       button: "Ouvrir la console",
       opened: "Console ouverte !",
@@ -133,7 +136,8 @@ const fr: Messages = {
       cleared: "Clé Nexus effacée",
     },
     gamesRoot: {
-      progress: "Déplacement : {{done}} / {{total}} fichiers ({{percent}} %). Ne lancez pas de jeu avant la fin.",
+      progress:
+        "Déplacement : {{done}} / {{total}} fichiers ({{percent}} %). Ne lancez pas de jeu avant la fin.",
       text: "Dossier d'installation des jeux. Changer le dossier déplace les jeux déjà installés (peut durer plusieurs minutes sur un autre disque).",
       change: "Changer",
       moving: "Déplacement…",
@@ -148,9 +152,14 @@ const fr: Messages = {
     dangerZone: "⚠️ Danger zone !",
     advanced: "⚠️ Advanced !",
     noMods: "Aucun mod à afficher pour cette instance.",
+    noMatchingMods: "Aucun mod correspondant trouvé.",
+    searchMods: "Rechercher un mod...",
     mods: "Mods ({{count}})",
     contributors: "Contributeurs ({{count}})",
     contributorsTab: "Contributeurs",
+    searchContributors: "Rechercher un contributeur...",
+    noMatchingContributors: "Aucun contributeur correspondant trouvé.",
+    clearSearch: "Effacer la recherche",
     seePage: "Voir la page",
     noContributors: "Aucun contributeur à afficher pour cette instance.",
     settingOn: "« {{label}} » activé.",
@@ -243,7 +252,8 @@ const fr: Messages = {
     entryCancelled: "{{entry}} : annulé",
     entryError: "{{entry}} : {{message}}",
     summary: "Fin en {{seconds}} s : {{ok}} réussie(s), {{failed}} en échec",
-    summaryCancelled: "Annulée après {{seconds}} s : {{ok}} réussie(s), {{failed}} en échec",
+    summaryCancelled:
+      "Annulée après {{seconds}} s : {{ok}} réussie(s), {{failed}} en échec",
   },
   debug: {
     search: "Rechercher une entrée…",
@@ -281,7 +291,8 @@ const fr: Messages = {
     total: "Total",
     toUpdate: "À mettre à jour",
     blocking: "Bloquant : {{list}}",
-    overlaps: "Chemins imbriqués (fichiers partagés, vérifier to_ignore / gameFolderToPreserve) : {{list}}",
+    overlaps:
+      "Chemins imbriqués (fichiers partagés, vérifier to_ignore / gameFolderToPreserve) : {{list}}",
     problemsOnly: "Afficher seulement les problèmes",
     entry: "Entrée",
     tier: "Niveau",
@@ -302,14 +313,16 @@ const fr: Messages = {
   tools: {
     withDependencies: "Inclure ses dépendances (modpack)",
     keyLabel: "Clé JSON (facultatif)",
-    keyHelp: "Chemin du tableau dans le JSON : dependencies, packs.0.mods… Vide : le fichier ou le lien est lui-même la liste.",
+    keyHelp:
+      "Chemin du tableau dans le JSON : dependencies, packs.0.mods… Vide : le fichier ou le lien est lui-même la liste.",
     stepOptions: "Options",
     stepRun: "Lancer",
     stepResult: "Résultat",
     stepSource: "Source",
     working: "Traitement en cours…",
     progress: "{{done}} / {{total}}",
-    urlLabel: "Lien vers la liste (JSON, texte) ou la page d'un mod Thunderstore ou Hexium",
+    urlLabel:
+      "Lien vers la liste (JSON, texte) ou la page d'un mod Thunderstore ou Hexium",
     urlInvalid: "Le lien doit commencer par http:// ou https://",
     pickFile: "Choisir un fichier…",
     fileLoaded: "Fichier : {{name}}",
@@ -319,7 +332,8 @@ const fr: Messages = {
     saved: "Enregistré : {{target}}",
     units: { b: "o", kb: "Ko", mb: "Mo", gb: "Go" },
     hashTitle: "Hash d'un dossier",
-    ignoreLabel: "to_ignore (un motif par ligne : logs, *.cfg, config/client.cfg…)",
+    ignoreLabel:
+      "to_ignore (un motif par ligne : logs, *.cfg, config/client.cfg…)",
     computing: "Calcul…",
     pick: "Choisir un dossier et hasher",
     exportFiles: "Exporter hash.json + fichiers",
@@ -331,17 +345,20 @@ const fr: Messages = {
     saveManifest: "Enregistrer hash.json",
     hashName: "Hash",
     modsTitle: "Liste de mods depuis un manifest",
-    depsLabelNexus: "Mods Nexus (jeu-idMod-idFichier, un par ligne, tableau JSON ou lien de page nexusmods.com)",
+    depsLabelNexus:
+      "Mods Nexus (jeu-idMod-idFichier, un par ligne, tableau JSON ou lien de page nexusmods.com)",
     api: {
       label: "API des mods",
       help: "Détection automatique, ou forcer une API.",
-      nexusHelp: "Nexus Mods : clé API requise (Réglages → Launcher) ; ligne jeu-idMod-idFichier (ex : valheim-1234-5678) ou lien de page nexusmods.com.",
+      nexusHelp:
+        "Nexus Mods : clé API requise (Réglages → Launcher) ; ligne jeu-idMod-idFichier (ex : valheim-1234-5678) ou lien de page nexusmods.com.",
       auto: "Détection automatique",
       thunderstore: "Thunderstore",
       hexium: "Hexium",
       nexus: "Nexus Mods",
     },
-    depsLabel: "Dépendances Thunderstore (Auteur-Nom-Version, une par ligne, tableau JSON ou lien)",
+    depsLabel:
+      "Dépendances Thunderstore (Auteur-Nom-Version, une par ligne, tableau JSON ou lien)",
     fetching: "Récupération…",
     generate: "Générer la liste",
     copyJson: "Copier le JSON",
@@ -362,10 +379,14 @@ const fr: Messages = {
       what: "**DepotDownloader** est un outil open source (licence GPL-2.0) qui télécharge une version précise d'un jeu depuis les serveurs de Steam.",
       source: "Code source : {{url}}",
       title: "Ce qui se passe",
-      step1: "1. Le launcher télécharge la version officielle **{{version}}** de l'outil, vérifie son empreinte sha256 puis le range dans `{{dir}}`. S'il est modifié, il est refusé.",
-      step2: "2. Une fenêtre affiche un **QR code** : scannez-le avec l'application mobile Steam. Votre mot de passe et votre code Steam Guard ne passent jamais par le launcher.",
-      step3: "3. Le jeu est téléchargé dans `{{dir}}`, puis chaque fichier est vérifié avant d'être copié dans l'instance. Ce dossier est ensuite supprimé.",
-      step4: "4. Le jeu doit appartenir à votre compte Steam. Ne partagez jamais les fichiers téléchargés.",
+      step1:
+        "1. Le launcher télécharge la version officielle **{{version}}** de l'outil, vérifie son empreinte sha256 puis le range dans `{{dir}}`. S'il est modifié, il est refusé.",
+      step2:
+        "2. Une fenêtre affiche un **QR code** : scannez-le avec l'application mobile Steam. Votre mot de passe et votre code Steam Guard ne passent jamais par le launcher.",
+      step3:
+        "3. Le jeu est téléchargé dans `{{dir}}`, puis chaque fichier est vérifié avant d'être copié dans l'instance. Ce dossier est ensuite supprimé.",
+      step4:
+        "4. Le jeu doit appartenir à votre compte Steam. Ne partagez jamais les fichiers téléchargés.",
       cancel: "Vous pouvez annuler à tout moment.",
       notConfigured: "non configurée",
     },

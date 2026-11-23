@@ -14,6 +14,10 @@
   min-width: 0;
   overflow-x: auto;
 }
+.settings-elements-box:last-child {
+  margin-bottom: 1cm;
+}
+
 .settings-elements-box > * {
   min-width: 0;
   max-width: 100%;
