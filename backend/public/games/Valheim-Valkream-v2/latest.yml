@@ -78,7 +78,6 @@ game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
   mods-thunderstore:
     version: 2.34.37
     type: thunderstore_modpack_url
-    api-url: https://thunderstore.io
     key: dependencies
     content: https://thunderstore.io/api/experimental/package/ValheimValkream/Valkream/2.34.37/
   mods-admin:
@@ -86,7 +85,6 @@ game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
     optional:
       setting: modsAdmin
     type: thunderstore_modpack_url
-    api-url: https://thunderstore.io
     content:
       - JereKuusela-Infinity_Hammer-1.79.0
       - JereKuusela-Server_devcommands-1.106.0
@@ -94,11 +92,10 @@ game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
       - JereKuusela-World_Edit_Commands-1.70.0
       - Astropilot-ValheimTooler-1.11.0
   mods-boostfps:
-    version: 2.34.37
+    version: 2.34.38
     optional:
       setting: boostFps
     type: thunderstore_modpack_url
-    api-url: https://thunderstore.io
     content:
       - castix-ValheimFPSBoost-1.0.0
       - vaffle1-FPSPlus-1.1.4
@@ -107,7 +104,6 @@ game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
     optional:
       setting: boostGraphic
     type: thunderstore_modpack_url
-    api-url: https://thunderstore.io
     content:
       - Willybach-Willybachs_HD_Seasonality-3.5.6
       - RustyMods-Seasonality-3.7.4

@@ -7,9 +7,9 @@ import { enqueueSnackbar } from "notistack";
 import { useState } from "react";
 import SpecialPanel from "../../component/special-panel/special-panel";
 
+import { useTranslation } from "react-i18next";
 import { useGames } from "../../context/games.context";
 import InstanceSettings from "./instance/InstanceSettings";
-import { useTranslation } from "react-i18next";
 
 function Settings() {
   const { t } = useTranslation();
@@ -20,12 +20,9 @@ function Settings() {
   const [isDevActive, setIsDevActive] = useState(false);
 
   const toogleAdmin = () => {
-    enqueueSnackbar(
-      isAdminActive
-        ? t("admin.off")
-        : t("admin.on"),
-      { variant: "warning" },
-    );
+    enqueueSnackbar(isAdminActive ? t("admin.off") : t("admin.on"), {
+      variant: "warning",
+    });
     setIsAdminActive(!isAdminActive);
   };
 
@@ -59,8 +56,8 @@ function Settings() {
 
   function ToggleIsConfirmAdminVisible() {
     // si déja activés --> les désactivés
-    if (isConfirmAdminVisible) {
-      setIsAdminActive(false);
+    if (isAdminActive) {
+      toogleAdmin();
       setIsConfirmAdminVisible(false);
     }
     // sinon rendre visible le panel de confirmation

@@ -20,23 +20,30 @@ import { useGames } from "../../../context/games.context";
 import { NavButton, NavSettings } from "../component/nav-settings/nav-settings";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTab from "../component/settings-tab/settings-tab";
-import SettingsToolbar from "../component/settings-toolbar/settings-toolbar";
-import { clampZoom, loadZoom, saveZoom, ZOOM_STEP } from "../component/settings-toolbar/zoom";
 import SettingsTitle from "../component/settings-title/settings-title";
+import SettingsToolbar from "../component/settings-toolbar/settings-toolbar";
+import {
+  clampZoom,
+  loadZoom,
+  saveZoom,
+  ZOOM_STEP,
+} from "../component/settings-toolbar/zoom";
 import ButtonDebug from "../settings-list/global/button-debug";
 import ButtonOpenAppData from "../settings-list/global/button-open-appdata";
 import ButtonUninstallGlobal from "../settings-list/global/button-uninstall-global";
 import GamesRootSetting from "../settings-list/global/games-root-setting";
+import NexusKeySetting from "../settings-list/global/nexus-key-setting";
 import SelectLanguage from "../settings-list/global/select-language";
 import SelectLauncherBackgroundType from "../settings-list/global/select-launcher-background-type";
 import SelectLauncherTheme from "../settings-list/global/select-launcher-theme";
-import NexusKeySetting from "../settings-list/global/nexus-key-setting";
 import ToggleBeta from "../settings-list/global/toggle-beta";
 import ToggleDev from "../settings-list/global/toggle-dev";
 import ToggleMusic from "../settings-list/global/toggle-music";
 import Instance_ButtonOpenGame from "../settings-list/instance/instance-button-open-game";
 import Instance_ButtonUninstallGame from "../settings-list/instance/instance-button-uninstall-game";
-import Instance_CustomSettings, { hasCustomSettings } from "../settings-list/instance/instance-custom-settings";
+import Instance_CustomSettings, {
+  hasCustomSettings,
+} from "../settings-list/instance/instance-custom-settings";
 import Instance_SelectLauncherBehavior from "../settings-list/instance/instance-select-launcher-behavior";
 import type { InstanceSettingValues } from "../settings-list/instance/instance-setting.types";
 import Instance_ToggleLaunchSteam from "../settings-list/instance/instance-toggle-launch-steam";
@@ -83,14 +90,18 @@ export default function InstanceSettings({
   };
   useEffect(() => {
     document.documentElement.style.setProperty("--settings-zoom", String(zoom));
-    return () => document.documentElement.style.removeProperty("--settings-zoom");
+    return () => {
+      document.documentElement.style.removeProperty("--settings-zoom");
+    };
   }, [zoom]);
   useEffect(() => {
     const onWheel = (event: WheelEvent) => {
       if (!event.ctrlKey) return;
       event.preventDefault();
       setZoomState((current) => {
-        const value = clampZoom(current + (event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+        const value = clampZoom(
+          current + (event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP),
+        );
         saveZoom(value);
         return value;
       });
@@ -221,13 +232,21 @@ export default function InstanceSettings({
         <SettingsTitle warn={false} scope="global">
           Launcher
         </SettingsTitle>
+        <ToggleMusic />
         <SelectLanguage />
         <SelectLauncherTheme />
         <SelectLauncherBackgroundType />
-        <ToggleMusic />
-        <NexusKeySetting />
         {!actionLoading && <GamesRootSetting />}
         {!actionLoading && <ToggleBeta />}
+
+        {isAdminActive && (
+          <>
+            <SettingsTitle warn={true} scope="global">
+              {t("instance.dangerZone")}
+            </SettingsTitle>
+            <NexusKeySetting />
+          </>
+        )}
       </SettingsTab>
 
       <SettingsTab id="game" activeTab={activeTab}>
@@ -265,6 +284,36 @@ export default function InstanceSettings({
             />
           </>
         )}
+
+        {/* Options du jeu réservées au dev / admin */}
+        {!actionLoading && hasAdvancedOptions && (
+          <>
+            <SettingsTitle warn={false} scope="advanced">
+              {t("instance.advancedGameOptions")}
+            </SettingsTitle>
+            {(["dev", "special", "admin"] as const).map(
+              (level) =>
+                ((level === "dev" && isDevActive) ||
+                  (level === "special" && isSpecialActive) ||
+                  (level === "admin" && isAdminActive)) && (
+                  <Fragment key={level}>
+                    <Instance_CustomSettings
+                      {...settingProps}
+                      settings={customSettings}
+                      level={level}
+                      zone="normal"
+                    />
+                    <Instance_CustomSettings
+                      {...settingProps}
+                      settings={customSettings}
+                      level={level}
+                      zone="danger"
+                    />
+                  </Fragment>
+                ),
+            )}
+          </>
+        )}
       </SettingsTab>
 
       <SettingsTab id="mods" activeTab={activeTab}>
@@ -294,36 +343,6 @@ export default function InstanceSettings({
         )}
         <ButtonOpenAppData />
         <ButtonDebug />
-
-        {/* Options du jeu réservées au dev / admin (le joueur ne voit que les options « normal » dans Game) */}
-        {!actionLoading && hasAdvancedOptions && (
-          <>
-            <SettingsTitle warn={false} scope="advanced">
-              {t("instance.advancedGameOptions")}
-            </SettingsTitle>
-            {(["dev", "special", "admin"] as const).map(
-              (level) =>
-                ((level === "dev" && isDevActive) ||
-                  (level === "special" && isSpecialActive) ||
-                  (level === "admin" && isAdminActive)) && (
-                  <Fragment key={level}>
-                    <Instance_CustomSettings
-                      {...settingProps}
-                      settings={customSettings}
-                      level={level}
-                      zone="normal"
-                    />
-                    <Instance_CustomSettings
-                      {...settingProps}
-                      settings={customSettings}
-                      level={level}
-                      zone="danger"
-                    />
-                  </Fragment>
-                ),
-            )}
-          </>
-        )}
       </SettingsTab>
 
       {/* Tools : outils de préparation du remote (hash de dossier, liste de mods) */}

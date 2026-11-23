@@ -13,10 +13,11 @@
   text-align: left;
   background: var(--background-transparent);
   color: var(--color);
+  margin-top: 1cm;
 }
 
 .titre-tab:first-child {
-  margin-top: 1cm;
+  margin-top: 0.5cm;
 }
 
 .titre-tab.warn {

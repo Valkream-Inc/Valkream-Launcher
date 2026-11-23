@@ -10,7 +10,11 @@
 import type { ModDisplay } from "@shared/types";
 import { pickKey } from "../../lib/json-key.js";
 import { LocalizedError } from "../../lib/localized-error.js";
-import { isNexusRef, NEXUS_API, parseNexusRef } from "../install/providers/nexus.js";
+import {
+  isNexusRef,
+  NEXUS_API,
+  parseNexusRef,
+} from "../install/providers/nexus.js";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
 
@@ -33,14 +37,20 @@ export const parseModList = (text: string, key?: string): ModRef[] => {
     if (!Array.isArray(parsed)) throw new LocalizedError("err.jsonArray");
     items = parsed.map(String);
   } else {
-    items = trimmed.split(/\r?\n/).map((line) => line.replace(/#.*/, "").trim().replace(/^[-*]\s+/, ""));
+    items = trimmed.split(/\r?\n/).map((line) =>
+      line
+        .replace(/#.*/, "")
+        .trim()
+        .replace(/^[-*]\s+/, ""),
+    );
   }
 
   const seen = new Set<string>();
   const refs: ModRef[] = [];
   for (const item of items.filter(Boolean)) {
     const match = DEPENDENCY.exec(item.replace(/[",]/g, "").trim());
-    if (!match) throw new LocalizedError("err.dependencyInvalid", { dependency: item });
+    if (!match)
+      throw new LocalizedError("err.dependencyInvalid", { dependency: item });
     const key = `${match[1]}-${match[2]}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -83,13 +93,19 @@ export interface PackagePage {
 
 /** Sites à l'API compatible Thunderstore dont on lit les pages de mod. */
 const PACKAGE_HOSTS = ["thunderstore.io", "hexium.gg"];
-const PACKAGE_PAGE = /^https:\/\/(?:www\.)?([a-z.]+)\/(?:c\/[\w-]+\/)?(?:p|package)\/([^/?#\s]+)\/([^/?#\s]+)(?:\/([\d.]+))?\/?(?:[?#]\S*)?$/;
+const PACKAGE_PAGE =
+  /^https:\/\/(?:www\.)?([a-z.]+)\/(?:c\/[\w-]+\/)?(?:p|package)\/([^/?#\s]+)\/([^/?#\s]+)(?:\/([\d.]+))?\/?(?:[?#]\S*)?$/;
 
 /** Lien vers la page d'un mod Thunderstore ou Hexium (`/c/valheim/p/Auteur/Nom/`) : `null` pour tout autre lien. */
 export const parsePackagePage = (url: string): PackagePage | null => {
   const match = PACKAGE_PAGE.exec(url.trim());
   if (!match || !PACKAGE_HOSTS.includes(match[1])) return null;
-  return { origin: `https://${match[1]}`, author: match[2], name: match[3], version: match[4] };
+  return {
+    origin: `https://${match[1]}`,
+    author: match[2],
+    name: match[3],
+    version: match[4],
+  };
 };
 
 interface PackageInfo {
@@ -113,10 +129,18 @@ export const refsFromPackagePage = async (
   const info = (await fetchJson(
     `${base}/api/experimental/package/${path}${page.version ? `${encodeURIComponent(page.version)}/` : ""}`,
   )) as PackageInfo;
-  const version = page.version ?? info.latest?.version_number ?? info.version_number;
-  if (!version) throw new LocalizedError("err.packageNotFound", { name: `${page.author}-${page.name}` });
-  const dependencies = withDependencies ? (page.version ? info.dependencies : info.latest?.dependencies) ?? [] : [];
-  return parseModList(JSON.stringify([`${page.author}-${page.name}-${version}`, ...dependencies]));
+  const version =
+    page.version ?? info.latest?.version_number ?? info.version_number;
+  if (!version)
+    throw new LocalizedError("err.packageNotFound", {
+      name: `${page.author}-${page.name}`,
+    });
+  const dependencies = withDependencies
+    ? ((page.version ? info.dependencies : info.latest?.dependencies) ?? [])
+    : [];
+  return parseModList(
+    JSON.stringify([`${page.author}-${page.name}-${version}`, ...dependencies]),
+  );
 };
 
 /** Infos d'affichage de chaque mod via l'API Thunderstore (image, description, page). */
@@ -147,7 +171,10 @@ export const buildModsDisplay = async (
         if (info.description) display.description = info.description;
       } catch (error) {
         display.icon = fallbackIcon(ref, base); // l'image est servie par le CDN même si l'API ne répond pas
-        failed.push({ id, error: error instanceof Error ? error.message : String(error) });
+        failed.push({
+          id,
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
       onProgress?.(++done, refs.length);
       return display;
@@ -169,10 +196,17 @@ export const parseNexusList = (text: string, key?: string): string[] | null => {
       return null;
     }
   } else {
-    items = trimmed.split(/\r?\n/).map((line) => line.replace(/#.*/, "").trim().replace(/^[-*]\s+/, ""));
+    items = trimmed.split(/\r?\n/).map((line) =>
+      line
+        .replace(/#.*/, "")
+        .trim()
+        .replace(/^[-*]\s+/, ""),
+    );
   }
   items = items.map((item) => item.replace(/[",]/g, "").trim()).filter(Boolean);
-  return items.length > 0 && items.every(isNexusRef) ? [...new Set(items)] : null;
+  return items.length > 0 && items.every(isNexusRef)
+    ? [...new Set(items)]
+    : null;
 };
 
 /** Infos d'affichage de chaque mod Nexus (nom, résumé, image, page) via l'API (clé du joueur). */
@@ -192,7 +226,9 @@ export const buildNexusDisplay = async (
         link: `https://www.nexusmods.com/${encodeURIComponent(ref.game)}/mods/${ref.mod}`,
       };
       try {
-        const info = (await fetchJson(`${NEXUS_API}/v1/games/${encodeURIComponent(ref.game)}/mods/${ref.mod}.json`)) as {
+        const info = (await fetchJson(
+          `${NEXUS_API}/v1/games/${encodeURIComponent(ref.game)}/mods/${ref.mod}.json`,
+        )) as {
           name?: string;
           summary?: string;
           picture_url?: string;
@@ -201,7 +237,10 @@ export const buildNexusDisplay = async (
         if (info.summary) display.description = info.summary;
         if (info.picture_url) display.icon = info.picture_url;
       } catch (error) {
-        failed.push({ id: display.id, error: error instanceof Error ? error.message : String(error) });
+        failed.push({
+          id: display.id ?? "unknown",
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
       onProgress?.(++done, items.length);
       return display;
