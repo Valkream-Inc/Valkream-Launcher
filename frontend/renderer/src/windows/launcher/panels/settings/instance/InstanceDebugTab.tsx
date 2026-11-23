@@ -10,16 +10,12 @@
 import {
   Box,
   Button,
-  ButtonGroup,
   Chip,
-  FormControlLabel,
-  Switch,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
@@ -104,8 +100,11 @@ export default function InstanceDebugTab({
   const needle = query.trim().toLowerCase();
   const matches = (entry: EntryReport) =>
     needle === "" ||
-    [entry.name, titleOf(entry), entry.type, entry.tier, entry.path].some((value) =>
-      String(value ?? "").toLowerCase().includes(needle),
+    [entry.name, titleOf(entry), entry.type, entry.tier, entry.path].some(
+      (value) =>
+        String(value ?? "")
+          .toLowerCase()
+          .includes(needle),
     );
   const tables = groupEntriesByPath(report.entries)
     .map((table) => ({
@@ -279,7 +278,7 @@ export default function InstanceDebugTab({
 
       {/* Un tableau par sous-chemin */}
       {tables.map((table) => (
-        <div key={table.path}>
+        <>
           <SettingsTitle warn={table.failing}>/{table.path}</SettingsTitle>
           <SettingsBox warn={false} layout="column">
             <Table size="small" sx={{ minWidth: 760 }}>
@@ -345,7 +344,7 @@ export default function InstanceDebugTab({
               </TableBody>
             </Table>
           </SettingsBox>
-        </div>
+        </>
       ))}
 
       {tables.length === 0 && (problemsOnly || needle !== "") && (
