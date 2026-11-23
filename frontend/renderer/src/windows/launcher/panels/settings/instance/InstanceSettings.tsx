@@ -30,6 +30,7 @@ import GamesRootSetting from "../settings-list/global/games-root-setting";
 import SelectLanguage from "../settings-list/global/select-language";
 import SelectLauncherBackgroundType from "../settings-list/global/select-launcher-background-type";
 import SelectLauncherTheme from "../settings-list/global/select-launcher-theme";
+import NexusKeySetting from "../settings-list/global/nexus-key-setting";
 import ToggleBeta from "../settings-list/global/toggle-beta";
 import ToggleDev from "../settings-list/global/toggle-dev";
 import ToggleMusic from "../settings-list/global/toggle-music";
@@ -224,6 +225,7 @@ export default function InstanceSettings({
         <SelectLauncherTheme />
         <SelectLauncherBackgroundType />
         <ToggleMusic />
+        <NexusKeySetting />
         {!actionLoading && <GamesRootSetting />}
         {!actionLoading && <ToggleBeta />}
       </SettingsTab>

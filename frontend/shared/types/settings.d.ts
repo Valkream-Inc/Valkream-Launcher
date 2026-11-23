@@ -16,6 +16,8 @@ export interface Settings {
   backgroundType: BackgroundType;
   /** Langue de l'interface. */
   language: "fr" | "en";
+  /** Clé API personnelle Nexus Mods (provider `nexus_modpack_url`). Locale : jamais envoyée au remote. */
+  nexusApiKey: string;
 }
 
 export type SettingKey = keyof Settings;

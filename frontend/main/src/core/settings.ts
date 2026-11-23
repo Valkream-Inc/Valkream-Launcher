@@ -23,6 +23,7 @@ class SettingsManager {
     betaEnabled: false,
     launcherTheme: "modern",
     backgroundType: "video",
+    nexusApiKey: "",
     language: Intl.DateTimeFormat().resolvedOptions().locale.startsWith("fr") ? "fr" : "en",
   };
   private readonly store: SettingsStore<Settings>;

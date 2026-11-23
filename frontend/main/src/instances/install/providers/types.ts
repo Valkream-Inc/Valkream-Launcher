@@ -78,6 +78,8 @@ export interface ProviderContext {
   signal?: AbortSignal;
   /** Jeu installé par le joueur dans sa bibliothèque Steam (`steamAppId` de l'instance), ou `null`. */
   steam: () => Promise<SteamGame | null>;
+  /** Clé API Nexus Mods du joueur (réglage local ; chaîne vide si absente). Jamais journalisée. */
+  nexusApiKey: () => Promise<string>;
   /** Archives déjà téléchargées pendant cette synchronisation (partagées entre entrées). */
   archives: ArchiveCache;
   /** Document JSON du `content` (lien, donnée inline ou `local:<entrée>/<fichier>`), `key` appliquée. */

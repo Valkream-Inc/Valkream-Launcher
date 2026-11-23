@@ -436,6 +436,46 @@ describe("InstanceInstaller", () => {
     assert.deepEqual([...urls].sort(), ["https://cdn.hexium.gg/a.zip", "https://hexium.gg/package/download/Au/ModB/2.0.0/"]);
   });
 
+  it("nexus : lien direct via la clé du joueur, un dossier par mod ; sans clé ou hors zip : échec explicite", async () => {
+    const mk = (content: string[], version = "1") => ({
+      "/index.json": index({ stable: "/stable.yml" }),
+      "/stable.yml": { version: "1.0.0", "game-details": { mods: { version, type: "nexus_modpack_url", content } } },
+    });
+    const run = async (remote: Record<string, any>, key: string) => {
+      const w = makeWorld(remote, {});
+      const urls: string[] = [];
+      w.io.download = async (url, dest) => {
+        urls.push(url);
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        fs.writeFileSync(dest, JSON.stringify({ "plugin.dll": "N" }));
+      };
+      const inspector = new InstanceInspector({ configs: [config], resolver: w.resolver, platform: "win32", rootPath: () => root });
+      const installer = new InstanceInstaller({ inspector, resolver: w.resolver, platform: "win32", io: w.io, nexusApiKey: () => key });
+      return { result: await installer.sync("g", "stable"), urls };
+    };
+    const originalFetch = globalThis.fetch;
+    const seen: string[] = [];
+    globalThis.fetch = (async (url: string, init?: { headers?: Record<string, string> }) => {
+      seen.push(`${url}|${init?.headers?.apikey}`);
+      const zip = !String(url).includes("/files/99/");
+      return new Response(JSON.stringify([{ URI: zip ? "https://cdn.nexus/f/mod.zip" : "https://cdn.nexus/f/mod.7z" }]), { status: 200 });
+    }) as typeof fetch;
+    try {
+      const ok = await run(mk(["valheim-1234-5678"]), "SECRET");
+      assert.deepEqual(ok.result.failed, []);
+      assert.deepEqual(ok.urls, ["https://cdn.nexus/f/mod.zip"]);
+      assert.equal(seen[0], "https://api.nexusmods.com/v1/games/valheim/mods/1234/files/5678/download_link.json|SECRET");
+      assert.equal(read("stable", "game/plugins/nexus-1234/plugin.dll"), "N");
+
+      const noKey = await run(mk(["valheim-1-2"], "2"), "");
+      assert.match(noKey.result.failed[0]?.error ?? "", /Nexus/);
+      const sevenZip = await run(mk(["valheim-5-99"], "3"), "SECRET");
+      assert.match(sevenZip.result.failed[0]?.error ?? "", /zip/);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it("entrée optionnelle désactivée : ses mods sont retirés, ceux des autres entrées restent", async () => {
     const remote: Record<string, any> = {
       "/index.json": index({ stable: "/stable.yml" }),
@@ -469,16 +509,6 @@ describe("InstanceInstaller", () => {
     assert.equal(fs.existsSync(path.join(dir("stable"), "game/plugins/Au-Normal/plugin.dll")), true);
     assert.equal("admin" in readInstallState(dir("stable")).entries, false);
     assert.equal((await inspector.report("g", "stable")).entries[1].status, "skipped");
-  });
-
-  it("type non pris en charge (nexus) : échec signalé, pas d'exception", async () => {
-    const remote: Record<string, any> = {
-      "/index.json": index({ stable: "/stable.yml" }),
-      "/stable.yml": { version: "1.0.0", "game-details": { n: { version: "1", type: "nexus_modpack_url", content: "/x.json" } } },
-    };
-    const { installer } = build(remote, {});
-    const result = await installer.sync("g", "stable");
-    assert.match(result.failed[0].error, /non pris en charge/);
   });
 
   it("deux synchronisations simultanées : la seconde est refusée", async () => {

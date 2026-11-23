@@ -54,6 +54,7 @@ import {
   thunderstoreProvider,
   thunderstoreUninstall,
 } from "./providers/thunderstore.js";
+import { nexusProvider, nexusUninstall } from "./providers/nexus.js";
 import type { InstallIO, Provider, Uninstaller } from "./providers/types.js";
 import { zipProvider } from "./providers/zip.js";
 import { errorText, errorTexts, LocalizedError } from "../../lib/localized-error.js";
@@ -63,11 +64,12 @@ const DEFAULT_PROVIDERS: Record<string, Provider> = {
   hash_url: hashProvider,
   steam_library: steamLibraryProvider,
   thunderstore_modpack_url: thunderstoreProvider,
-  // nexus_modpack_url : pas encore implémenté (l'entrée est signalée en échec).
+  nexus_modpack_url: nexusProvider,
 };
 
 const DEFAULT_UNINSTALLERS: Record<string, Uninstaller> = {
   thunderstore_modpack_url: thunderstoreUninstall,
+  nexus_modpack_url: nexusUninstall,
   // Les autres types ne savent pas quels fichiers leur appartiennent : seul l'état est oublié.
 };
 
@@ -80,6 +82,8 @@ export interface InstallerOptions {
   uninstallers?: Record<string, Uninstaller>;
   /** Langue de l'interface (mode d'emploi Steam) ; défaut : français. */
   language?: () => Promise<GuideLanguage> | GuideLanguage;
+  /** Clé API Nexus Mods du joueur (réglage local). */
+  nexusApiKey?: () => Promise<string> | string;
   /** Retrouve le jeu dans la bibliothèque Steam du joueur (injectable pour les tests). */
   steamLocator?: (appId: number) => Promise<SteamGame | null>;
   /** Octets libres du disque contenant ce dossier (injectable pour les tests). */
@@ -386,6 +390,7 @@ export class InstanceInstaller {
             previousOwned: pathChanged ? [] : (previous?.owned ?? []),
             signal,
             archives,
+            nexusApiKey: async () => (await this.options.nexusApiKey?.()) ?? "",
             steam: async () => {
               // Dossier indiqué par le joueur (ou téléchargé par DepotDownloader) : prioritaire.
               const chosen = readGameSourceDir(installDir);

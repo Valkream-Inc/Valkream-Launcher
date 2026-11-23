@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 
 import { manifestHash } from "../install/manifest.js";
 import { exportHashFolder, exportManifestOnly, hashFolder } from "./hash-folder.js";
-import { buildModsDisplay, cdnIcon, parseModList, parsePackagePage, refsFromPackagePage } from "./mods-list.js";
+import { buildModsDisplay, buildNexusDisplay, parseNexusList, cdnIcon, parseModList, parsePackagePage, refsFromPackagePage } from "./mods-list.js";
 
 let dir: string;
 beforeEach(() => {
@@ -101,6 +101,25 @@ describe("Hexium (API compatible Thunderstore)", () => {
     assert.equal(display.mods[0].icon, "https://hexium.gg/i.png");
     const failing = await buildModsDisplay(refs, async () => { throw new Error("503"); }, page.origin);
     assert.equal(failing.mods[0].icon, undefined);
+  });
+});
+
+describe("liste Nexus", () => {
+  it("reconnaît jeu-idMod-idFichier et rejette le reste", () => {
+    assert.deepEqual(parseNexusList("# pack\nvalheim-1234-5678\n- valheim-1234-5678\nvalheim-9-1"), ["valheim-1234-5678", "valheim-9-1"]);
+    assert.equal(parseNexusList("A-One-1.0.0"), null);
+    assert.equal(parseNexusList('["valheim-1-2"]')?.length, 1);
+  });
+
+  it("nom, résumé, image et page ; un échec n'empêche pas les autres", async () => {
+    const result = await buildNexusDisplay(["valheim-1-10", "valheim-2-20"], async (url) => {
+      if (url.includes("/mods/2.json")) throw new Error("403");
+      assert.equal(url, "https://api.nexusmods.com/v1/games/valheim/mods/1.json");
+      return { name: "Cool", summary: "Un mod", picture_url: "https://img/x.png" };
+    });
+    assert.deepEqual(result.mods[0], { id: "valheim-1", name: "Cool", link: "https://www.nexusmods.com/valheim/mods/1", description: "Un mod", icon: "https://img/x.png" });
+    assert.equal(result.mods[1].name, "Mod 2");
+    assert.equal(result.failed.length, 1);
   });
 });
 

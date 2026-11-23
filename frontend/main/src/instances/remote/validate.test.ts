@@ -144,6 +144,15 @@ describe("validateReleaseConfig", () => {
     assert.doesNotMatch(errors, /api-url/);
   });
 
+  it("nexus : liste jeu-idMod-idFichier, local: et key acceptés", () => {
+    const entry = { ...validEntry(), type: "nexus_modpack_url", content: ["valheim-1234-5678", "Auteur-Nom-1.0.0"], key: "mods" };
+    const errors = errorsOf(validateReleaseConfig({ version: "0.0.0", "game-details": { mods: entry } }));
+    assert.match(errors, /content\[1\] : « jeu-idMod-idFichier »/);
+    assert.doesNotMatch(errors, /content\[0\]|\.key/);
+    const local = { ...validEntry(), type: "nexus_modpack_url", content: "local:cfg/nexus.json" };
+    assert.equal(errorsOf(validateReleaseConfig({ version: "0.0.0", "game-details": { mods: local } })), "");
+  });
+
   it("champs réservés : folder_in_zip à zip_url/hash_url, zip à hash_url, api-url à thunderstore/nexus", () => {
     const entry = { ...validEntry(), type: "hash_url", "hash-folder": "/h/", folder_in_zip: "x", "api-url": "https://a.b" };
     const errors = errorsOf(validateReleaseConfig({ version: "0.0.0", "game-base": { v: entry } }));

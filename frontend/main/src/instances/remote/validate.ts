@@ -50,6 +50,7 @@ const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim() !== "";
 
 const SHA256 = /^[a-f0-9]{64}$/i;
+const NEXUS_REFERENCE = /^[a-z0-9_]+-\d+-\d+$/; // jeu-idMod-idFichier
 const THUNDERSTORE_DEPENDENCY = /^[^-\s]+-[^-\s]+-[^\s]+$/; // Auteur-Nom-Version
 
 const finish = <T>(value: unknown, errors: string[]): ValidationResult<T> =>
@@ -170,14 +171,16 @@ export const validateRemoteIndex = (
 /* latest.yml                                                         */
 /* ------------------------------------------------------------------ */
 
+const isModpackType = (type: string): boolean => type === "thunderstore_modpack_url" || type === "nexus_modpack_url";
+
 const checkContentValue = (
   type: string,
   content: unknown,
   where: string,
 ): string[] => {
   if (typeof content === "string" && isLocalContent(content)) {
-    if (!isHashType(type) && type !== "thunderstore_modpack_url") {
-      return [`${where} : local: réservé à hash_url, steam_library et thunderstore_modpack_url`];
+    if (!isHashType(type) && !isModpackType(type)) {
+      return [`${where} : local: réservé à hash_url, steam_library, thunderstore_modpack_url et nexus_modpack_url`];
     }
     return parseLocalContent(content) ? [] : [`${where} : local:<entrée>/<fichier> attendu (chemin relatif sûr) : ${content}`];
   }
@@ -194,10 +197,11 @@ const checkContentValue = (
 
   if (Array.isArray(content)) {
     if (isHashType(type)) return [`${where} : lien ou manifeste {chemin: sha256} attendu`];
+    const nexus = type === "nexus_modpack_url";
     return content.flatMap((item, index) =>
-      typeof item === "string" && THUNDERSTORE_DEPENDENCY.test(item)
+      typeof item === "string" && (nexus ? NEXUS_REFERENCE : THUNDERSTORE_DEPENDENCY).test(item)
         ? []
-        : [`${where}[${index}] : « Auteur-Nom-Version » attendu`],
+        : [`${where}[${index}] : ${nexus ? "« jeu-idMod-idFichier » (ex : valheim-1234-5678)" : "« Auteur-Nom-Version »"} attendu`],
     );
   }
 
@@ -320,8 +324,8 @@ const checkEntry = (entry: unknown, where: string): string[] => {
   }
 
   if (entry.key !== undefined && !isDataLink(entry.key)) {
-    if (!isHashType(type) && type !== "thunderstore_modpack_url") {
-      errors.push(`${where}.key : réservé à hash_url, steam_library et thunderstore_modpack_url`);
+    if (!isHashType(type) && !isModpackType(type)) {
+      errors.push(`${where}.key : réservé à hash_url, steam_library, thunderstore_modpack_url et nexus_modpack_url`);
     } else if (typeof entry.key !== "string" || !isValidKey(entry.key)) {
       errors.push(`${where}.key : chemin pointé attendu (ex : dependencies.mods, ou « . »)`);
     }

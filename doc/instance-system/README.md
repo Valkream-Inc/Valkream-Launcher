@@ -193,6 +193,15 @@ Une entrée `hash_url` peut déclarer `zip: <lien>` : une archive de **tous** le
 
 Les hash des fichiers installés sont mémorisés dans `instance.hashes.json` (à côté de `instance.state.json`), avec la taille et la date de chaque fichier : la vérification d'une installation ne relit que les fichiers modifiés depuis. La réparation (`repair`) ignore ce cache et relit tout le disque.
 
+## Mods Nexus Mods
+
+Type `nexus_modpack_url`, `content` = liste `jeu-idMod-idFichier` (ex : `valheim-1234-5678`, inline, lien, `local:` ou `key`). Chaque mod est extrait dans `nexus-<idMod>` sous le `path` de l'entrée (mêmes garanties que Thunderstore : bascule atomique, mods retirés supprimés). `api-url` vaut `https://api.nexusmods.com` par défaut.
+
+- **Clé API du joueur** : réglage local Launcher → « Clé API Nexus Mods » (jamais envoyée au remote ni journalisée). Sans clé : échec explicite.
+- **Compte Premium requis** pour le téléchargement automatique (`download_link.json`) : sans Premium Nexus exige un lien `nxm://` généré sur son site, impossible à automatiser (erreur `err.nexusPremium`).
+- **Archives `.zip` uniquement** (`.7z` / `.rar` : erreur explicite). Pas de résolution de dépendances (l'API Nexus n'en expose pas).
+- Outil Tools : une liste `jeu-idMod-idFichier` donne nom, résumé, image et page de chaque mod (avec la clé enregistrée dans les réglages).
+
 ## Mods Thunderstore
 
 **Hexium** (https://hexium.gg, API compatible Thunderstore) : même type `thunderstore_modpack_url`, avec `api-url: https://hexium.gg`. Le lien de téléchargement de chaque mod est lu dans `download_url` de `/api/experimental/package/<Auteur>/<Nom>/<version>/` (repli sur `/package/download/<Auteur>/<Nom>/<version>/` si l'API ne répond pas). Les liens de page `https://hexium.gg/c/<communauté>/p/<Auteur>/<Nom>/` sont acceptés par l'outil Tools ; l'image vient alors uniquement de l'API (pas de CDN de repli).

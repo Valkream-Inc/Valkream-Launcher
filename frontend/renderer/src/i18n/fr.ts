@@ -125,6 +125,13 @@ const fr: Messages = {
       text: "Vous voulez désinstaller le launcher et les jeux ? Faites-le ici. Mais attention, vous perdrez tous les paramètres de jeux, mais vous conserverez vos personnages.",
       button: "Désinstaller",
     },
+    nexusKey: {
+      text: "Clé API personnelle Nexus Mods (nexusmods.com → Paramètres → API). Nécessaire pour les mods Nexus ; le téléchargement automatique exige un compte Premium. Elle reste sur votre ordinateur.",
+      label: "Clé API Nexus Mods",
+      save: "Enregistrer",
+      saved: "Clé Nexus enregistrée",
+      cleared: "Clé Nexus effacée",
+    },
     gamesRoot: {
       text: "Dossier d'installation des jeux. Changer le dossier déplace les jeux déjà installés (peut durer plusieurs minutes sur un autre disque).",
       change: "Changer",

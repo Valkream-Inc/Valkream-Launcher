@@ -14,7 +14,9 @@ import { BrowserWindow, dialog, ipcMain, type WebContents } from "electron";
 import type { ModsListResult, ToolsHashSummary } from "@shared/types";
 
 import { exportHashFolder, hashFolder } from "../instances/tools/hash-folder.js";
-import { buildModsDisplay, parseModList, parsePackagePage, refsFromPackagePage } from "../instances/tools/mods-list.js";
+import SettingsManager from "../core/settings.js";
+import { nexusGetJson } from "../instances/install/providers/nexus.js";
+import { buildModsDisplay, buildNexusDisplay, parseModList, parseNexusList, parsePackagePage, refsFromPackagePage } from "../instances/tools/mods-list.js";
 import { httpGetText } from "../lib/http.js";
 import { LocalizedError } from "../lib/localized-error.js";
 
@@ -68,6 +70,12 @@ export default function registerAdminToolsIpc(): void {
     }
     // Un lien vers la liste (JSON ou texte) est aussi accepté
     if (/^https?:\/\/\S+$/.test(text)) text = await httpGetText(text, { timeout: 10_000 });
+    // Liste Nexus (`jeu-idMod-idFichier`) : lue avec la clé API du joueur (réglage local)
+    const nexusItems = parseNexusList(text, typeof key === "string" ? key : undefined);
+    if (nexusItems) {
+      const apiKey = await SettingsManager.getSetting("nexusApiKey");
+      return buildNexusDisplay(nexusItems, (url) => nexusGetJson(url, apiKey), reporter(event.sender, "mods"));
+    }
     return buildModsDisplay(
       parseModList(text, typeof key === "string" ? key : undefined),
       fetchJson,

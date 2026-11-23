@@ -70,6 +70,7 @@ export const getInstanceInstaller = (): InstanceInstaller => {
     resolver: getResolver(),
     platform: platform(),
     io: realInstallIO,
+    nexusApiKey: () => SettingsManager.getSetting("nexusApiKey"),
     language: async () => ((await SettingsManager.getSetting("language")) === "en" ? "en" : "fr"),
   });
   return installer;

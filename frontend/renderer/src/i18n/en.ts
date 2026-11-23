@@ -122,6 +122,13 @@ const en: Messages = {
       text: "Want to uninstall the launcher and the games? Do it here. Be careful: you will lose all game settings, but you will keep your characters.",
       button: "Uninstall",
     },
+    nexusKey: {
+      text: "Your personal Nexus Mods API key (nexusmods.com → Settings → API). Required for Nexus mods; automatic downloads need a Premium account. It stays on your computer.",
+      label: "Nexus Mods API key",
+      save: "Save",
+      saved: "Nexus key saved",
+      cleared: "Nexus key cleared",
+    },
     gamesRoot: {
       text: "Games installation folder. Changing the folder moves the games already installed (can take several minutes on another drive).",
       change: "Change",
