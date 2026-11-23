@@ -126,23 +126,13 @@ Les gros fichiers (zips du jeu, dossiers de fichiers référencés par un manife
 ## Test (Production)
 
 1. Pusher les modifications sur la main github
-2. Attendre la fin du workflow de build
-3. activer l'option de test beta dans le launcher sur le pc de test (settings -> crtl + maj + click sur l'image -> dev -> beta)
-   <br>
-   <img src="./doc/images/activer les devs.png" style="max-width: 10cm">
-   <br>
-   <img src="./doc/images/activer les devs 2.png" style="max-width: 10cm">
-4. puis télécharger l'installer depuis github
-5. mettre a jour le launcher sur le PC de test (via l'installer)
-6. Lancer le launcher
-7. Vérifier que le launcher fonctionne
-8. Désactiver l'option de test beta dans le launcher (settings -> crtl + maj + click sur l'image -> dev -> beta)
-   <br>
-   <img src="./doc/images/activer les devs.png" style="max-width: 10cm">
-   <br>
-   <img src="./doc/images/activer les devs 2.png" style="max-width: 10cm">
-9. Lancer le launcher (pour verifier que le beta est désactivé et que le launcher se met à jour)
-10. Installer la mise à jour sur le serveur si tout est ok (voir `doc/new-launcher-version.doc.md`)
+2. Attendre la fin du workflow de build (il lance `yarn build`, qui vérifie aussi que le système de mise à jour du build est cohérent : `yarn check:build`)
+3. Télécharger l'installer depuis github et l'installer sur le PC de test
+4. Lancer le launcher et vérifier qu'il fonctionne
+
+Pour tester le launcher **sans passer par la mise à jour**, faire un **Ctrl + Maj + clic sur la vidéo** de la fenêtre de mise à jour.
+
+L'installation de la mise à jour ne supprime rien (jeux et réglages conservés ; une nouvelle version majeure du launcher nettoie les installations au premier démarrage). Seule la désinstallation complète supprime les jeux, y compris ceux d'un dossier choisi ailleurs.
 
 ---
 

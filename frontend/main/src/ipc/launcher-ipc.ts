@@ -15,6 +15,8 @@ import CheckForUpdates from "./check-for-updates.js";
 import SettingsManager from "../core/settings.js";
 import LauncherManager from "../core/launcher.js";
 import DirsManager from "../core/dirs.js";
+import { isDev } from "../core/constants.js";
+import { syncUninstallPaths, UNINSTALL_PATHS_FILE } from "../lib/uninstall-paths.js";
 import { getMoveProgress, moveGamesRoot, type MoveProgress, writeGamesRoot } from "../lib/games-root.js";
 import { anySyncRunning } from "./sync-registry.js";
 import { isSafeExternalUrl } from "../lib/safe-link.js";
@@ -122,6 +124,15 @@ class IpcHandlers {
       isDefault: DirsManager.gamesRoot() === DirsManager.rootPath(),
     }));
     // Progression du déplacement : au plus un événement toutes les 100 ms (le premier et le dernier passent toujours)
+    // Liste des dossiers de jeux à supprimer à la désinstallation complète (relue par le désinstalleur)
+    const syncUninstall = () => {
+      if (isDev) return;
+      syncUninstallPaths({
+        file: path.join(DirsManager.rootPath(), UNINSTALL_PATHS_FILE),
+        gamesRoot: DirsManager.gamesRoot(),
+        defaultRoot: DirsManager.rootPath(),
+      });
+    };
     let lastSent = 0;
     const sendProgress = (progress: MoveProgress) => {
       const now = Date.now();
@@ -141,6 +152,7 @@ class IpcHandlers {
         isBusy: anySyncRunning,
         onProgress: sendProgress,
       });
+      syncUninstall();
       return folder;
     });
     ipcMain.handle("games-root:reset", async () => {
@@ -153,6 +165,7 @@ class IpcHandlers {
         onProgress: sendProgress,
       });
       writeGamesRoot(DirsManager.pathsFile(), undefined);
+      syncUninstall();
       return DirsManager.rootPath();
     });
 

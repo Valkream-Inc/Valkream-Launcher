@@ -14,6 +14,7 @@ import DirsManager from "./src/core/dirs.js";
 import LauncherManager from "./src/core/launcher.js";
 import { cleanupInterruptedMove, INSTANCES_DIR } from "./src/lib/games-root.js";
 import { applyLauncherVersion } from "./src/lib/launcher-version.js";
+import { syncUninstallPaths, UNINSTALL_PATHS_FILE } from "./src/lib/uninstall-paths.js";
 import { abortAllSyncs } from "./src/ipc/sync-registry.js";
 
 if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
@@ -30,6 +31,12 @@ else {
     try {
       cleanupInterruptedMove(DirsManager.gamesRoot());
       if (!isDev) {
+        // Liste des dossiers de jeux hors dossier par défaut, pour la désinstallation complète
+        syncUninstallPaths({
+          file: path.join(DirsManager.rootPath(), UNINSTALL_PATHS_FILE),
+          gamesRoot: DirsManager.gamesRoot(),
+          defaultRoot: DirsManager.rootPath(),
+        });
         const { change, cleaned } = applyLauncherVersion({
           versionFile: DirsManager.versionFile(),
           instancesDir: path.join(DirsManager.gamesRoot(), INSTANCES_DIR),
