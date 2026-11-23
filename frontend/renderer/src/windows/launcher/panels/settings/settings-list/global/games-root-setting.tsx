@@ -38,7 +38,10 @@ function GamesRootSetting() {
         await refreshChannel();
       }
     } catch (error) {
-      enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: "error" });
+      const raw = error instanceof Error ? error.message : String(error);
+      // Electron préfixe les erreurs IPC : on ne garde que le message utile
+      const message = raw.replace(/^Error invoking remote method '[^']+': (\w*Error: )?/, "");
+      enqueueSnackbar(message, { variant: "error" });
     } finally {
       setStarting(false);
     }

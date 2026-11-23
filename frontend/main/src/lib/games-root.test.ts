@@ -63,6 +63,17 @@ describe("déplacement du dossier des jeux", () => {
     assert.equal(readGamesRoot(path.join(dir, "p.json")), undefined);
   });
 
+  it("destination déjà remplie et rien à déplacer : on l'adopte (config seule)", async () => {
+    const from = path.join(dir, "old");
+    const to = path.join(dir, "new");
+    const configFile = path.join(dir, "paths.json");
+    seed(to);
+    fs.mkdirSync(from, { recursive: true });
+    await moveGamesRoot({ fromRoot: from, toRoot: to, configFile });
+    assert.equal(readGamesRoot(configFile), to);
+    assert.equal(fs.existsSync(path.join(to, "instances", "g", "stable", "game", "a.txt")), true);
+  });
+
   it("refuse dossier imbriqué, identique, relatif ou installation en cours", async () => {
     const from = path.join(dir, "old");
     seed(from);

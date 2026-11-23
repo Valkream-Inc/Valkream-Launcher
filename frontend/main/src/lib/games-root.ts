@@ -119,14 +119,15 @@ const moveGamesRootNow = async (
 
   const source = path.join(from, INSTANCES_DIR);
   const target = path.join(to, INSTANCES_DIR);
-  if (fs.existsSync(target) && !isEmptyDir(target)) throw new LocalizedError("err.rootNotEmpty", { target });
+  const targetHasGames = fs.existsSync(target) && !isEmptyDir(target);
+  if (targetHasGames && fs.existsSync(source)) throw new LocalizedError("err.rootNotEmpty", { target });
 
   fs.mkdirSync(to, { recursive: true });
   const moving = target + MOVING_SUFFIX;
   fs.rmSync(moving, { recursive: true, force: true });
 
   if (!fs.existsSync(source)) {
-    // Rien à déplacer (aucun jeu installé) : seule la config change
+    // Rien à déplacer (aucun jeu installé, ou jeux déjà présents dans la destination) : seule la config change
     writeGamesRoot(configFile, record ?? to);
     return;
   }
@@ -135,8 +136,9 @@ const moveGamesRootNow = async (
   try {
     fs.renameSync(source, target); // atomique sur un même volume
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "EXDEV") throw error;
-    // Autre volume : copie complète à côté, puis bascule par rename (jamais de dossier à moitié rempli en place)
+    // EXDEV : autre volume. EPERM / EBUSY / EACCES : Windows (OneDrive, antivirus, fichier ouvert) refuse le rename
+    if (!["EXDEV", "EPERM", "EBUSY", "EACCES"].includes((error as NodeJS.ErrnoException).code ?? "")) throw error;
+    // Copie complète : copie complète à côté, puis bascule par rename (jamais de dossier à moitié rempli en place)
     try {
       const total = await countFiles(source);
       let done = 0;
@@ -148,7 +150,11 @@ const moveGamesRootNow = async (
       throw copyError;
     }
     writeGamesRoot(configFile, record ?? to);
-    fs.rmSync(source, { recursive: true, force: true });
+    try {
+      fs.rmSync(source, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    } catch {
+      // Déplacement réussi : un reste impossible à supprimer (verrou) n'est pas une erreur
+    }
     return;
   }
   writeGamesRoot(configFile, record ?? to);
