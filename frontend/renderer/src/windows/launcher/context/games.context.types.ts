@@ -4,7 +4,7 @@
  */
 
 import type { ReactNode } from "react";
-import type { Channel, InstanceId } from "@shared/types";
+import type { Channel, GamesRootMove, InstanceId } from "@shared/types";
 
 import type { InstanceRenderConfig } from "../../../instances/instances.types";
 
@@ -24,4 +24,9 @@ export interface GamesContextValue {
   actualChannel: Channel;
   /** Vérifie que le canal actif est encore proposé (réglage désactivé, canal retiré du remote) : sinon stable. */
   refreshChannel: () => Promise<void>;
+  /** Le canal actif n'est plus proposé (tests désactivés, jeu sans stable…) : retour au choix du jeu requis. */
+  channelLost: boolean;
+  clearChannelLost: () => void;
+  /** Déplacement du dossier des jeux en cours : rien ne doit être lancé ni installé pendant ce temps. */
+  gamesRootMove: GamesRootMove;
 }

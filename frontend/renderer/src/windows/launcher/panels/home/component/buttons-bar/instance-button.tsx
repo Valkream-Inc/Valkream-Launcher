@@ -46,7 +46,7 @@ export default function InstanceButton() {
   const { t, i18n } = useTranslation();
   const { actionLoading, runAction } = useAction();
   const { pause, play } = useBackground();
-  const { actualInstanceId, actualInstance, actualChannel } = useGames();
+  const { actualInstanceId, actualInstance, actualChannel, gamesRootMove } = useGames();
   const { installationStatut, maintenance } = useInfos();
 
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
@@ -207,6 +207,16 @@ export default function InstanceButton() {
       try {
         if (actionLoading) return;
 
+        // Déplacement du dossier des jeux : ni lancement ni installation tant qu'il n'est pas terminé
+        if (gamesRootMove.active) {
+          const percent = gamesRootMove.total > 0 ? Math.floor((gamesRootMove.done / gamesRootMove.total) * 100) : 0;
+          return setAction({
+            text: t("button.moving", { percent }),
+            playIcon: false,
+            onClick: () => {},
+          });
+        }
+
         // Cas 0 : En cours de chargement
         if (!installationStatut || maintenance === null)
           return setAction(LOADING_ACTION);
@@ -317,6 +327,8 @@ export default function InstanceButton() {
     actualInstanceId,
     actualChannel,
     i18n.language,
+    gamesRootMove.active,
+    gamesRootMove.done,
   ]);
 
   return (

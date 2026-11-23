@@ -200,7 +200,7 @@ Type `nexus_modpack_url`, `content` = liste `jeu-idMod-idFichier` (ex : `valheim
 - **Clé API du joueur** : réglage local Launcher → « Clé API Nexus Mods » (jamais envoyée au remote ni journalisée). Sans clé : échec explicite.
 - **Compte Premium requis** pour le téléchargement automatique (`download_link.json`) : sans Premium Nexus exige un lien `nxm://` généré sur son site, impossible à automatiser (erreur `err.nexusPremium`).
 - **Archives `.zip` uniquement** (`.7z` / `.rar` : erreur explicite). Pas de résolution de dépendances (l'API Nexus n'en expose pas).
-- Outil Tools : une liste `jeu-idMod-idFichier` donne nom, résumé, image et page de chaque mod (avec la clé enregistrée dans les réglages).
+- Outil Tools : sélecteur **API** (auto / Thunderstore / Hexium / Nexus Mods). Une liste `jeu-idMod-idFichier` ou un lien de page `nexusmods.com/<jeu>/mods/<id>` (fichier principal retenu) donne nom, résumé, image et page de chaque mod, avec la clé enregistrée dans les réglages. Les requêtes sont limitées (4 en parallèle, espacées, reprise sur 429).
 
 ## Mods Thunderstore
 
@@ -333,3 +333,12 @@ Seuls les réglages utiles au joueur sont dans les onglets General, Launcher et 
 - Debug : barre d'outils collante (recherche, problèmes seulement, recharger / vérifier / réparer, copier).
 
 Tools, liste de mods : le lien peut être celui d'une **page Thunderstore ou Hexium** (`https://thunderstore.io/c/valheim/p/Auteur/Nom/`) : le mod (et, au choix, ses dépendances) est lu via l'API. Les images viennent de l'API, sinon du CDN Thunderstore (`gcdn.thunderstore.io/live/repository/icons/Auteur-Nom-Version.png`).
+
+
+## Canaux et choix du jeu
+
+Un jeu n'apparaît dans le choix que s'il propose au moins un canal visible : `stable` toujours, `beta` / `alpha` seulement si « Afficher les canaux de test » est actif. Un jeu sans `stable` n'est donc visible qu'avec les tests activés, et uniquement sur ses canaux de test. Désactiver les tests (ou voir un canal retiré du remote) pendant qu'on joue sur ce canal ramène au choix du jeu.
+
+## Déplacement du dossier des jeux
+
+Pendant le déplacement (copie fichier par fichier si autre volume), la progression s'affiche dans le réglage et sur le bouton du jeu ; lancer, installer, désinstaller et modifier un jeu sont refusés (`err.rootMoving`). Toutes les actions sur un jeu (dossier, journal, réglages, lancement) utilisent le dossier choisi par le joueur.

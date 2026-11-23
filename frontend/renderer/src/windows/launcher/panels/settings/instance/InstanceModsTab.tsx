@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import type { InstanceReport } from "@shared/types";
 
 import { localized } from "../../../../../i18n";
+import PagedList from "../component/paged-list/paged-list";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
 
@@ -29,7 +30,7 @@ export default function InstanceModsTab({ report }: { report: InstanceReport }) 
           <Typography>{t("instance.noMods")}</Typography>
         </SettingsBox>
       )}
-      {mods.map((mod) => (
+      <PagedList items={mods} pageSize={10} renderItem={(mod) => (
         <SettingsBox key={mod.id ?? mod.name} warn={false}>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             {mod.icon && <Avatar variant="rounded" src={mod.icon} alt={mod.name} slotProps={{ img: { loading: "lazy", decoding: "async" } }} />}
@@ -44,7 +45,7 @@ export default function InstanceModsTab({ report }: { report: InstanceReport }) 
             </Box>
           </Box>
         </SettingsBox>
-      ))}
+      )} />
     </>
   );
 }

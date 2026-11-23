@@ -9,7 +9,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { cleanupInterruptedMove, moveGamesRoot, readGamesRoot } from "./games-root.js";
+import { cleanupInterruptedMove, getMoveProgress, isMovingGamesRoot, moveGamesRoot, readGamesRoot } from "./games-root.js";
 import { applyLauncherVersion, compareVersions } from "./launcher-version.js";
 
 let dir: string;
@@ -34,6 +34,22 @@ describe("déplacement du dossier des jeux", () => {
     assert.equal(fs.readFileSync(path.join(to, "instances", "g", "stable", "game", "a.txt"), "utf8"), "A");
     assert.equal(fs.existsSync(path.join(from, "instances")), false);
     assert.equal(readGamesRoot(configFile), to);
+  });
+
+  it("état de déplacement : actif pendant l'opération (lancement interdit), puis libéré, même après un échec", async () => {
+    const from = path.join(dir, "old");
+    seed(from);
+    const states: boolean[] = [];
+    const configFile = path.join(dir, "cfg", "paths.json");
+    const pending = moveGamesRoot({ fromRoot: from, toRoot: path.join(dir, "new"), configFile, onProgress: (progress) => states.push(progress.active) });
+    assert.equal(isMovingGamesRoot(), true);
+    await assert.rejects(moveGamesRoot({ fromRoot: from, toRoot: path.join(dir, "autre"), configFile }), /déplacement|moved/i);
+    await pending;
+    assert.equal(isMovingGamesRoot(), false);
+    assert.equal(states[0], true);
+    assert.equal(states.at(-1), false);
+    await assert.rejects(moveGamesRoot({ fromRoot: from, toRoot: from, configFile }));
+    assert.deepEqual(getMoveProgress(), { active: false, done: 0, total: 0 });
   });
 
   it("refuse un dossier non vide : rien ne change", async () => {

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import type { EntryReport, InstanceSummary } from "@shared/types";
-import { groupEntriesByPath, isSelectable, overlappingPaths, resolveChannel, selectableChannels } from "./instances.helpers";
+import { groupEntriesByPath, isSelectable, overlappingPaths, paginate, pickerChannels, resolveChannel, selectableChannels } from "./instances.helpers";
 
 const entry = (name: string, path: string, status: EntryReport["status"]): EntryReport => ({
   name, tier: "game-base", type: "zip_url", path, declaredVersion: "1", status,
@@ -17,11 +17,20 @@ describe("canaux", () => {
     assert.deepEqual(selectableChannels(["beta"], true), ["beta"]);
   });
 
-  it("resolveChannel : canal souhaité s'il est encore proposé, sinon stable", () => {
+  it("resolveChannel : canal souhaité s'il est encore proposé, sinon null (retour au choix du jeu)", () => {
     assert.equal(resolveChannel("beta", ["stable", "beta"], true), "beta");
-    assert.equal(resolveChannel("beta", ["stable", "beta"], false), "stable");
-    assert.equal(resolveChannel("alpha", ["stable", "beta"], true), "stable");
+    assert.equal(resolveChannel("beta", ["stable", "beta"], false), null);
+    assert.equal(resolveChannel("alpha", ["stable", "beta"], true), null);
     assert.equal(resolveChannel("stable", ["stable"], false), "stable");
+    assert.equal(resolveChannel("stable", ["alpha"], true), null); // jeu sans stable
+  });
+
+  it("choix du jeu : un jeu sans canal proposé est masqué, sauf sans information du remote", () => {
+    assert.deepEqual(pickerChannels(["alpha"], false), []); // alpha seulement, tests désactivés
+    assert.deepEqual(pickerChannels(["alpha"], true), ["alpha"]);
+    assert.deepEqual(pickerChannels(["beta"], true), ["beta"]); // pas de stable : pas d'entrée stable
+    assert.deepEqual(pickerChannels(["stable", "beta"], false), ["stable"]);
+    assert.deepEqual(pickerChannels([], false), ["stable"]); // hors ligne sans cache
   });
 });
 
@@ -57,5 +66,16 @@ describe("overlappingPaths", () => {
       [["game", "game/mods"], ["game", "game/cfg"]],
     );
     assert.deepEqual(overlappingPaths([entry("a", "game/mods", "up-to-date"), entry("b", "game/mods2", "up-to-date")]), []);
+  });
+});
+
+describe("paginate", () => {
+  const list = Array.from({ length: 25 }, (_, i) => i);
+  it("découpe en pages et borne la page demandée", () => {
+    assert.deepEqual(paginate(list, 1, 10).items, list.slice(0, 10));
+    assert.deepEqual(paginate(list, 3, 10), { items: [20, 21, 22, 23, 24], page: 3, pageCount: 3 });
+    assert.equal(paginate(list, 99, 10).page, 3);
+    assert.equal(paginate(list, 0, 10).page, 1);
+    assert.deepEqual(paginate([], 1, 10), { items: [], page: 1, pageCount: 1 });
   });
 });

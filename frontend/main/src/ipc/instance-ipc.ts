@@ -25,6 +25,7 @@ import {
   getInstanceRegistry,
   getInstanceStatus,
 } from "../instances/services.js";
+import { isMovingGamesRoot } from "../lib/games-root.js";
 import DirsManager from "../core/dirs.js";
 import LauncherManager from "../core/launcher.js";
 import { ensureSteamRunning, isSteamRunning } from "../instances/local/steam.js";
@@ -40,6 +41,11 @@ import { LocalizedError } from "../lib/localized-error.js";
 const isChannel = (value: unknown): value is Channel =>
   value === "stable" || value === "beta" || value === "alpha";
 
+/** Pendant le déplacement du dossier des jeux, rien ne doit lancer, installer ni modifier un jeu. */
+const assertNotMoving = (): void => {
+  if (isMovingGamesRoot()) throw new LocalizedError("err.rootMoving");
+};
+
 /** Valide id et canal reçus du renderer et résout les chemins de l'installation. */
 const resolve = (id: unknown, channel: unknown) => {
   const config = instancesConfig.find((item) => item.id === id);
@@ -49,7 +55,9 @@ const resolve = (id: unknown, channel: unknown) => {
     config,
     channel,
     locations: installLocations(
-      DirsManager.rootPath(),
+      // Dossier des jeux choisi par le joueur (et non le dossier par défaut) : sinon, après un déplacement,
+      // le dossier, le journal et les réglages du jeu seraient cherchés au mauvais endroit.
+      DirsManager.gamesRoot(),
       config,
       channel,
       process.platform as GamePlatform
@@ -90,6 +98,7 @@ const InstanceIpcHandlers = (): void => {
 
   // Une synchronisation annulable par canal (clé = dossier d'installation) : relancer en remplace une bloquée.
   ipcMain.handle("instances:sync", (event, id: string, channel: Channel, options?: { repair?: boolean }) => {
+    assertNotMoving();
     const { locations } = resolve(id, channel);
     return runSync(locations.installDir, (signal) =>
       getInstanceInstaller().sync(id, channel, {
@@ -114,6 +123,7 @@ const InstanceIpcHandlers = (): void => {
   });
 
   ipcMain.handle("instances:launch", async (_event, id: string, channel: Channel) => {
+    assertNotMoving();
     const { config, locations } = resolve(id, channel);
 
     // On ne lance jamais un jeu dont une partie bloquante manque (sauf hors ligne : on joue l'installé).
@@ -166,6 +176,7 @@ const InstanceIpcHandlers = (): void => {
 
   // Solution « localiser l'installation » : le joueur choisit le dossier du jeu (lu, jamais modifié).
   ipcMain.handle("instances:pick-source", async (event, id: string, channel: Channel) => {
+    assertNotMoving();
     const { locations } = resolve(id, channel);
     const window = BrowserWindow.fromWebContents(event.sender);
     const options = { title: "Dossier d'installation du jeu", properties: ["openDirectory" as const] };
@@ -176,12 +187,14 @@ const InstanceIpcHandlers = (): void => {
   });
 
   ipcMain.handle("instances:clear-source", (_event, id: string, channel: Channel) => {
+    assertNotMoving();
     clearGameSourceDir(resolve(id, channel).locations.installDir);
   });
 
   // Solution « DepotDownloader » : la version exacte du jeu, connexion par QR code.
   // La sortie (QR code inclus) est envoyée ligne à ligne à l'interface.
   ipcMain.handle("instances:depot-download", async (event, id: string, channel: Channel) => {
+    assertNotMoving();
     const { config, locations } = resolve(id, channel);
     const { release } = await getInstanceInspector().load(id, channel);
     const entry = [...Object.values(release?.["game-base"] ?? {}), ...Object.values(release?.["game-details"] ?? {})].find(
@@ -238,6 +251,7 @@ const InstanceIpcHandlers = (): void => {
   });
 
   ipcMain.handle("instances:uninstall", (_event, id: string, channel: Channel) => {
+    assertNotMoving();
     const { locations } = resolve(id, channel);
     if (getInstanceInstaller().isBusy(locations.installDir)) {
       throw new LocalizedError("install.alreadyRunning");

@@ -9,6 +9,14 @@
   color: var(--color);
   display: flex;
   gap: 0.9rem 2rem;
+  /* Jamais plus large que la page ; un contenu trop large défile dans son bloc */
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+.settings-elements-box > * {
+  min-width: 0;
+  max-width: 100%;
 }
 .futuristic-theme .settings-elements-box {
   color: white;

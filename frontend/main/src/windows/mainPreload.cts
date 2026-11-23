@@ -83,6 +83,10 @@ const electronAPI: ElectronAPI = {
   openAppData: () => ipcRenderer.invoke("open-appdata"),
   uninstallLauncher: () => ipcRenderer.invoke("uninstall-launcher"),
   getGamesRoot: () => ipcRenderer.invoke("games-root:get"),
+  getGamesRootMove: () => ipcRenderer.invoke("games-root:move-state"),
+  onGamesRootProgress: (callback: (progress: unknown) => void) =>
+    ipcRenderer.on("games-root:progress", (_event, progress) => callback(progress)),
+  removeGamesRootProgressListeners: () => ipcRenderer.removeAllListeners("games-root:progress"),
   changeGamesRoot: () => ipcRenderer.invoke("games-root:change"),
   resetGamesRoot: () => ipcRenderer.invoke("games-root:reset"),
   chooseFolder: () => ipcRenderer.invoke("choose-folder"),

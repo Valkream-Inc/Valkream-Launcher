@@ -130,6 +130,7 @@ const en: Messages = {
       cleared: "Nexus key cleared",
     },
     gamesRoot: {
+      progress: "Moving: {{done}} / {{total}} files ({{percent}}%). Do not launch a game until it is finished.",
       text: "Games installation folder. Changing the folder moves the games already installed (can take several minutes on another drive).",
       change: "Change",
       moving: "Moving…",
@@ -204,6 +205,7 @@ const en: Messages = {
     cancelled: "cancelled",
   },
   button: {
+    moving: "Moving games ({{percent}}%): please wait",
     welcome: "Welcome to the Valkream launcher! 👋",
     cancelled: "Installation cancelled",
     install: "Install",
@@ -326,6 +328,16 @@ const en: Messages = {
     saveManifest: "Save hash.json",
     hashName: "Hash",
     modsTitle: "Mod list from a manifest",
+    depsLabelNexus: "Nexus mods (game-modId-fileId, one per line, JSON array or nexusmods.com page link)",
+    api: {
+      label: "Mods API",
+      help: "Automatic detection, or force an API.",
+      nexusHelp: "Nexus Mods: API key required (Settings → Launcher); line game-modId-fileId (e.g. valheim-1234-5678) or a nexusmods.com page link.",
+      auto: "Automatic detection",
+      thunderstore: "Thunderstore",
+      hexium: "Hexium",
+      nexus: "Nexus Mods",
+    },
     depsLabel: "Thunderstore dependencies (Author-Name-Version, one per line, JSON array or link)",
     fetching: "Fetching…",
     generate: "Generate the list",

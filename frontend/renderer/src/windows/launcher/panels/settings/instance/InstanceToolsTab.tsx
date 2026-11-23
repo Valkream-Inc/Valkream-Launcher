@@ -15,6 +15,7 @@ import {
   Button,
   FormControlLabel,
   LinearProgress,
+  MenuItem,
   Stack,
   Switch,
   TextField,
@@ -26,6 +27,7 @@ import { enqueueSnackbar } from "notistack";
 import { useEffect, useState } from "react";
 
 import type {
+  ModsApi,
   ModsListResult,
   ToolsHashSummary,
   ToolsProgress,
@@ -33,6 +35,7 @@ import type {
 
 import { useTranslation } from "react-i18next";
 import i18n from "../../../../../i18n";
+import PagedList from "../component/paged-list/paged-list";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
 
@@ -172,6 +175,7 @@ function HashFolderTool() {
         <Stack spacing={1.5} sx={{ width: "100%" }}>
           <Step index={1} label={t("tools.stepOptions")} />
           <TextField
+            fullWidth
             size="small"
             multiline
             minRows={2}
@@ -249,8 +253,13 @@ function ModsListTool() {
   /** Chemin du tableau dans un JSON (liens et fichiers : `dependencies`, `packs.0.mods`…). */
   const [key, setKey] = useState("");
   const [withDependencies, setWithDependencies] = useState(true);
+  /** API des mods : détection automatique, ou Thunderstore / Hexium / Nexus Mods (clé API des réglages). */
+  const [api, setApi] = useState<ModsApi>("auto");
   /** Lien de page Thunderstore / Hexium : le mod (et ses dépendances) sont lus via l'API, pas de clé à donner. */
-  const isPackagePage = mode === "url" && /^https:\/\/(www\.)?(thunderstore\.io|hexium\.gg)\/(c\/[\w-]+\/)?(p|package)\//.test(url.trim());
+  const isPackagePage =
+    mode === "url" &&
+    (/^https:\/\/(www\.)?(thunderstore\.io|hexium\.gg)\/(c\/[\w-]+\/)?(p|package)\//.test(url.trim()) ||
+      /^https:\/\/(www\.)?nexusmods\.com\/[\w]+\/mods\/\d+/.test(url.trim()));
   const [result, setResult] = useState<ModsListResult | null>(null);
   const [busy, setBusy] = useState(false);
   const progress = useToolProgress("mods", busy);
@@ -271,7 +280,7 @@ function ModsListTool() {
   const generate = async () => {
     setBusy(true);
     try {
-      setResult(await window.electron_API.toolsModsList(source, undefined, mode === "list" ? undefined : key.trim() || undefined, withDependencies));
+      setResult(await window.electron_API.toolsModsList(source, api, mode === "list" ? undefined : key.trim() || undefined, withDependencies));
     } catch (error) {
       fail(error);
     } finally {
@@ -298,18 +307,35 @@ function ModsListTool() {
             <ToggleButton value="url">{t("tools.mode.url")}</ToggleButton>
             <ToggleButton value="file">{t("tools.mode.file")}</ToggleButton>
           </ToggleButtonGroup>
+          <TextField
+            fullWidth
+            select
+            size="small"
+            label={t("tools.api.label")}
+            helperText={api === "nexus" ? t("tools.api.nexusHelp") : t("tools.api.help")}
+            value={api}
+            onChange={(event) => setApi(event.target.value as ModsApi)}
+          >
+            {(["auto", "thunderstore", "hexium", "nexus"] as const).map((item) => (
+              <MenuItem key={item} value={item}>
+                {t(`tools.api.${item}`)}
+              </MenuItem>
+            ))}
+          </TextField>
           {mode === "list" && (
             <TextField
+            fullWidth
               size="small"
               multiline
               minRows={4}
-              label={t("tools.depsLabel")}
+              label={api === "nexus" ? t("tools.depsLabelNexus") : t("tools.depsLabel")}
               value={text}
               onChange={(event) => setText(event.target.value)}
             />
           )}
           {mode === "url" && (
             <TextField
+            fullWidth
               size="small"
               label={t("tools.urlLabel")}
               placeholder="https://…"
@@ -335,6 +361,7 @@ function ModsListTool() {
           )}
           {mode !== "list" && !isPackagePage && (
             <TextField
+            fullWidth
               size="small"
               label={t("tools.keyLabel")}
               placeholder="dependencies"
@@ -373,7 +400,7 @@ function ModsListTool() {
           <SettingsTitle warn={false}>
             {t("tools.preview", { count: result.mods.length })}
           </SettingsTitle>
-          {result.mods.map((mod) => {
+          <PagedList items={result.mods} pageSize={10} renderItem={(mod) => {
             const description =
               typeof mod.description === "string"
                 ? mod.description
@@ -396,7 +423,7 @@ function ModsListTool() {
                 </Box>
               </SettingsBox>
             );
-          })}
+          }} />
         </>
       )}
     </>

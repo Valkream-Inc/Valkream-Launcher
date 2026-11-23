@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import type { InstanceReport } from "@shared/types";
 
 import { localized } from "../../../../../i18n";
+import PagedList from "../component/paged-list/paged-list";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
 
@@ -27,7 +28,7 @@ export default function InstanceContributorsTab({ report }: { report: InstanceRe
       <SettingsBox warn={false}>
         {contributors.length === 0 && <Typography>{t("instance.noContributors")}</Typography>}
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {contributors.map((person) => (
+          <PagedList items={contributors} pageSize={24} renderItem={(person) => (
             <Box key={person.name} sx={{ display: "flex", gap: 1, alignItems: "center" }}>
               <Avatar src={person.avatar} alt={person.name} slotProps={{ img: { loading: "lazy", decoding: "async" } }} sx={{ width: 32, height: 32 }} />
               <Box>
@@ -41,7 +42,7 @@ export default function InstanceContributorsTab({ report }: { report: InstanceRe
                 {person.role && <Typography variant="caption">{localized(person.role)}</Typography>}
               </Box>
             </Box>
-          ))}
+          )} />
         </Box>
       </SettingsBox>
     </>

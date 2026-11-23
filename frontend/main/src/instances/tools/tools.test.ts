@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 
 import { manifestHash } from "../install/manifest.js";
 import { exportHashFolder, exportManifestOnly, hashFolder } from "./hash-folder.js";
-import { buildModsDisplay, buildNexusDisplay, parseNexusList, cdnIcon, parseModList, parsePackagePage, refsFromPackagePage } from "./mods-list.js";
+import { buildModsDisplay, buildNexusDisplay, nexusItemFromPage, parseNexusList, parseNexusPage, cdnIcon, parseModList, parsePackagePage, refsFromPackagePage } from "./mods-list.js";
 
 let dir: string;
 beforeEach(() => {
@@ -120,6 +120,30 @@ describe("liste Nexus", () => {
     assert.deepEqual(result.mods[0], { id: "valheim-1", name: "Cool", link: "https://www.nexusmods.com/valheim/mods/1", description: "Un mod", icon: "https://img/x.png" });
     assert.equal(result.mods[1].name, "Mod 2");
     assert.equal(result.failed.length, 1);
+  });
+});
+
+describe("page de mod Nexus", () => {
+  it("reconnaît les liens nexusmods.com et rejette le reste", () => {
+    assert.deepEqual(parseNexusPage("https://www.nexusmods.com/valheim/mods/1234?tab=files"), { game: "valheim", mod: "1234" });
+    assert.deepEqual(parseNexusPage("https://nexusmods.com/7daystodie/mods/9/"), { game: "7daystodie", mod: "9" });
+    assert.equal(parseNexusPage("https://evil.example/valheim/mods/1"), null);
+    assert.equal(parseNexusPage("http://www.nexusmods.com/valheim/mods/1"), null);
+  });
+
+  it("choisit le fichier principal, sinon le dernier MAIN, sinon le plus récent", async () => {
+    const page = { game: "valheim", mod: "1" };
+    const files = (list: object[]) => async (url: string) => {
+      assert.equal(url, "https://api.nexusmods.com/v1/games/valheim/mods/1/files.json");
+      return { files: list };
+    };
+    assert.equal(await nexusItemFromPage(page, files([{ file_id: 1, is_primary: false }, { file_id: 2, is_primary: true }])), "valheim-1-2");
+    assert.equal(
+      await nexusItemFromPage(page, files([{ file_id: 5, category_name: "OPTIONAL", uploaded_timestamp: 9 }, { file_id: 3, category_name: "MAIN", uploaded_timestamp: 1 }, { file_id: 4, category_name: "MAIN", uploaded_timestamp: 2 }])),
+      "valheim-1-4",
+    );
+    assert.equal(await nexusItemFromPage(page, files([{ file_id: 7, uploaded_timestamp: 1 }, { file_id: 8, uploaded_timestamp: 2 }])), "valheim-1-8");
+    await assert.rejects(nexusItemFromPage(page, files([])), /Nexus/);
   });
 });
 

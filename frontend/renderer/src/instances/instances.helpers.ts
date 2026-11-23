@@ -28,12 +28,23 @@ export const selectableChannels = (
   ...(testChannelsEnabled ? TEST_CHANNELS.filter((channel) => channels.includes(channel)) : []),
 ];
 
-/** Canal souhaité s'il est encore proposé, sinon `stable` (ex : beta retirée du remote ou désactivée). */
+/**
+ * Canal souhaité s'il est encore proposé, sinon `null` : le joueur revient au choix du jeu
+ * (canaux de test désactivés, canal retiré du remote, jeu sans canal stable).
+ */
 export const resolveChannel = (
   wanted: Channel,
   channels: readonly Channel[],
   testChannelsEnabled: boolean,
-): Channel => (selectableChannels(channels, testChannelsEnabled).includes(wanted) ? wanted : "stable");
+): Channel | null => (selectableChannels(channels, testChannelsEnabled).includes(wanted) ? wanted : null);
+
+/**
+ * Entrées du choix du jeu pour une instance : un canal par entrée. Un jeu dont aucun canal n'est proposé
+ * (ex : seulement alpha, canaux de test désactivés) n'est pas affiché. Sans information du remote
+ * (hors ligne, pas de cache), le jeu reste accessible en stable.
+ */
+export const pickerChannels = (channels: readonly Channel[], testChannelsEnabled: boolean): Channel[] =>
+  channels.length === 0 ? ["stable"] : selectableChannels(channels, testChannelsEnabled);
 
 /** Une instance est affichable si le remote l'active et que le renderer sait la décrire. */
 export const isSelectable = (
@@ -82,4 +93,18 @@ export const overlappingPaths = (entries: readonly EntryReport[]): [string, stri
     }
   }
   return overlaps;
+};
+
+export interface Page<T> {
+  items: T[];
+  /** Page affichée (1-based), ramenée dans les bornes. */
+  page: number;
+  pageCount: number;
+}
+
+/** Découpe une liste en pages (le rendu ne charge que la page affichée). */
+export const paginate = <T,>(items: readonly T[], page: number, size: number): Page<T> => {
+  const pageCount = Math.max(1, Math.ceil(items.length / Math.max(1, size)));
+  const current = Math.min(Math.max(1, Math.floor(page) || 1), pageCount);
+  return { items: items.slice((current - 1) * size, current * size), page: current, pageCount };
 };

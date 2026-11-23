@@ -133,6 +133,7 @@ const fr: Messages = {
       cleared: "Clé Nexus effacée",
     },
     gamesRoot: {
+      progress: "Déplacement : {{done}} / {{total}} fichiers ({{percent}} %). Ne lancez pas de jeu avant la fin.",
       text: "Dossier d'installation des jeux. Changer le dossier déplace les jeux déjà installés (peut durer plusieurs minutes sur un autre disque).",
       change: "Changer",
       moving: "Déplacement…",
@@ -207,6 +208,7 @@ const fr: Messages = {
     cancelled: "annulé",
   },
   button: {
+    moving: "Déplacement des jeux en cours ({{percent}} %) : patientez",
     welcome: "Bienvenue sur le launcher de Valkream ! 👋",
     cancelled: "Installation annulée",
     install: "Installer",
@@ -329,6 +331,16 @@ const fr: Messages = {
     saveManifest: "Enregistrer hash.json",
     hashName: "Hash",
     modsTitle: "Liste de mods depuis un manifest",
+    depsLabelNexus: "Mods Nexus (jeu-idMod-idFichier, un par ligne, tableau JSON ou lien de page nexusmods.com)",
+    api: {
+      label: "API des mods",
+      help: "Détection automatique, ou forcer une API.",
+      nexusHelp: "Nexus Mods : clé API requise (Réglages → Launcher) ; ligne jeu-idMod-idFichier (ex : valheim-1234-5678) ou lien de page nexusmods.com.",
+      auto: "Détection automatique",
+      thunderstore: "Thunderstore",
+      hexium: "Hexium",
+      nexus: "Nexus Mods",
+    },
     depsLabel: "Dépendances Thunderstore (Auteur-Nom-Version, une par ligne, tableau JSON ou lien)",
     fetching: "Récupération…",
     generate: "Générer la liste",

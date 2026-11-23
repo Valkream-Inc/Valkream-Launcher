@@ -11,12 +11,12 @@ import fs from "fs";
 import path from "path";
 import { BrowserWindow, dialog, ipcMain, type WebContents } from "electron";
 
-import type { ModsListResult, ToolsHashSummary } from "@shared/types";
+import type { ModsApi, ModsListResult, ToolsHashSummary } from "@shared/types";
 
 import { exportHashFolder, hashFolder } from "../instances/tools/hash-folder.js";
 import SettingsManager from "../core/settings.js";
 import { nexusGetJson } from "../instances/install/providers/nexus.js";
-import { buildModsDisplay, buildNexusDisplay, parseModList, parseNexusList, parsePackagePage, refsFromPackagePage } from "../instances/tools/mods-list.js";
+import { buildModsDisplay, buildNexusDisplay, nexusItemFromPage, parseModList, parseNexusList, parseNexusPage, parsePackagePage, refsFromPackagePage } from "../instances/tools/mods-list.js";
 import { httpGetText } from "../lib/http.js";
 import { LocalizedError } from "../lib/localized-error.js";
 
@@ -66,29 +66,32 @@ export default function registerAdminToolsIpc(): void {
     return { output };
   });
 
-  ipcMain.handle("tools:mods-list", async (event, source: unknown, apiUrl?: unknown, key?: unknown, withDependencies?: unknown): Promise<ModsListResult> => {
+  ipcMain.handle("tools:mods-list", async (event, source: unknown, apiChoice?: unknown, key?: unknown, withDependencies?: unknown): Promise<ModsListResult> => {
     let text = String(source ?? "").trim();
-    const api = typeof apiUrl === "string" && /^https?:\/\//.test(apiUrl) ? apiUrl : undefined;
+    const choice: ModsApi = ["thunderstore", "hexium", "nexus"].includes(String(apiChoice)) ? (apiChoice as ModsApi) : "auto";
+    const listKey = typeof key === "string" ? key : undefined;
+    const progress = reporter(event.sender, "mods");
     const fetchJson = async (url: string) => JSON.parse(await httpGetText(url, { timeout: 10_000 })) as unknown;
-    // Page d'un mod Thunderstore : le mod (et ses dépendances) sont lus via l'API, hôte reconnu (Thunderstore, Hexium)
-    const page = parsePackagePage(text);
-    if (page) {
-      return buildModsDisplay(await refsFromPackagePage(page, fetchJson, undefined, withDependencies !== false), fetchJson, page.origin, reporter(event.sender, "mods"));
-    }
+    const nexusJson = async (url: string) => nexusGetJson(url, await SettingsManager.getSetting("nexusApiKey"));
+    const showNexus = (items: string[]) => buildNexusDisplay(items, nexusJson, progress);
+
+    // Page d'un mod : Thunderstore / Hexium (mod + dépendances lus via l'API du site) ou Nexus (fichier principal)
+    const page = choice === "nexus" ? null : parsePackagePage(text);
+    if (page) return buildModsDisplay(await refsFromPackagePage(page, fetchJson, undefined, withDependencies !== false), fetchJson, page.origin, progress);
+    const nexusPage = choice === "thunderstore" || choice === "hexium" ? null : parseNexusPage(text);
+    if (nexusPage) return showNexus([await nexusItemFromPage(nexusPage, nexusJson)]);
+
     // Un lien vers la liste (JSON ou texte) est aussi accepté
     if (/^https?:\/\/\S+$/.test(text)) text = await httpGetText(text, { timeout: 10_000 });
-    // Liste Nexus (`jeu-idMod-idFichier`) : lue avec la clé API du joueur (réglage local)
-    const nexusItems = parseNexusList(text, typeof key === "string" ? key : undefined);
-    if (nexusItems) {
-      const apiKey = await SettingsManager.getSetting("nexusApiKey");
-      return buildNexusDisplay(nexusItems, (url) => nexusGetJson(url, apiKey), reporter(event.sender, "mods"));
+
+    // Liste Nexus (`jeu-idMod-idFichier`), lue avec la clé API du joueur (réglage local)
+    if (choice === "nexus" || choice === "auto") {
+      const items = parseNexusList(text, listKey);
+      if (items) return showNexus(items);
+      if (choice === "nexus") throw new LocalizedError("err.nexusListInvalid");
     }
-    return buildModsDisplay(
-      parseModList(text, typeof key === "string" ? key : undefined),
-      fetchJson,
-      api,
-      reporter(event.sender, "mods"),
-    );
+    const origin = choice === "hexium" ? "https://hexium.gg" : undefined; // défaut : Thunderstore
+    return buildModsDisplay(parseModList(text, listKey), fetchJson, origin, progress);
   });
 
   // Fichier de liste (texte ou JSON) choisi par boîte de dialogue : le renderer ne fournit jamais de chemin

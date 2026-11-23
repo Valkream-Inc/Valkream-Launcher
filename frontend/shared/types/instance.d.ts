@@ -455,6 +455,9 @@ export interface LogRecord {
 }
 
 /** Progression d'un outil admin (onglet Tools). */
+/** API des mods pour l'outil de liste : `auto` détecte (lien de page, format des lignes). */
+export type ModsApi = "auto" | "thunderstore" | "hexium" | "nexus";
+
 export interface ToolsProgress {
   tool: "hash" | "mods";
   done: number;

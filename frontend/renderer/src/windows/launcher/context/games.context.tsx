@@ -8,9 +8,10 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
-import type { Channel, InstanceId } from "@shared/types";
+import type { Channel, GamesRootMove, InstanceId } from "@shared/types";
 
 import instancesRenderConfig from "../../../instances/instances.config";
 import { resolveChannel } from "../../../instances/instances.helpers";
@@ -31,6 +32,17 @@ export const GamesProvider = ({ children }: GamesProviderProps) => {
     instancesRenderConfig[0].id
   );
   const [actualChannel, setActualChannel] = useState<Channel>("stable");
+  const actualChannelRef = useRef<Channel>("stable");
+  actualChannelRef.current = actualChannel;
+  const [channelLost, setChannelLost] = useState(false);
+
+  // Déplacement du dossier des jeux (suivi en direct : bouton de jeu et réglage affichent la progression)
+  const [gamesRootMove, setGamesRootMove] = useState<GamesRootMove>({ active: false, done: 0, total: 0 });
+  useEffect(() => {
+    void window.electron_API.getGamesRootMove?.().then(setGamesRootMove).catch(() => undefined);
+    window.electron_API.onGamesRootProgress?.(setGamesRootMove);
+    return () => window.electron_API.removeGamesRootProgressListeners?.();
+  }, []);
 
   const actualInstance =
     instancesRenderConfig.find((item) => item.id === actualInstanceId) ??
@@ -52,7 +64,10 @@ export const GamesProvider = ({ children }: GamesProviderProps) => {
       ]);
       const summary = instances.find((item) => item.id === actualInstanceId);
       // Le canal choisi dans la liste est conservé tant qu'il est proposé (le jeu stable n'est jamais rechargé à tort)
-      setActualChannel((current) => resolveChannel(current, summary?.channels ?? [], betaEnabled));
+      // Sans information du remote (hors ligne, pas de cache) : on ne touche à rien
+      if (!summary || summary.channels.length === 0) return;
+      const resolved = resolveChannel(actualChannelRef.current, summary.channels, betaEnabled);
+      if (resolved === null) setChannelLost(true);
     } catch (error) {
       console.error("Erreur lors de la récupération du canal :", error);
     }
@@ -68,6 +83,9 @@ export const GamesProvider = ({ children }: GamesProviderProps) => {
     changeActualInstance,
     actualChannel,
     refreshChannel,
+    channelLost,
+    clearChannelLost: () => setChannelLost(false),
+    gamesRootMove,
   };
 
   return (

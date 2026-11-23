@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Button } from "@mui/material";
+import { Box, Button, LinearProgress, Typography } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 
 import { useGames } from "../../../../context/games.context";
@@ -17,9 +17,11 @@ import { useTranslation } from "react-i18next";
 
 function GamesRootSetting() {
   const { t } = useTranslation();
-  const { refreshChannel } = useGames();
+  const { refreshChannel, gamesRootMove } = useGames();
   const [root, setRoot] = useState<{ path: string; isDefault: boolean } | null>(null);
-  const [moving, setMoving] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const moving = starting || gamesRootMove.active;
+  const percent = gamesRootMove.total > 0 ? Math.floor((gamesRootMove.done / gamesRootMove.total) * 100) : 0;
 
   const load = async () => setRoot(await window.electron_API.getGamesRoot());
   useEffect(() => {
@@ -27,7 +29,7 @@ function GamesRootSetting() {
   }, []);
 
   const run = async (action: () => Promise<string | null>) => {
-    setMoving(true);
+    setStarting(true);
     try {
       const folder = await action();
       if (folder) {
@@ -38,7 +40,7 @@ function GamesRootSetting() {
     } catch (error) {
       enqueueSnackbar(error instanceof Error ? error.message : String(error), { variant: "error" });
     } finally {
-      setMoving(false);
+      setStarting(false);
     }
   };
 
@@ -52,6 +54,17 @@ function GamesRootSetting() {
         <Button disabled={moving} onClick={() => run(() => window.electron_API.resetGamesRoot())}>
           {t("settings.gamesRoot.reset")}
         </Button>
+      )}
+      {moving && (
+        <Box sx={{ width: "100%" }}>
+          <LinearProgress
+            variant={gamesRootMove.total > 0 ? "determinate" : "indeterminate"}
+            value={percent}
+          />
+          <Typography variant="caption">
+            {t("settings.gamesRoot.progress", { percent, done: gamesRootMove.done, total: gamesRootMove.total })}
+          </Typography>
+        </Box>
       )}
     </SettingsBox>
   );

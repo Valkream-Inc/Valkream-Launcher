@@ -4,10 +4,11 @@
  */
 
 import Box from "@mui/material/Box";
+import { useEffect } from "react";
 
 import { ActionProvider } from "./context/action.context";
 import { BackgroundProvider } from "./context/background.context";
-import { GamesProvider } from "./context/games.context";
+import { GamesProvider, useGames } from "./context/games.context";
 import { InfosProvider } from "./context/infos.context";
 import { PanelsProvider, usePanels } from "./context/panels.context";
 import { ThemeProvider } from "./context/theme.context";
@@ -52,11 +53,26 @@ function BetaEnabledPanel() {
   );
 }
 
+/** Le canal actif n'est plus proposé (canaux de test désactivés, jeu sans stable) : retour au choix du jeu. */
+function ChannelGuard() {
+  const { channelLost, clearChannelLost } = useGames();
+  const { changePanel } = usePanels();
+  useEffect(() => {
+    if (!channelLost) return;
+    clearChannelLost();
+    changePanel("choose-games");
+  }, [channelLost]);
+  return null;
+}
+
 function MainLauncherProviders({ children }: MainLauncherProvidersProps) {
   return (
     <ActionProvider>
       <GamesProvider>
-        <PanelsProvider>{children}</PanelsProvider>
+        <PanelsProvider>
+          <ChannelGuard />
+          {children}
+        </PanelsProvider>
       </GamesProvider>
     </ActionProvider>
   );

@@ -15,7 +15,7 @@ import CheckForUpdates from "./check-for-updates.js";
 import SettingsManager from "../core/settings.js";
 import LauncherManager from "../core/launcher.js";
 import DirsManager from "../core/dirs.js";
-import { moveGamesRoot, writeGamesRoot } from "../lib/games-root.js";
+import { getMoveProgress, moveGamesRoot, type MoveProgress, writeGamesRoot } from "../lib/games-root.js";
 import { anySyncRunning } from "./sync-registry.js";
 import { isSafeExternalUrl } from "../lib/safe-link.js";
 
@@ -121,6 +121,16 @@ class IpcHandlers {
       path: DirsManager.gamesRoot(),
       isDefault: DirsManager.gamesRoot() === DirsManager.rootPath(),
     }));
+    // Progression du déplacement : au plus un événement toutes les 100 ms (le premier et le dernier passent toujours)
+    let lastSent = 0;
+    const sendProgress = (progress: MoveProgress) => {
+      const now = Date.now();
+      if (progress.active && progress.done > 0 && progress.done < progress.total && now - lastSent < 100) return;
+      lastSent = now;
+      const window = MainWindow.getWindow();
+      if (window && !window.isDestroyed()) window.webContents.send("games-root:progress", progress);
+    };
+    ipcMain.handle("games-root:move-state", () => getMoveProgress());
     ipcMain.handle("games-root:change", async () => {
       const folder = await this.choseFolder();
       if (!folder) return null;
@@ -129,6 +139,7 @@ class IpcHandlers {
         toRoot: folder,
         configFile: DirsManager.pathsFile(),
         isBusy: anySyncRunning,
+        onProgress: sendProgress,
       });
       return folder;
     });
@@ -139,6 +150,7 @@ class IpcHandlers {
         configFile: DirsManager.pathsFile(),
         isBusy: anySyncRunning,
         record: undefined,
+        onProgress: sendProgress,
       });
       writeGamesRoot(DirsManager.pathsFile(), undefined);
       return DirsManager.rootPath();

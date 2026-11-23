@@ -256,3 +256,27 @@ export const buildNexusDisplay = async (
   );
   return { mods, failed };
 };
+
+/** Page d'un mod Nexus Mods : `https://www.nexusmods.com/<jeu>/mods/<id>` (le fichier est choisi via l'API). */
+export const parseNexusPage = (url: string): { game: string; mod: string } | null => {
+  const match = /^https:\/\/(?:www\.)?nexusmods\.com\/([a-z0-9_]+)\/mods\/(\d+)(?:[/?#]|$)/i.exec(url.trim());
+  return match ? { game: match[1].toLowerCase(), mod: match[2] } : null;
+};
+
+/**
+ * Référence `jeu-idMod-idFichier` d'une page Nexus : le fichier principal (`is_primary`), à défaut le
+ * dernier fichier MAIN, à défaut le plus récent.
+ */
+export const nexusItemFromPage = async (page: { game: string; mod: string }, fetchJson: JsonFetcher): Promise<string> => {
+  const info = (await fetchJson(`${NEXUS_API}/v1/games/${encodeURIComponent(page.game)}/mods/${page.mod}/files.json`)) as {
+    files?: { file_id?: number; category_name?: string | null; is_primary?: boolean; uploaded_timestamp?: number }[];
+  };
+  const files = (info.files ?? []).filter((file) => typeof file.file_id === "number");
+  const newest = (list: typeof files) => [...list].sort((a, b) => (b.uploaded_timestamp ?? 0) - (a.uploaded_timestamp ?? 0))[0];
+  const chosen =
+    files.find((file) => file.is_primary) ??
+    newest(files.filter((file) => file.category_name?.toUpperCase() === "MAIN")) ??
+    newest(files);
+  if (!chosen?.file_id) throw new LocalizedError("err.nexusNoFile", { mod: `${page.game}/${page.mod}` });
+  return `${page.game}-${page.mod}-${chosen.file_id}`;
+};

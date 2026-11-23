@@ -19,6 +19,7 @@ import type {
   InstanceSyncResult,
   DepotOutput,
   DepotInfo,
+  ModsApi,
   ModsListResult,
   ToolsHashSummary,
   ToolsProgress,
@@ -80,7 +81,7 @@ export interface ElectronAPI {
   /** Écrit `hash.json` + `hash/` du dernier dossier hashé dans un dossier choisi. `null` si annulé. */
   toolsExportHash(ignore: string[]): Promise<{ output: string } | null>;
   /** Liste `Auteur-Nom-Version` (texte, JSON ou lien) → mods avec image, description et lien. `key` : chemin du tableau dans un JSON (ex : `dependencies`). Un lien de page Thunderstore donne le mod (+ ses dépendances si `withDependencies`, défaut oui). */
-  toolsModsList(source: string, apiUrl?: string, key?: string, withDependencies?: boolean): Promise<ModsListResult>;
+  toolsModsList(source: string, api?: ModsApi, key?: string, withDependencies?: boolean): Promise<ModsListResult>;
   /** Choisit un fichier de liste (txt / json / md, 1 Mo max) et renvoie son texte. `null` si annulé. */
   toolsOpenTextFile(): Promise<{ name: string; text: string } | null>;
   /** Progression de l'outil en cours (hash d'un dossier, liste de mods). */
@@ -113,6 +114,10 @@ export interface ElectronAPI {
   uninstallLauncher(): Promise<ActionResult>;
   /** Dossier d'installation des jeux (réglage général). */
   getGamesRoot(): Promise<{ path: string; isDefault: boolean }>;
+  /** Déplacement du dossier des jeux en cours (fichiers copiés / total). */
+  getGamesRootMove(): Promise<GamesRootMove>;
+  onGamesRootProgress(callback: (progress: GamesRootMove) => void): void;
+  removeGamesRootProgressListeners(): void;
   /** Choisit un nouveau dossier et y déplace les jeux (atomique). `null` si annulé. */
   changeGamesRoot(): Promise<string | null>;
   resetGamesRoot(): Promise<string>;
@@ -127,4 +132,10 @@ export interface ElectronUpdaterAPI {
   removeUpdateListeners(): void;
   closeUpdateWindow(): void;
   openMainWindow(): void;
+}
+
+export interface GamesRootMove {
+  active: boolean;
+  done: number;
+  total: number;
 }

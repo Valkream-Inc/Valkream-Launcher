@@ -21,7 +21,7 @@ import instancesRenderConfig from "../../../../instances/instances.config";
 import {
   CHANNEL_COLOR,
   isSelectable,
-  selectableChannels,
+  pickerChannels,
 } from "../../../../instances/instances.helpers";
 import { useGames } from "../../context/games.context";
 import { usePanels } from "../../context/panels.context";
@@ -246,8 +246,7 @@ export default function ChooseGames() {
             .filter((summary) => isSelectable(summary, renderIds))
             .flatMap((summary) => {
               const render = instancesRenderConfig.find((item) => item.id === summary.id);
-              const channels = selectableChannels(summary.channels, testChannelsEnabled);
-              return (channels.length > 0 ? channels : (["stable"] as const)).map((channel) => ({
+              return pickerChannels(summary.channels, testChannelsEnabled).map((channel) => ({
                 id: summary.id,
                 channel,
                 name: render?.name ?? summary.id,

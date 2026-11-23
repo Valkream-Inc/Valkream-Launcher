@@ -17,6 +17,16 @@ import { isPathInside } from "./paths.js";
 import { LocalizedError } from "./localized-error.js";
 
 export const INSTANCES_DIR = "instances";
+
+/** Déplacement en cours (état du processus : lancement / installation interdits pendant ce temps). */
+export interface MoveProgress {
+  active: boolean;
+  done: number;
+  total: number;
+}
+let moveProgress: MoveProgress = { active: false, done: 0, total: 0 };
+export const getMoveProgress = (): MoveProgress => moveProgress;
+export const isMovingGamesRoot = (): boolean => moveProgress.active;
 const MOVING_SUFFIX = ".moving";
 
 export const readGamesRoot = (configFile: string): string | undefined => {
@@ -51,9 +61,53 @@ export interface MoveOptions {
   isBusy?: () => boolean;
   /** Valeur enregistrée dans la config (`undefined` : retour au défaut). */
   record?: string | undefined;
+  /** Progression (fichiers copiés / total) ; appelée à chaque changement d'état. */
+  onProgress?: (progress: MoveProgress) => void;
 }
 
-export const moveGamesRoot = async ({ fromRoot, toRoot, configFile, isBusy, record }: MoveOptions): Promise<void> => {
+const countFiles = async (dir: string): Promise<number> => {
+  let count = 0;
+  for (const entry of await fs.promises.readdir(dir, { withFileTypes: true })) {
+    count += entry.isDirectory() ? await countFiles(path.join(dir, entry.name)) : 1;
+  }
+  return count;
+};
+
+/** Copie récursive fichier par fichier (progression), liens symboliques conservés. */
+const copyTree = async (from: string, to: string, onFile: () => void): Promise<void> => {
+  await fs.promises.mkdir(to, { recursive: true });
+  for (const entry of await fs.promises.readdir(from, { withFileTypes: true })) {
+    const source = path.join(from, entry.name);
+    const target = path.join(to, entry.name);
+    if (entry.isDirectory()) await copyTree(source, target, onFile);
+    else if (entry.isSymbolicLink()) {
+      await fs.promises.symlink(await fs.promises.readlink(source), target);
+      onFile();
+    } else {
+      await fs.promises.copyFile(source, target);
+      onFile();
+    }
+  }
+};
+
+export const moveGamesRoot = async (options: MoveOptions): Promise<void> => {
+  if (moveProgress.active) throw new LocalizedError("err.rootMoving");
+  const publish = (progress: MoveProgress) => {
+    moveProgress = progress;
+    options.onProgress?.(progress);
+  };
+  publish({ active: true, done: 0, total: 0 });
+  try {
+    await moveGamesRootNow(options, publish);
+  } finally {
+    publish({ active: false, done: 0, total: 0 });
+  }
+};
+
+const moveGamesRootNow = async (
+  { fromRoot, toRoot, configFile, isBusy, record }: MoveOptions,
+  publish: (progress: MoveProgress) => void,
+): Promise<void> => {
   const from = path.resolve(fromRoot);
   const to = path.resolve(toRoot);
   if (!path.isAbsolute(toRoot)) throw new LocalizedError("err.rootAbsolute");
@@ -84,7 +138,10 @@ export const moveGamesRoot = async ({ fromRoot, toRoot, configFile, isBusy, reco
     if ((error as NodeJS.ErrnoException).code !== "EXDEV") throw error;
     // Autre volume : copie complète à côté, puis bascule par rename (jamais de dossier à moitié rempli en place)
     try {
-      await fs.promises.cp(source, moving, { recursive: true });
+      const total = await countFiles(source);
+      let done = 0;
+      publish({ active: true, done, total });
+      await copyTree(source, moving, () => publish({ active: true, done: ++done, total }));
       fs.renameSync(moving, target);
     } catch (copyError) {
       fs.rmSync(moving, { recursive: true, force: true });
