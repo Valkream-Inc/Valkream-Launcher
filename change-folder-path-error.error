@@ -1,0 +1,91 @@
+*  Executing task: yarn dev 
+
+
+   • turbo 2.11.13
+   • Packages in scope: Valkream-Launcher, dev-file-server
+   • Running dev:back, dev:react, dev:main, dev:electron, dev:types:main, dev:types:renderer in 2 packages
+   • Remote caching disabled
+
+Valkream-Launcher:dev:types:renderer: cache bypass, force executing 370d09ae997158a3
+dev-file-server:dev:back: cache bypass, force executing e75181b3d50f0f39
+Valkream-Launcher:dev:types:main: cache bypass, force executing 869a3a997b6b7009
+Valkream-Launcher:dev:electron: cache bypass, force executing aff114a8a91335c7
+Valkream-Launcher:dev:react: cache bypass, force executing 3a47a88e7c0e0e2a
+Valkream-Launcher:dev:main: cache bypass, force executing 1186b5290ce6095e
+Valkream-Launcher:dev:types:renderer: 
+Valkream-Launcher:dev:types:renderer: 18:17:03 - Starting compilation in watch mode...
+Valkream-Launcher:dev:types:renderer: 
+Valkream-Launcher:dev:types:main: 
+Valkream-Launcher:dev:types:main: 18:17:03 - Starting compilation in watch mode...
+Valkream-Launcher:dev:types:main: 
+dev-file-server:dev:back: 
+dev-file-server:dev:back: 
+dev-file-server:dev:back: [23/11/2026 18:17:03] 🚀 Serveur de mise à jour en écoute sur  http://localhost:3000
+Valkream-Launcher:dev:main: [dev-main:esm] building...
+Valkream-Launcher:dev:main: [dev-main:cjs] building...
+Valkream-Launcher:dev:main: [dev-main:cjs] ready
+Valkream-Launcher:dev:react: 
+Valkream-Launcher:dev:react:   VITE v8.3.8  ready in 181 ms
+Valkream-Launcher:dev:react:
+Valkream-Launcher:dev:react:   ➜  Local:   http://localhost:8080/
+Valkream-Launcher:dev:react:   ➜  Network: http://192.168.1.30:8080/  Ethernet
+Valkream-Launcher:dev:react:   ➜  Network: http://172.18.48.1:8080/   vEthernet (Default …
+Valkream-Launcher:dev:main: [dev-main:esm] ready
+Valkream-Launcher:dev:electron: [nodemon] 3.1.14
+Valkream-Launcher:dev:electron: [nodemon] to restart at any time, enter `rs`
+Valkream-Launcher:dev:electron: [nodemon] watching path(s): .tsbuild\**\*
+Valkream-Launcher:dev:electron: [nodemon] watching extensions: js,cjs,json
+Valkream-Launcher:dev:electron: [nodemon] starting `cross-env NODE_ENV=dev electron .tsbuild/app.js`
+Valkream-Launcher:dev:types:main: 
+Valkream-Launcher:dev:types:main: 18:17:05 - Found 0 errors. Watching for file changes.
+Valkream-Launcher:dev:electron: 
+Valkream-Launcher:dev:types:renderer: 
+Valkream-Launcher:dev:types:renderer: 18:17:08 - Found 0 errors. Watching for file changes.
+Valkream-Launcher:dev:electron: Error occurred in handler for 'games-root:change': LocalizedError: Le dossier F:\OneDrive - CCH Informatique & Domotique\Downloads\toto\instances n'estpas vide
+Valkream-Launcher:dev:electron:     at moveGamesRootNow (file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/lib/games-root.js:85:59)
+Valkream-Launcher:dev:electron:     at moveGamesRoot (file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/lib/games-root.js:69:11)
+Valkream-Launcher:dev:electron:     at file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/ipc/launcher-ipc.js:108:13 {
+Valkream-Launcher:dev:electron:   key: 'err.rootNotEmpty',
+Valkream-Launcher:dev:electron:   vars: {
+Valkream-Launcher:dev:electron:     target: 'F:\\OneDrive - CCH Informatique & Domotique\\Downloads\\toto\\instances'
+Valkream-Launcher:dev:electron:   }
+Valkream-Launcher:dev:electron: }
+Valkream-Launcher:dev:electron: Error occurred in handler for 'games-root:change': LocalizedError: Le dossier F:\OneDrive - CCH Informatique & Domotique\Downloads\toto\instances n'estpas vide
+Valkream-Launcher:dev:electron:     at moveGamesRootNow (file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/lib/games-root.js:85:59)
+Valkream-Launcher:dev:electron:     at moveGamesRoot (file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/lib/games-root.js:69:11)
+Valkream-Launcher:dev:electron:     at file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/ipc/launcher-ipc.js:108:13 {
+Valkream-Launcher:dev:electron:   key: 'err.rootNotEmpty',
+Valkream-Launcher:dev:electron:   vars: {
+Valkream-Launcher:dev:electron:     target: 'F:\\OneDrive - CCH Informatique & Domotique\\Downloads\\toto\\instances'
+Valkream-Launcher:dev:electron:   }
+Valkream-Launcher:dev:electron: }
+Valkream-Launcher:dev:electron: Error getting server infos: Failed all 3 attempts
+Valkream-Launcher:dev:react: 18:18:24 [vite] (client) hmr update /src/windows/launcher/launcher.tsx
+Valkream-Launcher:dev:types:renderer:
+Valkream-Launcher:dev:types:renderer: 18:18:25 - File change detected. Starting incremental compilation...
+Valkream-Launcher:dev:types:renderer:
+Valkream-Launcher:dev:types:renderer:
+Valkream-Launcher:dev:types:renderer: 18:18:26 - Found 0 errors. Watching for file changes.
+Valkream-Launcher:dev:electron: Error occurred in handler for 'games-root:reset': Error: EINVAL: invalid argument, readlink 'F:\OneDrive - CCH Informatique & Domotique\Downloads\data\instances\Valheim-Valkream-v2\stable\game\BepInEx\plugins\Therzie-Wizardry\config\TherzieTranslations\Wizardry'
+Valkream-Launcher:dev:electron:     at async Object.readlink (node:internal/fs/promises:1686:10)
+Valkream-Launcher:dev:electron:     at async copyTree (file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/lib/games-root.js:53:33)
+Valkream-Launcher:dev:electron:     at async copyTree (file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/lib/games-root.js:51:30)
+Valkream-Launcher:dev:electron:     ... collapsed 7 duplicate lines matching above 1 lines 7 times...
+Valkream-Launcher:dev:electron:     at async moveGamesRootNow (file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/lib/games-root.js:102:7)
+Valkream-Launcher:dev:electron:     at async moveGamesRoot (file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/lib/games-root.js:69:5)
+Valkream-Launcher:dev:electron:     at async file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/ipc/launcher-ipc.js:118:7 {
+Valkream-Launcher:dev:electron:   errno: -4071,
+Valkream-Launcher:dev:electron:   code: 'EINVAL',
+Valkream-Launcher:dev:electron:   syscall: 'readlink',
+Valkream-Launcher:dev:electron:   path: 'F:\\OneDrive - CCH Informatique & Domotique\\Downloads\\data\\instances\\Valheim-Valkream-v2\\stable\\game\\BepInEx\\plugins\\Therzie-Wizardry\\config\\TherzieTranslations\\Wizardry'
+Valkream-Launcher:dev:electron: }
+Valkream-Launcher:dev:electron: Error occurred in handler for 'games-root:reset': Error: EPERM, Permission denied: 'F:\OneDrive - CCH Informatique & Domotique\Downloads\data\instances'
+Valkream-Launcher:dev:electron:     at Object.rmSync (node:fs:1282:18)
+Valkream-Launcher:dev:electron:     at moveGamesRootNow (file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/lib/games-root.js:109:8)
+Valkream-Launcher:dev:electron:     at async moveGamesRoot (file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/lib/games-root.js:69:5)
+Valkream-Launcher:dev:electron:     at async file:///C:/code/Valkream-Launcher/frontend/.tsbuild/src/ipc/launcher-ipc.js:118:7 {
+Valkream-Launcher:dev:electron:   errno: 1,
+Valkream-Launcher:dev:electron:   code: 'EPERM',
+Valkream-Launcher:dev:electron:   path: 'F:\\OneDrive - CCH Informatique & Domotique\\Downloads\\data\\instances',
+Valkream-Launcher:dev:electron:   syscall: 'rm'
+Valkream-Launcher:dev:electron: }

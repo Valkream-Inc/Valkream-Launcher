@@ -19,6 +19,7 @@ import Panel from "./component/panel/panel";
 import SpecialPanel from "./component/special-panel/special-panel";
 import WindowsBar from "./component/windows-bar/windows-bar";
 
+import { useTranslation } from "react-i18next";
 import type {
   LauncherBackgroundProps,
   MainLauncherProvidersProps,
@@ -26,7 +27,6 @@ import type {
 import ChooseGames from "./panels/choose-games/choose-games";
 import Home from "./panels/home/home";
 import Settings from "./panels/settings/settings";
-import { useTranslation } from "react-i18next";
 
 function BetaEnabledPanel() {
   const { t } = useTranslation();
@@ -38,7 +38,6 @@ function BetaEnabledPanel() {
     return window.location.reload();
   };
 
-  console.log("render toto");
   return (
     <Box sx={{ position: "absolute", inset: 0 }}>
       <SpecialPanel
