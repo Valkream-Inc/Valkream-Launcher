@@ -411,6 +411,31 @@ describe("InstanceInstaller", () => {
     assert.equal(read("stable", "game/plugins/Autre-Mod/x.dll"), "autre");
   });
 
+  it("hexium (api-url compatible) : télécharge via download_url de l'API, repli sur le chemin standard", async () => {
+    const remote: Record<string, any> = {
+      "/index.json": index({ stable: "/stable.yml" }),
+      "/stable.yml": {
+        version: "1.0.0",
+        "game-details": {
+          mods: { version: "1", type: "thunderstore_modpack_url", "api-url": "https://hexium.gg", content: ["Au-ModA-1.0.0", "Au-ModB-2.0.0"] },
+        },
+      },
+      "https://hexium.gg/api/experimental/package/Au/ModA/1.0.0/": { download_url: "https://cdn.hexium.gg/a.zip" },
+    };
+    const urls: string[] = [];
+    const w2 = makeWorld(remote, {});
+    w2.io.download = async (url, dest) => {
+      urls.push(url);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.writeFileSync(dest, JSON.stringify({ "plugin.dll": "x" }));
+    };
+    const inspector = new InstanceInspector({ configs: [config], resolver: w2.resolver, platform: "win32", rootPath: () => root });
+    const installer = new InstanceInstaller({ inspector, resolver: w2.resolver, platform: "win32", io: w2.io });
+    const result = await installer.sync("g", "stable");
+    assert.deepEqual(result.failed, []);
+    assert.deepEqual([...urls].sort(), ["https://cdn.hexium.gg/a.zip", "https://hexium.gg/package/download/Au/ModB/2.0.0/"]);
+  });
+
   it("entrée optionnelle désactivée : ses mods sont retirés, ceux des autres entrées restent", async () => {
     const remote: Record<string, any> = {
       "/index.json": index({ stable: "/stable.yml" }),

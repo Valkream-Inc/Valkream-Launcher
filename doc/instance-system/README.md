@@ -195,6 +195,8 @@ Les hash des fichiers installés sont mémorisés dans `instance.hashes.json` (�
 
 ## Mods Thunderstore
 
+**Hexium** (https://hexium.gg, API compatible Thunderstore) : même type `thunderstore_modpack_url`, avec `api-url: https://hexium.gg`. Le lien de téléchargement de chaque mod est lu dans `download_url` de `/api/experimental/package/<Auteur>/<Nom>/<version>/` (repli sur `/package/download/<Auteur>/<Nom>/<version>/` si l'API ne répond pas). Les liens de page `https://hexium.gg/c/<communauté>/p/<Auteur>/<Nom>/` sont acceptés par l'outil Tools ; l'image vient alors uniquement de l'API (pas de CDN de repli).
+
 `dependencies: { skip?: [Auteur-Nom] }` (optionnel) active la résolution des dépendances transitives : après extraction, le `manifest.json` de chaque mod est lu et ses dépendances sont installées à leur tour (une version par mod : la première rencontrée, la liste de l'entrée d'abord ; les cycles sont gérés). `skip` liste les dossiers jamais installés comme dépendance, typiquement le pack BepInEx déjà fourni par le jeu. Sans `dependencies`, la liste de l'entrée doit être complète.
 
 Le contenu d'une entrée Thunderstore (`content`) peut être : une liste inline `[Auteur-Nom-Version, …]`, un lien vers un JSON (avec `key` pour désigner la liste à l'intérieur, ex : `dependencies.mods`) ou `local:<entrée>/<fichier>` (liste livrée dans une autre entrée, voir plus bas). L'API Thunderstore expose aussi, par version de mod, `https://thunderstore.io/api/experimental/package/<Auteur>/<Nom>/<version>/` dont le champ `dependencies` est la liste des dépendances directes : `content: <cette URL>` + `key: dependencies` l'utilise directement (API « experimental » : à vérifier avant usage, il n'existe pas d'URL qui renvoie le `manifest.json` brut seul).
@@ -321,4 +323,4 @@ Seuls les réglages utiles au joueur sont dans les onglets General, Launcher et 
 - Tools : source (liste collée, lien ou fichier) → clé JSON facultative pour un lien ou un fichier (`dependencies`, `packs.0.mods`…) → lancer avec barre de progression → résultat.
 - Debug : barre d'outils collante (recherche, problèmes seulement, recharger / vérifier / réparer, copier).
 
-Tools, liste de mods : le lien peut être celui d'une **page Thunderstore** (`https://thunderstore.io/c/valheim/p/Auteur/Nom/`) : le mod (et, au choix, ses dépendances) est lu via l'API. Les images viennent de l'API, sinon du CDN Thunderstore (`gcdn.thunderstore.io/live/repository/icons/Auteur-Nom-Version.png`).
+Tools, liste de mods : le lien peut être celui d'une **page Thunderstore ou Hexium** (`https://thunderstore.io/c/valheim/p/Auteur/Nom/`) : le mod (et, au choix, ses dépendances) est lu via l'API. Les images viennent de l'API, sinon du CDN Thunderstore (`gcdn.thunderstore.io/live/repository/icons/Auteur-Nom-Version.png`).

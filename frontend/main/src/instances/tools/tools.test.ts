@@ -54,8 +54,9 @@ describe("hashFolder / exportHashFolder", () => {
 
 describe("page de mod Thunderstore", () => {
   it("reconnaît les liens de page (avec ou sans communauté, avec version) et rejette le reste", () => {
-    assert.deepEqual(parsePackagePage("https://thunderstore.io/c/valheim/p/DirtyGames/TheGoodCitizen/"), { author: "DirtyGames", name: "TheGoodCitizen", version: undefined });
-    assert.deepEqual(parsePackagePage("https://thunderstore.io/package/A/B/1.2.3/"), { author: "A", name: "B", version: "1.2.3" });
+    assert.deepEqual(parsePackagePage("https://thunderstore.io/c/valheim/p/DirtyGames/TheGoodCitizen/"), { origin: "https://thunderstore.io", author: "DirtyGames", name: "TheGoodCitizen", version: undefined });
+    assert.deepEqual(parsePackagePage("https://thunderstore.io/package/A/B/1.2.3/"), { origin: "https://thunderstore.io", author: "A", name: "B", version: "1.2.3" });
+    assert.deepEqual(parsePackagePage("https://hexium.gg/c/valheim/p/A/B/"), { origin: "https://hexium.gg", author: "A", name: "B", version: undefined });
     assert.equal(parsePackagePage("https://evil.example/c/valheim/p/A/B/"), null);
     assert.equal(parsePackagePage("http://thunderstore.io/c/valheim/p/A/B/"), null);
     assert.equal(parsePackagePage("https://thunderstore.io/c/valheim/"), null);
@@ -67,7 +68,7 @@ describe("page de mod Thunderstore", () => {
   };
 
   it("mod + dépendances (dernière version), ou le mod seul", async () => {
-    const page = { author: "DirtyGames", name: "TheGoodCitizen" };
+    const page = { origin: "https://thunderstore.io", author: "DirtyGames", name: "TheGoodCitizen" };
     const all = await refsFromPackagePage(page, api);
     assert.deepEqual(all.map((ref) => `${ref.author}-${ref.name}-${ref.version}`), ["DirtyGames-TheGoodCitizen-1.4.0", "denikson-BepInExPack_Valheim-5.4.2202", "A-One-1.0.0"]);
     assert.equal((await refsFromPackagePage(page, api, undefined, false)).length, 1);
@@ -82,6 +83,24 @@ describe("page de mod Thunderstore", () => {
     assert.equal(failing.mods[0].icon, cdnIcon(ref));
     const withIcon = await buildModsDisplay([ref], async () => ({ icon: "https://x/i.png" }));
     assert.equal(withIcon.mods[0].icon, "https://x/i.png");
+  });
+});
+
+describe("Hexium (API compatible Thunderstore)", () => {
+  it("lit la page et l'API de Hexium, sans image de repli du CDN Thunderstore", async () => {
+    const urls: string[] = [];
+    const api = async (url: string): Promise<unknown> => {
+      urls.push(url);
+      return url.includes("/1.0.0/") ? { description: "d", icon: "https://hexium.gg/i.png" } : { latest: { version_number: "1.0.0", dependencies: [] } };
+    };
+    const page = parsePackagePage("https://hexium.gg/c/valheim/p/A/B/")!;
+    const refs = await refsFromPackagePage(page, api);
+    const display = await buildModsDisplay(refs, api, page.origin);
+    assert.equal(urls[0], "https://hexium.gg/api/experimental/package/A/B/");
+    assert.equal(display.mods[0].link, "https://hexium.gg/package/A/B/");
+    assert.equal(display.mods[0].icon, "https://hexium.gg/i.png");
+    const failing = await buildModsDisplay(refs, async () => { throw new Error("503"); }, page.origin);
+    assert.equal(failing.mods[0].icon, undefined);
   });
 });
 

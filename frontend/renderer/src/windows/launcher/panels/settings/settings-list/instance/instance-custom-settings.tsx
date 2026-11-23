@@ -35,6 +35,18 @@ interface Props extends InstanceSettingProps {
   zone: SettingZone;
 }
 
+/** Y a-t-il au moins un réglage de ce niveau / cette zone ? Sert à masquer les titres de catégories vides. */
+export const hasCustomSettings = (
+  settings: readonly CustomGameSetting[],
+  level: SettingLevel,
+  zone: SettingZone,
+): boolean =>
+  settings.some(
+    (setting) =>
+      (setting.category?.level ?? "normal") === level &&
+      (setting.category?.zone ?? "normal") === zone,
+  );
+
 /** Curseur : la valeur s'affiche en direct, mais n'est enregistrée qu'au relâchement (pas de rafale d'écritures). */
 function SliderSetting({
   setting,

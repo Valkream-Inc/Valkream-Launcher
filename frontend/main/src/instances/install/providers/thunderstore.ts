@@ -8,6 +8,7 @@
  * s'écrasent jamais. Les dossiers des mods retirés de la liste sont supprimés.
  * Option `dependencies` : résout aussi les dépendances transitives (manifest.json de chaque mod),
  * sauf celles listées dans `skip`. Sans elle, la liste doit être complète.
+ * `api-url` accepte tout site à l'API compatible Thunderstore (ex : `https://hexium.gg`).
  */
 
 import { createHash } from "crypto";
@@ -17,7 +18,7 @@ import path from "path";
 import { resolveInside } from "../../../lib/paths.js";
 import { commitStaged } from "../staging.js";
 import { createGlobalProgress } from "./global-progress.js";
-import type { Provider, Uninstaller } from "./types.js";
+import type { Provider, ProviderContext, Uninstaller } from "./types.js";
 import { LocalizedError } from "../../../lib/localized-error.js";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
@@ -43,6 +44,27 @@ const readDependencies = (modDir: string) => {
     });
   } catch {
     return [];
+  }
+};
+
+/**
+ * Lien de téléchargement d'un mod. Thunderstore : chemin standard. Autre site compatible (Hexium…) :
+ * `download_url` donné par son API, avec repli sur le chemin standard si l'API ne répond pas.
+ */
+const downloadLink = async (
+  apiUrl: string,
+  mod: { author: string; name: string; version: string },
+  context: Pick<ProviderContext, "resolver">,
+): Promise<string> => {
+  const standard = `${apiUrl}/package/download/${encodeURIComponent(mod.author)}/${encodeURIComponent(mod.name)}/${encodeURIComponent(mod.version)}/`;
+  if (/^https:\/\/(www\.)?thunderstore\.io$/.test(apiUrl)) return standard;
+  try {
+    const { value } = await context.resolver.getJson<{ download_url?: unknown }>(
+      `${apiUrl}/api/experimental/package/${encodeURIComponent(mod.author)}/${encodeURIComponent(mod.name)}/${encodeURIComponent(mod.version)}/`,
+    );
+    return typeof value.download_url === "string" && /^https:\/\//.test(value.download_url) ? value.download_url : standard;
+  } catch {
+    return standard;
   }
 };
 
@@ -79,9 +101,7 @@ export const thunderstoreProvider: Provider = async (context) => {
   while (queue.length > 0) {
     const mod = queue.shift()!;
     const zipPath = path.join(tempDir, `${mod.folder}.zip`);
-    const url = resolver.urlOf(
-      `${apiUrl}/package/download/${encodeURIComponent(mod.author)}/${encodeURIComponent(mod.name)}/${encodeURIComponent(mod.version)}/`,
-    );
+    const url = resolver.urlOf(await downloadLink(apiUrl, mod, context));
     let bytes = 0;
     await io.download(url, zipPath, signal, (transfer) => {
       bytes = transfer.processed ?? bytes;

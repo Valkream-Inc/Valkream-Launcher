@@ -289,7 +289,7 @@ const en: Messages = {
     stepSource: "Source",
     working: "Working…",
     progress: "{{done}} / {{total}}",
-    urlLabel: "Link to the list (JSON, text) or a Thunderstore mod page",
+    urlLabel: "Link to the list (JSON, text) or a Thunderstore or Hexium mod page",
     urlInvalid: "The link must start with http:// or https://",
     pickFile: "Choose a file…",
     fileLoaded: "File: {{name}}",

@@ -35,7 +35,7 @@ import ToggleDev from "../settings-list/global/toggle-dev";
 import ToggleMusic from "../settings-list/global/toggle-music";
 import Instance_ButtonOpenGame from "../settings-list/instance/instance-button-open-game";
 import Instance_ButtonUninstallGame from "../settings-list/instance/instance-button-uninstall-game";
-import Instance_CustomSettings from "../settings-list/instance/instance-custom-settings";
+import Instance_CustomSettings, { hasCustomSettings } from "../settings-list/instance/instance-custom-settings";
 import Instance_SelectLauncherBehavior from "../settings-list/instance/instance-select-launcher-behavior";
 import type { InstanceSettingValues } from "../settings-list/instance/instance-setting.types";
 import Instance_ToggleLaunchSteam from "../settings-list/instance/instance-toggle-launch-steam";
@@ -98,6 +98,15 @@ export default function InstanceSettings({
     return () => window.removeEventListener("wheel", onWheel);
   }, []);
   const customSettings = renderConfig?.customGamesSettings ?? [];
+  // Titre « options avancées » : seulement s'il y a au moins un réglage à montrer à ce niveau d'accès
+  const hasAdvancedOptions = (["dev", "special", "admin"] as const).some(
+    (level) =>
+      ((level === "dev" && isDevActive) ||
+        (level === "special" && isSpecialActive) ||
+        (level === "admin" && isAdminActive)) &&
+      (hasCustomSettings(customSettings, level, "normal") ||
+        hasCustomSettings(customSettings, level, "danger")),
+  );
 
   // Les réglages viennent du rapport au premier chargement de chaque instance / canal seulement :
   // ensuite l'état local fait foi (sinon un rechargement en retard écrase le réglage qu'on vient de changer).
@@ -197,10 +206,14 @@ export default function InstanceSettings({
           setDevActive={setIsDevActive}
           setTab={changeTab}
         />
-        <SettingsTitle warn={true} scope="global">
-          {t("instance.dangerZone")}
-        </SettingsTitle>
-        {!actionLoading && <ButtonUninstallGlobal />}
+        {!actionLoading && (
+          <>
+            <SettingsTitle warn={true} scope="global">
+              {t("instance.dangerZone")}
+            </SettingsTitle>
+            <ButtonUninstallGlobal />
+          </>
+        )}
       </SettingsTab>
 
       <SettingsTab id="launcher" activeTab={activeTab}>
@@ -230,9 +243,6 @@ export default function InstanceSettings({
         />
         <Instance_SelectLauncherBehavior {...settingProps} />
         {!actionLoading && (
-          <Instance_ButtonOpenGame id={instanceId} channel={channel} />
-        )}
-        {!actionLoading && (
           <>
             <Instance_CustomSettings
               {...settingProps}
@@ -240,11 +250,7 @@ export default function InstanceSettings({
               level="normal"
               zone="normal"
             />
-            {customSettings.some(
-              (setting) =>
-                setting.category?.zone === "danger" &&
-                setting.category?.level === "normal",
-            ) && (
+            {hasCustomSettings(customSettings, "normal", "danger") && (
               <SettingsTitle warn={true} scope="game">
                 {t("instance.dangerZone")}
               </SettingsTitle>
@@ -281,11 +287,14 @@ export default function InstanceSettings({
             onDone={reload}
           />
         )}
+        {!actionLoading && (
+          <Instance_ButtonOpenGame id={instanceId} channel={channel} />
+        )}
         <ButtonOpenAppData />
         <ButtonDebug />
 
         {/* Options du jeu réservées au dev / admin (le joueur ne voit que les options « normal » dans Game) */}
-        {!actionLoading && (
+        {!actionLoading && hasAdvancedOptions && (
           <>
             <SettingsTitle warn={false} scope="advanced">
               {t("instance.advancedGameOptions")}

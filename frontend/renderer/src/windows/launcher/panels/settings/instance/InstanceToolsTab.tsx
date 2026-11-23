@@ -249,8 +249,8 @@ function ModsListTool() {
   /** Chemin du tableau dans un JSON (liens et fichiers : `dependencies`, `packs.0.mods`…). */
   const [key, setKey] = useState("");
   const [withDependencies, setWithDependencies] = useState(true);
-  /** Lien de page Thunderstore : le mod (et ses dépendances) sont lus via l'API, pas de clé à donner. */
-  const isPackagePage = mode === "url" && /^https:\/\/(www\.)?thunderstore\.io\/(c\/[\w-]+\/)?(p|package)\//.test(url.trim());
+  /** Lien de page Thunderstore / Hexium : le mod (et ses dépendances) sont lus via l'API, pas de clé à donner. */
+  const isPackagePage = mode === "url" && /^https:\/\/(www\.)?(thunderstore\.io|hexium\.gg)\/(c\/[\w-]+\/)?(p|package)\//.test(url.trim());
   const [result, setResult] = useState<ModsListResult | null>(null);
   const [busy, setBusy] = useState(false);
   const progress = useToolProgress("mods", busy);

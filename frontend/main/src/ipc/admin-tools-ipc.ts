@@ -61,10 +61,10 @@ export default function registerAdminToolsIpc(): void {
     let text = String(source ?? "").trim();
     const api = typeof apiUrl === "string" && /^https?:\/\//.test(apiUrl) ? apiUrl : undefined;
     const fetchJson = async (url: string) => JSON.parse(await httpGetText(url, { timeout: 10_000 })) as unknown;
-    // Page d'un mod Thunderstore : le mod (et ses dépendances) sont lus via l'API, hôte fixe
+    // Page d'un mod Thunderstore : le mod (et ses dépendances) sont lus via l'API, hôte reconnu (Thunderstore, Hexium)
     const page = parsePackagePage(text);
     if (page) {
-      return buildModsDisplay(await refsFromPackagePage(page, fetchJson, api, withDependencies !== false), fetchJson, api, reporter(event.sender, "mods"));
+      return buildModsDisplay(await refsFromPackagePage(page, fetchJson, undefined, withDependencies !== false), fetchJson, page.origin, reporter(event.sender, "mods"));
     }
     // Un lien vers la liste (JSON ou texte) est aussi accepté
     if (/^https?:\/\/\S+$/.test(text)) text = await httpGetText(text, { timeout: 10_000 });

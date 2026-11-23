@@ -67,19 +67,28 @@ export interface ModsListResult {
 export const cdnIcon = (ref: ModRef): string =>
   `https://gcdn.thunderstore.io/live/repository/icons/${ref.author}-${ref.name}-${ref.version}.png`;
 
+/** Le CDN d'images n'existe que pour Thunderstore ; ailleurs, seule l'API donne l'image. */
+const fallbackIcon = (ref: ModRef, base: string): string | undefined =>
+  /^https:\/\/(www\.)?thunderstore\.io$/.test(base) ? cdnIcon(ref) : undefined;
+
 export interface PackagePage {
+  /** API du site du lien (`https://thunderstore.io`, `https://hexium.gg`). */
+  origin: string;
   author: string;
   name: string;
   /** Version indiquée dans le lien (sinon : la dernière). */
   version?: string;
 }
 
-const PACKAGE_PAGE = /^https:\/\/(?:www\.)?thunderstore\.io\/(?:c\/[\w-]+\/)?(?:p|package)\/([^/?#\s]+)\/([^/?#\s]+)(?:\/([\d.]+))?\/?(?:[?#]\S*)?$/;
+/** Sites à l'API compatible Thunderstore dont on lit les pages de mod. */
+const PACKAGE_HOSTS = ["thunderstore.io", "hexium.gg"];
+const PACKAGE_PAGE = /^https:\/\/(?:www\.)?([a-z.]+)\/(?:c\/[\w-]+\/)?(?:p|package)\/([^/?#\s]+)\/([^/?#\s]+)(?:\/([\d.]+))?\/?(?:[?#]\S*)?$/;
 
-/** Lien vers la page d'un mod Thunderstore (`/c/valheim/p/Auteur/Nom/`) : `null` pour tout autre lien. */
+/** Lien vers la page d'un mod Thunderstore ou Hexium (`/c/valheim/p/Auteur/Nom/`) : `null` pour tout autre lien. */
 export const parsePackagePage = (url: string): PackagePage | null => {
   const match = PACKAGE_PAGE.exec(url.trim());
-  return match ? { author: match[1], name: match[2], version: match[3] } : null;
+  if (!match || !PACKAGE_HOSTS.includes(match[1])) return null;
+  return { origin: `https://${match[1]}`, author: match[2], name: match[3], version: match[4] };
 };
 
 interface PackageInfo {
@@ -95,7 +104,7 @@ interface PackageInfo {
 export const refsFromPackagePage = async (
   page: PackagePage,
   fetchJson: JsonFetcher,
-  apiUrl = "https://thunderstore.io",
+  apiUrl = page.origin,
   withDependencies = true,
 ): Promise<ModRef[]> => {
   const base = apiUrl.replace(/\/+$/, "");
@@ -133,10 +142,10 @@ export const buildModsDisplay = async (
         const info = (await fetchJson(
           `${base}/api/experimental/package/${encodeURIComponent(ref.author)}/${encodeURIComponent(ref.name)}/${encodeURIComponent(ref.version)}/`,
         )) as PackageVersion;
-        display.icon = info.icon || cdnIcon(ref);
+        display.icon = info.icon || fallbackIcon(ref, base);
         if (info.description) display.description = info.description;
       } catch (error) {
-        display.icon = cdnIcon(ref); // l'image est servie par le CDN même si l'API ne répond pas
+        display.icon = fallbackIcon(ref, base); // l'image est servie par le CDN même si l'API ne répond pas
         failed.push({ id, error: error instanceof Error ? error.message : String(error) });
       }
       onProgress?.(++done, refs.length);
