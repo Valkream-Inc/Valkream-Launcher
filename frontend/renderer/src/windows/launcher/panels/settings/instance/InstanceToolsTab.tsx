@@ -384,7 +384,7 @@ function ModsListTool() {
             return (
               <SettingsBox key={mod.id ?? mod.name} warn={false}>
                 <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                  <Avatar variant="rounded" src={mod.icon} alt={mod.name}>
+                  <Avatar variant="rounded" src={mod.icon} alt={mod.name} slotProps={{ img: { loading: "lazy", decoding: "async" } }}>
                     {mod.name.charAt(0)}
                   </Avatar>
                   <Box>

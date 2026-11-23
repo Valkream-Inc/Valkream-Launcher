@@ -32,8 +32,8 @@ export interface InstanceMainConfig {
   /** Exécutable du jeu, relatif à la racine de l'instance. */
   executable?: Partial<Record<GamePlatform, string>>;
   /**
-   * Commande du PATH lancée à la place de `executable` (ex : `java` pour un jeu Java),
-   * par plateforme. Le fichier du jeu se passe alors dans `launchArgs` (`-jar`, …).
+   * Commande lancée à la place de `executable`, par plateforme : `java` = commande du PATH ;
+   * `java/bin/javaw.exe` (avec séparateur) = programme installé dans l'instance (ex : Java téléchargé dans `/java`). Le fichier du jeu se passe alors dans `launchArgs` (`-jar`, …).
    */
   command?: Partial<Record<GamePlatform, string>>;
   /** Dossier de lancement, relatif à la racine de l'instance (défaut : dossier de l'exécutable, ou la racine avec `command`). */

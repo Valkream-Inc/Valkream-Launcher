@@ -1,0 +1,44 @@
+# ──────────────────────────────────────────────────────────────
+# EXEMPLE : instance « Minecraft-Example » lancée avec un Java installé par le launcher dans /java.
+#
+# Dossiers (config main `entryPaths`) :   java → java      minecraft → game      mods → game/mods
+# Lancement (config main) :  command = java/bin/javaw.exe (Windows) ou java/bin/java (Linux), relatif à l'instance.
+#
+# Le Java est un JRE Temurin (Eclipse Adoptium) téléchargé depuis GitHub : le joueur n'a rien à installer.
+# `folder_in_zip` est le dossier racine de l'archive (son contenu arrive à la racine de /java) : il change à
+# chaque version du JRE, à vérifier en ouvrant l'archive. Les URL ci-dessous suivent le schéma des releases
+# `adoptium/temurin21-binaries` : à vérifier avant publication.
+#
+# Minecraft (client ou serveur de Mojang) ne se redistribue pas (EULA) : n'hébergez ici que VOS fichiers
+# (loader Fabric / Forge, mods, configs, `server.jar` obtenu légalement par vous pour un serveur).
+# ──────────────────────────────────────────────────────────────
+
+version: 1.0.0
+buildDate: 2026-11-23T00:00:00.000Z
+
+game-base:
+  java:
+    version: 21.0.5+11
+    type: zip_url
+    content:
+      win32: https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.5%2B11/OpenJDK21U-jre_x64_windows_hotspot_21.0.5_11.zip
+      linux: https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.5%2B11/OpenJDK21U-jre_x64_linux_hotspot_21.0.5_11.tar.gz
+    folder_in_zip: jdk-21.0.5+11-jre
+
+  minecraft:
+    version: 1.21.1
+    type: hash_url
+    content: /games/Minecraft-Example/hash/game.json          # manifeste { fichier: sha256 } (`yarn build:manifest`)
+    hash-folder: /games/Minecraft-Example/files/game/         # dossier servi : loader, server.jar, libs…
+    # hash: <sha256 écrit par build:manifest>
+    gameFolderToPreserve:
+      - server.properties
+      - world
+
+game-details:
+  mods:
+    version: 1.0.0
+    type: hash_url
+    content: /games/Minecraft-Example/hash/mods.json
+    hash-folder: /games/Minecraft-Example/files/mods/
+    # hash: <sha256 écrit par build:manifest>

@@ -23,8 +23,15 @@ import { LocalizedError } from "../lib/localized-error.js";
 const window = () => BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0];
 
 /** Progression d'un outil, affichée par une barre dans l'onglet Tools. */
-const reporter = (sender: WebContents, tool: "hash" | "mods") => (done: number, total: number) => {
-  if (!sender.isDestroyed()) sender.send("tools:progress", { tool, done, total });
+const reporter = (sender: WebContents, tool: "hash" | "mods") => {
+  let last = 0;
+  return (done: number, total: number) => {
+    // Au plus un événement toutes les 100 ms (le dernier passe toujours) : le renderer ne suit pas des milliers de fichiers
+    const now = Date.now();
+    if (done < total && now - last < 100) return;
+    last = now;
+    if (!sender.isDestroyed()) sender.send("tools:progress", { tool, done, total });
+  };
 };
 
 /** Taille maximale d'un fichier de liste ouvert depuis l'outil (évite de charger un gros fichier par erreur). */

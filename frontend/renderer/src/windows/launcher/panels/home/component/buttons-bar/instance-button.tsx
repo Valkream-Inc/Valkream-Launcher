@@ -68,7 +68,13 @@ export default function InstanceButton() {
     version ? t("button.playVersion", { version }) : t("button.play");
 
   const render = () => {
-    const { text, progress } = lastProgress.current;
+    const { text: actionName, progress } = lastProgress.current;
+    // Message traduit ICI (pas dans le main) : un changement de langue en cours de synchronisation
+    // est pris en compte au prochain rafraîchissement (chaque seconde au plus).
+    const rank = progress && progress.total > 0 ? ` (${progress.index}/${progress.total})` : "";
+    const text = progress
+      ? `${progress.messageKey ? (t as (key: string, vars?: object) => string)(progress.messageKey, progress.messageVars) : (progress.message ?? actionName)}${rank}`
+      : actionName;
     const transfer = progress?.transfer;
     const elapsed = `⏱ ${formatElapsed(Date.now() - syncStartedAt.current)}`;
     // Progression globale : pourcentage, cumul d'octets (total connu seulement pour un fichier unique)
@@ -111,9 +117,7 @@ export default function InstanceButton() {
           progress.channel !== actualChannel
         )
           return;
-        const rank =
-          progress.total > 0 ? ` (${progress.index}/${progress.total})` : "";
-        callback(`${progress.message ?? actionName}${rank}`, progress);
+        callback(actionName, progress);
       });
 
       const result = await window.electron_API.syncInstance(

@@ -32,7 +32,7 @@ export default function InstanceModsTab({ report }: { report: InstanceReport }) 
       {mods.map((mod) => (
         <SettingsBox key={mod.id ?? mod.name} warn={false}>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            {mod.icon && <Avatar variant="rounded" src={mod.icon} alt={mod.name} />}
+            {mod.icon && <Avatar variant="rounded" src={mod.icon} alt={mod.name} slotProps={{ img: { loading: "lazy", decoding: "async" } }} />}
             <Box>
               <Typography sx={{ fontWeight: 700 }}>{mod.name}</Typography>
               {mod.description && <Typography variant="body2">{localized(mod.description)}</Typography>}

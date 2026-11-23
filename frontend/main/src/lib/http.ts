@@ -14,6 +14,8 @@ export class HttpError extends Error {
   constructor(
     readonly status: number,
     readonly url: string,
+    /** `Retry-After` du serveur (429 / 503), en ms. */
+    readonly retryAfterMs?: number,
   ) {
     super(translate("fr", "err.http", { status, url }));
     this.name = "HttpError";
@@ -37,6 +39,15 @@ const withParams = (url: string, params: Record<string, string | number>): strin
   return target.toString();
 };
 
+/** `Retry-After` : nombre de secondes ou date HTTP → ms (absent / invalide : `undefined`). */
+export const parseRetryAfter = (value: string | null, now = Date.now()): number | undefined => {
+  if (!value) return undefined;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
+  const date = Date.parse(value);
+  return Number.isNaN(date) ? undefined : Math.max(0, date - now);
+};
+
 /** GET qui rejette en `HttpError` si le statut n'est pas accepté, et en erreur réseau sinon. */
 export const httpGet = async (url: string, options: HttpGetOptions = {}): Promise<Response> => {
   const { timeout = 5000, headers = {}, noCache, signal, accept = (status) => status >= 200 && status < 300 } = options;
@@ -58,7 +69,7 @@ export const httpGet = async (url: string, options: HttpGetOptions = {}): Promis
     });
     if (!accept(response.status)) {
       void response.body?.cancel();
-      throw new HttpError(response.status, url);
+      throw new HttpError(response.status, url, parseRetryAfter(response.headers.get("retry-after")));
     }
     return response;
   } catch (error) {

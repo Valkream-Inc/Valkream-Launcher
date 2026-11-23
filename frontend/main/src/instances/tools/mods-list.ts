@@ -9,6 +9,7 @@
 
 import type { ModDisplay } from "@shared/types";
 import { pickKey } from "../../lib/json-key.js";
+import { type LimitOptions, mapLimited } from "../../lib/limiter.js";
 import { LocalizedError } from "../../lib/localized-error.js";
 import {
   isNexusRef,
@@ -150,13 +151,16 @@ export const buildModsDisplay = async (
   apiUrl = "https://thunderstore.io",
   /** Appelé après chaque mod interrogé : (faits, total). */
   onProgress?: (done: number, total: number) => void,
+  /** Charge sur l'API : appels simultanés, espacement, reprise sur 429 (voir `lib/limiter`). */
+  limits?: LimitOptions,
 ): Promise<ModsListResult> => {
   let done = 0;
   const base = apiUrl.replace(/\/+$/, "");
   const failed: ModsListResult["failed"] = [];
 
-  const mods = await Promise.all(
-    refs.map(async (ref): Promise<ModDisplay> => {
+  const mods = await mapLimited(
+    refs,
+    async (ref): Promise<ModDisplay> => {
       const id = `${ref.author}-${ref.name}`;
       const display: ModDisplay = {
         id,
@@ -178,7 +182,8 @@ export const buildModsDisplay = async (
       }
       onProgress?.(++done, refs.length);
       return display;
-    }),
+    },
+    limits,
   );
   return { mods, failed };
 };
@@ -214,11 +219,13 @@ export const buildNexusDisplay = async (
   items: readonly string[],
   fetchJson: JsonFetcher,
   onProgress?: (done: number, total: number) => void,
+  limits?: LimitOptions,
 ): Promise<ModsListResult> => {
   let done = 0;
   const failed: ModsListResult["failed"] = [];
-  const mods = await Promise.all(
-    items.map(async (item): Promise<ModDisplay> => {
+  const mods = await mapLimited(
+    items,
+    async (item): Promise<ModDisplay> => {
       const ref = parseNexusRef(item);
       const display: ModDisplay = {
         id: `${ref.game}-${ref.mod}`,
@@ -244,7 +251,8 @@ export const buildNexusDisplay = async (
       }
       onProgress?.(++done, items.length);
       return display;
-    }),
+    },
+    limits,
   );
   return { mods, failed };
 };

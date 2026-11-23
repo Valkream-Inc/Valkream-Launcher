@@ -19,7 +19,7 @@ import type {
   ReleaseEntry,
 } from "@shared/types";
 
-import { type Lang, translator } from "../../lib/messages.js";
+import { type Lang, type Translate, translator } from "../../lib/messages.js";
 import { isPathInside } from "../../lib/paths.js";
 import { entryDirectory } from "../local/instance-paths.js";
 import {
@@ -154,7 +154,15 @@ export class InstanceInstaller {
     }
 
     const lang: Lang = (await this.options.language?.()) ?? "fr";
-    const t = translator(lang);
+    const base = translator(lang);
+    // Les messages de progression gardent leur clé + variables : le renderer les traduit à l'affichage
+    // (changer de langue en cours de téléchargement met le bouton à jour tout de suite).
+    const known = new Map<string, { key: string; vars?: Record<string, string | number> }>();
+    const t: Translate = (key, vars) => {
+      const text = base(key, vars);
+      known.set(text, { key, vars });
+      return text;
+    };
     const lockKey = path.resolve(installDir);
     if (this.running.has(lockKey)) throw new LocalizedError("install.alreadyRunning");
     this.running.add(lockKey);
@@ -298,7 +306,14 @@ export class InstanceInstaller {
             );
           }
         }
-        onProgress?.({ id, channel, elapsedMs: now - startedAt, ...progress });
+        const message = progress.message !== undefined ? known.get(progress.message) : undefined;
+        onProgress?.({
+          id,
+          channel,
+          elapsedMs: now - startedAt,
+          ...progress,
+          ...(message && { messageKey: message.key, messageVars: message.vars }),
+        });
       };
       // Archives partagées : combien d'entrées utilisent chaque lien (supprimée après la dernière).
       const archiveUses = new Map<string, number>();

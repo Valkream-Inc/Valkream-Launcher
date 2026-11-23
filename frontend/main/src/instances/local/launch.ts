@@ -31,7 +31,8 @@ export type LaunchPlan =
     };
 
 /**
- * - `command` déclarée pour la plateforme (ex : `java`) : lancée depuis le PATH ;
+ * - `command` déclarée pour la plateforme : `java` = commande du PATH ; `java/bin/javaw.exe` (avec séparateur)
+ *   = programme installé dans l'instance, résolu depuis sa racine ;
  * - sinon l'exécutable déclaré, qui doit exister ;
  * - sans exécutable : Steam lance le jeu si `launchSteam` est actif, sinon erreur.
  * `launchSteam` (avec un `steamAppId`) fait démarrer Steam avant le jeu ; `launchArgs` donne les arguments.
@@ -51,7 +52,12 @@ export const planLaunch = (
 
   const command = config.command?.[platform];
   if (command) {
-    return { kind: "executable", path: command, cwd: cwdOverride ?? locations.installDir, args, ensureSteam };
+    // Commande avec un séparateur (`java/bin/javaw.exe`) : programme installé DANS l'instance (ex : un Java
+    // téléchargé dans `/java`), résolu depuis sa racine et obligatoire. Sans séparateur (`java`) : commande du PATH.
+    const bundled = /[\\/]/.test(command);
+    const file = bundled ? resolveInside(locations.installDir, command) : command;
+    if (bundled && !exists(file)) throw new LocalizedError("err.executableMissing", { path: file });
+    return { kind: "executable", path: file, cwd: cwdOverride ?? locations.installDir, args, ensureSteam };
   }
 
   if (!locations.executable) {

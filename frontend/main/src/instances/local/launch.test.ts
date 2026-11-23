@@ -34,6 +34,15 @@ describe("planLaunch", () => {
     assert.throws(() => planLaunch({}, locations, {}, { platform: "win32", exists: () => false }), /introuvable/);
   });
 
+  it("command avec séparateur : programme installé dans l'instance (Java dans /java), obligatoire", () => {
+    const config = { command: { win32: "java/bin/javaw.exe" }, launchArgs: ["-jar", "game/client.jar"] };
+    const plan = planLaunch(config, { installDir: "/d" }, {}, yes);
+    assert.equal(plan.kind === "executable" && plan.path.replace(/\\/g, "/").endsWith("/d/java/bin/javaw.exe"), true);
+    assert.equal(plan.kind === "executable" && plan.cwd, "/d");
+    assert.throws(() => planLaunch(config, { installDir: "/d" }, {}, { platform: "win32", exists: () => false }), /introuvable/);
+    assert.throws(() => planLaunch({ command: { win32: "../x/java.exe" } }, { installDir: "/d" }, {}, yes));
+  });
+
   it("command (java) : lancée depuis le PATH avec arguments et cwd", () => {
     const plan = planLaunch(
       {

@@ -148,6 +148,18 @@ describe("InstanceInstaller", () => {
     assert.ok(events.every((event) => event.elapsedMs >= 0));
   });
 
+  it("les messages de progression portent leur clé : le renderer les traduit (langue suivie en direct)", async () => {
+    const world = makeWorld(baseRemote(), files);
+    const inspector = new InstanceInspector({ configs: [config], resolver: world.resolver, platform: "win32", rootPath: () => root });
+    const installer = new InstanceInstaller({ inspector, resolver: world.resolver, platform: "win32", io: world.io });
+    const events: { message?: string; messageKey?: string; messageVars?: Record<string, unknown> }[] = [];
+    await installer.sync("g", "stable", { onProgress: (progress) => events.push(progress) });
+    const download = events.find((event) => event.messageKey?.startsWith("progress."));
+    assert.ok(download, "aucun message avec clé");
+    assert.ok(download.messageVars && "label" in download.messageVars);
+    assert.ok(download.message); // texte de repli toujours présent
+  });
+
   it("réglage : le fichier créé et le résultat contiennent aussi les valeurs par défaut", () => {
     const defaults = { modsAdmin: false, launchSteam: true, launcherBehavior: "hide" };
     const result = writeInstanceSetting(dir("stable"), "modsAdmin", true, defaults);

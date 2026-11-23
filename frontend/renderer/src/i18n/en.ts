@@ -195,6 +195,14 @@ const en: Messages = {
     searchLabel: "Search",
     none: "No game found for “{{search}}”",
   },
+  progress: {
+    download: "{{label}}: downloading",
+    downloadExtract: "{{label}}: downloading + extracting",
+    extract: "{{label}}: extracting",
+    mods: "{{label}}: mods",
+    removed: "{{label}} removed",
+    cancelled: "cancelled",
+  },
   button: {
     welcome: "Welcome to the Valkream launcher! 👋",
     cancelled: "Installation cancelled",

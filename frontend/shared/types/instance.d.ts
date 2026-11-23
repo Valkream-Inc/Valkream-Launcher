@@ -344,7 +344,11 @@ export interface InstanceSyncProgress {
   index: number;
   total: number;
   step: "start" | "download" | "extract" | "verify" | "done" | "error";
+  /** Texte déjà traduit (langue au début de la synchronisation) : repli quand `messageKey` est absent. */
   message?: string;
+  /** Clé `progress.*` + variables : le renderer traduit à l'affichage, donc suit la langue en direct. */
+  messageKey?: string;
+  messageVars?: Record<string, string | number>;
   /** Temps écoulé depuis le début de la synchronisation (ms). */
   elapsedMs: number;
   /** Progression du fichier en cours de téléchargement (valeurs formatées, ex : "12.3 Mo"). */

@@ -29,7 +29,7 @@ export default function InstanceContributorsTab({ report }: { report: InstanceRe
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
           {contributors.map((person) => (
             <Box key={person.name} sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-              <Avatar src={person.avatar} alt={person.name} sx={{ width: 32, height: 32 }} />
+              <Avatar src={person.avatar} alt={person.name} slotProps={{ img: { loading: "lazy", decoding: "async" } }} sx={{ width: 32, height: 32 }} />
               <Box>
                 {person.link ? (
                   <Link component="button" onClick={() => open(person.link as string)}>
