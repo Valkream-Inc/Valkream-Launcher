@@ -1,7 +1,641 @@
 [
   {
-    "id": "JereKuusela-Infinity_Hammer",
-    "name": "Infinity Hammer",
-    "description": "Affichage seulement : ce qui est installé vient des entrées de latest.yml."
+    "id": "DirtyGames-TheGoodCitizen",
+    "name": "TheGoodCitizen",
+    "link": "https://thunderstore.io/package/DirtyGames/TheGoodCitizen/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/DirtyGames-TheGoodCitizen-0.0.3.png",
+    "description": "Introducing Trash Bins And Recycling Containers! Trash cans will dispose of left inside of it and the recycling container will turn all items inside into wood."
+  },
+  {
+    "id": "jrobsonchase-PositionalAudio",
+    "name": "PositionalAudio",
+    "link": "https://thunderstore.io/package/jrobsonchase/PositionalAudio/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/jrobsonchase-PositionalAudio-3.1.0.png",
+    "description": "Positional Audio support via Mumble"
+  },
+  {
+    "id": "RandyKnapp-MinimalStatusEffects",
+    "name": "MinimalStatusEffects",
+    "link": "https://thunderstore.io/package/RandyKnapp/MinimalStatusEffects/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/RandyKnapp-MinimalStatusEffects-1.0.7.png",
+    "description": "Shrink the status effect list and put it in a vertical list below the minimap. Position and size is customizable."
+  },
+  {
+    "id": "Smoothbrain-SmoothSave",
+    "name": "SmoothSave",
+    "link": "https://thunderstore.io/package/Smoothbrain/SmoothSave/"
+  },
+  {
+    "id": "shudnal-MoreGatesExtended",
+    "name": "MoreGatesExtended",
+    "link": "https://thunderstore.io/package/shudnal/MoreGatesExtended/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/shudnal-MoreGatesExtended-1.0.2.png",
+    "description": "MoreGates mod originally created by LordHayze. Localization support, configurable recipes, disableable pieces."
+  },
+  {
+    "id": "OdinPlus-BowOfFrey",
+    "name": "BowOfFrey",
+    "link": "https://thunderstore.io/package/OdinPlus/BowOfFrey/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/OdinPlus-BowOfFrey-1.0.6.png",
+    "description": "The arcane enchanted bow of the legendary Viking marksman, Frey Aslaug."
+  },
+  {
+    "id": "Smoothbrain-SteadyRegeneration",
+    "name": "SteadyRegeneration",
+    "link": "https://thunderstore.io/package/Smoothbrain/SteadyRegeneration/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-SteadyRegeneration-1.0.3.png",
+    "description": "Removes the healing ticks of food and makes you slowly, but constantly regenerate HP instead."
+  },
+  {
+    "id": "Tequila-Dvergr_Pieces",
+    "name": "Dvergr Pieces",
+    "link": "https://thunderstore.io/package/Tequila/Dvergr_Pieces/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Tequila-Dvergr_Pieces-2.9.0.png",
+    "description": "Adds dvergr buildable pieces"
+  },
+  {
+    "id": "Azumatt-MajesticButton",
+    "name": "MajesticButton",
+    "link": "https://thunderstore.io/package/Azumatt/MajesticButton/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-MajesticButton-1.0.5.png",
+    "description": "Makes custom buttons at the bottom of the main menu to link to URLS. Comma delimited list of button names and URLs in the config determine how many buttons and where they go."
+  },
+  {
+    "id": "coemt-Belts",
+    "name": "Belts",
+    "link": "https://thunderstore.io/package/coemt/Belts/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/coemt-Belts-1.1.6.png",
+    "description": "New belts with special powers that can be purchased at the trader or crafted, configurable"
+  },
+  {
+    "id": "The_Bees_Decree-VALKEA",
+    "name": "VALKEA",
+    "link": "https://thunderstore.io/package/The_Bees_Decree/VALKEA/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/The_Bees_Decree-VALKEA-3.0.0.png",
+    "description": "Over 300 Brand Spanking New Upbeat Build Pieces - BOG WITCH"
+  },
+  {
+    "id": "BentoG-MissingPieces",
+    "name": "MissingPieces",
+    "link": "https://thunderstore.io/package/BentoG/MissingPieces/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/BentoG-MissingPieces-2.2.2.png",
+    "description": "A fix for what impedes your building fix."
+  },
+  {
+    "id": "WackyMole-Multiple_RecipeItem_BugFix",
+    "name": "Multiple RecipeItem BugFix",
+    "link": "https://thunderstore.io/package/WackyMole/Multiple_RecipeItem_BugFix/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/WackyMole-Multiple_RecipeItem_BugFix-1.0.0.png",
+    "description": "A partial fix for a bug in **ItemManager** related to recipes with more than 4 items."
+  },
+  {
+    "id": "Therzie-Warfare",
+    "name": "Warfare",
+    "link": "https://thunderstore.io/package/Therzie/Warfare/"
+  },
+  {
+    "id": "Therzie-Wizardry",
+    "name": "Wizardry",
+    "link": "https://thunderstore.io/package/Therzie/Wizardry/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Therzie-Wizardry-1.1.8.png",
+    "description": "Fills the magical gap in vanilla Valheim with MANY unique extras!"
+  },
+  {
+    "id": "Therzie-Armory",
+    "name": "Armory",
+    "link": "https://thunderstore.io/package/Therzie/Armory/"
+  },
+  {
+    "id": "Therzie-Monstrum",
+    "name": "Monstrum",
+    "link": "https://thunderstore.io/package/Therzie/Monstrum/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Therzie-Monstrum-1.5.1.png",
+    "description": "Adds new monsters and mini-bosses to fight and tame for original Valheim up till Mistlands."
+  },
+  {
+    "id": "Therzie-WarfareFireAndIce",
+    "name": "WarfareFireAndIce",
+    "link": "https://thunderstore.io/package/Therzie/WarfareFireAndIce/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Therzie-WarfareFireAndIce-2.0.8.png",
+    "description": "Extends the Warfare end game content for the Deep North biome."
+  },
+  {
+    "id": "Smoothbrain-ComfortTweaks",
+    "name": "ComfortTweaks",
+    "link": "https://thunderstore.io/package/Smoothbrain/ComfortTweaks/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-ComfortTweaks-3.3.9.png",
+    "description": "Everything your comfortable heart requires"
+  },
+  {
+    "id": "Azumatt-HelheimHarmonizer",
+    "name": "HelheimHarmonizer",
+    "link": "https://thunderstore.io/package/Azumatt/HelheimHarmonizer/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-HelheimHarmonizer-1.0.9.png",
+    "description": "A mod that allows you to change some things when you die. Keep, Destroy, or Drop your items based on the YAML and normal config. Good replacement for Death Tweaks"
+  },
+  {
+    "id": "Tristan-Valheim_PvP_Tweaks",
+    "name": "Valheim PvP Tweaks",
+    "link": "https://thunderstore.io/package/Tristan/Valheim_PvP_Tweaks/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Tristan-Valheim_PvP_Tweaks-1.1.1.png",
+    "description": "Absolutely necessary features for PvP in Valheim. Can also be used for a variety of PvE gameplay."
+  },
+  {
+    "id": "Therzie-MonstrumDeepNorth",
+    "name": "MonstrumDeepNorth",
+    "link": "https://thunderstore.io/package/Therzie/MonstrumDeepNorth/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Therzie-MonstrumDeepNorth-2.0.6.png",
+    "description": "Adds new monsters to fight and tame, locations and new forsaken bosses for the Deep North biome"
+  },
+  {
+    "id": "RustyMods-MarketStall",
+    "name": "MarketStall",
+    "link": "https://thunderstore.io/package/RustyMods/MarketStall/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/RustyMods-MarketStall-1.1.4.png",
+    "description": "A buildable market to sell your goods at any time"
+  },
+  {
+    "id": "Azumatt-ChangelogEditor",
+    "name": "ChangelogEditor",
+    "link": "https://thunderstore.io/package/Azumatt/ChangelogEditor/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-ChangelogEditor-1.0.9.png",
+    "description": "A simple mod that allows you to change the changelog text at the main menu, or hide it entirely."
+  },
+  {
+    "id": "Azumatt-ChangeOfScenery",
+    "name": "ChangeOfScenery",
+    "link": "https://thunderstore.io/package/Azumatt/ChangeOfScenery/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-ChangeOfScenery-1.0.6.png",
+    "description": "A simple mod that gives a welcoming change to the start menu of Valheim. A \"Change Of Scenery\" if you will. Configure the song playing, camera locations, or leave it alone and enjoy my settings."
+  },
+  {
+    "id": "Azumatt-Logo_Changer",
+    "name": "Logo Changer",
+    "link": "https://thunderstore.io/package/Azumatt/Logo_Changer/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-Logo_Changer-1.0.12.png",
+    "description": "Changes main menu logo and ashlands logo. Change the name it searches for in BepInEx folder. Comes with a default logo & default game logos as examples."
+  },
+  {
+    "id": "Azumatt-AzuAreaRepair",
+    "name": "AzuAreaRepair",
+    "link": "https://thunderstore.io/package/Azumatt/AzuAreaRepair/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-AzuAreaRepair-1.1.6.png",
+    "description": "Repair pieces in a specified area around the player when using the hammer to repair. Code pulled from OdinsQOL"
+  },
+  {
+    "id": "Azumatt-PvPAlwaysOn",
+    "name": "PvPAlwaysOn",
+    "link": "https://thunderstore.io/package/Azumatt/PvPAlwaysOn/"
+  },
+  {
+    "id": "Azumatt-AzuAntiCheat",
+    "name": "AzuAntiCheat",
+    "link": "https://thunderstore.io/package/Azumatt/AzuAntiCheat/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-AzuAntiCheat-4.3.11.png",
+    "description": "A minor anti-dickhead mod. Server files & folders dictate what mods are allowed. Admins/Moderators bypass the check for plugins."
+  },
+  {
+    "id": "Smoothbrain-Professions",
+    "name": "Professions",
+    "link": "https://thunderstore.io/package/Smoothbrain/Professions/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Professions-1.4.5.png",
+    "description": "Adds a profession system to your server. Read the description to learn how."
+  },
+  {
+    "id": "Azumatt-MagicEitrBase",
+    "name": "MagicEitrBase",
+    "link": "https://thunderstore.io/package/Azumatt/MagicEitrBase/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-MagicEitrBase-1.1.8.png",
+    "description": "A mod that will update your base Eitr by a factor of your magic skills. Whichever skill is highest will be used to calculate the base Eitr value."
+  },
+  {
+    "id": "Azumatt-Minimal_UI",
+    "name": "Minimal UI",
+    "link": "https://thunderstore.io/package/Azumatt/Minimal_UI/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-Minimal_UI-2.3.12.png",
+    "description": "A mod I made to hide the wooden panels, change the color of them, or use your own pngs because I am not fond of them. Optionally move your windows around."
+  },
+  {
+    "id": "Azumatt-TooltipExpansion",
+    "name": "TooltipExpansion",
+    "link": "https://thunderstore.io/package/Azumatt/TooltipExpansion/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-TooltipExpansion-1.1.0.png",
+    "description": "Client only mod that adds a scrolling functionality to inventory tooltips. For use when you like your UI huge, your items overpowered and/or your tooltips long."
+  },
+  {
+    "id": "Smoothbrain-ServerCharacters",
+    "name": "ServerCharacters",
+    "link": "https://thunderstore.io/package/Smoothbrain/ServerCharacters/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-ServerCharacters-1.4.16.png",
+    "description": "Saves your character on the server, instead of your computer, to prevent you from messing with it."
+  },
+  {
+    "id": "Smoothbrain-CreatureLevelAndLootControl",
+    "name": "CreatureLevelAndLootControl",
+    "link": "https://thunderstore.io/package/Smoothbrain/CreatureLevelAndLootControl/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-CreatureLevelAndLootControl-4.6.4.png",
+    "description": "Puts YOU in control of creature level and loot!"
+  },
+  {
+    "id": "Vismeneer-MoreMissingPieces",
+    "name": "MoreMissingPieces",
+    "link": "https://thunderstore.io/package/Vismeneer/MoreMissingPieces/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Vismeneer-MoreMissingPieces-1.1.0.png",
+    "description": "Adds more 'missing' building pieces to Valheim."
+  },
+  {
+    "id": "ValheimModding-YamlDotNet",
+    "name": "YamlDotNet",
+    "link": "https://thunderstore.io/package/ValheimModding/YamlDotNet/"
+  },
+  {
+    "id": "ValheimModding-JsonDotNET",
+    "name": "JsonDotNET",
+    "link": "https://thunderstore.io/package/ValheimModding/JsonDotNET/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/ValheimModding-JsonDotNET-13.0.4.png",
+    "description": "Shared version 13.0.3 of Json.NET from Newtonsoft, net45 package for use in Valheim mods. Maintained by the ValheimModding team."
+  },
+  {
+    "id": "Azumatt-Hearthstone",
+    "name": "Hearthstone",
+    "link": "https://thunderstore.io/package/Azumatt/Hearthstone/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-Hearthstone-1.1.1.png",
+    "description": "Adds an item to the game that allows you to return to your bed or the default start temple if no bed is found. Configurable recipe."
+  },
+  {
+    "id": "JereKuusela-Expand_World_Events",
+    "name": "Expand World Events",
+    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Events/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/JereKuusela-Expand_World_Events-1.16.0.png",
+    "description": "Allows configuring random event system."
+  },
+  {
+    "id": "denikson-BepInExPack_Valheim",
+    "name": "BepInExPack Valheim",
+    "link": "https://thunderstore.io/package/denikson/BepInExPack_Valheim/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/denikson-BepInExPack_Valheim-5.4.2333.png",
+    "description": "BepInEx pack for Valheim. Preconfigured with the correct entry point for mods and preferred defaults for the community."
+  },
+  {
+    "id": "Azumatt-SaveCrossbowState",
+    "name": "SaveCrossbowState",
+    "link": "https://thunderstore.io/package/Azumatt/SaveCrossbowState/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-SaveCrossbowState-1.0.2.png",
+    "description": "Client mod that will save the state of the crossbow when you switch weapons (or otherwise unequip the crossbow). Meaning, if it was loaded, it will be loaded when you switch back to it."
+  },
+  {
+    "id": "Tristan-Player_Activity",
+    "name": "Player Activity",
+    "link": "https://thunderstore.io/package/Tristan/Player_Activity/"
+  },
+  {
+    "id": "blacks7ar-WieldEquipmentWhileSwimming",
+    "name": "WieldEquipmentWhileSwimming",
+    "link": "https://thunderstore.io/package/blacks7ar/WieldEquipmentWhileSwimming/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/blacks7ar-WieldEquipmentWhileSwimming-1.1.3.png",
+    "description": "A simple mod that lets you wield your equipments while swimming/diving or in water (Configurable)."
+  },
+  {
+    "id": "Azumatt-FastLink",
+    "name": "FastLink",
+    "link": "https://thunderstore.io/package/Azumatt/FastLink/"
+  },
+  {
+    "id": "nwesterhausen-DiscordConnector_Client",
+    "name": "DiscordConnector Client",
+    "link": "https://thunderstore.io/package/nwesterhausen/DiscordConnector_Client/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/nwesterhausen-DiscordConnector_Client-1.0.3.png",
+    "description": "Connects your Valheim server to a Discord webhook. This must be installed on the client."
+  },
+  {
+    "id": "arielle-MoreMapPins",
+    "name": "MoreMapPins",
+    "link": "https://thunderstore.io/package/arielle/MoreMapPins/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/arielle-MoreMapPins-1.3.0.png",
+    "description": "Rework of original MoreMapPins Mod that allows you to add map pins to place on map. Up to 250 new pins"
+  },
+  {
+    "id": "ComfyMods-SearsCatalog",
+    "name": "SearsCatalog",
+    "link": "https://thunderstore.io/package/ComfyMods/SearsCatalog/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/ComfyMods-SearsCatalog-1.8.0.png",
+    "description": "Resize and reposition the build panel in-game."
+  },
+  {
+    "id": "southsil-SouthsilArmor",
+    "name": "SouthsilArmor",
+    "link": "https://thunderstore.io/package/southsil/SouthsilArmor/"
+  },
+  {
+    "id": "KGvalheim-No_More_Crashes",
+    "name": "No More Crashes",
+    "link": "https://thunderstore.io/package/KGvalheim/No_More_Crashes/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/KGvalheim-No_More_Crashes-1.6.0.png",
+    "description": "Mod prevents servers using Steam socket from crashing because of broken packet sent (k_EResultLimitExceeded, k_EResultInvalidParam and other)"
+  },
+  {
+    "id": "Azumatt-Azus_UnOfficial_ConfigManager",
+    "name": "Azus UnOfficial ConfigManager",
+    "link": "https://thunderstore.io/package/Azumatt/Azus_UnOfficial_ConfigManager/"
+  },
+  {
+    "id": "Dzk-ValkreamPlus",
+    "name": "ValkreamPlus",
+    "link": "https://thunderstore.io/package/Dzk/ValkreamPlus/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Dzk-ValkreamPlus-1.0.6.png",
+    "description": "Mod for Valkream Server"
+  },
+  {
+    "id": "Azumatt-AAA_Crafting",
+    "name": "AAA Crafting",
+    "link": "https://thunderstore.io/package/Azumatt/AAA_Crafting/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-AAA_Crafting-2.1.6.png",
+    "description": "AzuAnti-ArthriticCrafting. Gives you an input field to enter the amount of items you want to craft, a search filter feature, and recipe tracking. Controller friendly, with virtual keyboard."
+  },
+  {
+    "id": "Azumatt-Build_Camera_Custom_Hammers_Edition",
+    "name": "Build Camera Custom Hammers Edition",
+    "link": "https://thunderstore.io/package/Azumatt/Build_Camera_Custom_Hammers_Edition/"
+  },
+  {
+    "id": "WackyMole-RareMagicPortalPlus",
+    "name": "RareMagicPortalPlus",
+    "link": "https://thunderstore.io/package/WackyMole/RareMagicPortalPlus/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/WackyMole-RareMagicPortalPlus-3.1.9.png",
+    "description": "Rare Magic Portal Plus (RMPP) is a feature-rich mod designed to overhaul how portals function in Valheim."
+  },
+  {
+    "id": "Azumatt-BindOnEquip",
+    "name": "BindOnEquip",
+    "link": "https://thunderstore.io/package/Azumatt/BindOnEquip/"
+  },
+  {
+    "id": "MonsterLabZFix-MonsterLabZ",
+    "name": "MonsterLabZ",
+    "link": "https://thunderstore.io/package/MonsterLabZFix/MonsterLabZ/"
+  },
+  {
+    "id": "Smoothbrain-Groups",
+    "name": "Groups",
+    "link": "https://thunderstore.io/package/Smoothbrain/Groups/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Groups-1.2.10.png",
+    "description": "Adds basic group features to the game."
+  },
+  {
+    "id": "OdinPlus-OdinCampsite",
+    "name": "OdinCampsite",
+    "link": "https://thunderstore.io/package/OdinPlus/OdinCampsite/"
+  },
+  {
+    "id": "OdinPlus-OdinBanners",
+    "name": "OdinBanners",
+    "link": "https://thunderstore.io/package/OdinPlus/OdinBanners/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/OdinPlus-OdinBanners-1.1.11.png",
+    "description": "Custom Banners is just simple mod for additional banners which You can use as decoration of your village or castle. If you're building lover this is definitely another mod for you."
+  },
+  {
+    "id": "Smoothbrain-Blacksmithing",
+    "name": "Blacksmithing",
+    "link": "https://thunderstore.io/package/Smoothbrain/Blacksmithing/"
+  },
+  {
+    "id": "Smoothbrain-Building",
+    "name": "Building",
+    "link": "https://thunderstore.io/package/Smoothbrain/Building/"
+  },
+  {
+    "id": "Smoothbrain-Foraging",
+    "name": "Foraging",
+    "link": "https://thunderstore.io/package/Smoothbrain/Foraging/"
+  },
+  {
+    "id": "Smoothbrain-Lumberjacking",
+    "name": "Lumberjacking",
+    "link": "https://thunderstore.io/package/Smoothbrain/Lumberjacking/"
+  },
+  {
+    "id": "Smoothbrain-Mining",
+    "name": "Mining",
+    "link": "https://thunderstore.io/package/Smoothbrain/Mining/"
+  },
+  {
+    "id": "Smoothbrain-Sailing",
+    "name": "Sailing",
+    "link": "https://thunderstore.io/package/Smoothbrain/Sailing/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Sailing-1.1.8.png",
+    "description": "Adds a skill that increases the health of ships, sailing speed and exploration radius while sailing."
+  },
+  {
+    "id": "Smoothbrain-Vitality",
+    "name": "Vitality",
+    "link": "https://thunderstore.io/package/Smoothbrain/Vitality/"
+  },
+  {
+    "id": "Smoothbrain-Exploration",
+    "name": "Exploration",
+    "link": "https://thunderstore.io/package/Smoothbrain/Exploration/"
+  },
+  {
+    "id": "Smoothbrain-Farming",
+    "name": "Farming",
+    "link": "https://thunderstore.io/package/Smoothbrain/Farming/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Farming-2.2.2.png",
+    "description": "Adds a skill that makes crops grow faster and increases item yield for harvesting crops."
+  },
+  {
+    "id": "Smoothbrain-Cooking",
+    "name": "Cooking",
+    "link": "https://thunderstore.io/package/Smoothbrain/Cooking/"
+  },
+  {
+    "id": "Smoothbrain-Resurrection",
+    "name": "Resurrection",
+    "link": "https://thunderstore.io/package/Smoothbrain/Resurrection/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-Resurrection-1.0.13.png",
+    "description": "Lets you open a portal to hell, to drag your friends back into the world of the living."
+  },
+  {
+    "id": "OdinPlus-CrystalLights",
+    "name": "CrystalLights",
+    "link": "https://thunderstore.io/package/OdinPlus/CrystalLights/"
+  },
+  {
+    "id": "OdinPlus-BeeQueen",
+    "name": "BeeQueen",
+    "link": "https://thunderstore.io/package/OdinPlus/BeeQueen/"
+  },
+  {
+    "id": "blacks7ar-VikingsDoSwim",
+    "name": "VikingsDoSwim",
+    "link": "https://thunderstore.io/package/blacks7ar/VikingsDoSwim/"
+  },
+  {
+    "id": "blacks7ar-MagicRevamp",
+    "name": "MagicRevamp",
+    "link": "https://thunderstore.io/package/blacks7ar/MagicRevamp/"
+  },
+  {
+    "id": "blacks7ar-BoatAdditions",
+    "name": "BoatAdditions",
+    "link": "https://thunderstore.io/package/blacks7ar/BoatAdditions/"
+  },
+  {
+    "id": "Smoothbrain-Ranching",
+    "name": "Ranching",
+    "link": "https://thunderstore.io/package/Smoothbrain/Ranching/"
+  },
+  {
+    "id": "Azumatt-FirstPersonMode",
+    "name": "FirstPersonMode",
+    "link": "https://thunderstore.io/package/Azumatt/FirstPersonMode/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Azumatt-FirstPersonMode-1.3.12.png",
+    "description": "Simple mod that allows First Person. It moves the camera into the player's head. It hides what is needed either through culling the character model or hiding the head by shrinking it (configuration value)"
+  },
+  {
+    "id": "Smoothbrain-Backpacks",
+    "name": "Backpacks",
+    "link": "https://thunderstore.io/package/Smoothbrain/Backpacks/"
+  },
+  {
+    "id": "JereKuusela-Expand_World_Size",
+    "name": "Expand World Size",
+    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Size/"
+  },
+  {
+    "id": "ASharpPen-Drop_That",
+    "name": "Drop That",
+    "link": "https://thunderstore.io/package/ASharpPen/Drop_That/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/ASharpPen-Drop_That-3.1.4.png",
+    "description": "Tool for configuring loot tables."
+  },
+  {
+    "id": "Smoothbrain-Guilds",
+    "name": "Guilds",
+    "link": "https://thunderstore.io/package/Smoothbrain/Guilds/"
+  },
+  {
+    "id": "Smoothbrain-TargetPortal",
+    "name": "TargetPortal",
+    "link": "https://thunderstore.io/package/Smoothbrain/TargetPortal/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Smoothbrain-TargetPortal-1.2.3.png",
+    "description": "Lets you target any portal, instead of having to connect two portals via a tag."
+  },
+  {
+    "id": "OdinPlus-OdinHorse",
+    "name": "OdinHorse",
+    "link": "https://thunderstore.io/package/OdinPlus/OdinHorse/"
+  },
+  {
+    "id": "Meldurson-PortablePals",
+    "name": "PortablePals",
+    "link": "https://thunderstore.io/package/Meldurson/PortablePals/"
+  },
+  {
+    "id": "Marlthon-SeaAnimals",
+    "name": "SeaAnimals",
+    "link": "https://thunderstore.io/package/Marlthon/SeaAnimals/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/Marlthon-SeaAnimals-0.3.6.png",
+    "description": "Give life to Valheim’s oceans with dangerous creatures, rideable marine beasts, and true ocean exploration. The sea is no longer empty."
+  },
+  {
+    "id": "Marlthon-TheFisher",
+    "name": "TheFisher",
+    "link": "https://thunderstore.io/package/Marlthon/TheFisher/"
+  },
+  {
+    "id": "Radamanto-LootBox",
+    "name": "LootBox",
+    "link": "https://thunderstore.io/package/Radamanto/LootBox/"
+  },
+  {
+    "id": "shudnal-LongshipUpgrades",
+    "name": "LongshipUpgrades",
+    "link": "https://thunderstore.io/package/shudnal/LongshipUpgrades/"
+  },
+  {
+    "id": "Soloredis-RtDOcean",
+    "name": "RtDOcean",
+    "link": "https://thunderstore.io/package/Soloredis/RtDOcean/"
+  },
+  {
+    "id": "KGvalheim-Arcane_Ward",
+    "name": "Arcane Ward",
+    "link": "https://thunderstore.io/package/KGvalheim/Arcane_Ward/"
+  },
+  {
+    "id": "JereKuusela-Expand_World_Data",
+    "name": "Expand World Data",
+    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Data/"
+  },
+  {
+    "id": "ValheimModding-Jotunn",
+    "name": "Jotunn",
+    "link": "https://thunderstore.io/package/ValheimModding/Jotunn/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/ValheimModding-Jotunn-2.29.0.png",
+    "description": "Jötunn (/ˈjɔːtʊn/, 'giant'), the Valheim Library was created with the goal of making the lives of mod developers easier. It enables you to create mods for Valheim using an abstracted API so you can focus on the actual content creation."
+  },
+  {
+    "id": "OdinPlus-PotionPlus",
+    "name": "PotionPlus",
+    "link": "https://thunderstore.io/package/OdinPlus/PotionPlus/"
+  },
+  {
+    "id": "JereKuusela-Expand_World_Prefabs",
+    "name": "Expand World Prefabs",
+    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Prefabs/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/JereKuusela-Expand_World_Prefabs-1.52.0.png",
+    "description": "Allows creating rules for objects being spawned, destroyed and more."
+  },
+  {
+    "id": "shudnal-ExtraSlotsCustomSlots",
+    "name": "ExtraSlotsCustomSlots",
+    "link": "https://thunderstore.io/package/shudnal/ExtraSlotsCustomSlots/"
+  },
+  {
+    "id": "JereKuusela-Expand_World_Spawns",
+    "name": "Expand World Spawns",
+    "link": "https://thunderstore.io/package/JereKuusela/Expand_World_Spawns/"
+  },
+  {
+    "id": "Dzk-BossNBows",
+    "name": "BossNBows",
+    "link": "https://thunderstore.io/package/Dzk/BossNBows/"
+  },
+  {
+    "id": "KGvalheim-Marketplace_And_Server_NPCs_Revamped",
+    "name": "Marketplace And Server NPCs Revamped",
+    "link": "https://thunderstore.io/package/KGvalheim/Marketplace_And_Server_NPCs_Revamped/"
+  },
+  {
+    "id": "Smoothbrain-Jewelcrafting",
+    "name": "Jewelcrafting",
+    "link": "https://thunderstore.io/package/Smoothbrain/Jewelcrafting/"
+  },
+  {
+    "id": "WackyMole-WackyItemRequiresSkillLevel",
+    "name": "WackyItemRequiresSkillLevel",
+    "link": "https://thunderstore.io/package/WackyMole/WackyItemRequiresSkillLevel/"
+  },
+  {
+    "id": "WackyMole-WackyEpicMMOSystem",
+    "name": "WackyEpicMMOSystem",
+    "link": "https://thunderstore.io/package/WackyMole/WackyEpicMMOSystem/"
+  },
+  {
+    "id": "shudnal-ExtraSlots",
+    "name": "ExtraSlots",
+    "link": "https://thunderstore.io/package/shudnal/ExtraSlots/"
+  },
+  {
+    "id": "VerdantsAscent-FiresGhettoNetworking",
+    "name": "FiresGhettoNetworking",
+    "link": "https://thunderstore.io/package/VerdantsAscent/FiresGhettoNetworking/"
+  },
+  {
+    "id": "WackyMole-WackysDatabase",
+    "name": "WackysDatabase",
+    "link": "https://thunderstore.io/package/WackyMole/WackysDatabase/",
+    "icon": "https://ccdn.thunderstore.io/live/repository/icons/WackyMole-WackysDatabase-2.4.81.png",
+    "description": "WackysDatabase allows you to control all items/recipes/pieces/creatures/materials/textures via YML files with ServerSync and so much more."
   }
 ]

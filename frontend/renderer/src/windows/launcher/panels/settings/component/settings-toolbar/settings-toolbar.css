@@ -1,14 +1,12 @@
 /* Barre d'outils des réglages : dans la bande du haut, au-dessus de l'onglet affiché. */
 .settings-toolbar {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: calc(80% - 2px);
-  max-width: calc(100% - 7cm - 2px);
+  /* position: fixed;
+  top: 0; */
+  /* right: 5cm; */
+  /* width: calc(80% - 2px);
+  max-width: calc(100% - 7cm - 2px); */
   height: 1cm;
-  z-index: 5;
   box-sizing: border-box;
-  padding: 0 1rem;
   display: flex;
   align-items: center;
   justify-content: flex-end;
