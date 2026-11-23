@@ -16,8 +16,8 @@ import path from "path";
 
 import type { SteamSourceIssue } from "@shared/types";
 
-import { type ErrorVars, LocalizedError } from "../../lib/localized-error.js";
-import type { MessageKey } from "../../lib/messages.js";
+import { type ErrorVars, LocalizedError } from "../../lib/errors/localized-error.js";
+import type { MessageKey } from "../../lib/errors/messages.js";
 
 export const SOURCE_FILE = "instance.source.json";
 /** Dossier (dans l'installation) où DepotDownloader dépose le jeu avant la copie vérifiée. */

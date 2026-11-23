@@ -9,7 +9,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { manifestHash } from "../install/manifest.js";
+import { manifestHash } from "../install/state/manifest.js";
 import { exportHashFolder, exportManifestOnly, hashFolder } from "./hash-folder.js";
 import { buildModsDisplay, buildNexusDisplay, nexusItemFromPage, parseNexusList, parseNexusPage, cdnIcon, parseModList, parsePackagePage, refsFromPackagePage } from "./mods-list.js";
 

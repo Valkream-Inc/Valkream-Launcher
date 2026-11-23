@@ -12,9 +12,9 @@ import { isDev } from "./src/core/constants.js";
 import path from "path";
 import DirsManager from "./src/core/dirs.js";
 import LauncherManager from "./src/core/launcher.js";
-import { cleanupInterruptedMove, INSTANCES_DIR } from "./src/lib/games-root.js";
-import { applyLauncherVersion } from "./src/lib/launcher-version.js";
-import { syncUninstallPaths, UNINSTALL_PATHS_FILE } from "./src/lib/uninstall-paths.js";
+import { cleanupInterruptedMove, INSTANCES_DIR } from "./src/lib/fs/games-root.js";
+import { applyLauncherVersion } from "./src/lib/settings/launcher-version.js";
+import { syncUninstallPaths, UNINSTALL_PATHS_FILE } from "./src/lib/fs/uninstall-paths.js";
 import { abortAllSyncs } from "./src/ipc/sync-registry.js";
 
 if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
@@ -51,6 +51,12 @@ else {
     // ⚙️ Initialisation des handlers IPC
     const ipcHandlers = new IpcHandlers();
     ipcHandlers.init();
+
+    // Test de démarrage du build (scripts/check-runtime.ts) : tout est initialisé, on quitte sans ouvrir de fenêtre
+    if (process.env.VALKREAM_SMOKE_TEST === "1") {
+      console.log("SMOKE_TEST_OK");
+      return app.exit(0);
+    }
 
     // 🪟 Lancement de la fenêtre principale
     if (isDev) return MainWindow.createWindow();

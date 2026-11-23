@@ -8,7 +8,7 @@
 import type { GamePlatform, InstanceId, InstanceSettingValue, RawOption } from "@shared/types";
 
 import type { ServerQueryConfig } from "../types/core.js";
-import type { LaunchArgs } from "./local/launch-args.js";
+import type { LaunchArgs } from "./local/launch/launch-args.js";
 
 /**
  * Config main d'une instance : ce que le remote n'a pas le droit de décider

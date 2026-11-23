@@ -29,8 +29,8 @@ import {
   parsePackagePage,
   refsFromPackagePage,
 } from "../instances/tools/mods-list.js";
-import { httpGetText } from "../lib/http.js";
-import { LocalizedError } from "../lib/localized-error.js";
+import { httpGetText } from "../lib/net/http.js";
+import { LocalizedError } from "../lib/errors/localized-error.js";
 
 const window = () =>
   BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0];

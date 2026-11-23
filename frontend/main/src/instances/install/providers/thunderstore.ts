@@ -15,11 +15,11 @@ import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
-import { resolveInside } from "../../../lib/paths.js";
-import { commitStaged } from "../staging.js";
+import { resolveInside } from "../../../lib/fs/paths.js";
+import { commitStaged } from "../files/staging.js";
 import { createGlobalProgress } from "./global-progress.js";
 import type { Provider, ProviderContext, Uninstaller } from "./types.js";
-import { LocalizedError } from "../../../lib/localized-error.js";
+import { LocalizedError } from "../../../lib/errors/localized-error.js";
 
 const DEPENDENCY = /^([^-\s]+)-([^-\s]+)-([^\s]+)$/;
 

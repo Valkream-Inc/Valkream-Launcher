@@ -7,10 +7,10 @@ import path from "path";
 
 import type { SettingKey, Settings } from "@shared/types";
 
-import { readLegacySettings } from "../lib/legacy-settings.js";
-import { setErrorLanguage } from "../lib/localized-error.js";
-import type { Lang } from "../lib/messages.js";
-import { SettingsStore } from "../lib/settings-store.js";
+import { readLegacySettings } from "../lib/settings/legacy-settings.js";
+import { setErrorLanguage } from "../lib/errors/localized-error.js";
+import type { Lang } from "../lib/errors/messages.js";
+import { SettingsStore } from "../lib/settings/settings-store.js";
 import { isDev } from "./constants.js";
 import DirsManager from "./dirs.js";
 

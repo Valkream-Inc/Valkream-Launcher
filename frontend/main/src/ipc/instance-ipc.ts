@@ -14,10 +14,10 @@ import { BrowserWindow, dialog, ipcMain, shell } from "electron";
 import type { Channel, GamePlatform, InstanceSettingValue } from "@shared/types";
 
 import instancesConfig from "../instances/instances.config.js";
-import { readInstallLog } from "../instances/install/install-log.js";
+import { readInstallLog } from "../instances/install/state/install-log.js";
 import { installLocations } from "../instances/local/instance-paths.js";
-import { readInstanceSettings, writeInstanceSetting } from "../instances/install/install-store.js";
-import { planLaunch } from "../instances/local/launch.js";
+import { readInstanceSettings, writeInstanceSetting } from "../instances/install/state/install-store.js";
+import { planLaunch } from "../instances/local/launch/launch.js";
 import {
   getInstanceInfos,
   getInstanceInspector,
@@ -25,18 +25,18 @@ import {
   getInstanceRegistry,
   getInstanceStatus,
 } from "../instances/services.js";
-import { isMovingGamesRoot } from "../lib/games-root.js";
+import { isMovingGamesRoot } from "../lib/fs/games-root.js";
 import DirsManager from "../core/dirs.js";
 import LauncherManager from "../core/launcher.js";
-import { ensureSteamRunning, isSteamRunning } from "../instances/local/steam.js";
+import { ensureSteamRunning, isSteamRunning } from "../instances/local/steam/steam.js";
 import { cancelSync, runSync } from "./sync-registry.js";
 import { clearGameSourceDir, writeGameSourceDir } from "../instances/install/game-source.js";
-import { DEPOT_DOWNLOADER_ASSETS, DEPOT_DOWNLOADER_VERSION } from "../instances/install/depot-config.js";
-import { depotAssetFor, ensureDepotDownloader } from "../instances/install/depot-tool.js";
-import { depotOsOf, downloadWithDepot } from "../instances/install/depot-download.js";
-import { realDepotRunner } from "../instances/install/depot-runner.js";
+import { DEPOT_DOWNLOADER_ASSETS, DEPOT_DOWNLOADER_VERSION } from "../instances/install/depot/depot-config.js";
+import { depotAssetFor, ensureDepotDownloader } from "../instances/install/depot/depot-tool.js";
+import { depotOsOf, downloadWithDepot } from "../instances/install/depot/depot-download.js";
+import { realDepotRunner } from "../instances/install/depot/depot-runner.js";
 import { realInstallIO } from "../instances/install/real-io.js";
-import { LocalizedError } from "../lib/localized-error.js";
+import { LocalizedError } from "../lib/errors/localized-error.js";
 
 const isChannel = (value: unknown): value is Channel =>
   value === "stable" || value === "beta" || value === "alpha";

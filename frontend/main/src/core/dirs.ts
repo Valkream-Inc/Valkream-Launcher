@@ -5,8 +5,8 @@
 
 import path from "path";
 import { app } from "electron";
-import { readGamesRoot } from "../lib/games-root.js";
-import newDir from "../lib/platform-dir.js";
+import { readGamesRoot } from "../lib/fs/games-root.js";
+import newDir from "../lib/fs/platform-dir.js";
 
 import { isDev } from "./constants.js";
 

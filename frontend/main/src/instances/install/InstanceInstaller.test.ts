@@ -8,10 +8,10 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 import type { InstanceMainConfig } from "../instances.types.js";
 import { InstanceInspector } from "../local/InstanceInspector.js";
 import { InstanceInstaller } from "./InstanceInstaller.js";
-import { readInstallState, readInstanceSettings, writeInstallState, writeInstanceSetting } from "./install-store.js";
+import { readInstallState, readInstanceSettings, writeInstallState, writeInstanceSetting } from "./state/install-store.js";
 import { writeGameSourceDir } from "./game-source.js";
-import { manifestHash } from "./manifest.js";
-import { instanceRootPath } from "../../lib/paths.js";
+import { manifestHash } from "./state/manifest.js";
+import { instanceRootPath } from "../../lib/fs/paths.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
 import type { InstallIO } from "./providers/types.js";
 

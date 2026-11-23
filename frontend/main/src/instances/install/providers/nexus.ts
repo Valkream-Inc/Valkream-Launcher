@@ -16,10 +16,10 @@ import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
-import { HttpError, httpGetText } from "../../../lib/http.js";
-import { LocalizedError } from "../../../lib/localized-error.js";
-import { resolveInside } from "../../../lib/paths.js";
-import { commitStaged } from "../staging.js";
+import { HttpError, httpGetText } from "../../../lib/net/http.js";
+import { LocalizedError } from "../../../lib/errors/localized-error.js";
+import { resolveInside } from "../../../lib/fs/paths.js";
+import { commitStaged } from "../files/staging.js";
 import { createGlobalProgress } from "./global-progress.js";
 import type { Provider, Uninstaller } from "./types.js";
 

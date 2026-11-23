@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 
-import { createDiskCache } from "./disk-cache.js";
+import { createDiskCache } from "./fetch/disk-cache.js";
 import { ParamResolver, type ParamCache } from "./ParamResolver.js";
 
 const memoryCache = (): ParamCache & { store: Map<string, string> } => {

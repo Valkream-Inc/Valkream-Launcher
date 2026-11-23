@@ -9,7 +9,7 @@ import { GameDig } from "gamedig";
 import type { ServerInfos } from "@shared/types";
 
 import { baseUrl, noCache } from "./constants.js";
-import { httpGet } from "../lib/http.js";
+import { httpGet } from "../lib/net/http.js";
 import type { ServerQueryConfig } from "../types/core.js";
 
 class InfosManager {

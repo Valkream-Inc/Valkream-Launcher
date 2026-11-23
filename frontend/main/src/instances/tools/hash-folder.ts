@@ -9,8 +9,8 @@
 import fs from "fs";
 import path from "path";
 
-import { manifestHash, scanManifest, type Manifest } from "../install/manifest.js";
-import { LocalizedError } from "../../lib/localized-error.js";
+import { manifestHash, scanManifest, type Manifest } from "../install/state/manifest.js";
+import { LocalizedError } from "../../lib/errors/localized-error.js";
 
 export interface FolderHash {
   /** Hash de l'entrée (`hash` du latest.yml). */

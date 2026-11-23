@@ -7,7 +7,7 @@ import { describe, it } from "node:test";
 import yaml from "yaml";
 
 import type { GamePlatform, ReleaseEntry } from "@shared/types";
-import { manifestHash } from "../install/manifest.js";
+import { manifestHash } from "../install/state/manifest.js";
 import instancesConfig from "../instances.config.js";
 import { ParamResolver } from "./ParamResolver.js";
 import { flattenRelease, RELEASE_TIERS } from "./release-options.js";

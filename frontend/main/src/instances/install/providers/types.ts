@@ -6,14 +6,14 @@
  * Les accès réseau et zip sont injectés (`InstallIO`) pour tester sans réseau.
  */
 
-import type { Translate } from "../../../lib/messages.js";
+import type { Translate } from "../../../lib/errors/messages.js";
 import type { GamePlatform, ProgressData, ReleaseEntry } from "@shared/types";
 
 import type { ParamResolver } from "../../remote/ParamResolver.js";
-import type { SteamGame } from "../../local/steam-library.js";
+import type { SteamGame } from "../../local/steam/steam-library.js";
 import type { ArchiveCache } from "./archive-cache.js";
-import type { HashCache } from "../hash-cache.js";
-import type { UpdatePlan } from "../preserve.js";
+import type { HashCache } from "../files/hash-cache.js";
+import type { UpdatePlan } from "../files/preserve.js";
 
 /** Progression d'un téléchargement : valeurs déjà formatées pour l'affichage. */
 export type TransferProgress = Pick<ProgressData, "processedBytes" | "totalBytes" | "percent" | "speed"> & {

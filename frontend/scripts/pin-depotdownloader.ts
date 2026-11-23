@@ -13,17 +13,17 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
-import type { DepotAsset } from "../main/src/instances/install/depot-config";
+import type { DepotAsset } from "../main/src/instances/install/depot/depot-config";
 import {
   platformOfAsset,
   renderDepotConfig,
   type ReleaseAsset,
-} from "../main/src/instances/install/depot-pins";
+} from "../main/src/instances/install/depot/depot-pins";
 
 const REPO = "SteamRE/DepotDownloader";
 const CONFIG = path.join(
   import.meta.dirname,
-  "../main/src/instances/install/depot-config.ts",
+  "../main/src/instances/install/depot/depot-config.ts",
 );
 
 const main = async (): Promise<void> => {

@@ -126,7 +126,7 @@ Les gros fichiers (zips du jeu, dossiers de fichiers référencés par un manife
 ## Test (Production)
 
 1. Pusher les modifications sur la main github
-2. Attendre la fin du workflow de build (il lance `yarn build`, qui vérifie aussi que le système de mise à jour du build est cohérent : `yarn check:build`)
+2. Attendre la fin du workflow de build (il lance `yarn build`, qui vérifie aussi que le système de mise à jour du build est cohérent : `yarn check:build`, et que le build s'exécute : `yarn check:runtime`)
 3. Télécharger l'installer depuis github et l'installer sur le PC de test
 4. Lancer le launcher et vérifier qu'il fonctionne
 

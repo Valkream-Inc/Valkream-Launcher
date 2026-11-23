@@ -25,15 +25,15 @@ import type {
 import type { InstanceMainConfig } from "../instances.types.js";
 import { entryDirectory, installLocations, type InstallLocations } from "./instance-paths.js";
 import { loadRemoteIndex } from "../remote/InstanceRegistry.js";
-import { readInstallState, readInstanceSettings } from "../install/install-store.js";
-import { HashCache } from "../install/hash-cache.js";
-import { verifyManifest, type Manifest } from "../install/manifest.js";
+import { readInstallState, readInstanceSettings } from "../install/state/install-store.js";
+import { HashCache } from "../install/files/hash-cache.js";
+import { verifyManifest, type Manifest } from "../install/state/manifest.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
-import { resolvePreserved } from "../install/preserve.js";
-import { loadEntryContent } from "../install/local-content.js";
+import { resolvePreserved } from "../install/files/preserve.js";
+import { loadEntryContent } from "../install/files/local-content.js";
 import { flattenRelease, RELEASE_TIERS } from "../remote/release-options.js";
 import { validateReleaseConfig } from "../remote/validate.js";
-import { LocalizedError } from "../../lib/localized-error.js";
+import { LocalizedError } from "../../lib/errors/localized-error.js";
 
 export interface InspectorOptions {
   configs: readonly InstanceMainConfig[];

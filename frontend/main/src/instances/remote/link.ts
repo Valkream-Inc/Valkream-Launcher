@@ -10,7 +10,7 @@
  */
 
 import type { EntryContent, EntryContentByPlatform, GamePlatform } from "@shared/types";
-import { LocalizedError } from "../../lib/localized-error.js";
+import { LocalizedError } from "../../lib/errors/localized-error.js";
 
 export type LinkKind = "url" | "relative" | "data" | "invalid";
 

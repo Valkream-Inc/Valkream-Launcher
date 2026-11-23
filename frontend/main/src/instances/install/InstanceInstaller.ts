@@ -19,17 +19,17 @@ import type {
   ReleaseEntry,
 } from "@shared/types";
 
-import { type Lang, type Translate, translator } from "../../lib/messages.js";
-import { isPathInside } from "../../lib/paths.js";
+import { type Lang, type Translate, translator } from "../../lib/errors/messages.js";
+import { isPathInside } from "../../lib/fs/paths.js";
 import { entryDirectory } from "../local/instance-paths.js";
 import {
   buildRow,
   type InstanceInspector,
   TIERS,
 } from "../local/InstanceInspector.js";
-import { locateSteamGame, type SteamGame } from "../local/steam-library.js";
+import { locateSteamGame, type SteamGame } from "../local/steam/steam-library.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
-import { removeWithPlan } from "./fs-ops.js";
+import { removeWithPlan } from "./files/fs-ops.js";
 import {
   clearGameSourceDir,
   DEPOT_DIR,
@@ -38,16 +38,16 @@ import {
   readGameSourceDir,
   toSteamSourceIssue,
 } from "./game-source.js";
-import { HashCache } from "./hash-cache.js";
-import { appendInstallLog } from "./install-log.js";
+import { HashCache } from "./files/hash-cache.js";
+import { appendInstallLog } from "./state/install-log.js";
 import {
   readInstallState,
   readInstanceSettings,
   recordInstalledEntry,
   removeInstalledEntry,
-} from "./install-store.js";
-import { loadEntryContent } from "./local-content.js";
-import { planEntryUpdate } from "./preserve.js";
+} from "./state/install-store.js";
+import { loadEntryContent } from "./files/local-content.js";
+import { planEntryUpdate } from "./files/preserve.js";
 import { ArchiveCache } from "./providers/archive-cache.js";
 import { hashProvider, steamLibraryProvider } from "./providers/hash.js";
 import {
@@ -57,7 +57,7 @@ import {
 import { nexusProvider, nexusUninstall } from "./providers/nexus.js";
 import type { InstallIO, Provider, Uninstaller } from "./providers/types.js";
 import { zipProvider } from "./providers/zip.js";
-import { errorText, errorTexts, LocalizedError } from "../../lib/localized-error.js";
+import { errorText, errorTexts, LocalizedError } from "../../lib/errors/localized-error.js";
 
 const DEFAULT_PROVIDERS: Record<string, Provider> = {
   zip_url: zipProvider,

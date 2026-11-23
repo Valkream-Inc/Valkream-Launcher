@@ -7,8 +7,8 @@ import { createHash } from "node:crypto";
 
 import type { InstanceMainConfig } from "../instances.types.js";
 import { InstanceInspector } from "./InstanceInspector.js";
-import { recordInstalledEntry, writeInstanceSetting } from "../install/install-store.js";
-import { instanceRootPath } from "../../lib/paths.js";
+import { recordInstalledEntry, writeInstanceSetting } from "../install/state/install-store.js";
+import { instanceRootPath } from "../../lib/fs/paths.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
 
 const sha = (text: string) => createHash("sha256").update(text).digest("hex");

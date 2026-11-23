@@ -8,9 +8,9 @@
  */
 
 import type { ModDisplay } from "@shared/types";
-import { pickKey } from "../../lib/json-key.js";
-import { type LimitOptions, mapLimited } from "../../lib/limiter.js";
-import { LocalizedError } from "../../lib/localized-error.js";
+import { pickKey } from "../../lib/format/json-key.js";
+import { type LimitOptions, mapLimited } from "../../lib/net/limiter.js";
+import { LocalizedError } from "../../lib/errors/localized-error.js";
 import {
   isNexusRef,
   NEXUS_API,

@@ -16,17 +16,17 @@ import SettingsManager from "../core/settings.js";
 import LauncherManager from "../core/launcher.js";
 import DirsManager from "../core/dirs.js";
 import { isDev } from "../core/constants.js";
-import { syncUninstallPaths, UNINSTALL_PATHS_FILE } from "../lib/uninstall-paths.js";
-import { getMoveProgress, moveGamesRoot, type MoveProgress, writeGamesRoot } from "../lib/games-root.js";
+import { syncUninstallPaths, UNINSTALL_PATHS_FILE } from "../lib/fs/uninstall-paths.js";
+import { getMoveProgress, moveGamesRoot, type MoveProgress, writeGamesRoot } from "../lib/fs/games-root.js";
 import { anySyncRunning } from "./sync-registry.js";
-import { isSafeExternalUrl } from "../lib/safe-link.js";
+import { isSafeExternalUrl } from "../lib/net/safe-link.js";
 
 import * as MainWindow from "../windows/mainWindow.js";
 import * as UpdateWindow from "../windows/updateWindow.js";
 
 import registerAdminToolsIpc from "./admin-tools-ipc.js";
 import InstanceIpcHandlers from "./instance-ipc.js";
-import { LocalizedError } from "../lib/localized-error.js";
+import { LocalizedError } from "../lib/errors/localized-error.js";
 
 // Fenêtre principale (supposée ouverte quand les handlers sont appelés)
 const mainWindow = () => MainWindow.getWindow() as BrowserWindow;

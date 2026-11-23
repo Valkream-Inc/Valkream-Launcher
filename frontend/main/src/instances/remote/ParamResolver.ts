@@ -12,7 +12,7 @@ import yaml from "yaml";
 import type { LinkOrData } from "@shared/types";
 
 import { resolveLinkUrl } from "./link.js";
-import { LocalizedError } from "../../lib/localized-error.js";
+import { LocalizedError } from "../../lib/errors/localized-error.js";
 
 export interface ParamCache {
   read(key: string): Promise<string | null>;

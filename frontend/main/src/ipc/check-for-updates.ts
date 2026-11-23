@@ -6,9 +6,9 @@
 import fs from "fs";
 
 import type { IpcMainEvent } from "electron";
-import { formatBytes } from "../lib/format-bytes.js";
+import { formatBytes } from "../lib/format/format-bytes.js";
 import SettingsManager from "../core/settings.js";
-import { translator, type Translate } from "../lib/messages.js";
+import { translator, type Translate } from "../lib/errors/messages.js";
 
 import { baseUrl } from "../core/constants.js";
 import InfosManager from "../core/server-infos.js";

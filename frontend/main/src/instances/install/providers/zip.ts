@@ -10,11 +10,11 @@
 import fs from "fs";
 import path from "path";
 
-import { shouldWriteFile } from "../preserve.js";
-import { commitStaged } from "../staging.js";
+import { shouldWriteFile } from "../files/preserve.js";
+import { commitStaged } from "../files/staging.js";
 import { fetchArchive } from "./archive.js";
 import type { Provider } from "./types.js";
-import { LocalizedError } from "../../../lib/localized-error.js";
+import { LocalizedError } from "../../../lib/errors/localized-error.js";
 
 export const zipProvider: Provider = async (context) => {
   const { entry, entryDir, tempDir, plan, platform, name, beforeCommit } = context;

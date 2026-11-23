@@ -19,7 +19,7 @@ import type { ServerQueryConfig } from "../../types/core.js";
 import type { InstanceMainConfig } from "../instances.types.js";
 import { loadRemoteIndex } from "../remote/InstanceRegistry.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
-import { LocalizedError } from "../../lib/localized-error.js";
+import { LocalizedError } from "../../lib/errors/localized-error.js";
 
 export interface InfosOptions {
   configs: readonly InstanceMainConfig[];
