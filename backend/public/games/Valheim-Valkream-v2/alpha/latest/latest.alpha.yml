@@ -26,7 +26,7 @@ game-base:
     type: steam_library # le steamAppId (892970) vient de la config main, pas du remote
     buildid: 26249040 # Patch 1.0.21 (28 octobre 2026)
     # steam-beta: public-test # inutile pour la branche publique actuelle
-    content: /games/Valheim-Valkream-v2/hash/alpha-game.json
+    content: /games/Valheim-Valkream-v2/alpha/latest/hash/alpha-game.json
     hash: 70b7e3617e3c343d6ff6e3d1e0fece2ef7812cc3c2a5ff560fea6216a7bee89a
     depot: { id: 892972, manifest: "3316048117713314105" } # 892972 = Valheim Windows
     to_ignore:
