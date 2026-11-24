@@ -1,0 +1,48 @@
+# ──────────────────────────────────────────────────────────────
+# EXEMPLE : Valheim-Valkream-v2, canal ALPHA, jeu pris dans la bibliothèque Steam du joueur.
+#
+# À déposer en backend/public/games/Valheim-Valkream-v2/latest.alpha.yml, puis dans index.config.json :
+#   "channels": { …, "alpha": "/games/Valheim-Valkream-v2/latest.alpha.yml" }
+# (le canal alpha n'apparaît dans le choix du jeu que si « Afficher les canaux de test » est actif.)
+#
+# Le jeu n'est PAS hébergé chez nous (licence) : `steam_library` copie les fichiers listés dans le manifeste
+# depuis le dossier Steam du joueur, vérifiés un par un par leur sha256. Les mods passent par les autres entrées.
+#
+# À FAIRE avant publication (rien de tout cela ne peut être deviné) :
+#   1. Sur une installation Steam PROPRE de la version alpha (branche bêta Steam « public-test » par exemple) :
+#        yarn build:manifest <dossier-du-jeu> <sortie> --manifest-only --ignore "*.log" --latest latest.alpha.yml --entry game-base.valheim
+#      → écrit hash.json (à servir sous /games/Valheim-Valkream-v2/hash/alpha-game.json) et le `hash` de l'entrée.
+#   2. Renseigner `buildid` (affiché par Steam / SteamDB) si on veut un message précis quand la version diffère.
+#   3. Facultatif : `depot` (id + manifeste de SteamDB) propose au joueur de télécharger la version exacte
+#      (DepotDownloader, QR code Steam) quand sa copie Steam n'est pas la bonne.
+# ──────────────────────────────────────────────────────────────
+
+version: 3.0.0
+buildDate: 2026-11-23T00:00:00.000Z
+
+game-base:
+  valheim:
+    version: 1.0.21
+    type: steam_library # le steamAppId (892970) vient de la config main, pas du remote
+    buildid: 26249040 # Patch 1.0.21 (28 octobre 2026)
+    # steam-beta: public-test # inutile pour la branche publique actuelle
+    content: /games/Valheim-Valkream-v2/hash/alpha-game.json
+    hash: 744d6f0cea210138b02c53c6d11119a765424c7058ff87075e09192d57a5297d
+    depot: { id: 892972, manifest: "3316048117713314105" } # 892972 = Valheim Windows
+    to_ignore:
+      - "*.log"
+      - BepInEx/**
+
+  bepinex:
+    version: 5.4.2333
+    type: zip_url
+    content: /games/Valheim/latest/BepInEx-5.4.2333.zip
+    gameFolderToRemove:
+      - BepInEx/cache
+
+game-details:
+  mods-thunderstore:
+    version: 3.0.0-alpha1
+    type: thunderstore_modpack_url
+    api-url: https://thunderstore.io
+    content: /games/Valheim-Valkream-v2/modpack.alpha.json # tableau "Auteur-Nom-Version"

@@ -10,7 +10,7 @@
   "channels": {
     "stable": "/games/Valheim-Valkream-v2/latest.yml",
     "beta": "/games/Valheim-Valkream-v2/latest.beta.yml",
-    "alpha": "/games/Valheim-Valkream-v2/latest.beta.yml"
+    "alpha": "/games/Valheim-Valkream-v2/latest.alpha.yml"
   },
   "event": "/games/Valheim-Valkream-v2/config/event.json",
   "maintenance": "/games/Valheim-Valkream-v2/config/maintenance.json",
