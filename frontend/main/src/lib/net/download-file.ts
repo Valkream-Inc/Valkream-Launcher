@@ -12,13 +12,22 @@ import path from "path";
 import { Readable, Transform } from "stream";
 import { pipeline } from "stream/promises";
 
-import type { FileProgressCallback, NetworkErrorLike } from "../types/utils.js";
+import type {
+  FileProgressCallback,
+  NetworkErrorLike,
+} from "../../types/utils.js";
 
-import { completePartial, discardPartial, rememberPartial, resumePoint, validatorOf } from "./download-resume.js";
+import { LocalizedError } from "../errors/localized-error.js";
 import { consoleStreamAnswer } from "../format/console-stream.js";
 import { formatBytes } from "../format/format-bytes.js";
+import {
+  completePartial,
+  discardPartial,
+  rememberPartial,
+  resumePoint,
+  validatorOf,
+} from "./download-resume.js";
 import { HttpError, httpGet } from "./http.js";
-import { LocalizedError } from "../errors/localized-error.js";
 
 const REQUEST_TIMEOUT = 10 * 1000;
 const STALL_TIMEOUT = 30 * 1000;
@@ -58,11 +67,19 @@ export const isNetworkError = (err: unknown): boolean => {
 
 /** Erreur HTTP définitive (4xx hors 408 / 429) : inutile de réessayer. */
 const isFatalHttpError = (err: unknown): boolean =>
-  err instanceof HttpError && err.status >= 400 && err.status < 500 && err.status !== 408 && err.status !== 429;
+  err instanceof HttpError &&
+  err.status >= 400 &&
+  err.status < 500 &&
+  err.status !== 408 &&
+  err.status !== 429;
 
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-const parseTotalSizeFromContentRange = (contentRange: string | null, fallback: number): number => {
+const parseTotalSizeFromContentRange = (
+  contentRange: string | null,
+  fallback: number,
+): number => {
   const match = contentRange?.match(/bytes \d+-\d+\/(\d+|\*)/);
   if (!match || match[1] === "*") return fallback;
   return parseInt(match[1], 10);
@@ -112,17 +129,32 @@ const attemptDownload = async (
       continue;
     }
 
-    if (!response.body) throw new LocalizedError("err.noBody", { url: downloadUrl });
-    rememberPartial(destPath, downloadUrl, validatorOf(Object.fromEntries(response.headers)));
+    if (!response.body)
+      throw new LocalizedError("err.noBody", { url: downloadUrl });
+    rememberPartial(
+      destPath,
+      downloadUrl,
+      validatorOf(Object.fromEntries(response.headers)),
+    );
 
-    const remainingSize = parseInt(response.headers.get("content-length") ?? "0", 10);
+    const remainingSize = parseInt(
+      response.headers.get("content-length") ?? "0",
+      10,
+    );
     const totalSize =
       response.status === 206
-        ? parseTotalSizeFromContentRange(response.headers.get("content-range"), existingSize + remainingSize)
+        ? parseTotalSizeFromContentRange(
+            response.headers.get("content-range"),
+            existingSize + remainingSize,
+          )
         : remainingSize;
 
-    const source = Readable.fromWeb(response.body as Parameters<typeof Readable.fromWeb>[0]);
-    const writer = fs.createWriteStream(destPath, { flags: existingSize > 0 ? "a" : "w" });
+    const source = Readable.fromWeb(
+      response.body as Parameters<typeof Readable.fromWeb>[0],
+    );
+    const writer = fs.createWriteStream(destPath, {
+      flags: existingSize > 0 ? "a" : "w",
+    });
 
     let transferred = existingSize;
     let lastReport = Date.now();
@@ -133,7 +165,13 @@ const attemptDownload = async (
     const armStall = () => {
       clearTimeout(stallTimer);
       stallTimer = setTimeout(
-        () => source.destroy(Object.assign(new LocalizedError("err.stall", { ms: stallTimeoutMs }), { code: "ETIMEDOUT" })),
+        () =>
+          source.destroy(
+            Object.assign(
+              new LocalizedError("err.stall", { ms: stallTimeoutMs }),
+              { code: "ETIMEDOUT" },
+            ),
+          ),
         stallTimeoutMs,
       );
     };
@@ -145,7 +183,8 @@ const attemptDownload = async (
         const now = Date.now();
         if (now - lastReport >= PROGRESS_INTERVAL) {
           const speed = ((transferred - lastBytes) * 1000) / (now - lastReport);
-          const percent = totalSize > 0 ? Math.round((transferred / totalSize) * 100) : 0;
+          const percent =
+            totalSize > 0 ? Math.round((transferred / totalSize) * 100) : 0;
           void callback(transferred, totalSize, percent, speed);
           lastReport = now;
           lastBytes = transferred;
@@ -154,7 +193,8 @@ const attemptDownload = async (
       },
     });
 
-    const onAbort = () => source.destroy(new Error(`Download aborted for ${downloadUrl}`));
+    const onAbort = () =>
+      source.destroy(new Error(`Download aborted for ${downloadUrl}`));
     signal?.addEventListener("abort", onAbort, { once: true });
     armStall();
     try {
@@ -171,7 +211,12 @@ const attemptDownload = async (
 const downloadFile = async (
   downloadUrl: string,
   destPath: string,
-  callback: FileProgressCallback = (downloadedBytes, totalBytes, percent, speed) =>
+  callback: FileProgressCallback = (
+    downloadedBytes,
+    totalBytes,
+    percent,
+    speed,
+  ) =>
     consoleStreamAnswer(
       `📥 Téléchargement du fichier ${path.basename(destPath)} : ${percent}% ` +
         `(${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}) ` +
@@ -183,10 +228,19 @@ const downloadFile = async (
   let otherRetryCount = 0;
 
   while (true) {
-    if (signal?.aborted) throw new Error(`Download aborted before starting retry for ${downloadUrl}`);
+    if (signal?.aborted)
+      throw new Error(
+        `Download aborted before starting retry for ${downloadUrl}`,
+      );
 
     try {
-      await attemptDownload(downloadUrl, destPath, callback, signal, stallTimeoutMs);
+      await attemptDownload(
+        downloadUrl,
+        destPath,
+        callback,
+        signal,
+        stallTimeoutMs,
+      );
       completePartial(destPath);
       return;
     } catch (err) {
@@ -197,14 +251,18 @@ const downloadFile = async (
 
       // Coupure réseau : on reprend là où on s'est arrêté, sans limite (l'utilisateur peut annuler)
       if (isNetworkError(err)) {
-        console.log(`⚠️  Erreur réseau -> ${message || code} pour ${downloadUrl}, reprise...`);
+        console.log(
+          `⚠️  Erreur réseau -> ${message || code} pour ${downloadUrl}, reprise...`,
+        );
         await sleep(retryDelayMs);
         continue;
       }
 
       if (otherRetryCount < MAX_OTHER_RETRIES) {
         otherRetryCount++;
-        console.log(`⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} -> ${message || code} pour ${downloadUrl}...`);
+        console.log(
+          `⚠️  Tentative ${otherRetryCount}/${MAX_OTHER_RETRIES} -> ${message || code} pour ${downloadUrl}...`,
+        );
         discardPartial(destPath);
         callback(0, 0, 0, 0);
         await sleep(otherRetryCount * retryDelayMs);

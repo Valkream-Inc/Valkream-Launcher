@@ -8,7 +8,7 @@
  * 3. DepotDownloader : version exacte téléchargée depuis Steam, connexion par QR code.
  */
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Alert,
@@ -22,12 +22,18 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import type { Channel, DepotInfo, DepotStepName, InstanceId, SteamSourceIssue } from "@shared/types";
+import type {
+  Channel,
+  DepotInfo,
+  DepotStepName,
+  InstanceId,
+  SteamSourceIssue,
+} from "@shared/types";
 
-import { isQrLine, qrModules } from "../../../../../../i18n/qr-block";
-import { ipcErrorMessage } from "../../../../../../i18n/ipc-error";
-import SimpleMarkdown from "./simple-markdown";
 import { useTranslation } from "react-i18next";
+import { ipcErrorMessage } from "../../../../../../i18n/ipc-error";
+import { isQrLine, qrModules } from "../../../../../../i18n/qr-block";
+import SimpleMarkdown from "./simple-markdown";
 
 interface Props {
   issue: SteamSourceIssue | null;
@@ -48,30 +54,186 @@ const STEP_NUMBER: Record<DepotStepName, number> = {
   finish: 4,
 };
 
-/** QR code de connexion redessiné en SVG (noir sur blanc, marge de 2 modules), lisible quel que soit le thème ou la police. */
-const QrCode = ({ lines }: { lines: string[] }) => {
-  const grid = qrModules(lines);
-  if (!grid) return null;
-  const margin = 2;
-  const width = grid[0].length;
-  const height = grid.length;
-  const cells: string[] = [];
-  grid.forEach((row, y) =>
-    row.forEach((dark, x) => {
-      if (dark) cells.push(`M${x + margin} ${y + margin}h1v1h-1z`);
-    }),
+/** Styles de barre de défilement propres et cohérents avec le thème MUI. */
+const CLEAN_SCROLLBAR_SX = {
+  scrollbarWidth: "thin" as const,
+  scrollbarColor: "rgba(128, 128, 128, 0.45) transparent",
+  "&::-webkit-scrollbar": {
+    width: 8,
+    height: 8,
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "transparent",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: "rgba(128, 128, 128, 0.4)",
+    borderRadius: 999,
+    border: "2px solid transparent",
+    backgroundClip: "content-box",
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    backgroundColor: "rgba(128, 128, 128, 0.65)",
+  },
+};
+
+/** Nettoie les séquences ANSI et les caractères de remplacement sans déclencher no-control-regex. */
+const ESC = String.fromCharCode(0x1b);
+const ANSI_ESCAPE_REGEX = new RegExp(`${ESC}\\[[0-9;]*[A-Za-z]`, "g");
+
+const sanitizeTerminalLine = (raw: string): string =>
+  raw
+    .replace(ANSI_ESCAPE_REGEX, "")
+    .replace(/\uFFFD/g, " ")
+    .replace(/\r/g, "");
+
+/** Détection de secours si une ligne appartient à un QR code console. */
+const isQrLineFallback = (line: string): boolean => {
+  const trimmed = line.trim();
+  if (trimmed.length < 10) return false;
+  return /^[█▀▄▌▐■□#\s]+$/.test(line) && /[█▀▄▌▐■#]/.test(line);
+};
+
+/** Conversion de secours des blocs console (demi-blocs ou blocs pleins) en grille booléenne. */
+const parseQrFallback = (lines: string[]): boolean[][] | null => {
+  const nonEmpty = lines.filter((l) => l.trim().length > 0);
+  if (nonEmpty.length < 10) return null;
+
+  const hasHalfBlocks = nonEmpty.some((l) => /[▀▄]/.test(l));
+  const maxWidth = Math.max(...nonEmpty.map((l) => l.length));
+  const grid: boolean[][] = [];
+
+  for (const rawLine of nonEmpty) {
+    const line = rawLine.padEnd(maxWidth, " ");
+    if (hasHalfBlocks) {
+      const topRow: boolean[] = [];
+      const bottomRow: boolean[] = [];
+      for (const ch of line) {
+        if (ch === "█" || ch === "#") {
+          topRow.push(true);
+          bottomRow.push(true);
+        } else if (ch === "▀") {
+          topRow.push(true);
+          bottomRow.push(false);
+        } else if (ch === "▄") {
+          topRow.push(false);
+          bottomRow.push(true);
+        } else {
+          topRow.push(false);
+          bottomRow.push(false);
+        }
+      }
+      grid.push(topRow, bottomRow);
+    } else {
+      grid.push(
+        Array.from(line, (ch) => ch === "█" || ch === "#" || ch === "■"),
+      );
+    }
+  }
+
+  return grid;
+};
+
+/** Normalise une grille booléenne pour garantir une largeur uniforme. */
+const normalizeGrid = (
+  grid: boolean[][] | null | undefined,
+): boolean[][] | null => {
+  if (!grid || grid.length === 0) return null;
+  const maxCols = Math.max(...grid.map((row) => row.length));
+  if (maxCols === 0) return null;
+  return grid.map((row) =>
+    Array.from({ length: maxCols }, (_, x) => Boolean(row[x])),
   );
+};
+
+/** Rogne les lignes et colonnes entièrement vides (false) autour de la grille. */
+const trimGrid = (grid: boolean[][]): boolean[][] => {
+  if (grid.length === 0 || grid[0].length === 0) return grid;
+
+  let top = 0;
+  let bottom = grid.length - 1;
+  let left = 0;
+  let right = grid[0].length - 1;
+
+  while (top <= bottom && grid[top].every((cell) => !cell)) top++;
+  while (bottom >= top && grid[bottom].every((cell) => !cell)) bottom--;
+
+  while (
+    left <= right &&
+    grid.slice(top, bottom + 1).every((row) => !row[left])
+  ) {
+    left++;
+  }
+  while (
+    right >= left &&
+    grid.slice(top, bottom + 1).every((row) => !row[right])
+  ) {
+    right--;
+  }
+
+  if (top > bottom || left > right) return grid;
+
+  return grid.slice(top, bottom + 1).map((row) => row.slice(left, right + 1));
+};
+
+/** QR code de connexion redessiné en SVG (carrés pleins noirs sur fond blanc, marge symétrique de 2 modules). */
+const QrCode = ({ lines }: { lines: string[] }) => {
+  const parsed = qrModules(lines) ?? parseQrFallback(lines);
+  const normalized = normalizeGrid(parsed);
+  const grid = normalized ? trimGrid(normalized) : null;
+  if (!grid) return null;
+
+  const margin = 2;
+  const height = grid.length;
+  const width = grid[0].length;
+  const viewBoxWidth = width + margin * 2;
+  const viewBoxHeight = height + margin * 2;
+  const pixelSize = Math.min(280, viewBoxWidth * 6);
+
   return (
-    <Box sx={{ display: "flex", justifyContent: "center" }}>
-      <svg
-        viewBox={`0 0 ${width + margin * 2} ${height + margin * 2}`}
-        width={Math.min(280, (width + margin * 2) * 6)}
-        shapeRendering="crispEdges"
-        role="img"
+    <Box sx={{ display: "flex", justifyContent: "center", my: 1 }}>
+      <Box
+        sx={{
+          p: 1.5,
+          bgcolor: "#ffffff",
+          borderRadius: 2,
+          border: "1px solid",
+          borderColor: "divider",
+          boxShadow: 1,
+          display: "inline-flex",
+        }}
       >
-        <rect width="100%" height="100%" fill="#fff" />
-        <path d={cells.join("")} fill="#000" />
-      </svg>
+        <svg
+          viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
+          width={pixelSize}
+          height={Math.round((pixelSize * viewBoxHeight) / viewBoxWidth)}
+          shapeRendering="crispEdges"
+          role="img"
+          aria-label="Steam QR code"
+          style={{ display: "block" }}
+        >
+          <rect
+            x={0}
+            y={0}
+            width={viewBoxWidth}
+            height={viewBoxHeight}
+            fill="#ffffff"
+          />
+          {grid.map((row, y) =>
+            row.map((dark, x) =>
+              dark ? (
+                <rect
+                  key={`${x}-${y}`}
+                  x={x + margin}
+                  y={y + margin}
+                  width={1}
+                  height={1}
+                  fill="#000000"
+                />
+              ) : null,
+            ),
+          )}
+        </svg>
+      </Box>
     </Box>
   );
 };
@@ -86,10 +248,16 @@ const infoAccepted = (): boolean => {
   }
 };
 
-/** Lignes gardées à l'écran : assez pour le QR code (une trentaine de lignes). */
-const MAX_LINES = 60;
+/** Lignes gardées à l'écran : assez pour le QR code et l'historique récent. */
+const MAX_LINES = 80;
 
-export default function SteamSourceDialog({ issue, instanceId, channel, onClose, onRetry }: Props) {
+export default function SteamSourceDialog({
+  issue,
+  instanceId,
+  channel,
+  onClose,
+  onRetry,
+}: Props) {
   const { t } = useTranslation();
   const [depotRunning, setDepotRunning] = useState(false);
   const [lines, setLines] = useState<string[]>([]);
@@ -98,7 +266,8 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
   const [qrLines, setQrLines] = useState<string[]>([]);
   const qrRun = useRef<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<DepotInfo | null>(null); // écran d'information (première utilisation)
+  const [info, setInfo] = useState<DepotInfo | null>(null);
+  const logBoxRef = useRef<HTMLPreElement | null>(null);
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -109,17 +278,26 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
     };
   }, []);
 
+  // Auto-scroll en bas de la console de logs à chaque nouvelle ligne
+  useEffect(() => {
+    const el = logBoxRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [lines]);
+
   const pickFolder = async () => {
     setError(null);
     try {
-      const folder = await window.electron_API.pickInstanceSource(instanceId, channel);
+      const folder = await window.electron_API.pickInstanceSource(
+        instanceId,
+        channel,
+      );
       if (folder) onRetry();
     } catch (err) {
       setError(ipcErrorMessage(err));
     }
   };
 
-  // Première utilisation : écran d'information d'abord (ce qui est exécuté, où, avec quelles garanties).
   const askDepot = async () => {
     if (infoAccepted()) return startDepot();
     try {
@@ -147,26 +325,39 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
     setQrLines([]);
     qrRun.current = [];
     setDepotRunning(true);
+
     window.electron_API.onDepotOutput((data) => {
-      if (data.id !== instanceId || data.channel !== channel || !mounted.current) return;
+      if (
+        data.id !== instanceId ||
+        data.channel !== channel ||
+        !mounted.current
+      ) {
+        return;
+      }
+
       if (data.line !== undefined) {
-        const line = data.line;
-        if (isQrLine(line)) {
-          // Le QR code est redessiné à part (voir QrCode) : on garde la dernière suite de lignes de blocs
-          qrRun.current = [...qrRun.current, line];
-          setQrLines(qrRun.current);
-        } else {
-          qrRun.current = [];
-          setLines((previous) => [...previous, line].slice(-MAX_LINES));
+        const subLines = sanitizeTerminalLine(data.line).split("\n");
+        for (const rawSub of subLines) {
+          const line = rawSub.trimEnd();
+          if (isQrLine(line) || isQrLineFallback(line)) {
+            qrRun.current = [...qrRun.current, line];
+            setQrLines(qrRun.current);
+          } else if (line.trim().length > 0) {
+            qrRun.current = [];
+            setLines((previous) => [...previous, line].slice(-MAX_LINES));
+          }
         }
       }
+
       if (data.step !== undefined) {
         setStep(data.step);
         if (data.step !== "login") setQrLines([]);
-        setPercent(null); // chaque étape repart de zéro (le pourcentage de l'outil n'est pas celui du jeu)
+        setPercent(null);
       }
+
       if (data.percent !== undefined) setPercent(data.percent);
     });
+
     try {
       await window.electron_API.depotDownloadInstance(instanceId, channel);
       if (mounted.current) onRetry();
@@ -178,39 +369,73 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
     }
   };
 
-  const cancelDepot = () => window.electron_API.cancelDepotDownload(instanceId, channel);
+  const cancelDepot = () =>
+    window.electron_API.cancelDepotDownload(instanceId, channel);
 
   return (
-    <Dialog open={issue !== null} onClose={depotRunning ? undefined : onClose} maxWidth="md" fullWidth>
+    <Dialog
+      open={issue !== null}
+      onClose={depotRunning ? undefined : onClose}
+      maxWidth="md"
+      fullWidth
+    >
       <DialogTitle>{t("steam.dialogTitle")}</DialogTitle>
-      <DialogContent dividers>
+      <DialogContent dividers sx={CLEAN_SCROLLBAR_SX}>
         {issue && <SimpleMarkdown source={issue.guide} />}
         {depotRunning && (
-          <Stack spacing={1} sx={{ mt: 2 }}>
+          <Stack spacing={1.5} sx={{ mt: 2 }}>
             <Alert severity="info">
               {step
                 ? `${t("steam.stepCount", { current: STEP_NUMBER[step], total: 4 })} — ${t(`steam.step.${step}`)}`
                 : t("steam.step.tool-verify")}
             </Alert>
-            {step === "login" && <Alert severity="warning">{t("steam.scan")}</Alert>}
-            {step === "login" && <QrCode lines={qrLines} />}
+            {(step === "login" || qrLines.length > 0) && (
+              <Alert severity="warning">{t("steam.scan")}</Alert>
+            )}
+            {(step === "login" || qrLines.length > 0) && (
+              <QrCode lines={qrLines} />
+            )}
             <Typography variant="caption" color="text.secondary">
               {t("steam.logTitle")}
             </Typography>
             <Box
+              ref={logBoxRef}
               component="pre"
-              sx={{ m: 0, p: 1, maxHeight: 360, overflow: "auto", fontFamily: "monospace", fontSize: 10, lineHeight: 1, bgcolor: "action.hover" }}
+              sx={{
+                m: 0,
+                p: 1.5,
+                maxHeight: 280,
+                overflow: "auto",
+                borderRadius: 1.5,
+                border: "1px solid",
+                borderColor: "divider",
+                fontFamily:
+                  '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
+                fontSize: 11,
+                lineHeight: 1.4,
+                bgcolor: "action.hover",
+                ...CLEAN_SCROLLBAR_SX,
+              }}
             >
               {lines.join("\n")}
             </Box>
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
               <LinearProgress
-                sx={{ flexGrow: 1 }}
+                sx={{ flexGrow: 1, height: 8, borderRadius: 999 }}
                 variant={percent === null ? "indeterminate" : "determinate"}
                 value={percent ?? 0}
               />
-              <Typography variant="body2" sx={{ minWidth: 56, textAlign: "right" }}>
-                {percent === null ? "…" : `${percent.toFixed(percent >= 100 ? 0 : 1)} %`}
+              <Typography
+                variant="body2"
+                sx={{
+                  minWidth: 56,
+                  textAlign: "right",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {percent === null
+                  ? "…"
+                  : `${percent.toFixed(percent >= 100 ? 0 : 1)} %`}
               </Typography>
             </Stack>
           </Stack>
@@ -221,15 +446,21 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
           </Alert>
         )}
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ px: 3, py: 1.5 }}>
         {!issue?.depotOnly && (
           <Button onClick={pickFolder} disabled={depotRunning}>
             {t("steam.pick")}
           </Button>
         )}
         {issue?.depotAvailable && (
-          <Button onClick={depotRunning ? cancelDepot : askDepot} color={depotRunning ? "error" : "primary"}>
-            {depotRunning ? t("steam.cancelDepot") : t(issue.depotOnly ? "steam.depotOnly" : "steam.depot")}
+          <Button
+            onClick={depotRunning ? cancelDepot : askDepot}
+            color={depotRunning ? "error" : "primary"}
+            variant={depotRunning ? "outlined" : "contained"}
+          >
+            {depotRunning
+              ? t("steam.cancelDepot")
+              : t(issue.depotOnly ? "steam.depotOnly" : "steam.depot")}
           </Button>
         )}
         <Button onClick={onRetry} disabled={depotRunning}>
@@ -239,16 +470,24 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
           {t("common.close")}
         </Button>
       </DialogActions>
-      <Dialog open={info !== null} onClose={() => setInfo(null)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={info !== null}
+        onClose={() => setInfo(null)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>{t("steam.infoTitle")}</DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={CLEAN_SCROLLBAR_SX}>
           {info && (
             <SimpleMarkdown
               source={[
                 t("steam.info.what"),
                 t("steam.info.source", { url: info.sourceUrl }),
                 `## ${t("steam.info.title")}`,
-                t("steam.info.step1", { version: info.version || t("steam.info.notConfigured"), dir: info.toolsDir }),
+                t("steam.info.step1", {
+                  version: info.version || t("steam.info.notConfigured"),
+                  dir: info.toolsDir,
+                }),
                 t("steam.info.step2"),
                 t("steam.info.step3", { dir: info.downloadDir }),
                 t("steam.info.step4"),
@@ -257,7 +496,7 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
             />
           )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ px: 3, py: 1.5 }}>
           <Button onClick={() => setInfo(null)}>{t("common.cancel")}</Button>
           <Button onClick={acceptInfo} variant="contained">
             {t("steam.infoContinue")}

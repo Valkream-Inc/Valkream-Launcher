@@ -25,6 +25,7 @@ import { useTranslation } from "react-i18next";
 
 import type { InstanceReport } from "@shared/types";
 
+import { useGames } from "@/src/windows/launcher/context/games.context";
 import { localized } from "../../../../../i18n";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
@@ -126,6 +127,7 @@ export default function InstanceModsTab({
   report: InstanceReport;
 }) {
   const { t } = useTranslation();
+  const { actualChannel: channel } = useGames();
   const { mods } = report;
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -198,7 +200,11 @@ export default function InstanceModsTab({
           scrollbarGutter: "stable",
         }}
       >
-        <SettingsTitle warn={false} scope="game">
+        <SettingsTitle
+          warn={false}
+          scope="game"
+          scopeDetail={channel !== "stable" ? channel : undefined}
+        >
           <Stack
             direction="row"
             useFlexGap
@@ -314,7 +320,11 @@ export default function InstanceModsTab({
         }}
       >
         {mods.length === 0 ? (
-          <Typography color="text.secondary">{t("instance.noMods")}</Typography>
+          <SettingsBox warn={false}>
+            <Typography color="text.secondary">
+              {t("instance.noMods")}
+            </Typography>
+          </SettingsBox>
         ) : filteredMods.length === 0 ? (
           <SettingsBox warn={false}>
             <Typography color="text.secondary">

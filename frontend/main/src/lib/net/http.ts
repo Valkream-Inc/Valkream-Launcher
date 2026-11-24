@@ -6,7 +6,7 @@
  * annulation et en-têtes anti-cache. Remplace axios.
  */
 
-import type { NoCacheConfig } from "../types/core.js";
+import type { NoCacheConfig } from "../../types/core.js";
 import { LocalizedError } from "../errors/localized-error.js";
 import { translate } from "../errors/messages.js";
 
@@ -33,14 +33,21 @@ export interface HttpGetOptions {
   accept?: (status: number) => boolean;
 }
 
-const withParams = (url: string, params: Record<string, string | number>): string => {
+const withParams = (
+  url: string,
+  params: Record<string, string | number>,
+): string => {
   const target = new URL(url);
-  for (const [key, value] of Object.entries(params)) target.searchParams.set(key, String(value));
+  for (const [key, value] of Object.entries(params))
+    target.searchParams.set(key, String(value));
   return target.toString();
 };
 
 /** `Retry-After` : nombre de secondes ou date HTTP → ms (absent / invalide : `undefined`). */
-export const parseRetryAfter = (value: string | null, now = Date.now()): number | undefined => {
+export const parseRetryAfter = (
+  value: string | null,
+  now = Date.now(),
+): number | undefined => {
   if (!value) return undefined;
   const seconds = Number(value);
   if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
@@ -49,32 +56,57 @@ export const parseRetryAfter = (value: string | null, now = Date.now()): number 
 };
 
 /** GET qui rejette en `HttpError` si le statut n'est pas accepté, et en erreur réseau sinon. */
-export const httpGet = async (url: string, options: HttpGetOptions = {}): Promise<Response> => {
-  const { timeout = 5000, headers = {}, noCache, signal, accept = (status) => status >= 200 && status < 300 } = options;
+export const httpGet = async (
+  url: string,
+  options: HttpGetOptions = {},
+): Promise<Response> => {
+  const {
+    timeout = 5000,
+    headers = {},
+    noCache,
+    signal,
+    accept = (status) => status >= 200 && status < 300,
+  } = options;
 
   const controller = new AbortController();
   const onAbort = () => controller.abort(signal?.reason);
   if (signal?.aborted) onAbort();
   signal?.addEventListener("abort", onAbort, { once: true });
   const timer = setTimeout(
-    () => controller.abort(Object.assign(new LocalizedError("err.timeout", { ms: timeout, url }), { code: "ETIMEDOUT" })),
+    () =>
+      controller.abort(
+        Object.assign(new LocalizedError("err.timeout", { ms: timeout, url }), {
+          code: "ETIMEDOUT",
+        }),
+      ),
     timeout,
   );
 
   try {
-    const response = await fetch(noCache ? withParams(url, noCache.params) : url, {
-      method: "GET",
-      headers: { ...(noCache?.headers ?? {}), ...headers },
-      signal: controller.signal,
-    });
+    const response = await fetch(
+      noCache ? withParams(url, noCache.params) : url,
+      {
+        method: "GET",
+        headers: { ...(noCache?.headers ?? {}), ...headers },
+        signal: controller.signal,
+      },
+    );
     if (!accept(response.status)) {
       void response.body?.cancel();
-      throw new HttpError(response.status, url, parseRetryAfter(response.headers.get("retry-after")));
+      throw new HttpError(
+        response.status,
+        url,
+        parseRetryAfter(response.headers.get("retry-after")),
+      );
     }
     return response;
   } catch (error) {
     // Délai dépassé : on remonte l'erreur lisible plutôt qu'un AbortError générique
-    if (controller.signal.aborted && !signal?.aborted && controller.signal.reason instanceof Error) {
+    if (
+      controller.signal.aborted &&
+      !signal?.aborted &&
+      controller.signal.reason instanceof Error
+    ) {
       throw controller.signal.reason;
     }
     throw error;
@@ -84,5 +116,7 @@ export const httpGet = async (url: string, options: HttpGetOptions = {}): Promis
   }
 };
 
-export const httpGetText = async (url: string, options?: HttpGetOptions): Promise<string> =>
-  (await httpGet(url, options)).text();
+export const httpGetText = async (
+  url: string,
+  options?: HttpGetOptions,
+): Promise<string> => (await httpGet(url, options)).text();

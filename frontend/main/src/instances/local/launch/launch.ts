@@ -12,10 +12,10 @@ import type { GamePlatform, InstanceSettingValue } from "@shared/types";
 
 import { resolveInside } from "../../../lib/fs/paths.js";
 
-import type { InstanceMainConfig } from "../instances.types.js";
+import { LocalizedError } from "../../../lib/errors/localized-error.js";
+import type { InstanceMainConfig } from "../../instances.types.js";
 import type { InstallLocations } from "../instance-paths.js";
 import { buildLaunchArgs } from "./launch-args.js";
-import { LocalizedError } from "../../../lib/errors/localized-error.js";
 
 export type LaunchPlan =
   /** Jeu sans exécutable déclaré, lancé par Steam (`launchSteam` actif). */
@@ -38,34 +38,55 @@ export type LaunchPlan =
  * `launchSteam` (avec un `steamAppId`) fait démarrer Steam avant le jeu ; `launchArgs` donne les arguments.
  */
 export const planLaunch = (
-  config: Pick<InstanceMainConfig, "steamAppId" | "command" | "launchCwd" | "launchArgs">,
+  config: Pick<
+    InstanceMainConfig,
+    "steamAppId" | "command" | "launchCwd" | "launchArgs"
+  >,
   locations: InstallLocations,
   settings: Record<string, InstanceSettingValue>,
-  { platform = process.platform as GamePlatform, exists = fs.existsSync }: {
+  {
+    platform = process.platform as GamePlatform,
+    exists = fs.existsSync,
+  }: {
     platform?: GamePlatform;
     exists?: (file: string) => boolean;
   } = {},
 ): LaunchPlan => {
-  const ensureSteam = settings.launchSteam === true && config.steamAppId !== undefined;
+  const ensureSteam =
+    settings.launchSteam === true && config.steamAppId !== undefined;
   const args = buildLaunchArgs(config.launchArgs, settings, platform);
-  const cwdOverride = config.launchCwd ? resolveInside(locations.installDir, config.launchCwd) : undefined;
+  const cwdOverride = config.launchCwd
+    ? resolveInside(locations.installDir, config.launchCwd)
+    : undefined;
 
   const command = config.command?.[platform];
   if (command) {
     // Commande avec un séparateur (`java/bin/javaw.exe`) : programme installé DANS l'instance (ex : un Java
     // téléchargé dans `/java`), résolu depuis sa racine et obligatoire. Sans séparateur (`java`) : commande du PATH.
     const bundled = /[\\/]/.test(command);
-    const file = bundled ? resolveInside(locations.installDir, command) : command;
-    if (bundled && !exists(file)) throw new LocalizedError("err.executableMissing", { path: file });
-    return { kind: "executable", path: file, cwd: cwdOverride ?? locations.installDir, args, ensureSteam };
+    const file = bundled
+      ? resolveInside(locations.installDir, command)
+      : command;
+    if (bundled && !exists(file))
+      throw new LocalizedError("err.executableMissing", { path: file });
+    return {
+      kind: "executable",
+      path: file,
+      cwd: cwdOverride ?? locations.installDir,
+      args,
+      ensureSteam,
+    };
   }
 
   if (!locations.executable) {
-    if (ensureSteam) return { kind: "steam", url: `steam://rungameid/${config.steamAppId}` };
+    if (ensureSteam)
+      return { kind: "steam", url: `steam://rungameid/${config.steamAppId}` };
     throw new LocalizedError("err.noExecutable");
   }
   if (!exists(locations.executable)) {
-    throw new LocalizedError("err.executableMissing", { path: locations.executable });
+    throw new LocalizedError("err.executableMissing", {
+      path: locations.executable,
+    });
   }
   return {
     kind: "executable",

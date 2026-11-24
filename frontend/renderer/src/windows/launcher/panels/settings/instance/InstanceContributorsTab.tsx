@@ -27,6 +27,7 @@ import type { InstanceReport } from "@shared/types";
 import { localized } from "../../../../../i18n";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
+import { useGames } from "@/src/windows/launcher/context/games.context";
 
 type ContributorItem = InstanceReport["contributors"][number];
 
@@ -123,6 +124,7 @@ export default function InstanceContributorsTab({
   report: InstanceReport;
 }) {
   const { t } = useTranslation();
+  const { actualChannel: channel } = useGames();
   const { contributors } = report;
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -202,7 +204,11 @@ export default function InstanceContributorsTab({
           scrollbarGutter: "stable",
         }}
       >
-        <SettingsTitle warn={false} scope="game">
+        <SettingsTitle
+          warn={false}
+          scope="game"
+          scopeDetail={channel !== "stable" ? channel : undefined}
+        >
           <Stack
             direction="row"
             useFlexGap

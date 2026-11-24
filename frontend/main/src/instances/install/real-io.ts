@@ -10,13 +10,13 @@ import fs from "fs";
 import path from "path";
 
 import { assertArchiveWithinLimits } from "../../lib/archive/archive-limits.js";
-import { downloadFile } from "../../lib/net/download-file.js";
 import { formatBytes } from "../../lib/format/format-bytes.js";
-import { isPathInside } from "../../lib/fs/paths.js";
 import { normalizeRelative } from "../../lib/format/patterns.js";
-import { progressOf } from "./state/progress.js";
-import type { InstallIO } from "./providers/types.js";
+import { isPathInside } from "../../lib/fs/paths.js";
+import { downloadFile } from "../../lib/net/download-file.js";
 import { streamExtractTarGz } from "./files/stream-extract.js";
+import type { InstallIO } from "./providers/types.js";
+import { progressOf } from "./state/progress.js";
 
 export const realInstallIO: InstallIO = {
   async download(url, destination, signal, onProgress) {

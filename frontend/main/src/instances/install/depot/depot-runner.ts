@@ -16,7 +16,11 @@ export interface DepotRunOptions {
 }
 
 /** Retourne le code de sortie. Injectable pour les tests. */
-export type DepotRunner = (command: string, args: string[], options: DepotRunOptions) => Promise<number>;
+export type DepotRunner = (
+  command: string,
+  args: string[],
+  options: DepotRunOptions,
+) => Promise<number>;
 
 /** `NN.NN% fichier` → pourcentage. */
 export const parseDepotPercent = (line: string): number | undefined => {
@@ -26,26 +30,91 @@ export const parseDepotPercent = (line: string): number | undefined => {
   return value >= 0 && value <= 100 ? value : undefined;
 };
 
-export const realDepotRunner: DepotRunner = (command, args, { cwd, signal, onLine }) =>
+/**
+ * Table de correspondance des caractères de blocs CP437 / CP850 (0x80–0xFF)
+ * vers Unicode, avec repli en latin1 pour le reste des octets hauts.
+ */
+const OEM_BLOCK_MAP: Record<number, string> = {
+  0xb0: "░",
+  0xb1: "▒",
+  0xb2: "▓",
+  0xdb: "█",
+  0xdc: "▄",
+  0xdd: "▌",
+  0xde: "▐",
+  0xdf: "▀",
+  0xfe: "■",
+};
+
+const decodeWin32Chunk = (chunk: Buffer): string => {
+  let out = "";
+  for (let i = 0; i < chunk.length; i++) {
+    const byte = chunk[i];
+    if (byte < 0x80) {
+      out += String.fromCharCode(byte);
+    } else {
+      out += OEM_BLOCK_MAP[byte] ?? chunk.subarray(i, i + 1).toString("latin1");
+    }
+  }
+  return out;
+};
+
+export const realDepotRunner: DepotRunner = (
+  command,
+  args,
+  { cwd, signal, onLine },
+) =>
   new Promise((resolve, reject) => {
-    const child = spawn(command, args, { cwd, stdio: ["ignore", "pipe", "pipe"], windowsHide: true, signal });
-    let pending = "";
-    // Un décodeur par flux : un caractère multi-octets (blocs ▀▄█ du QR code) peut être coupé entre deux morceaux
-    const feeder = () => {
-      const decoder = new StringDecoder("utf8");
-      return (chunk: Buffer) => feed(decoder.write(chunk));
+    const child = spawn(command, args, {
+      cwd,
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+      signal,
+    });
+
+    const createStreamFeeder = () => {
+      const utf8Decoder = new StringDecoder("utf8");
+      let pending = "";
+
+      const feed = (text: string) => {
+        pending += text;
+        const lines = pending.split(/\r\n|\n|\r/);
+        pending = lines.pop() ?? "";
+        for (const line of lines) {
+          if (line !== "") onLine(line);
+        }
+      };
+
+      const onData = (chunk: Buffer) => {
+        if (process.platform === "win32") {
+          feed(decodeWin32Chunk(chunk));
+        } else {
+          feed(utf8Decoder.write(chunk));
+        }
+      };
+
+      const flush = () => {
+        if (process.platform !== "win32") {
+          const tail = utf8Decoder.end();
+          if (tail) feed(tail);
+        }
+        if (pending !== "") onLine(pending);
+        pending = "";
+      };
+
+      return { onData, flush };
     };
-    const feed = (text: string) => {
-      pending += text;
-      const lines = pending.split(/\r\n|\n|\r/);
-      pending = lines.pop() ?? "";
-      for (const line of lines) if (line !== "") onLine(line);
-    };
-    child.stdout.on("data", feeder());
-    child.stderr.on("data", feeder());
+
+    const stdoutFeeder = createStreamFeeder();
+    const stderrFeeder = createStreamFeeder();
+
+    child.stdout.on("data", stdoutFeeder.onData);
+    child.stderr.on("data", stderrFeeder.onData);
+
     child.once("error", reject);
     child.once("close", (code) => {
-      if (pending !== "") onLine(pending);
+      stdoutFeeder.flush();
+      stderrFeeder.flush();
       resolve(code ?? -1);
     });
   });

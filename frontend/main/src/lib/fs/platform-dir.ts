@@ -6,7 +6,7 @@
 import fs from "fs";
 import { platform } from "os";
 
-import type { PlatformValues } from "../types/utils.js";
+import type { PlatformValues } from "../../types/utils.js";
 
 const newDir = (valueForAllPlatforms: PlatformValues): string => {
   const dirPath = valueForAllPlatforms[platform() as keyof PlatformValues];
@@ -18,7 +18,7 @@ const newDir = (valueForAllPlatforms: PlatformValues): string => {
   } catch (err) {
     console.error(
       "Erreur lors de la création du dossier:",
-      err instanceof Error ? err.message : String(err)
+      err instanceof Error ? err.message : String(err),
     );
   }
 
