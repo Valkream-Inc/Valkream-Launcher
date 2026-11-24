@@ -15,7 +15,8 @@ import type { InstanceRenderConfig } from "./instances.types";
 
 // Chargé à la demande avec le fond 3D (three.js n'est pas dans le bundle de démarrage)
 const SunsetEnvironment = lazy(
-  () => import("../windows/launcher/component/background/gltf-background/component/sunset-environement"),
+  () =>
+    import("../windows/launcher/component/background/gltf-background/component/sunset-environement"),
 );
 
 const DISCORD = "https://discord.com/invite/zn3TsumtyG";
@@ -67,7 +68,7 @@ const instancesRenderConfig: InstanceRenderConfig[] = [
         hasCampfire: true,
       },
     },
-    serverLabel: "Valheim",
+    serverLabel: "Valheim v2",
     links: {
       discord: DISCORD,
       site: SITE,
@@ -165,7 +166,7 @@ const instancesRenderConfig: InstanceRenderConfig[] = [
         hasCampfire: false,
       },
     },
-    serverLabel: "7 Days",
+    serverLabel: "7 Days v2",
     links: {
       discord: DISCORD,
       site: SITE,

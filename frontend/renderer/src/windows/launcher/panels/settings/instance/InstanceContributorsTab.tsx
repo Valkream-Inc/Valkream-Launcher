@@ -24,10 +24,10 @@ import { useTranslation } from "react-i18next";
 
 import type { InstanceReport } from "@shared/types";
 
+import { useGames } from "@/src/windows/launcher/context/games.context";
 import { localized } from "../../../../../i18n";
 import SettingsBox from "../component/settings-box/settings-box";
 import SettingsTitle from "../component/settings-title/settings-title";
-import { useGames } from "@/src/windows/launcher/context/games.context";
 
 type ContributorItem = InstanceReport["contributors"][number];
 
@@ -325,9 +325,11 @@ export default function InstanceContributorsTab({
         }}
       >
         {contributors.length === 0 ? (
-          <Typography color="text.secondary">
-            {t("instance.noContributors")}
-          </Typography>
+          <SettingsBox warn={false}>
+            <Typography color="text.secondary">
+              {t("instance.noContributors")}
+            </Typography>
+          </SettingsBox>
         ) : filteredContributors.length === 0 ? (
           <SettingsBox warn={false}>
             <Typography color="text.secondary">

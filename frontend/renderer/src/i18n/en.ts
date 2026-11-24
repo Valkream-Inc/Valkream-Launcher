@@ -176,7 +176,7 @@ const en: Messages = {
     },
     saveFailed: "Setting not saved!",
     openGame: {
-      text: "You can open Valkream's game folder.",
+      text: "You can open this game folder.",
       opened: "Game folder opened!",
       notOpened: "Game folder not opened!",
       button: "Open the game folder",
@@ -184,7 +184,7 @@ const en: Messages = {
     uninstall: {
       done: "Game uninstalled!",
       failed: "Game not uninstalled!",
-      text: "You can delete the Valkream game files.",
+      text: "You can delete this game files.",
       button: "Uninstall the game",
     },
     behavior: {
@@ -383,7 +383,8 @@ const en: Messages = {
       "tool-extract": "Preparing: installing the DepotDownloader tool…",
       login: "Signing in to Steam: waiting for the QR code to be scanned.",
       download: "Downloading the exact game version from Steam…",
-      finish: "Download finished. The files will now be checked and copied into the game.",
+      finish:
+        "Download finished. The files will now be checked and copied into the game.",
     },
     logTitle: "DepotDownloader log (in English, useful for support)",
     scan: "Scan the QR code with the Steam mobile app (Steam Guard → “Scan a QR code”). The launcher never sees your password.",

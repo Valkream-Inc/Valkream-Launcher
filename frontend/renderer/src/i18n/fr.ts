@@ -179,7 +179,7 @@ const fr: Messages = {
     },
     saveFailed: "Réglage non enregistré !",
     openGame: {
-      text: "Vous pouvez ouvrir le dossier du jeu de Valkream.",
+      text: "Vous pouvez ouvrir le dossier de ce jeu.",
       opened: "Dossier du jeu ouvert !",
       notOpened: "Dossier du jeu non ouvert !",
       button: "Ouvrir le dossier du jeu",
@@ -187,7 +187,7 @@ const fr: Messages = {
     uninstall: {
       done: "Jeu désinstallé !",
       failed: "Jeu non désinstallé !",
-      text: "Vous pouvez supprimer les fichiers de jeux Valkream.",
+      text: "Vous pouvez supprimer les fichiers de ce jeux.",
       button: "Désinstaller le jeu",
     },
     behavior: {
@@ -382,11 +382,13 @@ const fr: Messages = {
     stepCount: "Étape {{current}} / {{total}}",
     step: {
       "tool-verify": "Préparation : vérification de l'outil DepotDownloader…",
-      "tool-download": "Préparation : téléchargement de l'outil DepotDownloader…",
+      "tool-download":
+        "Préparation : téléchargement de l'outil DepotDownloader…",
       "tool-extract": "Préparation : installation de l'outil DepotDownloader…",
       login: "Connexion à Steam : en attente du scan du QR code.",
       download: "Téléchargement de la version exacte du jeu depuis Steam…",
-      finish: "Téléchargement terminé. Les fichiers vont être vérifiés puis copiés dans le jeu.",
+      finish:
+        "Téléchargement terminé. Les fichiers vont être vérifiés puis copiés dans le jeu.",
     },
     logTitle: "Journal de DepotDownloader (en anglais, utile au support)",
     scan: "Scannez le QR code avec l'application mobile Steam (Steam Guard → « Scanner un code QR »). Le launcher ne voit pas votre mot de passe.",

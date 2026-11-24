@@ -220,11 +220,13 @@ export default function InstanceSettings({
           setDevActive={setIsDevActive}
           setTab={changeTab}
         />
+        {!actionLoading && <ToggleBeta />}
         {!actionLoading && (
           <>
             <SettingsTitle warn={true} scope="global">
               {t("instance.dangerZone")}
             </SettingsTitle>
+            <GamesRootSetting />
             <ButtonUninstallGlobal />
           </>
         )}
@@ -238,8 +240,6 @@ export default function InstanceSettings({
         <SelectLanguage />
         <SelectLauncherTheme />
         <SelectLauncherBackgroundType />
-        {!actionLoading && <GamesRootSetting />}
-        {!actionLoading && <ToggleBeta />}
 
         {isAdminActive && (
           <>
@@ -266,18 +266,24 @@ export default function InstanceSettings({
         />
         <Instance_SelectLauncherBehavior {...settingProps} />
         {!actionLoading && (
+          <Instance_CustomSettings
+            {...settingProps}
+            settings={customSettings}
+            level="normal"
+            zone="normal"
+          />
+        )}
+
+        <SettingsTitle warn={true} scope="game">
+          {t("instance.dangerZone")}
+        </SettingsTitle>
+        {!actionLoading && (
           <>
-            <Instance_CustomSettings
-              {...settingProps}
-              settings={customSettings}
-              level="normal"
-              zone="normal"
+            <Instance_ButtonUninstallGame
+              id={instanceId}
+              channel={channel}
+              onDone={reload}
             />
-            {hasCustomSettings(customSettings, "normal", "danger") && (
-              <SettingsTitle warn={true} scope="game">
-                {t("instance.dangerZone")}
-              </SettingsTitle>
-            )}
             <Instance_CustomSettings
               {...settingProps}
               settings={customSettings}
@@ -333,13 +339,6 @@ export default function InstanceSettings({
         <SettingsTitle warn={true} scope="advanced">
           Dev
         </SettingsTitle>
-        {!actionLoading && (
-          <Instance_ButtonUninstallGame
-            id={instanceId}
-            channel={channel}
-            onDone={reload}
-          />
-        )}
         {!actionLoading && (
           <Instance_ButtonOpenGame id={instanceId} channel={channel} />
         )}
