@@ -140,7 +140,7 @@ const en: Messages = {
     },
     gamesRoot: {
       progress:
-        "Moving: {{done}} / {{total}} files ({{percent}}%). Do not launch a game until it is finished.",
+        "Moving: {{done}} / {{total}} ({{percent}}%). Do not launch a game until it is finished.",
       text: "Games installation folder. Changing the folder moves the games already installed (can take several minutes on another drive).",
       change: "Change",
       moving: "Moving…",

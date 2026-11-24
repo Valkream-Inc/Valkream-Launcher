@@ -146,6 +146,8 @@ export interface GamesRootInfo {
 
 export interface GamesRootMove {
   active: boolean;
+  /** Octets copiés. */
   done: number;
+  /** Octets à copier. */
   total: number;
 }

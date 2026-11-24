@@ -143,7 +143,7 @@ const fr: Messages = {
     },
     gamesRoot: {
       progress:
-        "Déplacement : {{done}} / {{total}} fichiers ({{percent}} %). Ne lancez pas de jeu avant la fin.",
+        "Déplacement : {{done}} / {{total}} ({{percent}} %). Ne lancez pas de jeu avant la fin.",
       text: "Dossier d'installation des jeux. Changer le dossier déplace les jeux déjà installés (peut durer plusieurs minutes sur un autre disque).",
       change: "Changer",
       moving: "Déplacement…",

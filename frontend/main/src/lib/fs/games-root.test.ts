@@ -84,6 +84,28 @@ describe("déplacement du dossier des jeux", () => {
     assert.equal(fs.existsSync(path.join(to, "instances", "g", "stable", "game", "a.txt")), true);
   });
 
+  it("progression en octets et ancien dossier supprimé après le déplacement", async () => {
+    const from = path.join(dir, "old");
+    const to = path.join(dir, "new");
+    seed(from);
+    fs.writeFileSync(path.join(from, "instances", "g", "stable", "game", "big.bin"), Buffer.alloc(5000));
+    const seen: number[] = [];
+    await moveGamesRoot({ fromRoot: from, toRoot: to, configFile: path.join(dir, "p.json"), onProgress: (p) => seen.push(p.done) });
+    assert.ok(fs.existsSync(path.join(to, "instances", "g", "stable", "game", "big.bin")));
+    assert.equal(fs.existsSync(from), false, "l'ancien dossier (vide) est supprimé");
+    assert.ok(seen.every((value, index) => index === 0 || value >= seen[index - 1]));
+  });
+
+  it("l'ancien dossier est conservé s'il contient autre chose que les jeux", async () => {
+    const from = path.join(dir, "old");
+    const to = path.join(dir, "new");
+    seed(from);
+    fs.writeFileSync(path.join(from, "settings.json"), "{}");
+    await moveGamesRoot({ fromRoot: from, toRoot: to, configFile: path.join(dir, "p.json") });
+    assert.equal(fs.existsSync(path.join(from, "instances")), false);
+    assert.equal(fs.existsSync(path.join(from, "settings.json")), true);
+  });
+
   it("refuse dossier imbriqué, identique, relatif ou installation en cours", async () => {
     const from = path.join(dir, "old");
     seed(from);

@@ -21,7 +21,9 @@ export const INSTANCES_DIR = "instances";
 /** Déplacement en cours (état du processus : lancement / installation interdits pendant ce temps). */
 export interface MoveProgress {
   active: boolean;
+  /** Octets copiés. */
   done: number;
+  /** Octets à copier. */
   total: number;
 }
 let moveProgress: MoveProgress = { active: false, done: 0, total: 0 };
@@ -33,14 +35,20 @@ const MOVING_SUFFIX = ".moving";
 interface PathsFile {
   gamesRoot?: string;
   confirmed?: boolean;
+  /** Anciens dossiers de jeux dont la suppression a échoué (retentée au démarrage). */
+  pendingRemoval?: string[];
 }
 
 const readPaths = (configFile: string): PathsFile => {
   try {
-    const raw = JSON.parse(fs.readFileSync(configFile, "utf8")) as { gamesRoot?: unknown; confirmed?: unknown };
+    const raw = JSON.parse(fs.readFileSync(configFile, "utf8")) as { gamesRoot?: unknown; confirmed?: unknown; pendingRemoval?: unknown };
+    const pending = Array.isArray(raw.pendingRemoval)
+      ? raw.pendingRemoval.filter((item): item is string => typeof item === "string" && path.isAbsolute(item))
+      : [];
     return {
       gamesRoot: typeof raw.gamesRoot === "string" && path.isAbsolute(raw.gamesRoot) ? raw.gamesRoot : undefined,
       confirmed: raw.confirmed === true,
+      ...(pending.length > 0 ? { pendingRemoval: pending } : {}),
     };
   } catch {
     return {};
@@ -57,8 +65,10 @@ const savePaths = (configFile: string, paths: PathsFile): void => {
 export const readGamesRoot = (configFile: string): string | undefined => readPaths(configFile).gamesRoot;
 
 /** Écriture atomique ; `undefined` = retour au dossier par défaut. Un choix explicite vaut validation. */
-export const writeGamesRoot = (configFile: string, gamesRoot: string | undefined): void =>
-  savePaths(configFile, { ...(gamesRoot ? { gamesRoot } : {}), confirmed: true });
+export const writeGamesRoot = (configFile: string, gamesRoot: string | undefined): void => {
+  const { pendingRemoval } = readPaths(configFile);
+  savePaths(configFile, { ...(gamesRoot ? { gamesRoot } : {}), confirmed: true, ...(pendingRemoval ? { pendingRemoval } : {}) });
+};
 
 /** Le joueur garde le dossier actuel (par défaut ou déjà choisi) : on ne le lui redemandera plus. */
 export const confirmGamesRoot = (configFile: string): void =>
@@ -113,32 +123,42 @@ export interface MoveOptions {
   isBusy?: () => boolean;
   /** Valeur enregistrée dans la config (`undefined` : retour au défaut). */
   record?: string | undefined;
-  /** Progression (fichiers copiés / total) ; appelée à chaque changement d'état. */
+  /** Progression en octets (copiés / total) ; appelée à chaque changement d'état. */
   onProgress?: (progress: MoveProgress) => void;
 }
 
-const countFiles = async (dir: string): Promise<number> => {
-  let count = 0;
+/** Taille totale (octets) d'un dossier : sert de base à la progression de la copie. */
+const folderBytes = async (dir: string): Promise<number> => {
+  let bytes = 0;
   for (const entry of await fs.promises.readdir(dir, { withFileTypes: true })) {
-    count += entry.isDirectory() ? await countFiles(path.join(dir, entry.name)) : 1;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) bytes += await folderBytes(full);
+    else if (!entry.isSymbolicLink()) bytes += (await fs.promises.stat(full)).size;
   }
-  return count;
+  return bytes;
 };
 
-/** Copie récursive fichier par fichier (progression), liens symboliques conservés. */
-const copyTree = async (from: string, to: string, onFile: () => void): Promise<void> => {
+/** Copie d'un fichier par flux : la progression avance aussi pendant les gros fichiers (plusieurs Go). */
+const copyFileWithProgress = (from: string, to: string, onBytes: (bytes: number) => void): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const input = fs.createReadStream(from);
+    const output = fs.createWriteStream(to);
+    input.on("data", (chunk) => onBytes(chunk.length));
+    input.once("error", reject);
+    output.once("error", reject);
+    output.once("close", () => resolve());
+    input.pipe(output);
+  });
+
+/** Copie récursive (progression en octets), liens symboliques conservés. */
+const copyTree = async (from: string, to: string, onBytes: (bytes: number) => void): Promise<void> => {
   await fs.promises.mkdir(to, { recursive: true });
   for (const entry of await fs.promises.readdir(from, { withFileTypes: true })) {
     const source = path.join(from, entry.name);
     const target = path.join(to, entry.name);
-    if (entry.isDirectory()) await copyTree(source, target, onFile);
-    else if (entry.isSymbolicLink()) {
-      await fs.promises.symlink(await fs.promises.readlink(source), target);
-      onFile();
-    } else {
-      await fs.promises.copyFile(source, target);
-      onFile();
-    }
+    if (entry.isDirectory()) await copyTree(source, target, onBytes);
+    else if (entry.isSymbolicLink()) await fs.promises.symlink(await fs.promises.readlink(source), target);
+    else await copyFileWithProgress(source, target, onBytes);
   }
 };
 
@@ -181,6 +201,7 @@ const moveGamesRootNow = async (
   if (!fs.existsSync(source)) {
     // Rien à déplacer (aucun jeu installé, ou jeux déjà présents dans la destination) : seule la config change
     writeGamesRoot(configFile, record ?? to);
+    removeOldRoot(from, configFile);
     return;
   }
 
@@ -192,22 +213,53 @@ const moveGamesRootNow = async (
     if (!["EXDEV", "EPERM", "EBUSY", "EACCES"].includes((error as NodeJS.ErrnoException).code ?? "")) throw error;
     // Copie complète : copie complète à côté, puis bascule par rename (jamais de dossier à moitié rempli en place)
     try {
-      const total = await countFiles(source);
+      const total = await folderBytes(source);
       let done = 0;
       publish({ active: true, done, total });
-      await copyTree(source, moving, () => publish({ active: true, done: ++done, total }));
+      await copyTree(source, moving, (bytes) => publish({ active: true, done: (done += bytes), total }));
       fs.renameSync(moving, target);
     } catch (copyError) {
       fs.rmSync(moving, { recursive: true, force: true });
       throw copyError;
     }
     writeGamesRoot(configFile, record ?? to);
-    try {
-      fs.rmSync(source, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-    } catch {
-      // Déplacement réussi : un reste impossible à supprimer (verrou) n'est pas une erreur
-    }
+    removeOldRoot(from, configFile);
     return;
   }
   writeGamesRoot(configFile, record ?? to);
+  removeOldRoot(from, configFile);
+};
+
+/**
+ * Ancien emplacement après un déplacement réussi : `instances/` de l'ancien dossier supprimé, puis le dossier
+ * lui-même s'il est vide (jamais un dossier qui contient autre chose). Un reste verrouillé (antivirus, fichier
+ * ouvert) n'est pas une erreur : il est retenté au prochain démarrage (`cleanupPendingRemovals`).
+ */
+const removeOldRoot = (root: string, configFile: string): void => {
+  try {
+    fs.rmSync(path.join(root, INSTANCES_DIR), { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    if (fs.existsSync(root) && isEmptyDir(root)) fs.rmdirSync(root);
+  } catch {
+    const paths = readPaths(configFile);
+    savePaths(configFile, { ...paths, pendingRemoval: [...new Set([...(paths.pendingRemoval ?? []), root])] });
+  }
+};
+
+/** Retente la suppression des anciens dossiers de jeux restés verrouillés lors d'un déplacement. */
+export const cleanupPendingRemovals = (configFile: string): void => {
+  const paths = readPaths(configFile);
+  if (!paths.pendingRemoval?.length) return;
+  const current = paths.gamesRoot ? path.resolve(paths.gamesRoot) : undefined;
+  const stillPending: string[] = [];
+  for (const root of paths.pendingRemoval) {
+    // Jamais le dossier actuellement utilisé (le joueur a pu revenir dessus entre-temps)
+    if (current !== undefined && (path.resolve(root) === current || isPathInside(root, current))) continue;
+    try {
+      fs.rmSync(path.join(root, INSTANCES_DIR), { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+      if (fs.existsSync(root) && isEmptyDir(root)) fs.rmdirSync(root);
+    } catch {
+      stillPending.push(root);
+    }
+  }
+  savePaths(configFile, { ...readPaths(configFile), pendingRemoval: stillPending });
 };

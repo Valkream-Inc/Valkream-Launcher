@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Box, Button, LinearProgress, Typography } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 
+import { formatBytes } from "../../../../../../i18n/format-bytes";
 import { useGames } from "../../../../context/games.context";
 import SettingsBox from "../../component/settings-box/settings-box";
 import { useTranslation } from "react-i18next";
@@ -65,7 +66,7 @@ function GamesRootSetting() {
             value={percent}
           />
           <Typography variant="caption">
-            {t("settings.gamesRoot.progress", { percent, done: gamesRootMove.done, total: gamesRootMove.total })}
+            {t("settings.gamesRoot.progress", { percent, done: formatBytes(gamesRootMove.done), total: formatBytes(gamesRootMove.total) })}
           </Typography>
         </Box>
       )}

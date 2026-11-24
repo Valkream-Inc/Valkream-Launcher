@@ -12,7 +12,7 @@ import { isDev } from "./src/core/constants.js";
 import path from "path";
 import DirsManager from "./src/core/dirs.js";
 import LauncherManager from "./src/core/launcher.js";
-import { cleanupInterruptedMove, INSTANCES_DIR } from "./src/lib/fs/games-root.js";
+import { cleanupInterruptedMove, cleanupPendingRemovals, INSTANCES_DIR } from "./src/lib/fs/games-root.js";
 import { applyLauncherVersion } from "./src/lib/settings/launcher-version.js";
 import { syncUninstallPaths, UNINSTALL_PATHS_FILE } from "./src/lib/fs/uninstall-paths.js";
 import { abortAllSyncs } from "./src/ipc/sync-registry.js";
@@ -30,6 +30,7 @@ else {
     // Dossier des jeux : restes d'un déplacement interrompu, puis nettoyage si le launcher change de version majeure
     try {
       cleanupInterruptedMove(DirsManager.gamesRoot());
+      cleanupPendingRemovals(DirsManager.pathsFile()); // anciens dossiers de jeux restés verrouillés après un déplacement
       if (!isDev) {
         // Liste des dossiers de jeux hors dossier par défaut, pour la désinstallation complète
         syncUninstallPaths({
