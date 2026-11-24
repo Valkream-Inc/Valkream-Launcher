@@ -373,6 +373,7 @@ const en: Messages = {
     dialogTitle: "The game cannot be used as is",
     pick: "Locate the installation",
     depot: "Download the right version (QR)",
+    depotOnly: "Download with DepotDownloader (QR)",
     cancelDepot: "Cancel the download",
     retry: "I installed the right version: retry",
     stepCount: "Step {{current}} / {{total}}",

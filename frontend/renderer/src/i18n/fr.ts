@@ -376,6 +376,7 @@ const fr: Messages = {
     dialogTitle: "Le jeu n'est pas utilisable tel quel",
     pick: "Localiser l'installation",
     depot: "Télécharger la bonne version (QR)",
+    depotOnly: "Télécharger avec DepotDownloader (QR)",
     cancelDepot: "Annuler le téléchargement",
     retry: "J'ai installé la bonne version : réessayer",
     stepCount: "Étape {{current}} / {{total}}",

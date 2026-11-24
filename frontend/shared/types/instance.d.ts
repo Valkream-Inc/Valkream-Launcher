@@ -87,6 +87,7 @@ export type EntryType =
   | "hash_url"
   | "thunderstore_modpack_url"
   | "steam_library"
+  | "depot_steam"
   | "nexus_modpack_url";
 
 /**
@@ -157,11 +158,11 @@ export interface RawReleaseEntry {
   zip?: RawOption<string>;
   /** `zip_url` et `hash_url` (avec `zip`) : dossier de l'archive à extraire. */
   folder_in_zip?: RawOption<string>;
-  /** `steam_library` : `buildid` Steam attendu (affiché si la version installée par le joueur est différente). */
+  /** `steam_library` et `depot_steam` : `buildid` Steam attendu (affiché si la version installée par le joueur est différente). */
   buildid?: RawOption<string | number>;
-  /** `steam_library` : branche bêta Steam à choisir (affichée dans le mode d'emploi). */
+  /** `steam_library` et `depot_steam` : branche bêta Steam à choisir (affichée dans le mode d'emploi). */
   "steam-beta"?: RawOption<string>;
-  /** `steam_library` : depot + manifeste pour télécharger la version exacte avec DepotDownloader. */
+  /** `steam_library` (facultatif : solution de secours) et `depot_steam` (obligatoire) : depot + manifeste pour télécharger la version exacte avec DepotDownloader. */
   depot?: RawOption<DepotOptions>;
   /** `thunderstore_modpack_url` et `nexus_modpack_url` : domaine de l'API. */
   "api-url"?: RawOption<string>;
@@ -365,6 +366,8 @@ export interface SteamSourceIssue {
   guide: string;
   /** DepotDownloader est possible (l'entrée déclare `depot`). */
   depotAvailable: boolean;
+  /** Entrée `depot_steam` : DepotDownloader est la seule source (ni bibliothèque Steam, ni dossier à indiquer). */
+  depotOnly: boolean;
 }
 
 export interface DepotInfo {

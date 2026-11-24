@@ -76,6 +76,8 @@ export interface GuideInput {
   files?: string[];
   chosenFolder?: boolean;
   depotAvailable: boolean;
+  /** Entrée `depot_steam` : DepotDownloader est la seule source. */
+  depotOnly?: boolean;
   /** Langue du mode d'emploi (défaut : français). */
   language?: GuideLanguage;
 }
@@ -104,6 +106,12 @@ const TEXT = {
     s2: "### Solution 2 — indiquer le dossier d'une installation",
     s2text:
       "Si le jeu est installé ailleurs (autre disque, copie, version non Steam…), choisissez son dossier. Seuls les fichiers attendus sont copiés, après vérification : les fichiers en plus (BepInEx, mods, sauvegardes) sont ignorés et jamais modifiés.",
+    depotTitle: (entry: string) => `## Téléchargement du jeu requis pour « ${entry} »`,
+    depotOnly:
+      "Cette instance utilise une version précise du jeu, téléchargée depuis Steam avec l'outil open source DepotDownloader : votre bibliothèque Steam n'est pas utilisée. Le jeu doit appartenir à votre compte.",
+    depotOnlyWhy: (build: string) => `Le jeu n'est pas encore téléchargé ou ne correspond pas à la version attendue${build}.`,
+    depotOnlyHow:
+      "Cliquez sur **Télécharger avec DepotDownloader** : vous vous connectez en **scannant un QR code** avec l'application mobile Steam (le launcher ne voit jamais votre mot de passe).",
     s3: "### Solution 3 — télécharger la version exacte (DepotDownloader)",
     s3text:
       "Le launcher peut télécharger cette version directement depuis Steam avec l'outil open source DepotDownloader. Vous vous connectez en **scannant un QR code** avec l'application mobile Steam : le launcher ne voit jamais votre mot de passe. Le jeu doit appartenir à votre compte.",
@@ -130,6 +138,12 @@ const TEXT = {
     s2: "### Solution 2 — point to an existing installation",
     s2text:
       "If the game is installed elsewhere (another drive, a copy, a non-Steam version…), choose its folder. Only the expected files are copied, after verification: extra files (BepInEx, mods, saves) are ignored and never modified.",
+    depotTitle: (entry: string) => `## Game download required for “${entry}”`,
+    depotOnly:
+      "This instance uses a specific game version, downloaded from Steam with the open source tool DepotDownloader: your Steam library is not used. The game must belong to your account.",
+    depotOnlyWhy: (build: string) => `The game is not downloaded yet or does not match the expected version${build}.`,
+    depotOnlyHow:
+      "Click **Download with DepotDownloader**: you sign in by **scanning a QR code** with the Steam mobile app (the launcher never sees your password).",
     s3: "### Solution 3 — download the exact version (DepotDownloader)",
     s3text:
       "The launcher can download this version straight from Steam with the open source tool DepotDownloader. You sign in by **scanning a QR code** with the Steam mobile app: the launcher never sees your password. The game must belong to your account.",
@@ -141,6 +155,19 @@ export const buildSteamGuide = (input: GuideInput): string => {
   const { issue, appId, branch, expectedBuild, installedBuild, files = [], chosenFolder, depotAvailable } = input;
   const text = TEXT[input.language ?? "fr"];
   const lines: string[] = [];
+
+  if (input.depotOnly) {
+    lines.push(
+      text.depotTitle(input.entry),
+      "",
+      text.depotOnly,
+      "",
+      text.depotOnlyWhy(expectedBuild !== undefined ? text.build(expectedBuild, undefined) : ""),
+      "",
+      text.depotOnlyHow,
+    );
+    return lines.join("\n");
+  }
 
   lines.push(issue === "missing" ? text.missingTitle(input.entry) : text.versionTitle(input.entry), "");
   lines.push(
@@ -171,4 +198,5 @@ export const toSteamSourceIssue = (error: GameSourceError, input: Omit<GuideInpu
   issue: error.issue,
   guide: buildSteamGuide({ ...input, issue: error.issue, ...error.details }),
   depotAvailable: input.depotAvailable,
+  depotOnly: input.depotOnly === true,
 });

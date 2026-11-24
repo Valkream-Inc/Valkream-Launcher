@@ -198,7 +198,7 @@ const InstanceIpcHandlers = (): void => {
     const { config, locations } = resolve(id, channel);
     const { release } = await getInstanceInspector().load(id, channel);
     const entry = [...Object.values(release?.["game-base"] ?? {}), ...Object.values(release?.["game-details"] ?? {})].find(
-      (item) => item.type === "steam_library" && item.depot !== undefined
+      (item) => (item.type === "steam_library" || item.type === "depot_steam") && item.depot !== undefined
     );
     if (!entry?.depot || config.steamAppId === undefined) throw new LocalizedError("err.noDepot");
 

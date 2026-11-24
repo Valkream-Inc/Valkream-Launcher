@@ -599,6 +599,41 @@ describe("InstanceInstaller", () => {
       assert.match(result.failed[0]?.steamIssue?.guide ?? "", /DepotDownloader/);
     });
 
+    describe("depot_steam : DepotDownloader est la seule source", () => {
+      const depotRemote = () => {
+        const remote = steamRemote(false);
+        const base = remote["/stable.yml"]["game-base"].base;
+        base.type = "depot_steam";
+        (base as Record<string, unknown>).depot = { id: 7, manifest: "123456789" };
+        return remote;
+      };
+
+      it("ignore la bibliothèque Steam du joueur, même avec la bonne version", async () => {
+        const { result } = await run({ "valheim.exe": "EXE-v1", "data/a.dat": "A", "mod.cfg": "OURS" }, depotRemote());
+        assert.equal(result.installed.length, 0);
+        const issue = result.failed[0]?.steamIssue;
+        assert.equal(issue?.depotOnly, true);
+        assert.equal(issue?.depotAvailable, true);
+        assert.match(result.failed[0]?.error ?? "", /DepotDownloader/);
+        assert.match(issue?.guide ?? "", /votre bibliothèque Steam n'est pas utilisée/);
+        assert.doesNotMatch(issue?.guide ?? "", /Solution 1/);
+      });
+
+      it("jeu téléchargé par DepotDownloader (dossier source) : copié et vérifié", async () => {
+        const depotGame = path.join(dir("stable"), ".depot", "game");
+        fs.rmSync(depotGame, { recursive: true, force: true });
+        for (const [file, content] of Object.entries({ "valheim.exe": "EXE-v1", "data/a.dat": "A", "mod.cfg": "OURS" })) {
+          fs.mkdirSync(path.dirname(path.join(depotGame, file)), { recursive: true });
+          fs.writeFileSync(path.join(depotGame, file), content);
+        }
+        writeGameSourceDir(dir("stable"), depotGame);
+        const { result } = await run(null, depotRemote());
+        assert.deepEqual(result.failed, []);
+        assert.equal(read("stable", "game/valheim.exe"), "EXE-v1");
+        assert.ok(!fs.existsSync(path.join(dir("stable"), ".depot")), "le téléchargement est supprimé après la copie");
+      });
+    });
+
     it("dossier choisi par le joueur : prioritaire sur Steam, fichiers parasites ignorés", async () => {
       const chosen = path.join(root, "chosen-game");
       fs.rmSync(chosen, { recursive: true, force: true });

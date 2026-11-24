@@ -107,6 +107,19 @@ game-base:
 
 Le `steamAppId` vient de la config main. Les fichiers du manifeste sont copiés depuis le dossier du jeu dans la bibliothèque Steam du joueur (retrouvé via `libraryfolders.vdf` et `appmanifest_<id>.acf`, sous Windows via le registre) ; chaque fichier est vérifié par son hash et le dossier Steam n'est **jamais modifié**. Sans `hash-folder`, un fichier absent ou d'une autre version fait échouer l'entrée avec un message explicite (build installé / attendu, fichiers en cause, et la marche à suivre : Propriétés → Bêtas dans Steam). Ne mettez dans le manifeste que les fichiers du jeu ; vos mods et configs passent par les autres entrées (`zip_url`, Thunderstore). `content` accepte les mêmes formes que `hash_url` (`key`, `local:`). Le rapport vérifie l'entrée comme un `hash_url`.
 
+### Provider `depot_steam` : toujours DepotDownloader
+
+Même entrée que `steam_library` (manifeste de hash, `buildid`, `steam-beta`, `hash-folder` facultatif), avec `depot` **obligatoire** (par plateforme si besoin). Différence : la bibliothèque Steam du joueur n'est **jamais** consultée, le jeu vient toujours de DepotDownloader (`<installation>/.depot/game`, version exacte du depot et du manifeste déclarés). C'est utile quand la version voulue n'existe pas dans Steam (canal alpha, ancienne version) ou pour ne pas dépendre de ce que le joueur a installé.
+
+```yaml
+valheim:
+  type: depot_steam
+  content: /games/Valheim-Valkream-v2/hash/alpha-game.json
+  depot: { id: 892971, manifest: "5099988776655443322" }
+```
+
+À la première synchronisation (jeu pas encore téléchargé), l'installation s'arrête sur un dialogue qui ne propose que **Télécharger avec DepotDownloader** (pas de mode d'emploi Steam ni de choix de dossier). Une fois le jeu téléchargé, la synchronisation reprend seule : chaque fichier est copié et vérifié par son hash, puis `.depot` est supprimé. Le `steamAppId` et la pin de l'outil (`yarn depot:pin <tag>`) restent nécessaires.
+
 ### Jeu absent ou autre version : trois solutions proposées au joueur
 
 Quand `steam_library` échoue (jeu introuvable ou fichiers d'une autre version), la synchronisation renvoie un `steamIssue` et l'interface ouvre un dialogue :

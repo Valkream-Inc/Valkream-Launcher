@@ -17,6 +17,9 @@
  * (autre version du jeu) est refusé ; un fichier absent de Steam est pris dans `hash-folder` s'il
  * est déclaré (nos propres fichiers). Si la version ne correspond pas : erreur explicite avec les
  * `buildid` installé / attendu.
+ *
+ * `depot_steam` : comme `steam_library`, mais la bibliothèque Steam du joueur n'est jamais consultée : le jeu
+ * vient toujours de DepotDownloader (`<installation>/.depot/game`, version exacte du depot déclaré).
  */
 
 import fs from "fs";
@@ -56,7 +59,7 @@ const extractFromZip = async (
   return extractDir;
 };
 
-const createHashProvider = (source: "remote" | "steam"): Provider => async (context) => {
+const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => async (context) => {
   const { entry, entryDir, tempDir, plan, platform, resolver, io, hashes, name, signal, beforeCommit } = context;
 
   const content = entry.content;
@@ -73,9 +76,9 @@ const createHashProvider = (source: "remote" | "steam"): Provider => async (cont
 
   const folderLink = entry["hash-folder"];
   const baseUrl = folderLink !== undefined ? String(folderLink).replace(/\/*$/, "/") : undefined;
-  const steamGame = source === "steam" ? await context.steam() : null;
-  if (source === "steam" && !steamGame) {
-    throw new GameSourceError("err.steamMissing", { name }, "missing", {
+  const steamGame = source !== "remote" ? await context.steam() : null;
+  if (source !== "remote" && !steamGame) {
+    throw new GameSourceError(source === "depot" ? "err.depotRequired" : "err.steamMissing", { name }, "missing", {
       expectedBuild: entry.buildid,
     });
   }
@@ -195,3 +198,5 @@ const createHashProvider = (source: "remote" | "steam"): Provider => async (cont
 
 export const hashProvider: Provider = createHashProvider("remote");
 export const steamLibraryProvider: Provider = createHashProvider("steam");
+/** `depot_steam` : même vérification que `steam_library`, mais le jeu vient uniquement de DepotDownloader. */
+export const depotSteamProvider: Provider = createHashProvider("depot");

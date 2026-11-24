@@ -49,7 +49,7 @@ import {
 import { loadEntryContent } from "./files/local-content.js";
 import { planEntryUpdate } from "./files/preserve.js";
 import { ArchiveCache } from "./providers/archive-cache.js";
-import { hashProvider, steamLibraryProvider } from "./providers/hash.js";
+import { depotSteamProvider, hashProvider, steamLibraryProvider } from "./providers/hash.js";
 import {
   thunderstoreProvider,
   thunderstoreUninstall,
@@ -63,6 +63,7 @@ const DEFAULT_PROVIDERS: Record<string, Provider> = {
   zip_url: zipProvider,
   hash_url: hashProvider,
   steam_library: steamLibraryProvider,
+  depot_steam: depotSteamProvider,
   thunderstore_modpack_url: thunderstoreProvider,
   nexus_modpack_url: nexusProvider,
 };
@@ -410,6 +411,8 @@ export class InstanceInstaller {
               // Dossier indiqué par le joueur (ou téléchargé par DepotDownloader) : prioritaire.
               const chosen = readGameSourceDir(installDir);
               if (chosen) return { dir: chosen, buildId: "", chosen: true };
+              // depot_steam : jamais la bibliothèque Steam, seulement le jeu téléchargé par DepotDownloader.
+              if (item.entry.type === "depot_steam") return null;
               return loaded.config.steamAppId === undefined
                 ? null
                 : (this.options.steamLocator ?? locateSteamGame)(
@@ -468,6 +471,7 @@ export class InstanceInstaller {
                   depotAvailable:
                     item.entry.depot !== undefined &&
                     loaded.config.steamAppId !== undefined,
+                  depotOnly: item.entry.type === "depot_steam",
                   language: lang,
                 })
               : undefined;

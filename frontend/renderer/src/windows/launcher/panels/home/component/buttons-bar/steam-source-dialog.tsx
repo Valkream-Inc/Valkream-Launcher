@@ -222,12 +222,14 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={pickFolder} disabled={depotRunning}>
-          {t("steam.pick")}
-        </Button>
+        {!issue?.depotOnly && (
+          <Button onClick={pickFolder} disabled={depotRunning}>
+            {t("steam.pick")}
+          </Button>
+        )}
         {issue?.depotAvailable && (
           <Button onClick={depotRunning ? cancelDepot : askDepot} color={depotRunning ? "error" : "primary"}>
-            {depotRunning ? t("steam.cancelDepot") : t("steam.depot")}
+            {depotRunning ? t("steam.cancelDepot") : t(issue.depotOnly ? "steam.depotOnly" : "steam.depot")}
           </Button>
         )}
         <Button onClick={onRetry} disabled={depotRunning}>

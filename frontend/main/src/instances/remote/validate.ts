@@ -37,11 +37,14 @@ const ENTRY_TYPES = [
   "hash_url",
   "thunderstore_modpack_url",
   "steam_library",
+  "depot_steam",
   "nexus_modpack_url",
 ];
 
 /** Types dont `content` est un manifeste de hash (`{ fichier: sha256 }`). */
-const isHashType = (type: string): boolean => type === "hash_url" || type === "steam_library";
+const isHashType = (type: string): boolean => type === "hash_url" || type === "steam_library" || type === "depot_steam";
+/** Types dont le jeu est un manifeste de hash fourni par Steam (et non hébergé). */
+const isSteamType = (type: string): boolean => type === "steam_library" || type === "depot_steam";
 const RELEASE_ROOT_KEYS = ["version", "buildDate", ...TIERS];
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -188,7 +191,7 @@ const checkContentValue = (
 ): string[] => {
   if (typeof content === "string" && isLocalContent(content)) {
     if (!isHashType(type) && !isModpackType(type)) {
-      return [`${where} : local: réservé à hash_url, steam_library, thunderstore_modpack_url et nexus_modpack_url`];
+      return [`${where} : local: réservé à hash_url, steam_library, depot_steam, thunderstore_modpack_url et nexus_modpack_url`];
     }
     return parseLocalContent(content) ? [] : [`${where} : local:<entrée>/<fichier> attendu (chemin relatif sûr) : ${content}`];
   }
@@ -308,32 +311,36 @@ const checkEntry = (entry: unknown, where: string): string[] => {
   // `steam_library` : `hash-folder` est facultatif (fichiers à nous absents de Steam : config, mods…)
   if (type === "hash_url" && !isFetchableLink(entry["hash-folder"])) {
     errors.push(`${where}.hash-folder : URL de base des fichiers requise`);
-  } else if (type === "steam_library" && entry["hash-folder"] !== undefined && !isFetchableLink(entry["hash-folder"])) {
+  } else if (isSteamType(type) && entry["hash-folder"] !== undefined && !isFetchableLink(entry["hash-folder"])) {
     errors.push(`${where}.hash-folder : URL de base des fichiers attendue`);
   }
 
   if (entry.buildid !== undefined && !isDataLink(entry.buildid)) {
-    if (type !== "steam_library") errors.push(`${where}.buildid : réservé à steam_library`);
+    if (!isSteamType(type)) errors.push(`${where}.buildid : réservé à steam_library et depot_steam`);
     else if (typeof entry.buildid !== "string" && typeof entry.buildid !== "number") errors.push(`${where}.buildid : numéro de build attendu`);
   }
 
-  if (entry["steam-beta"] !== undefined && type !== "steam_library") {
-    errors.push(`${where}.steam-beta : réservé à steam_library`);
+  if (entry["steam-beta"] !== undefined && !isSteamType(type)) {
+    errors.push(`${where}.steam-beta : réservé à steam_library et depot_steam`);
   } else if (entry["steam-beta"] !== undefined && !isNonEmptyString(entry["steam-beta"])) {
     errors.push(`${where}.steam-beta : nom de branche attendu`);
   }
 
   if (entry.depot !== undefined) {
     const depot = entry.depot;
-    if (type !== "steam_library") errors.push(`${where}.depot : réservé à steam_library`);
+    if (!isSteamType(type)) errors.push(`${where}.depot : réservé à steam_library et depot_steam`);
     else if (!isObject(depot) || !/^\d{1,20}$/.test(String(depot.id)) || !/^\d{1,20}$/.test(String(depot.manifest))) {
       errors.push(`${where}.depot : { id, manifest } numériques attendus`);
     }
   }
 
+  if (type === "depot_steam" && entry.depot === undefined) {
+    errors.push(`${where}.depot : requis pour depot_steam (le jeu est toujours téléchargé avec DepotDownloader)`);
+  }
+
   if (entry.key !== undefined && !isDataLink(entry.key)) {
     if (!isHashType(type) && !isModpackType(type)) {
-      errors.push(`${where}.key : réservé à hash_url, steam_library, thunderstore_modpack_url et nexus_modpack_url`);
+      errors.push(`${where}.key : réservé à hash_url, steam_library, depot_steam, thunderstore_modpack_url et nexus_modpack_url`);
     } else if (typeof entry.key !== "string" || !isValidKey(entry.key)) {
       errors.push(`${where}.key : chemin pointé attendu (ex : dependencies.mods, ou « . »)`);
     }

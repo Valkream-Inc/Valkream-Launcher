@@ -94,7 +94,7 @@ content:
 
 Une entrée sans valeur pour la plateforme du joueur est simplement **ignorée** (pas d'erreur).
 
-Pour `steam_library`, `buildid`, `steam-beta` et `depot` se déclinent aussi par plateforme (le depot Steam d'un jeu n'est pas
+Pour `steam_library` et `depot_steam`, `buildid`, `steam-beta` et `depot` se déclinent aussi par plateforme (le depot Steam d'un jeu n'est pas
 le même sous Windows et Linux). Sans `depot` pour la plateforme du joueur, la solution DepotDownloader n'est pas proposée :
 
 ```yaml
@@ -118,12 +118,14 @@ valheim:
 | un dossier de fichiers **vérifié par hash** | `hash_url` | lien vers `hash.json` | réparable, mises à jour fichier par fichier ; `hash` obligatoire |
 | des mods Thunderstore | `thunderstore_modpack_url` | liste `[Auteur-Nom-Version, …]` | chaque mod a son dossier ; `api-url` pour Hexium |
 | des mods Nexus Mods | `nexus_modpack_url` | liste `jeu-idMod-idFichier` | clé API **Premium** du joueur, `.zip` seulement |
-| le jeu depuis la copie **Steam du joueur** | `steam_library` | manifeste de hash du jeu | rien n'est hébergé chez nous ; voir README « Jeux Steam » |
+| le jeu depuis la copie **Steam du joueur** | `steam_library` | manifeste de hash du jeu | rien n'est hébergé chez nous ; voir README « Jeux Steam » ; DepotDownloader en solution de secours |
+| la version **exacte** du jeu, toujours téléchargée depuis Steam | `depot_steam` | manifeste de hash du jeu | comme `steam_library`, mais la bibliothèque Steam du joueur n'est jamais utilisée ; `depot` **obligatoire** (QR code) |
 
 Arbre de décision rapide :
 
 ```
-C'est le jeu commercial (Steam) ?            → steam_library
+C'est le jeu commercial (Steam) ?            → steam_library (copie du joueur)
+                                               ou depot_steam (toujours la version exacte, via DepotDownloader)
 C'est un mod publié sur Thunderstore/Hexium ? → thunderstore_modpack_url
 C'est un mod sur Nexus Mods ?                → nexus_modpack_url
 Les fichiers doivent être réparables un par un ? → hash_url
