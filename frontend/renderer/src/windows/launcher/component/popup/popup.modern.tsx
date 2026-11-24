@@ -42,17 +42,19 @@ export default function ModernPopup({
   open,
   onClose,
   onConfirm,
+  buttons: customButtons,
+  dismissible = true,
   type = "info",
   title = "Titre du popup",
   message = "<p>Message du popup</p>",
 }: PopupProps) {
   const { color, icon } = getModernTypeConfig(type);
-  const buttons = createButtons(onClose, onConfirm);
+  const buttons = customButtons ?? createButtons(onClose, onConfirm);
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={dismissible ? onClose : undefined}
       slots={{ transition: Transition }}
       keepMounted
       maxWidth="sm"
@@ -99,6 +101,7 @@ export default function ModernPopup({
           <Button
             key={index}
             onClick={button.action}
+            disabled={button.disabled}
             sx={{
               bgcolor: button.variant === "main" ? color : "grey.800",
               color: "common.white",

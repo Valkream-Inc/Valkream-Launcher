@@ -10,18 +10,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import {
-  Alert,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  LinearProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, LinearProgress, Stack, Typography } from "@mui/material";
 import type {
   Channel,
   DepotInfo,
@@ -33,10 +22,22 @@ import type {
 import { useTranslation } from "react-i18next";
 import { ipcErrorMessage } from "../../../../../../i18n/ipc-error";
 import { isQrLine, qrModules } from "../../../../../../i18n/qr-block";
+import Popup from "../../../../component/popup/popup";
+import type { PopupButton } from "../../../../component/popup/popup.types";
 import SimpleMarkdown from "./simple-markdown";
+
+/** État du téléchargement DepotDownloader, remonté au bouton principal (le popup peut être masqué pendant ce temps). */
+export interface DepotRunState {
+  running: boolean;
+  percent: number | null;
+  step: DepotStepName | null;
+}
 
 interface Props {
   issue: SteamSourceIssue | null;
+  /** Popup affiché (le joueur peut le masquer : un téléchargement en cours continue). */
+  open: boolean;
+  onDepotState?: (state: DepotRunState) => void;
   instanceId: InstanceId;
   channel: Channel;
   onClose: () => void;
@@ -253,6 +254,8 @@ const MAX_LINES = 80;
 
 export default function SteamSourceDialog({
   issue,
+  open,
+  onDepotState,
   instanceId,
   channel,
   onClose,
@@ -278,12 +281,28 @@ export default function SteamSourceDialog({
     };
   }, []);
 
+  // Nouveau problème (nouvelle tentative qui échoue) : les messages de la tentative précédente disparaissent
+  useEffect(() => {
+    if (issue === null) return;
+    setError(null);
+  }, [issue]);
+
+  // Le bouton principal affiche la progression quand le popup est masqué
+  useEffect(() => {
+    onDepotState?.({ running: depotRunning, percent, step });
+  }, [depotRunning, percent, step]);
+
   // Auto-scroll en bas de la console de logs à chaque nouvelle ligne
   useEffect(() => {
     const el = logBoxRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
   }, [lines]);
+
+  const retry = () => {
+    setError(null);
+    onRetry();
+  };
 
   const pickFolder = async () => {
     setError(null);
@@ -303,7 +322,7 @@ export default function SteamSourceDialog({
     try {
       setInfo(await window.electron_API.getDepotInfo(instanceId, channel));
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(ipcErrorMessage(err));
     }
   };
 
@@ -372,137 +391,160 @@ export default function SteamSourceDialog({
   const cancelDepot = () =>
     window.electron_API.cancelDepotDownload(instanceId, channel);
 
-  return (
-    <Dialog
-      open={issue !== null}
-      onClose={depotRunning ? undefined : onClose}
-      maxWidth="md"
-      fullWidth
+  const content = (
+    <Box
+      sx={{
+        textAlign: "left",
+        maxHeight: "52vh",
+        overflowY: "auto",
+        pr: 1,
+        ...CLEAN_SCROLLBAR_SX,
+      }}
     >
-      <DialogTitle>{t("steam.dialogTitle")}</DialogTitle>
-      <DialogContent dividers sx={CLEAN_SCROLLBAR_SX}>
-        {issue && <SimpleMarkdown source={issue.guide} />}
-        {depotRunning && (
-          <Stack spacing={1.5} sx={{ mt: 2 }}>
-            <Alert severity="info">
-              {step
-                ? `${t("steam.stepCount", { current: STEP_NUMBER[step], total: 4 })} — ${t(`steam.step.${step}`)}`
-                : t("steam.step.tool-verify")}
+      {issue && <SimpleMarkdown source={issue.guide} />}
+      {depotRunning && (
+        <Stack spacing={1.5} sx={{ mt: 2 }}>
+          <Alert severity="info" variant="outlined" sx={{ color: "inherit" }}>
+            {step
+              ? `${t("steam.stepCount", { current: STEP_NUMBER[step], total: 4 })} — ${t(`steam.step.${step}`)}`
+              : t("steam.step.tool-verify")}
+          </Alert>
+          {(step === "login" || qrLines.length > 0) && (
+            <Alert severity="warning" variant="outlined" sx={{ color: "inherit" }}>
+              {t("steam.scan")}
             </Alert>
-            {(step === "login" || qrLines.length > 0) && (
-              <Alert severity="warning">{t("steam.scan")}</Alert>
-            )}
-            {(step === "login" || qrLines.length > 0) && (
-              <QrCode lines={qrLines} />
-            )}
-            <Typography variant="caption" color="text.secondary">
-              {t("steam.logTitle")}
-            </Typography>
-            <Box
-              ref={logBoxRef}
-              component="pre"
+          )}
+          {(step === "login" || qrLines.length > 0) && <QrCode lines={qrLines} />}
+          <Typography variant="caption" sx={{ opacity: 0.7 }}>
+            {t("steam.logTitle")}
+          </Typography>
+          <Box
+            ref={logBoxRef}
+            component="pre"
+            sx={{
+              m: 0,
+              p: 1.5,
+              maxHeight: 200,
+              overflow: "auto",
+              borderRadius: 1.5,
+              border: "1px solid rgba(128,128,128,0.4)",
+              fontFamily:
+                '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
+              fontSize: 11,
+              lineHeight: 1.4,
+              bgcolor: "rgba(0,0,0,0.25)",
+              color: "inherit",
+              ...CLEAN_SCROLLBAR_SX,
+            }}
+          >
+            {lines.join("\n")}
+          </Box>
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+            <LinearProgress
+              sx={{ flexGrow: 1, height: 8, borderRadius: 999 }}
+              variant={percent === null ? "indeterminate" : "determinate"}
+              value={percent ?? 0}
+            />
+            <Typography
+              variant="body2"
               sx={{
-                m: 0,
-                p: 1.5,
-                maxHeight: 280,
-                overflow: "auto",
-                borderRadius: 1.5,
-                border: "1px solid",
-                borderColor: "divider",
-                fontFamily:
-                  '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
-                fontSize: 11,
-                lineHeight: 1.4,
-                bgcolor: "action.hover",
-                ...CLEAN_SCROLLBAR_SX,
+                minWidth: 56,
+                textAlign: "right",
+                fontVariantNumeric: "tabular-nums",
               }}
             >
-              {lines.join("\n")}
-            </Box>
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-              <LinearProgress
-                sx={{ flexGrow: 1, height: 8, borderRadius: 999 }}
-                variant={percent === null ? "indeterminate" : "determinate"}
-                value={percent ?? 0}
-              />
-              <Typography
-                variant="body2"
-                sx={{
-                  minWidth: 56,
-                  textAlign: "right",
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
-                {percent === null
-                  ? "…"
-                  : `${percent.toFixed(percent >= 100 ? 0 : 1)} %`}
-              </Typography>
-            </Stack>
+              {percent === null
+                ? "…"
+                : `${percent.toFixed(percent >= 100 ? 0 : 1)} %`}
+            </Typography>
           </Stack>
-        )}
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-      </DialogContent>
-      <DialogActions sx={{ px: 3, py: 1.5 }}>
-        {!issue?.depotOnly && (
-          <Button onClick={pickFolder} disabled={depotRunning}>
-            {t("steam.pick")}
-          </Button>
-        )}
-        {issue?.depotAvailable && (
-          <Button
-            onClick={depotRunning ? cancelDepot : askDepot}
-            color={depotRunning ? "error" : "primary"}
-            variant={depotRunning ? "outlined" : "contained"}
-          >
-            {depotRunning
+        </Stack>
+      )}
+      {error && (
+        <Alert severity="error" variant="outlined" sx={{ mt: 2, color: "inherit" }}>
+          {error}
+        </Alert>
+      )}
+    </Box>
+  );
+
+  const buttons: PopupButton[] = [
+    ...(issue?.depotAvailable
+      ? [
+          {
+            text: depotRunning
               ? t("steam.cancelDepot")
-              : t(issue.depotOnly ? "steam.depotOnly" : "steam.depot")}
-          </Button>
-        )}
-        <Button onClick={onRetry} disabled={depotRunning}>
-          {t("steam.retry")}
-        </Button>
-        <Button onClick={onClose} disabled={depotRunning}>
-          {t("common.close")}
-        </Button>
-      </DialogActions>
-      <Dialog
+              : t(issue.depotOnly ? "steam.depotOnly" : "steam.depot"),
+            action: depotRunning ? cancelDepot : askDepot,
+            variant: "main" as const,
+          },
+        ]
+      : []),
+    ...(issue?.depotOnly
+      ? []
+      : [
+          {
+            text: t("steam.pick"),
+            action: pickFolder,
+            variant: "secondary" as const,
+            disabled: depotRunning,
+          },
+        ]),
+    {
+      text: t("steam.retry"),
+      action: retry,
+      variant: "secondary",
+      disabled: depotRunning,
+    },
+    {
+      // Pendant un téléchargement, fermer masque seulement le popup : le bouton principal le rouvre
+      text: depotRunning ? t("steam.hide") : t("common.close"),
+      action: onClose,
+      variant: "secondary",
+    },
+  ];
+
+  const infoMessage = info && (
+    <Box sx={{ textAlign: "left", maxHeight: "52vh", overflowY: "auto", ...CLEAN_SCROLLBAR_SX }}>
+      <SimpleMarkdown
+        source={[
+          t("steam.info.what"),
+          t("steam.info.source", { url: info.sourceUrl }),
+          `## ${t("steam.info.title")}`,
+          t("steam.info.step1", {
+            version: info.version || t("steam.info.notConfigured"),
+            dir: info.toolsDir,
+          }),
+          t("steam.info.step2"),
+          t("steam.info.step3", { dir: info.downloadDir }),
+          t("steam.info.step4"),
+          t("steam.info.cancel"),
+        ].join("\n")}
+      />
+    </Box>
+  );
+
+  return (
+    <>
+      <Popup
+        open={open && issue !== null}
+        onClose={onClose}
+        type={error ? "error" : "warning"}
+        title={t("steam.dialogTitle")}
+        message={content}
+        buttons={buttons}
+      />
+      <Popup
         open={info !== null}
         onClose={() => setInfo(null)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>{t("steam.infoTitle")}</DialogTitle>
-        <DialogContent dividers sx={CLEAN_SCROLLBAR_SX}>
-          {info && (
-            <SimpleMarkdown
-              source={[
-                t("steam.info.what"),
-                t("steam.info.source", { url: info.sourceUrl }),
-                `## ${t("steam.info.title")}`,
-                t("steam.info.step1", {
-                  version: info.version || t("steam.info.notConfigured"),
-                  dir: info.toolsDir,
-                }),
-                t("steam.info.step2"),
-                t("steam.info.step3", { dir: info.downloadDir }),
-                t("steam.info.step4"),
-                t("steam.info.cancel"),
-              ].join("\n")}
-            />
-          )}
-        </DialogContent>
-        <DialogActions sx={{ px: 3, py: 1.5 }}>
-          <Button onClick={() => setInfo(null)}>{t("common.cancel")}</Button>
-          <Button onClick={acceptInfo} variant="contained">
-            {t("steam.infoContinue")}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Dialog>
+        type="info"
+        title={t("steam.infoTitle")}
+        message={infoMessage}
+        buttons={[
+          { text: t("steam.infoContinue"), action: acceptInfo, variant: "main" },
+          { text: t("common.cancel"), action: () => setInfo(null), variant: "secondary" },
+        ]}
+      />
+    </>
   );
 }

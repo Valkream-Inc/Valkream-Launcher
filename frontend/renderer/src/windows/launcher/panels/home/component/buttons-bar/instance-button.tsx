@@ -10,7 +10,7 @@ import { enqueueSnackbar } from "notistack";
 import React, { useEffect, useRef, useState } from "react";
 
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
-import { Button, ButtonBase, Stack } from "@mui/material";
+import { Box, Button, ButtonBase, Stack } from "@mui/material";
 import type { InstanceSyncProgress, SteamSourceIssue } from "@shared/types";
 
 import Popup from "../../../../component/popup/popup";
@@ -22,7 +22,7 @@ import { useBackground } from "../../../../context/background.context";
 import { useGames } from "../../../../context/games.context";
 import { useInfos } from "../../../../context/infos.context";
 import type { InstanceButtonAction } from "./instance-button.types";
-import SteamSourceDialog from "./steam-source-dialog";
+import SteamSourceDialog, { type DepotRunState } from "./steam-source-dialog";
 
 /** 75 s → "1:15", 3725 s → "1:02:05". */
 const formatElapsed = (ms: number): string => {
@@ -55,6 +55,15 @@ export default function InstanceButton() {
   const [syncing, setSyncing] = useState(false);
   // Jeu Steam absent / autre version : solutions proposées au joueur
   const [steamIssue, setSteamIssue] = useState<SteamSourceIssue | null>(null);
+  // Popup Steam masquable : le téléchargement DepotDownloader continue, le bouton principal le rouvre
+  const [steamOpen, setSteamOpen] = useState(false);
+  // Échecs d'installation autres que Steam : détaillés dans un popup (jamais sur le bouton)
+  const [syncErrors, setSyncErrors] = useState<string[]>([]);
+  const [depotState, setDepotState] = useState<DepotRunState>({
+    running: false,
+    percent: null,
+    step: null,
+  });
 
   // Dernier état de progression + horloge locale : le temps écoulé avance chaque seconde,
   // même quand aucune progression n'arrive (extraction, vérification…).
@@ -85,7 +94,12 @@ export default function InstanceButton() {
       return translate(key, vars as Record<string, unknown> | undefined);
     };
 
-    const text = progress
+    // Une erreur est détaillée dans un popup / une notification, jamais en entier sur le bouton
+    const shortText = (value: string): string =>
+      value.length > 60 ? `${value.slice(0, 57)}…` : value;
+    const text = progress?.step === "error"
+      ? shortText(actionName)
+      : progress
       ? `${progress.messageKey ? translateProgress(progress.messageKey, progress.messageVars) : (progress.message ?? actionName)}${rank}`
       : actionName;
     const transfer = progress?.transfer;
@@ -120,6 +134,7 @@ export default function InstanceButton() {
     let clock: ReturnType<typeof setInterval> | undefined;
     try {
       setSyncing(true);
+      setSyncErrors([]); // les erreurs de la tentative précédente ne restent pas affichées
       syncStartedAt.current = Date.now();
       lastProgress.current = { text: actionName };
       render();
@@ -143,13 +158,10 @@ export default function InstanceButton() {
         setSteamIssue(
           result.failed.find((item) => item.steamIssue)?.steamIssue ?? null,
         );
+        setSteamOpen(true);
       } else if (result.failed.length > 0) {
-        error(
-          actionName,
-          result.failed
-            .map((item) => `${item.name} (${item.error})`)
-            .join(", "),
-        );
+        error(actionName, result.failed.map((item) => item.name).join(", "));
+        setSyncErrors(result.failed.map((item) => `${item.name} : ${item.error}`));
       } else {
         enqueueSnackbar(doneText, { variant: "success" });
       }
@@ -230,6 +242,29 @@ export default function InstanceButton() {
             text: t("button.moving", { percent }),
             playIcon: false,
             onClick: () => {},
+          });
+        }
+
+        // Téléchargement DepotDownloader en cours (popup masqué) : un clic le rouvre
+        if (depotState.running) {
+          return setAction({
+            text: t("steam.depotRunning", {
+              percent:
+                depotState.percent === null
+                  ? "…"
+                  : `${depotState.percent.toFixed(0)} %`,
+            }),
+            playIcon: false,
+            onClick: () => setSteamOpen(true),
+          });
+        }
+
+        // Jeu Steam à fournir (popup fermé) : un clic le rouvre
+        if (steamIssue !== null && !steamOpen) {
+          return setAction({
+            text: t("steam.reopen"),
+            playIcon: false,
+            onClick: () => setSteamOpen(true),
           });
         }
 
@@ -345,6 +380,10 @@ export default function InstanceButton() {
     i18n.language,
     gamesRootMove.active,
     gamesRootMove.done,
+    depotState.running,
+    depotState.percent,
+    steamIssue,
+    steamOpen,
   ]);
 
   return (
@@ -362,13 +401,30 @@ export default function InstanceButton() {
         title={t("button.welcome")}
         message={actualInstance.welcomeContent}
       />
+      <Popup
+        open={syncErrors.length > 0}
+        onClose={() => setSyncErrors([])}
+        type="error"
+        title={t("button.errorTitle")}
+        message={
+          <Box component="ul" sx={{ textAlign: "left", m: 0, pl: 2.5, maxHeight: "50vh", overflowY: "auto" }}>
+            {syncErrors.map((line, index) => (
+              <li key={index}>{line}</li>
+            ))}
+          </Box>
+        }
+      />
       <SteamSourceDialog
         issue={steamIssue}
+        open={steamOpen}
+        onDepotState={setDepotState}
         instanceId={actualInstanceId}
         channel={actualChannel}
-        onClose={() => setSteamIssue(null)}
+        onClose={() => setSteamOpen(false)}
         onRetry={() => {
+          // Source prête (ou nouvelle tentative) : popup fermé, l'installation continue sur le bouton
           setSteamIssue(null);
+          setSteamOpen(false);
           handleInstall();
         }}
       />

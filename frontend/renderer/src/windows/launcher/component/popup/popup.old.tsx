@@ -74,17 +74,19 @@ function OldPopup({
   open,
   onClose,
   onConfirm,
+  buttons: customButtons,
+  dismissible = true,
   type = "info",
   title = "Titre du popup",
   message = "Message du popup",
 }: PopupProps) {
   const { color, icon } = getOldTypeConfig(type);
-  const buttons = createButtons(onClose, onConfirm);
+  const buttons = customButtons ?? createButtons(onClose, onConfirm);
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={dismissible ? onClose : undefined}
       slots={{ transition: Transition }}
       keepMounted
       maxWidth="sm"
@@ -174,6 +176,7 @@ function OldPopup({
             <Button
               key={index}
               onClick={button.action}
+            disabled={button.disabled}
               sx={{
                 background: button.variant === "main" ? "#5c4438" : "#ccc",
                 border:

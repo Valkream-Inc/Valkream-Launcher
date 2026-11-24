@@ -334,14 +334,16 @@ function FuturisticPopup({
   title = "Titre du popup",
   message = "Message du popup",
   onConfirm,
+  buttons: customButtons,
+  dismissible = true,
 }: PopupProps) {
   const { color, icon, iconSize, titleSize } = getFuturistTypeConfig(type);
-  const buttons = createButtons(onClose, onConfirm);
+  const buttons = customButtons ?? createButtons(onClose, onConfirm);
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={dismissible ? onClose : undefined}
       slots={{ transition: Transition }}
       keepMounted
       maxWidth="sm"
@@ -413,6 +415,7 @@ function FuturisticPopup({
             <Button
               key={i}
               onClick={btn.action}
+            disabled={btn.disabled}
               sx={{
                 background: "transparent",
                 border: `2px solid ${color}`,
