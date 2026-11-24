@@ -12,9 +12,10 @@
 import fs from "fs";
 import path from "path";
 
-import type { DepotOptions } from "@shared/types";
+import type { DepotOptions, DepotStepName } from "@shared/types";
 
 import { DEPOT_DIR } from "../game-source.js";
+import { classifyDepotFailure, parseDepotStep } from "./depot-output.js";
 import { parseDepotPercent, type DepotRunner } from "./depot-runner.js";
 import { LocalizedError } from "../../../lib/errors/localized-error.js";
 
@@ -29,6 +30,8 @@ export interface DepotDownloadInput {
   signal?: AbortSignal;
   onLine?: (line: string) => void;
   onPercent?: (percent: number) => void;
+  /** Étape détectée dans la sortie de l'outil (connexion, téléchargement, fin) ; appelée à chaque changement. */
+  onStep?: (step: DepotStepName) => void;
 }
 
 const DIGITS = /^\d{1,20}$/;
@@ -59,18 +62,36 @@ export const downloadWithDepot = async (input: DepotDownloadInput): Promise<stri
   fs.mkdirSync(outDir, { recursive: true });
   const args = buildDepotArgs(input.appId, input.depot, outDir, input.os);
 
-  const code = await input.runner(input.tool, args, {
-    cwd: root,
-    signal: input.signal,
-    onLine: (line) => {
-      input.onLine?.(line);
-      const percent = parseDepotPercent(line);
-      if (percent !== undefined) input.onPercent?.(percent);
-    },
-  });
+  const recent: string[] = [];
+  let step: DepotStepName | undefined;
+  let code: number;
+  try {
+    code = await input.runner(input.tool, args, {
+      cwd: root,
+      signal: input.signal,
+      onLine: (line) => {
+        recent.push(line);
+        if (recent.length > 80) recent.shift();
+        input.onLine?.(line);
+        const next = parseDepotStep(line);
+        if (next !== undefined && next !== step) {
+          step = next;
+          input.onStep?.(next);
+        }
+        const percent = parseDepotPercent(line);
+        if (percent !== undefined) input.onPercent?.(percent);
+      },
+    });
+  } catch (error) {
+    if (input.signal?.aborted) throw new LocalizedError("err.downloadCancelled");
+    // L'outil n'a pas pu démarrer (antivirus, droits, fichier supprimé…)
+    const reason = (error as NodeJS.ErrnoException).code ?? (error instanceof Error ? error.message : String(error));
+    throw new LocalizedError("err.depotSpawn", { reason });
+  }
   if (input.signal?.aborted) throw new LocalizedError("err.downloadCancelled");
   if (code !== 0) {
-    throw new LocalizedError("err.depotFailed", { code });
+    const failure = classifyDepotFailure(recent);
+    throw new LocalizedError(failure.key, { code, detail: failure.detail });
   }
   return outDir;
 };

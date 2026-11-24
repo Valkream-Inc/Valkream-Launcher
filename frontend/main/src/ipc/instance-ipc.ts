@@ -11,7 +11,7 @@ import os from "os";
 import path from "path";
 import { BrowserWindow, dialog, ipcMain, shell } from "electron";
 
-import type { Channel, GamePlatform, InstanceSettingValue } from "@shared/types";
+import type { Channel, DepotStepName, GamePlatform, InstanceSettingValue } from "@shared/types";
 
 import instancesConfig from "../instances/instances.config.js";
 import { readInstallLog } from "../instances/install/state/install-log.js";
@@ -206,11 +206,11 @@ const InstanceIpcHandlers = (): void => {
     if (!depotAssetFor(DEPOT_DOWNLOADER_ASSETS, platformKey)) {
       throw new LocalizedError("err.depotUnavailable");
     }
-    const send = (payload: { line?: string; percent?: number }) => {
+    const send = (payload: { line?: string; percent?: number; step?: DepotStepName }) => {
       if (!event.sender.isDestroyed()) event.sender.send("instances:depot-output", { id, channel, ...payload });
     };
     return runSync(`${locations.installDir}#depot`, async (signal) => {
-      send({ line: "Préparation de DepotDownloader…" });
+      send({ step: "tool-verify" });
       const tool = await ensureDepotDownloader({
         toolsDir: path.join(DirsManager.rootPath(), "tools"),
         platformKey,
@@ -218,6 +218,7 @@ const InstanceIpcHandlers = (): void => {
         io: realInstallIO,
         signal,
         onProgress: (percent) => send({ percent }),
+        onStep: (step) => send({ step, percent: step === "tool-download" ? 0 : undefined }),
       });
       const dir = await downloadWithDepot({
         tool,
@@ -229,6 +230,7 @@ const InstanceIpcHandlers = (): void => {
         signal,
         onLine: (line) => send({ line }),
         onPercent: (percent) => send({ percent }),
+        onStep: (step) => send({ step }),
       });
       writeGameSourceDir(locations.installDir, dir);
       return dir;

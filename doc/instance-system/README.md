@@ -130,6 +130,8 @@ Quand `steam_library` échoue (jeu introuvable ou fichiers d'une autre version),
 
 Règles de sécurité appliquées : pas de mot de passe côté launcher (QR, stdin fermé, aucun `-username` / `-password`) ; `appId` pris dans la config main, `depot` / `manifest` strictement numériques, arguments en tableau (pas de shell), dossier de sortie forcé dans l'installation ; le dossier téléchargé n'est pas cru : chaque fichier est vérifié par le manifeste de hash. Un écran d'information (outil, version, emplacements, QR, vérifications) s'affiche avant la première utilisation.
 
+**Étapes et erreurs affichées dans la langue du joueur** : le dialogue indique l'étape en cours (1 outil → 2 connexion Steam / QR → 3 téléchargement → 4 vérification), détectée depuis la sortie de l'outil (`depot/depot-output.ts`, `parseDepotStep`). En cas d'échec, la cause est classée (`classifyDepotFailure` : QR expiré, connexion refusée, trop de tentatives, jeu non possédé, disque plein, réseau, lancement impossible) et traduite via `err.depot*` (`main/src/lib/errors/messages.ts`), la dernière ligne utile de l'outil étant jointe en détail. Le journal brut reste en anglais (utile au support). Les motifs de détection sont basés sur les messages usuels de DepotDownloader : une cause inconnue retombe sur `err.depotFailed` avec le détail brut.
+
 Dans tous les cas le serveur n'héberge plus que nos fichiers (zip de config, mods Thunderstore).
 
 Ce document n'est pas un avis juridique : le contrat d'abonné Steam et les conditions de l'éditeur du jeu font foi (par exemple, ne jamais partager son compte ni distribuer les fichiers téléchargés).

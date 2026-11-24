@@ -20,9 +20,11 @@ import {
   DialogTitle,
   LinearProgress,
   Stack,
+  Typography,
 } from "@mui/material";
-import type { Channel, DepotInfo, InstanceId, SteamSourceIssue } from "@shared/types";
+import type { Channel, DepotInfo, DepotStepName, InstanceId, SteamSourceIssue } from "@shared/types";
 
+import { ipcErrorMessage } from "../../../../../../i18n/ipc-error";
 import SimpleMarkdown from "./simple-markdown";
 import { useTranslation } from "react-i18next";
 
@@ -34,6 +36,16 @@ interface Props {
   /** Une source est prête : on relance l'installation. */
   onRetry: () => void;
 }
+
+/** Numéro d'étape affiché (outil, connexion, téléchargement, vérification). */
+const STEP_NUMBER: Record<DepotStepName, number> = {
+  "tool-verify": 1,
+  "tool-download": 1,
+  "tool-extract": 1,
+  login: 2,
+  download: 3,
+  finish: 4,
+};
 
 const INFO_KEY = "valkream.depot-info-accepted";
 
@@ -53,6 +65,7 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
   const [depotRunning, setDepotRunning] = useState(false);
   const [lines, setLines] = useState<string[]>([]);
   const [percent, setPercent] = useState<number | null>(null);
+  const [step, setStep] = useState<DepotStepName | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<DepotInfo | null>(null); // écran d'information (première utilisation)
   const mounted = useRef(true);
@@ -71,7 +84,7 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
       const folder = await window.electron_API.pickInstanceSource(instanceId, channel);
       if (folder) onRetry();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(ipcErrorMessage(err));
     }
   };
 
@@ -99,10 +112,15 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
     setError(null);
     setLines([]);
     setPercent(null);
+    setStep(null);
     setDepotRunning(true);
     window.electron_API.onDepotOutput((data) => {
       if (data.id !== instanceId || data.channel !== channel || !mounted.current) return;
       if (data.line !== undefined) setLines((previous) => [...previous, data.line as string].slice(-MAX_LINES));
+      if (data.step !== undefined) {
+        setStep(data.step);
+        setPercent(null); // chaque étape repart de zéro (le pourcentage de l'outil n'est pas celui du jeu)
+      }
       if (data.percent !== undefined) setPercent(data.percent);
     });
     try {
@@ -126,8 +144,14 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
         {depotRunning && (
           <Stack spacing={1} sx={{ mt: 2 }}>
             <Alert severity="info">
-              {t("steam.scan")}
+              {step
+                ? `${t("steam.stepCount", { current: STEP_NUMBER[step], total: 4 })} — ${t(`steam.step.${step}`)}`
+                : t("steam.step.tool-verify")}
             </Alert>
+            {step === "login" && <Alert severity="warning">{t("steam.scan")}</Alert>}
+            <Typography variant="caption" color="text.secondary">
+              {t("steam.logTitle")}
+            </Typography>
             <Box
               component="pre"
               sx={{ m: 0, p: 1, maxHeight: 360, overflow: "auto", fontFamily: "monospace", fontSize: 10, lineHeight: 1, bgcolor: "action.hover" }}

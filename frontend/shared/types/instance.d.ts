@@ -375,11 +375,23 @@ export interface DepotInfo {
   sourceUrl: string;
 }
 
+/** Étapes affichées pendant « Télécharger la bonne version » (dans l'ordre). */
+export type DepotStepName =
+  | "tool-download"
+  | "tool-verify"
+  | "tool-extract"
+  | "login"
+  | "download"
+  | "finish";
+
 export interface DepotOutput {
   id: InstanceId;
   channel: Channel;
+  /** Ligne brute de DepotDownloader (anglais, QR code compris). */
   line?: string;
   percent?: number;
+  /** Étape en cours : l'interface affiche le texte traduit correspondant. */
+  step?: DepotStepName;
 }
 
 export interface DepotOptions {

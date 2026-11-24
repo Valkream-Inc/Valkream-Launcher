@@ -10,6 +10,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
+import { classifyDepotFailure } from "./depot-output.js";
 import { buildDepotArgs, downloadWithDepot } from "./depot-download.js";
 import { parseDepotPercent, type DepotRunner } from "./depot-runner.js";
 import { depotAssetFor, ensureDepotDownloader } from "./depot-tool.js";
@@ -70,6 +71,61 @@ describe("téléchargement", () => {
 
   it("code de sortie non nul : erreur", async () => {
     await assert.rejects(() => downloadWithDepot(input(async () => 1)), /code 1/);
+  });
+});
+
+describe("étapes et erreurs lisibles", () => {
+  const input = (runner: DepotRunner, extra = {}) => ({
+    tool: "tool", runner, appId: 7, depot: { id: 8, manifest: "9" }, installDir: dir, os: "linux" as const, ...extra,
+  });
+  const failing = (lines: string[], code = 1): DepotRunner => async (_c, _a, { onLine }) => {
+    lines.forEach(onLine);
+    return code;
+  };
+
+  it("détecte les étapes : connexion, téléchargement, fin (une seule fois chacune)", async () => {
+    const steps: string[] = [];
+    const runner = failing(["Logging into Steam3 using QR", "██ ██", " 10.00% a", " 20.00% b", "Total downloaded: 1 GB"], 0);
+    await downloadWithDepot(input(runner, { onStep: (step: string) => steps.push(step) }));
+    assert.deepEqual(steps, ["login", "download", "finish"]);
+  });
+
+  it("classe la cause d'un échec (connexion, licence, limite, disque, réseau, QR expiré)", () => {
+    const key = (...lines: string[]) => classifyDepotFailure(lines).key;
+    assert.equal(key("Unable to login to Steam3: InvalidPassword"), "err.depotLogin");
+    assert.equal(key("Logging in", "Depot 8 is not available for this account"), "err.depotNotOwned");
+    assert.equal(key("Failed to get depot key"), "err.depotNotOwned");
+    assert.equal(key("Login failed: RateLimitExceeded"), "err.depotRateLimit");
+    assert.equal(key("Error: No space left on device"), "err.depotNoSpace");
+    assert.equal(key("SocketException: Connection reset by peer"), "err.depotNetwork");
+    assert.equal(key("QR code challenge expired"), "err.depotQrTimeout");
+    assert.equal(key("quelque chose d'inconnu"), "err.depotFailed");
+  });
+
+  it("le détail est la dernière ligne utile (ni pourcentage, ni QR)", () => {
+    const failure = classifyDepotFailure(["Erreur grave XYZ", " 50.00% a.dat", "██▀▀██"]);
+    assert.equal(failure.detail, "Erreur grave XYZ");
+    assert.equal(classifyDepotFailure([]).detail, "—");
+  });
+
+  it("l'échec lève l'erreur précise, traduite, avec le détail", async () => {
+    await assert.rejects(() => downloadWithDepot(input(failing(["Unable to login to Steam3: AccountLoginDeniedThrottle"]))), /limite temporairement/);
+    await assert.rejects(() => downloadWithDepot(input(failing(["x", "InvalidPassword"]))), /Connexion à Steam refusée.*InvalidPassword/);
+    await assert.rejects(() => downloadWithDepot(input(failing(["boum"]))), /code 1.*boum/);
+  });
+
+  it("outil impossible à démarrer : erreur dédiée ; annulation : « annulé », pas d'erreur système", async () => {
+    const spawnFail: DepotRunner = async () => {
+      throw Object.assign(new Error("spawn EACCES"), { code: "EACCES" });
+    };
+    await assert.rejects(() => downloadWithDepot(input(spawnFail)), /Impossible de démarrer DepotDownloader \(EACCES\)/);
+
+    const controller = new AbortController();
+    const aborted: DepotRunner = async () => {
+      controller.abort();
+      throw new Error("The operation was aborted");
+    };
+    await assert.rejects(() => downloadWithDepot(input(aborted, { signal: controller.signal })), /annulé/);
   });
 });
 

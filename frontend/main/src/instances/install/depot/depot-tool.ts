@@ -23,6 +23,8 @@ export interface DepotToolOptions {
   io: Pick<InstallIO, "download" | "extract">;
   signal?: AbortSignal;
   onProgress?: (percent: number) => void;
+  /** Étape en cours : téléchargement de l'outil, vérification du hash, extraction. */
+  onStep?: (step: "tool-download" | "tool-verify" | "tool-extract") => void;
 }
 
 const SHA256 = /^[0-9a-f]{64}$/;
@@ -58,6 +60,7 @@ export const ensureDepotDownloader = async ({
   io,
   signal,
   onProgress,
+  onStep,
 }: DepotToolOptions): Promise<string> => {
   const asset = depotAssetFor(assets, platformKey);
   if (!asset) {
@@ -80,13 +83,16 @@ export const ensureDepotDownloader = async ({
   }
 
   fs.mkdirSync(base, { recursive: true });
+  onStep?.("tool-download");
   await io.download(asset.url, zipPath, signal, (transfer) => onProgress?.(transfer.percent));
+  onStep?.("tool-verify");
   if ((await hashFile(zipPath)) !== sha) {
     fs.rmSync(zipPath, { force: true });
     throw new LocalizedError("err.depotHash");
   }
 
   fs.rmSync(outDir, { recursive: true, force: true });
+  onStep?.("tool-extract");
   await io.extract(zipPath, outDir, { accept: () => true });
   if (!fs.existsSync(exe)) throw new LocalizedError("err.depotExeMissing", { file: asset.file });
   if (process.platform !== "win32") fs.chmodSync(exe, 0o755);
