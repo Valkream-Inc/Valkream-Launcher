@@ -23,6 +23,10 @@ import type {
   InstallationStatut,
 } from "./infos.context.types";
 
+// Statut (disque + remote) et infos serveur : inutile de les relire chaque seconde.
+// Un changement d'action (installation terminée…) relance une lecture immédiate (voir l'effet).
+const REFRESH_INTERVAL_MS = 5000;
+
 const InfosContext = createContext<InfosContextValue | undefined>(undefined);
 export const useInfos = (): InfosContextValue => {
   const ctx = useContext(InfosContext);
@@ -153,7 +157,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
     getAllInfos().then(() => {
       // Vérifier que le composant n'a pas été démonté ou que les dépendances n'ont pas changé
       if (intervalRef.current === null) {
-        intervalRef.current = setInterval(getAllInfos, 1000);
+        intervalRef.current = setInterval(getAllInfos, REFRESH_INTERVAL_MS);
       }
     });
 

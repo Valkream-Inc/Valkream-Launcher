@@ -93,3 +93,8 @@ Seules les tâches **ouvertes** sont listées. Légende : (+) petit · (++) moye
 - [ ] (++) Support de Linux / macOS dans le test de démarrage et les installeurs (AppImage, dmg), avec les chemins par plateforme déjà prévus dans les configs.
 - [ ] (+++) Mode « serveur dédié » : installer et mettre à jour le serveur de jeu avec le même moteur (instances de type serveur, sans interface de jeu).
 - [ ] (++) API publique en lecture seule du backend (liste des jeux, versions, événements) pour un site web ou un bot Discord.
+
+### Poids de l'installeur (le plus gros gain restant)
+- [ ] (++) Modèle 3D `SevenDtoD-3d.glb` : **97 Mo** (Valheim : 4 Mo). Compresser avec `gltf-transform` (meshopt + textures WebP/KTX2) ; objectif < 10 Mo.
+- [ ] (++) Bandes-annonces `*-trailer.mp4` : **~92 Mo chacune** (1080p, 7,5 Mb/s). Ré-encoder en 720p, CRF 28 (~10-15 Mo) ou héberger sur le serveur et les charger à la demande ; `pre-loading.mp4` (8 Mo) aussi.
+- [ ] (+) Audios `*-song.mp3` (2 Mo et 1,4 Mo) : passer en 96 kbit/s ou hors installeur.

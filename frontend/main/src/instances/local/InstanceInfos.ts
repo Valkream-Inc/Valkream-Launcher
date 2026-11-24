@@ -4,7 +4,8 @@
  *
  * Infos d'accueil d'une instance : serveur de jeu, événement, maintenance.
  * L'événement et la maintenance sont décrits par l'index remote (lien ou donnée inline).
- * Les résultats sont gardés quelques secondes : l'accueil les interroge en boucle.
+ * Les résultats sont gardés quelques secondes : l'accueil les interroge en boucle
+ * (la requête au serveur de jeu, la plus coûteuse, est aussi partagée entre appels simultanés).
  */
 
 import type {
@@ -28,6 +29,8 @@ export interface InfosOptions {
   queryServer: (server: ServerQueryConfig) => Promise<ServerInfos>;
   /** Durée de conservation de l'événement et de la maintenance (ms). */
   ttlMs?: number;
+  /** Durée de conservation de la réponse du serveur de jeu (ms). */
+  serverTtlMs?: number;
   now?: () => number;
 }
 
@@ -42,6 +45,7 @@ const messageOf = (error: unknown): string =>
 
 export class InstanceInfos {
   private readonly cache = new Map<string, Cached>();
+  private readonly servers = new Map<string, { at: number; value: Promise<ServerInfos> }>();
 
   constructor(private readonly options: InfosOptions) {}
 
@@ -50,10 +54,20 @@ export class InstanceInfos {
     if (!config) throw new LocalizedError("err.unknownInstance", { id });
 
     const [serverInfos, remote] = await Promise.all([
-      this.options.queryServer(config.server),
+      this.server(config),
       this.remote(config),
     ]);
     return { serverInfos, event: remote.event, maintenance: remote.maintenance };
+  }
+
+  /** Réponse du serveur de jeu gardée quelques secondes ; une requête en cours est réutilisée. */
+  private server(config: InstanceMainConfig): Promise<ServerInfos> {
+    const { serverTtlMs = 4000, now = Date.now } = this.options;
+    const cached = this.servers.get(config.id);
+    if (cached && now() - cached.at < serverTtlMs) return cached.value;
+    const value = this.options.queryServer(config.server);
+    this.servers.set(config.id, { at: now(), value });
+    return value;
   }
 
   private async remote(config: InstanceMainConfig): Promise<Cached> {

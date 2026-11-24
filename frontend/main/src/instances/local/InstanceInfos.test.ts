@@ -69,4 +69,22 @@ describe("InstanceInfos", () => {
   it("instance inconnue : lève", async () => {
     await assert.rejects(() => make({}).infos.get("nope"), /inconnue/);
   });
+
+  it("requête serveur de jeu partagée pendant 4 s, puis renouvelée", async () => {
+    let clock = 0;
+    let queries = 0;
+    const resolver = { urlOf: (l: string) => l, getJson: async () => ({ value: index({}), source: "online" }) } as unknown as ParamResolver;
+    const online: ServerInfos = { status: "server online", players: { online: 1, max: 2 }, ping: 5 };
+    const infos = new InstanceInfos({
+      configs: [config], resolver, platform: "win32", now: () => clock,
+      queryServer: async () => (queries++, online),
+    });
+    await Promise.all([infos.get("g"), infos.get("g")]);
+    clock = 3000;
+    await infos.get("g");
+    assert.equal(queries, 1);
+    clock = 4500;
+    await infos.get("g");
+    assert.equal(queries, 2);
+  });
 });
