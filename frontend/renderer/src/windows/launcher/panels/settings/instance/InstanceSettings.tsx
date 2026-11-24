@@ -81,8 +81,15 @@ export default function InstanceSettings({
   );
   const isSpecialActive = isDevActive || isAdminActive;
 
-  // Zoom des réglages : variable CSS sur le document, conservée entre deux lancements ; Ctrl + molette
-  const [zoom, setZoomState] = useState(loadZoom);
+  // Zoom des réglages : variable CSS sur le document, enregistré dans les réglages ; Ctrl + molette
+  const [zoom, setZoomState] = useState(1);
+  useEffect(() => {
+    let alive = true;
+    void loadZoom().then((value) => alive && setZoomState(value));
+    return () => {
+      alive = false;
+    };
+  }, []);
   const setZoom = (next: number) => {
     const value = clampZoom(next);
     setZoomState(value);

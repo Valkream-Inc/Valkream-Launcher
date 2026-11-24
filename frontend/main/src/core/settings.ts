@@ -22,6 +22,7 @@ class SettingsManager {
     launcherTheme: "modern",
     backgroundType: "video",
     nexusApiKey: "",
+    settingsZoom: 1,
     language: Intl.DateTimeFormat().resolvedOptions().locale.startsWith("fr") ? "fr" : "en",
   };
   private readonly store: SettingsStore<Settings>;

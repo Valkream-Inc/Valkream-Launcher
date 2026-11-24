@@ -18,6 +18,8 @@ export interface Settings {
   language: "fr" | "en";
   /** Clé API personnelle Nexus Mods (provider `nexus_modpack_url`). Locale : jamais envoyée au remote. */
   nexusApiKey: string;
+  /** Niveau de zoom de la page des réglages (1 = 100 %). */
+  settingsZoom: number;
 }
 
 export type SettingKey = keyof Settings;
