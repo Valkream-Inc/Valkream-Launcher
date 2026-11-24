@@ -8,6 +8,7 @@ import { enqueueSnackbar } from "notistack";
 import { useState } from "react";
 import Wait from "../../../../component/wait/wait";
 import { useAction } from "../../../../context/action.context";
+import { useGames } from "../../../../context/games.context";
 import SettingsBox from "../../component/settings-box/settings-box";
 import type { InstanceButtonProps } from "./instance-setting.types";
 import { useTranslation } from "react-i18next";
@@ -19,6 +20,7 @@ const Instance_ButtonUninstallGame = ({
 }: InstanceButtonProps) => {
   const { t } = useTranslation();
   const { runAction } = useAction();
+  const { refreshChannel } = useGames();
   const [isWaiting, setIsWaiting] = useState(false);
 
   const handleClick = () => {
@@ -28,6 +30,7 @@ const Instance_ButtonUninstallGame = ({
         await window.electron_API.uninstallInstance(id, channel);
         enqueueSnackbar(t("instance.uninstall.done"), { variant: "success" });
         onDone();
+        void refreshChannel(); // statut et infos relus tout de suite (bouton principal, liste des jeux)
       } catch (error) {
         console.error(error);
         enqueueSnackbar(t("instance.uninstall.failed"), { variant: "error" });

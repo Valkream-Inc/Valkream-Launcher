@@ -68,6 +68,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
   const actionLoadingRef = useRef<boolean | null>(null); // Pour vérifier si une nouvelle action est en cours
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null); // Pour lancer une fois à blanc avant de lancer la boucle
   const isLoadingRef = useRef(false); // Pour empêcher les appels parallèles
+  const rerunRef = useRef(false); // Une demande arrivée pendant un appel en cours : relancée juste après (pas dans 5 s)
 
   useEffect(() => {
     if (
@@ -99,8 +100,12 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
     }
 
     const getAllInfos = async () => {
-      // Empêcher les appels parallèles
-      if (isLoadingRef.current) return;
+      // Pas d'appels parallèles ; la demande est mémorisée et rejouée dès que l'appel en cours se termine.
+      // Sinon, juste après une action (désinstallation…), la mise à jour attendait le prochain tour (5 s).
+      if (isLoadingRef.current) {
+        rerunRef.current = true;
+        return;
+      }
       isLoadingRef.current = true;
 
       try {
@@ -145,6 +150,10 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
         console.error("Erreur lors de la récupération des infos :", error);
       } finally {
         isLoadingRef.current = false;
+        if (rerunRef.current) {
+          rerunRef.current = false;
+          void getAllInfos();
+        }
       }
     };
 
