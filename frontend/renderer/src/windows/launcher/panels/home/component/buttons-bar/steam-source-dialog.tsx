@@ -24,6 +24,7 @@ import {
 } from "@mui/material";
 import type { Channel, DepotInfo, DepotStepName, InstanceId, SteamSourceIssue } from "@shared/types";
 
+import { isQrLine, qrModules } from "../../../../../../i18n/qr-block";
 import { ipcErrorMessage } from "../../../../../../i18n/ipc-error";
 import SimpleMarkdown from "./simple-markdown";
 import { useTranslation } from "react-i18next";
@@ -47,6 +48,34 @@ const STEP_NUMBER: Record<DepotStepName, number> = {
   finish: 4,
 };
 
+/** QR code de connexion redessiné en SVG (noir sur blanc, marge de 2 modules), lisible quel que soit le thème ou la police. */
+const QrCode = ({ lines }: { lines: string[] }) => {
+  const grid = qrModules(lines);
+  if (!grid) return null;
+  const margin = 2;
+  const width = grid[0].length;
+  const height = grid.length;
+  const cells: string[] = [];
+  grid.forEach((row, y) =>
+    row.forEach((dark, x) => {
+      if (dark) cells.push(`M${x + margin} ${y + margin}h1v1h-1z`);
+    }),
+  );
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center" }}>
+      <svg
+        viewBox={`0 0 ${width + margin * 2} ${height + margin * 2}`}
+        width={Math.min(280, (width + margin * 2) * 6)}
+        shapeRendering="crispEdges"
+        role="img"
+      >
+        <rect width="100%" height="100%" fill="#fff" />
+        <path d={cells.join("")} fill="#000" />
+      </svg>
+    </Box>
+  );
+};
+
 const INFO_KEY = "valkream.depot-info-accepted";
 
 const infoAccepted = (): boolean => {
@@ -66,6 +95,8 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
   const [lines, setLines] = useState<string[]>([]);
   const [percent, setPercent] = useState<number | null>(null);
   const [step, setStep] = useState<DepotStepName | null>(null);
+  const [qrLines, setQrLines] = useState<string[]>([]);
+  const qrRun = useRef<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<DepotInfo | null>(null); // écran d'information (première utilisation)
   const mounted = useRef(true);
@@ -113,12 +144,25 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
     setLines([]);
     setPercent(null);
     setStep(null);
+    setQrLines([]);
+    qrRun.current = [];
     setDepotRunning(true);
     window.electron_API.onDepotOutput((data) => {
       if (data.id !== instanceId || data.channel !== channel || !mounted.current) return;
-      if (data.line !== undefined) setLines((previous) => [...previous, data.line as string].slice(-MAX_LINES));
+      if (data.line !== undefined) {
+        const line = data.line;
+        if (isQrLine(line)) {
+          // Le QR code est redessiné à part (voir QrCode) : on garde la dernière suite de lignes de blocs
+          qrRun.current = [...qrRun.current, line];
+          setQrLines(qrRun.current);
+        } else {
+          qrRun.current = [];
+          setLines((previous) => [...previous, line].slice(-MAX_LINES));
+        }
+      }
       if (data.step !== undefined) {
         setStep(data.step);
+        if (data.step !== "login") setQrLines([]);
         setPercent(null); // chaque étape repart de zéro (le pourcentage de l'outil n'est pas celui du jeu)
       }
       if (data.percent !== undefined) setPercent(data.percent);
@@ -127,7 +171,7 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
       await window.electron_API.depotDownloadInstance(instanceId, channel);
       if (mounted.current) onRetry();
     } catch (err) {
-      if (mounted.current) setError(err instanceof Error ? err.message : String(err));
+      if (mounted.current) setError(ipcErrorMessage(err));
     } finally {
       window.electron_API.removeDepotOutputListeners();
       if (mounted.current) setDepotRunning(false);
@@ -149,6 +193,7 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
                 : t("steam.step.tool-verify")}
             </Alert>
             {step === "login" && <Alert severity="warning">{t("steam.scan")}</Alert>}
+            {step === "login" && <QrCode lines={qrLines} />}
             <Typography variant="caption" color="text.secondary">
               {t("steam.logTitle")}
             </Typography>
@@ -158,7 +203,16 @@ export default function SteamSourceDialog({ issue, instanceId, channel, onClose,
             >
               {lines.join("\n")}
             </Box>
-            <LinearProgress variant={percent === null ? "indeterminate" : "determinate"} value={percent ?? 0} />
+            <Stack direction="row" spacing={1} alignItems="center">
+              <LinearProgress
+                sx={{ flexGrow: 1 }}
+                variant={percent === null ? "indeterminate" : "determinate"}
+                value={percent ?? 0}
+              />
+              <Typography variant="body2" sx={{ minWidth: 56, textAlign: "right" }}>
+                {percent === null ? "…" : `${percent.toFixed(percent >= 100 ? 0 : 1)} %`}
+              </Typography>
+            </Stack>
           </Stack>
         )}
         {error && (

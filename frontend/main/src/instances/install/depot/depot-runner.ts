@@ -7,6 +7,7 @@
  */
 
 import { spawn } from "child_process";
+import { StringDecoder } from "string_decoder";
 
 export interface DepotRunOptions {
   cwd: string;
@@ -29,14 +30,19 @@ export const realDepotRunner: DepotRunner = (command, args, { cwd, signal, onLin
   new Promise((resolve, reject) => {
     const child = spawn(command, args, { cwd, stdio: ["ignore", "pipe", "pipe"], windowsHide: true, signal });
     let pending = "";
-    const feed = (chunk: Buffer) => {
-      pending += chunk.toString("utf8");
+    // Un décodeur par flux : un caractère multi-octets (blocs ▀▄█ du QR code) peut être coupé entre deux morceaux
+    const feeder = () => {
+      const decoder = new StringDecoder("utf8");
+      return (chunk: Buffer) => feed(decoder.write(chunk));
+    };
+    const feed = (text: string) => {
+      pending += text;
       const lines = pending.split(/\r\n|\n|\r/);
       pending = lines.pop() ?? "";
       for (const line of lines) if (line !== "") onLine(line);
     };
-    child.stdout.on("data", feed);
-    child.stderr.on("data", feed);
+    child.stdout.on("data", feeder());
+    child.stderr.on("data", feeder());
     child.once("error", reject);
     child.once("close", (code) => {
       if (pending !== "") onLine(pending);
