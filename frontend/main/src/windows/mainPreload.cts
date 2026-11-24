@@ -37,7 +37,7 @@ const electronAPI: ElectronAPI = {
 
   // jeux : une seule API pour toutes les instances
   getInstances: () => ipcRenderer.invoke("instances:list"),
-  getInstanceInfos: (id) => ipcRenderer.invoke("instances:infos", id),
+  getInstanceInfos: (id, channel) => ipcRenderer.invoke("instances:infos", id, channel),
   getInstanceStatus: (id, channel) =>
     ipcRenderer.invoke("instances:status", id, channel),
   getInstanceReport: (id, channel, options) =>

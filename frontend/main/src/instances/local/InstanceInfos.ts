@@ -11,6 +11,7 @@
 import type {
   CheckInfosResult,
   GameEvent,
+  Channel,
   GamePlatform,
   Maintenance,
   ServerInfos,
@@ -19,6 +20,7 @@ import type {
 import type { ServerQueryConfig } from "../../types/core.js";
 import type { InstanceMainConfig } from "../instances.types.js";
 import { loadRemoteIndex } from "../remote/InstanceRegistry.js";
+import { pickChannel } from "../remote/channel-value.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
 import { LocalizedError } from "../../lib/errors/localized-error.js";
 
@@ -49,13 +51,14 @@ export class InstanceInfos {
 
   constructor(private readonly options: InfosOptions) {}
 
-  async get(id: string): Promise<CheckInfosResult> {
+  /** `channel` : canal affiché (l'événement et la maintenance peuvent différer d'un canal à l'autre). */
+  async get(id: string, channel: Channel = "stable"): Promise<CheckInfosResult> {
     const config = this.options.configs.find((item) => item.id === id);
     if (!config) throw new LocalizedError("err.unknownInstance", { id });
 
     const [serverInfos, remote] = await Promise.all([
       this.server(config),
-      this.remote(config),
+      this.remote(config, channel),
     ]);
     return { serverInfos, event: remote.event, maintenance: remote.maintenance };
   }
@@ -70,20 +73,23 @@ export class InstanceInfos {
     return value;
   }
 
-  private async remote(config: InstanceMainConfig): Promise<Cached> {
+  private async remote(config: InstanceMainConfig, channel: Channel): Promise<Cached> {
     const { resolver, ttlMs = 5000, now = Date.now } = this.options;
-    const cached = this.cache.get(config.id);
+    const key = `${config.id}@${channel}`;
+    const cached = this.cache.get(key);
     if (cached && now() - cached.at < ttlMs) return cached;
 
     const load = await loadRemoteIndex(resolver, config.indexUrl, config.id);
     const entry = load.kind === "ok" ? load.index : undefined;
 
+    const event = pickChannel(entry?.event, channel);
+    const maintenance = pickChannel(entry?.maintenance, channel);
     const fresh: Cached = {
       at: now(),
-      event: entry?.event === undefined ? false : await this.read<GameEvent>(entry.event, "événement", (value) => this.withImage(value)),
-      maintenance: entry?.maintenance === undefined ? false : await this.read<Maintenance>(entry.maintenance, "maintenance"),
+      event: event === undefined ? false : await this.read<GameEvent>(event, "événement", (value) => this.withImage(value)),
+      maintenance: maintenance === undefined ? false : await this.read<Maintenance>(maintenance, "maintenance"),
     };
-    this.cache.set(config.id, fresh);
+    this.cache.set(key, fresh);
     return fresh;
   }
 

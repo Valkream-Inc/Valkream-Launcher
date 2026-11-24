@@ -36,7 +36,7 @@ joueur ouvre le launcher
 | Ajouter un mod Thunderstore | 4 | ajouter `Auteur-Nom-Version` dans la liste de l'entrée Thunderstore |
 | Ajouter une **nouvelle entrée** (nouveau dossier d'installation) | 1 (`entryPaths`) **et** 4 | l'entrée doit exister dans les deux, sinon elle est refusée |
 | Changer l'emplacement d'une entrée | 1 (`entryPaths`) | le launcher réinstalle l'entrée au nouvel endroit |
-| Afficher un événement / une maintenance | 5 (`event.json`, `maintenance.json`) | bandeau dans l'accueil |
+| Afficher un événement / une maintenance | 5 (`event.json`, `maintenance.json`) | bandeau dans l'accueil ; une valeur par canal possible (§5) |
 | Changer la liste des mods affichée aux joueurs | 5 (`mods.json`) | l'onglet Tools génère ce fichier |
 | Changer l'exécutable, les arguments de lancement, Java | 1 | `executable`, `command`, `launchArgs` |
 | Ajouter un réglage joueur (case, liste, curseur) | 2 (`customGamesSettings`) | utilisable dans `launchArgs` via `{nom}` |
@@ -94,6 +94,19 @@ content:
 
 Une entrée sans valeur pour la plateforme du joueur est simplement **ignorée** (pas d'erreur).
 
+Pour `steam_library`, `buildid`, `steam-beta` et `depot` se déclinent aussi par plateforme (le depot Steam d'un jeu n'est pas
+le même sous Windows et Linux). Sans `depot` pour la plateforme du joueur, la solution DepotDownloader n'est pas proposée :
+
+```yaml
+valheim:
+  type: steam_library
+  content: /games/Valheim-Valkream-v2/valheim-manifest.json
+  buildid: { win32: 15245500, linux: 15245501 }   # valeurs d'exemple : à lire sur SteamDB
+  depot:
+    win32: { id: 892971, manifest: "5099988776655443322" }
+    linux: { id: 896661, manifest: "1122334455667788990" }
+```
+
 **Une chaîne qui commence par `/` est un lien** vers un fichier du serveur (`/games/<id>/modpack.json`), pas un chemin disque :
 `folder_in_zip` et `path` s'écrivent donc sans `/` au début.
 
@@ -133,6 +146,24 @@ Sinon                                        → zip_url
 - `stable` est toujours proposé ; `beta` et `alpha` seulement si le joueur active « Afficher les canaux de test ».
 - Un canal absent d'`index.config.json` n'existe pas. Un jeu **sans `stable`** n'apparaît que si les tests sont activés.
 - Workflow type : modifier `latest.beta.yml` → tester → copier dans `latest.yml`.
+
+**Événement, maintenance, mods, contributeurs : une valeur par canal.** Ces quatre champs de `index.config.json` acceptent
+soit une valeur unique (lien `/chemin` ou données en ligne), soit une table par canal :
+
+```json
+"event": {
+  "stable": "/games/Valheim-Valkream-v2/config/event.json",
+  "beta":   "/games/Valheim-Valkream-v2/config/event.beta.json"
+},
+"maintenance": { "beta": { "enabled": true, "description": "Test en cours", "end_date": "2026-12-01" } },
+"mods": { "default": "/games/Valheim-Valkream-v2/config/mods.json", "alpha": "/games/Valheim-Valkream-v2/config/mods.alpha.json" }
+```
+
+- Chaque valeur est un lien ou des données, comme pour une valeur unique.
+- Canal absent de la table : `default`, puis `stable`. S'il n'y a ni l'un ni l'autre, rien n'est affiché pour ce canal.
+- Une table n'est reconnue que si **toutes** ses clés sont `stable`, `beta`, `alpha` ou `default` : un événement qui a ses propres champs
+  (`name`, `description`…) reste une donnée.
+- L'accueil affiche l'événement et la maintenance **du canal sélectionné** ; les onglets Mods et Contributeurs, ceux du canal ouvert.
 
 ## 6. Ajouter un jeu en 3 étapes
 

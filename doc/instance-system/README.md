@@ -8,7 +8,7 @@ Une **instance** = un jeu (ou une variante d'un jeu) décrit par trois couches r
 | --- | --- | --- |
 | Main | `frontend/main/src/instances/instances.config.ts` | serveur de jeu, lien de l'`index.config.json` du jeu (`indexUrl`), **dossier d'installation de chaque entrée** (`entryPaths`, par nom d'entrée, déclinable par plateforme), exécutable, Steam |
 | Render | `frontend/renderer/src/instances/instances.config.tsx` | nom, images, **fonds** (image, vidéo, audio, modèle 3D + scène), textes, liens, réglages (`customGamesSettings`, niveaux normal / special / danger), tableaux Debug |
-| Remote | `backend/public/games/<id>/` | `index.config.json` (plateformes, **liens des latest stable / beta**, événement, maintenance, mods, contributeurs) et `latest.yml` / `latest.beta.yml` (versions, sources, hash) |
+| Remote | `backend/public/games/<id>/` | `index.config.json` (plateformes, **liens des latest stable / beta**, événement, maintenance, mods, contributeurs — chacun unique ou par canal, voir [configs.md](configs.md#5-les-canaux-stable-beta-alpha)) et `latest.yml` / `latest.beta.yml` (versions, sources, hash) |
 
 Le remote ne décide jamais où le launcher écrit : `path` est interdit dans le `latest.yml`.
 

@@ -19,6 +19,7 @@ import type {
 
 import { isLocalContent, parseLocalContent } from "../install/files/local-content.js";
 import { isValidKey } from "../../lib/format/json-key.js";
+import { isChannelTable } from "./channel-value.js";
 import { classifyLink, isFetchableLink, isPerPlatformContent } from "./link.js";
 import { RELEASE_TIERS } from "./release-options.js";
 import { isSafeRelativePath, isSafeSegment } from "../../lib/fs/paths.js";
@@ -159,8 +160,15 @@ export const validateRemoteIndex = (
     ["mods", checkMods],
   ];
   for (const [key, checkData] of optionalParams) {
-    if (raw[key] !== undefined) {
-      errors.push(...checkLinkOrData(raw[key], `${where}.${key}`, checkData));
+    const value = raw[key];
+    if (value === undefined) continue;
+    if (isChannelTable(value)) {
+      // Une valeur par canal : chacune est un lien ou des données
+      for (const [channel, perChannel] of Object.entries(value)) {
+        errors.push(...checkLinkOrData(perChannel, `${where}.${key}.${channel}`, checkData));
+      }
+    } else {
+      errors.push(...checkLinkOrData(value, `${where}.${key}`, checkData));
     }
   }
 

@@ -185,3 +185,28 @@ describe("options par lien", () => {
     assert.equal(validateReleaseConfig(release as never).ok, true);
   });
 });
+
+describe("steam_library : depot, buildid et steam-beta par plateforme", () => {
+  const entry = {
+    version: 1,
+    type: "steam_library",
+    content: "/m.json",
+    buildid: { win32: 111, linux: 222 },
+    depot: { win32: { id: 892971, manifest: "1" }, linux: { id: 892972, manifest: "2" } },
+  };
+
+  it("chaque plateforme reçoit son depot (et son buildid)", () => {
+    assert.deepEqual(selectEntryPlatform(entry, "win32"), { ...entry, buildid: 111, depot: { id: 892971, manifest: "1" } });
+    assert.deepEqual(selectEntryPlatform(entry, "linux"), { ...entry, buildid: 222, depot: { id: 892972, manifest: "2" } });
+  });
+
+  it("plateforme sans depot : l'option est simplement absente (solution DepotDownloader non proposée)", () => {
+    const darwin = selectEntryPlatform(entry, "darwin") as Record<string, unknown>;
+    assert.equal("depot" in darwin, false);
+  });
+
+  it("un depot unique (non décliné) vaut pour toutes les plateformes", () => {
+    const shared = { ...entry, depot: { id: 5, manifest: "9" } };
+    assert.deepEqual((selectEntryPlatform(shared, "linux") as { depot: unknown }).depot, { id: 5, manifest: "9" });
+  });
+});

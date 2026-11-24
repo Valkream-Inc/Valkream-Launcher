@@ -129,7 +129,8 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
 
         // get other infos
         const infos = await window.electron_API.getInstanceInfos(
-          actualInstanceId
+          actualInstanceId,
+          actualChannel
         );
         if (actualGameRef.current !== gameKey) {
           isLoadingRef.current = false;
