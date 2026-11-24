@@ -22,6 +22,7 @@ import type {
   ReleaseTier,
 } from "@shared/types";
 
+import { pickChannel } from "../remote/channel-value.js";
 import type { InstanceMainConfig } from "../instances.types.js";
 import { entryDirectory, installLocations, type InstallLocations } from "./instance-paths.js";
 import { loadRemoteIndex } from "../remote/InstanceRegistry.js";
@@ -98,8 +99,8 @@ export class InstanceInspector {
       }
       releaseLink = index.channels?.[channel];
       loaded.requiredSpaceMb = index.requiredSpaceMb;
-      loaded.mods = await this.loadList<ModDisplay>(index.mods, "mods", errors);
-      loaded.contributors = await this.loadList<Contributor>(index.contributors, "contributeurs", errors);
+      loaded.mods = await this.loadList<ModDisplay>(pickChannel(index.mods, channel), "mods", errors);
+      loaded.contributors = await this.loadList<Contributor>(pickChannel(index.contributors, channel), "contributeurs", errors);
     }
 
     // 2. latest.yml du canal.

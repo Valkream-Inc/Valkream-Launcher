@@ -76,6 +76,34 @@ describe("validateRemoteIndex", () => {
   });
 });
 
+describe("paramètres par canal", () => {
+  it("accepte une valeur par canal (lien ou données) pour les quatre champs", () => {
+    const index = {
+      ...validIndex(),
+      event: { stable: "/e.json", beta: { name: "e" } },
+      maintenance: { default: "/m.json", alpha: { enabled: true } },
+      mods: { stable: [{ name: "m" }], beta: "/mods.json" },
+      contributors: { default: [{ name: "c" }] },
+    };
+    assert.equal(validateRemoteIndex(index).ok, true);
+  });
+
+  it("signale le canal fautif", () => {
+    const index = {
+      ...validIndex(),
+      event: { stable: "/e.json", beta: "pas-un-lien" },
+      mods: { alpha: [{ icon: "x" }] },
+    };
+    const errors = errorsOf(validateRemoteIndex(index));
+    assert.match(errors, /\.event\.beta : lien invalide/);
+    assert.match(errors, /\.mods\.alpha\[0\] : « name » requis/);
+  });
+
+  it("un événement avec ses propres champs n'est pas pris pour une table de canaux", () => {
+    assert.equal(validateRemoteIndex({ ...validIndex(), event: { name: "stable", stable: "x" } }).ok, true);
+  });
+});
+
 describe("validateReleaseConfig", () => {
   it("accepte une release minimale", () => {
     assert.equal(validateReleaseConfig(validRelease()).ok, true);

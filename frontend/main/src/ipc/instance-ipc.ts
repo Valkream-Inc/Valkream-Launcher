@@ -70,9 +70,9 @@ const InstanceIpcHandlers = (): void => {
   ipcMain.handle("instances:list", () => getInstanceRegistry().list());
 
   // Serveur de jeu, événement et maintenance.
-  ipcMain.handle("instances:infos", (_event, id: string) => {
-    resolve(id, "stable");
-    return getInstanceInfos().get(id);
+  ipcMain.handle("instances:infos", (_event, id: string, channel: Channel = "stable") => {
+    resolve(id, channel);
+    return getInstanceInfos().get(id, channel);
   });
 
   ipcMain.handle("instances:status", (_event, id: string, channel: Channel) => {

@@ -40,6 +40,25 @@ describe("InstanceInfos", () => {
     assert.equal(result.maintenance && result.maintenance.enabled, true);
   });
 
+  it("événement et maintenance différents selon le canal (cache séparé, repli sur stable)", async () => {
+    const { infos } = make({
+      "/index.json": index({
+        event: { stable: "/e.json", beta: "/eb.json" },
+        maintenance: { beta: { enabled: true, description: "beta", end_date: "2026-01-01" } },
+      }),
+      "/e.json": { name: "stable" },
+      "/eb.json": { name: "beta" },
+    });
+    const stable = await infos.get("g", "stable");
+    const beta = await infos.get("g", "beta");
+    const alpha = await infos.get("g", "alpha");
+    assert.equal(stable.event && stable.event.name, "stable");
+    assert.equal(beta.event && beta.event.name, "beta");
+    assert.equal(alpha.event && alpha.event.name, "stable");
+    assert.equal(stable.maintenance, false);
+    assert.equal(beta.maintenance && beta.maintenance.description, "beta");
+  });
+
   it("image data: conservée ; événement absent ou en erreur : false", async () => {
     const withData = make({ "/index.json": index({ event: "/e.json" }), "/e.json": { image: "data:image/png;base64,AAAA" } });
     assert.equal(((await withData.infos.get("g")).event as { image: string }).image, "data:image/png;base64,AAAA");

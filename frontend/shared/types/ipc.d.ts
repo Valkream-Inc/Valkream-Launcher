@@ -48,7 +48,7 @@ export interface ElectronAPI {
   // jeux : une seule API pour toutes les instances (`id` = Valheim-Valkream-v2, SevenDtoD-Valkream-v2…)
   getInstances(): Promise<InstanceSummary[]>;
   /** Serveur de jeu, événement et maintenance. */
-  getInstanceInfos(id: InstanceId): Promise<InstanceInfos>;
+  getInstanceInfos(id: InstanceId, channel?: Channel): Promise<InstanceInfos>;
   /** Statut d'accueil : installé ? à jour ? jouable ? */
   getInstanceStatus(id: InstanceId, channel: Channel): Promise<InstanceStatus>;
   /** Rapport détaillé (onglets Mods et Debug). `verify` contrôle aussi les fichiers sur le disque. */

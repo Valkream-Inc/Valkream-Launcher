@@ -28,6 +28,9 @@ export type InstanceKey = `${InstanceId}@${Channel}`;
  */
 export type LinkOrData<T> = string | T;
 
+/** Valeur unique, ou une valeur par canal (`default` puis `stable` si le canal n'est pas listé). */
+export type PerChannel<T> = T | Partial<Record<Channel | "default", T>>;
+
 /* ------------------------------------------------------------------ */
 /* Remote : games/<id>/index.config.json (un par jeu)                 */
 /* ------------------------------------------------------------------ */
@@ -68,10 +71,10 @@ export interface RemoteIndex {
   channels?: Partial<Record<Channel, string>>;
   /** Espace libre minimal (Mo) exigé avant une première installation du jeu. */
   requiredSpaceMb?: number;
-  event?: LinkOrData<GameEvent>;
-  maintenance?: LinkOrData<Maintenance>;
-  contributors?: LinkOrData<Contributor[]>;
-  mods?: LinkOrData<ModDisplay[]>;
+  event?: PerChannel<LinkOrData<GameEvent>>;
+  maintenance?: PerChannel<LinkOrData<Maintenance>>;
+  contributors?: PerChannel<LinkOrData<Contributor[]>>;
+  mods?: PerChannel<LinkOrData<ModDisplay[]>>;
 }
 
 /* ------------------------------------------------------------------ */
