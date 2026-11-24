@@ -330,6 +330,10 @@ Tools, liste de mods : le lien peut être celui d'une **page Thunderstore ou Hex
 
 Un jeu n'apparaît dans le choix que s'il propose au moins un canal visible : `stable` toujours, `beta` / `alpha` seulement si « Afficher les canaux de test » est actif. Un jeu sans `stable` n'est donc visible qu'avec les tests activés, et uniquement sur ses canaux de test. Désactiver les tests (ou voir un canal retiré du remote) pendant qu'on joue sur ce canal ramène au choix du jeu.
 
+## Choix du dossier au premier lancement
+
+Au tout premier lancement, un panneau demande où installer les jeux : dossier proposé (par défaut), **espace libre du volume**, « Continuer avec ce dossier » ou « Choisir un autre dossier » (un autre disque, par exemple). Le choix est mémorisé dans `launcher-paths.json` (`confirmed: true`) : il n'est plus redemandé, même après un rechargement. Le panneau n'apparaît pas si des jeux sont déjà installés (installation existante reprise telle quelle). Choisir un dossier avant toute installation ne copie rien : seule la config change. Après un changement (premier lancement ou réglages), le statut des jeux est relu immédiatement (`refreshTick` du contexte `games`) au lieu d'attendre le rafraîchissement périodique de 5 s.
+
 ## Déplacement du dossier des jeux
 
 Pendant le déplacement (copie fichier par fichier si autre volume), la progression s'affiche dans le réglage et sur le bouton du jeu ; lancer, installer, désinstaller et modifier un jeu sont refusés (`err.rootMoving`). Toutes les actions sur un jeu (dossier, journal, réglages, lancement) utilisent le dossier choisi par le joueur.

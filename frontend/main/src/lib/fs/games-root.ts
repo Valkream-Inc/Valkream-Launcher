@@ -29,21 +29,73 @@ export const getMoveProgress = (): MoveProgress => moveProgress;
 export const isMovingGamesRoot = (): boolean => moveProgress.active;
 const MOVING_SUFFIX = ".moving";
 
-export const readGamesRoot = (configFile: string): string | undefined => {
+/** Contenu de `launcher-paths.json` : dossier choisi (absent = défaut) et « le joueur a validé son choix ». */
+interface PathsFile {
+  gamesRoot?: string;
+  confirmed?: boolean;
+}
+
+const readPaths = (configFile: string): PathsFile => {
   try {
-    const raw = JSON.parse(fs.readFileSync(configFile, "utf8")) as { gamesRoot?: unknown };
-    return typeof raw.gamesRoot === "string" && path.isAbsolute(raw.gamesRoot) ? raw.gamesRoot : undefined;
+    const raw = JSON.parse(fs.readFileSync(configFile, "utf8")) as { gamesRoot?: unknown; confirmed?: unknown };
+    return {
+      gamesRoot: typeof raw.gamesRoot === "string" && path.isAbsolute(raw.gamesRoot) ? raw.gamesRoot : undefined,
+      confirmed: raw.confirmed === true,
+    };
   } catch {
-    return undefined;
+    return {};
   }
 };
 
-/** Écriture atomique ; `undefined` = retour au dossier par défaut. */
-export const writeGamesRoot = (configFile: string, gamesRoot: string | undefined): void => {
+const savePaths = (configFile: string, paths: PathsFile): void => {
   fs.mkdirSync(path.dirname(configFile), { recursive: true });
   const temporary = `${configFile}.tmp`;
-  fs.writeFileSync(temporary, JSON.stringify(gamesRoot ? { gamesRoot } : {}, null, 2));
+  fs.writeFileSync(temporary, JSON.stringify(paths, null, 2));
   fs.renameSync(temporary, configFile);
+};
+
+export const readGamesRoot = (configFile: string): string | undefined => readPaths(configFile).gamesRoot;
+
+/** Écriture atomique ; `undefined` = retour au dossier par défaut. Un choix explicite vaut validation. */
+export const writeGamesRoot = (configFile: string, gamesRoot: string | undefined): void =>
+  savePaths(configFile, { ...(gamesRoot ? { gamesRoot } : {}), confirmed: true });
+
+/** Le joueur garde le dossier actuel (par défaut ou déjà choisi) : on ne le lui redemandera plus. */
+export const confirmGamesRoot = (configFile: string): void =>
+  savePaths(configFile, { ...readPaths(configFile), confirmed: true });
+
+/** Des jeux sont déjà installés dans ce dossier (hors fichiers de déplacement). */
+const hasGames = (root: string): boolean => {
+  try {
+    return fs.readdirSync(path.join(root, INSTANCES_DIR)).length > 0;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Le choix du dossier est demandé au premier lancement seulement : tant que le joueur n'a rien validé
+ * ET qu'aucun jeu n'est déjà installé (une installation existante est reprise telle quelle).
+ */
+export const needsGamesRootChoice = (configFile: string, defaultRoot: string): boolean => {
+  const paths = readPaths(configFile);
+  if (paths.confirmed) return false;
+  return !hasGames(paths.gamesRoot ?? defaultRoot);
+};
+
+/** Espace libre (octets) du volume qui contiendra ce dossier, même s'il n'existe pas encore. */
+export const freeSpaceBytes = (folder: string): number | undefined => {
+  let current = path.resolve(folder);
+  for (;;) {
+    try {
+      const stats = fs.statfsSync(current);
+      return Number(stats.bavail) * Number(stats.bsize);
+    } catch {
+      const parent = path.dirname(current);
+      if (parent === current) return undefined;
+      current = parent;
+    }
+  }
 };
 
 const isEmptyDir = (dir: string): boolean => fs.readdirSync(dir).length === 0;

@@ -4,7 +4,7 @@
  */
 
 import Box from "@mui/material/Box";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 
 import { ActionProvider } from "./context/action.context";
 import { BackgroundProvider } from "./context/background.context";
@@ -19,7 +19,10 @@ import Panel from "./component/panel/panel";
 import SpecialPanel from "./component/special-panel/special-panel";
 import WindowsBar from "./component/windows-bar/windows-bar";
 
+import { enqueueSnackbar } from "notistack";
 import { useTranslation } from "react-i18next";
+import { formatBytes } from "../../i18n/format-bytes";
+import type { GamesRootInfo } from "@shared/types";
 import type {
   LauncherBackgroundProps,
   MainLauncherProvidersProps,
@@ -30,6 +33,74 @@ import Home from "./panels/home/home";
 
 // Les réglages (mods, outils, debug) ne servent pas au démarrage : chargés à part
 const Settings = lazy(() => import("./panels/settings/settings"));
+
+/** Premier lancement : où installer les jeux (dossier proposé, espace libre, choix d'un autre dossier). */
+function GamesRootChoicePanel() {
+  const { t } = useTranslation();
+  const { changePanel } = usePanels();
+  const { refreshChannel } = useGames();
+  const [info, setInfo] = useState<GamesRootInfo | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => setInfo(await window.electron_API.getGamesRoot());
+  useEffect(() => {
+    void load();
+  }, []);
+
+  // Dossier validé : les jeux sont relus depuis le bon dossier, puis on suit le parcours habituel
+  const done = async () => {
+    await refreshChannel();
+    const betaEnabled = await window.electron_API.getSettings("betaEnabled");
+    changePanel(betaEnabled ? "info-beta-test" : "choose-games");
+  };
+
+  const keep = async () => {
+    setBusy(true);
+    try {
+      await window.electron_API.confirmGamesRoot();
+      await done();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const change = async () => {
+    setBusy(true);
+    try {
+      const folder = await window.electron_API.changeGamesRoot();
+      if (folder) {
+        enqueueSnackbar(t("settings.gamesRoot.moved", { folder }), { variant: "success" });
+        await done();
+      }
+    } catch (error) {
+      const raw = error instanceof Error ? error.message : String(error);
+      enqueueSnackbar(raw.replace(/^Error invoking remote method '[^']+': (\w*Error: )?/, ""), { variant: "error" });
+      await load(); // l'état réel (dossier, espace libre) peut avoir changé
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Box sx={{ position: "absolute", inset: 0 }}>
+      <SpecialPanel
+        type="info"
+        paragraph={t("gamesRootChoice.text", {
+          path: info?.path ?? "…",
+          free: info?.freeBytes != null ? formatBytes(info.freeBytes) : t("gamesRootChoice.unknownFree"),
+        })}
+        buttons={
+          info && !busy
+            ? [
+                { text: t("gamesRootChoice.keep"), onClick: keep },
+                { text: t("gamesRootChoice.change"), onClick: change },
+              ]
+            : []
+        }
+      />
+    </Box>
+  );
+}
 
 function BetaEnabledPanel() {
   const { t } = useTranslation();
@@ -58,12 +129,13 @@ function BetaEnabledPanel() {
 /** Le canal actif n'est plus proposé (canaux de test désactivés, jeu sans stable) : retour au choix du jeu. */
 function ChannelGuard() {
   const { channelLost, clearChannelLost } = useGames();
-  const { changePanel } = usePanels();
+  const { changePanel, activePanel } = usePanels();
   useEffect(() => {
-    if (!channelLost) return;
+    // Premier lancement : le choix du dossier passe avant tout (il mène lui-même au choix du jeu)
+    if (!channelLost || activePanel === "choose-games-root") return;
     clearChannelLost();
     changePanel("choose-games");
-  }, [channelLost]);
+  }, [channelLost, activePanel]);
   return null;
 }
 
@@ -99,6 +171,9 @@ function Launcher() {
       <MainLauncherProviders>
         {/* Panels */}
         <ThemeProvider>
+          <Panel id="choose-games-root">
+            <GamesRootChoicePanel />
+          </Panel>
           <Panel id="info-beta-test">
             <BetaEnabledPanel />
           </Panel>

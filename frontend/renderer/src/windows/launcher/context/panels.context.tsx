@@ -24,6 +24,9 @@ export const PanelsProvider = ({ children }: PanelsProviderProps) => {
 
   useEffect(() => {
     const loadSettings = async () => {
+      // Premier lancement : le dossier d'installation des jeux est demandé avant tout
+      const root = await window.electron_API.getGamesRoot();
+      if (root.needsChoice) return setActivePanel("choose-games-root");
       const betaEnabled = await window.electron_API.getSettings("betaEnabled");
       if (betaEnabled) setActivePanel("info-beta-test");
     };

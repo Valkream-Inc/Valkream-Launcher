@@ -109,6 +109,7 @@ const electronAPI: ElectronAPI = {
   },
   removeGamesRootProgressListeners: () =>
     ipcRenderer.removeAllListeners("games-root:progress"),
+  confirmGamesRoot: () => ipcRenderer.invoke("games-root:confirm"),
   changeGamesRoot: () => ipcRenderer.invoke("games-root:change"),
   resetGamesRoot: () => ipcRenderer.invoke("games-root:reset"),
   chooseFolder: () => ipcRenderer.invoke("choose-folder"),

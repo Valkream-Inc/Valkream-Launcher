@@ -9,7 +9,17 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { cleanupInterruptedMove, getMoveProgress, isMovingGamesRoot, moveGamesRoot, readGamesRoot } from "./games-root.js";
+import {
+  cleanupInterruptedMove,
+  confirmGamesRoot,
+  freeSpaceBytes,
+  getMoveProgress,
+  isMovingGamesRoot,
+  moveGamesRoot,
+  needsGamesRootChoice,
+  readGamesRoot,
+  writeGamesRoot,
+} from "./games-root.js";
 import { applyLauncherVersion, compareVersions } from "../settings/launcher-version.js";
 
 let dir: string;
@@ -120,5 +130,55 @@ describe("version du launcher", () => {
     assert.equal(fs.existsSync(path.join(instances, "g", "stable", "game")), false);
     assert.ok(fs.existsSync(path.join(instances, "g", "stable", "instance.settings.json")));
     assert.equal(applyLauncherVersion({ versionFile, instancesDir: instances, current: "3.0.0" }).change, "same");
+  });
+});
+
+describe("choix du dossier au premier lancement", () => {
+  it("demandé tant que rien n'est validé et qu'aucun jeu n'est installé", () => {
+    const file = path.join(dir, "paths.json");
+    const root = path.join(dir, "data");
+    assert.equal(needsGamesRootChoice(file, root), true);
+  });
+
+  it("plus demandé après validation (dossier gardé) ou choix explicite, y compris après un retour au défaut", () => {
+    const root = path.join(dir, "data");
+    const kept = path.join(dir, "kept.json");
+    confirmGamesRoot(kept);
+    assert.equal(needsGamesRootChoice(kept, root), false);
+    assert.equal(readGamesRoot(kept), undefined);
+
+    const chosen = path.join(dir, "chosen.json");
+    writeGamesRoot(chosen, path.join(dir, "ailleurs"));
+    assert.equal(needsGamesRootChoice(chosen, root), false);
+    assert.equal(readGamesRoot(chosen), path.join(dir, "ailleurs"));
+
+    writeGamesRoot(chosen, undefined);
+    assert.equal(needsGamesRootChoice(chosen, root), false);
+    assert.equal(readGamesRoot(chosen), undefined);
+  });
+
+  it("valider garde le dossier déjà choisi", () => {
+    const file = path.join(dir, "paths.json");
+    fs.writeFileSync(file, JSON.stringify({ gamesRoot: path.join(dir, "x") }));
+    confirmGamesRoot(file);
+    assert.equal(readGamesRoot(file), path.join(dir, "x"));
+  });
+
+  it("installation existante reprise telle quelle : pas de question", () => {
+    const root = path.join(dir, "data");
+    seed(root);
+    assert.equal(needsGamesRootChoice(path.join(dir, "paths.json"), root), false);
+  });
+
+  it("fichier de config illisible : on demande (et rien ne plante)", () => {
+    const file = path.join(dir, "paths.json");
+    fs.writeFileSync(file, "{pas du json");
+    assert.equal(needsGamesRootChoice(file, path.join(dir, "data")), true);
+    assert.equal(readGamesRoot(file), undefined);
+  });
+
+  it("espace libre d'un dossier qui n'existe pas encore : celui du volume parent", () => {
+    const free = freeSpaceBytes(path.join(dir, "n", "existe", "pas"));
+    assert.ok(typeof free === "number" && free > 0);
   });
 });

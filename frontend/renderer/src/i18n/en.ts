@@ -66,6 +66,12 @@ const en: Messages = {
     beta: "BETA",
     alpha: "ALPHA",
   },
+  gamesRootChoice: {
+    text: "Where should your games be installed? Suggested folder: {{path}} (free space: {{free}}). Pick another folder (another drive, for example) or keep this one. You can change it later in the launcher settings.",
+    unknownFree: "unknown",
+    change: "Choose another folder",
+    keep: "Continue with this folder",
+  },
   beta: {
     panel: "You have beta testing enabled ...",
     disable: "Disable it",

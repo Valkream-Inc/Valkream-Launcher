@@ -24,6 +24,8 @@ export interface GamesContextValue {
   actualChannel: Channel;
   /** Vérifie que le canal actif est encore proposé (réglage désactivé, canal retiré du remote) : sinon stable. */
   refreshChannel: () => Promise<void>;
+  /** Change quand les données locales ont changé (dossier des jeux déplacé…) : relire le statut. */
+  refreshTick: number;
   /** Le canal actif n'est plus proposé (tests désactivés, jeu sans stable…) : retour au choix du jeu requis. */
   channelLost: boolean;
   clearChannelLost: () => void;

@@ -69,6 +69,12 @@ const fr: Messages = {
     beta: "BETA",
     alpha: "ALPHA",
   },
+  gamesRootChoice: {
+    text: "Où installer vos jeux ? Dossier proposé : {{path}} (espace libre : {{free}}). Choisissez un autre dossier (un autre disque, par exemple) ou gardez celui-ci. Vous pourrez le changer plus tard dans les réglages du launcher.",
+    unknownFree: "inconnu",
+    change: "Choisir un autre dossier",
+    keep: "Continuer avec ce dossier",
+  },
   beta: {
     panel: "Vous avez les tests betas activés ...",
     disable: "Les désactiver",

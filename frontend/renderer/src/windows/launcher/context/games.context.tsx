@@ -44,6 +44,15 @@ export const GamesProvider = ({ children }: GamesProviderProps) => {
     return () => window.electron_API.removeGamesRootProgressListeners?.();
   }, []);
 
+  // Incrémenté quand les données locales changent sous nos pieds (dossier des jeux déplacé, canaux relus) :
+  // l'accueil relit alors le statut tout de suite au lieu d'attendre le prochain rafraîchissement.
+  const [refreshTick, setRefreshTick] = useState(0);
+  const wasMoving = useRef(false);
+  useEffect(() => {
+    if (wasMoving.current && !gamesRootMove.active) setRefreshTick((tick) => tick + 1);
+    wasMoving.current = gamesRootMove.active;
+  }, [gamesRootMove.active]);
+
   const actualInstance =
     instancesRenderConfig.find((item) => item.id === actualInstanceId) ??
     instancesRenderConfig[0];
@@ -57,6 +66,7 @@ export const GamesProvider = ({ children }: GamesProviderProps) => {
   };
 
   const refreshChannel = useCallback(async () => {
+    setRefreshTick((tick) => tick + 1);
     try {
       const [betaEnabled, instances] = await Promise.all([
         window.electron_API.getSettings("betaEnabled"),
@@ -83,6 +93,7 @@ export const GamesProvider = ({ children }: GamesProviderProps) => {
     changeActualInstance,
     actualChannel,
     refreshChannel,
+    refreshTick,
     channelLost,
     clearChannelLost: () => setChannelLost(false),
     gamesRootMove,

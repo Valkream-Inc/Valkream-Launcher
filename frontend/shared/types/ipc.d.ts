@@ -113,7 +113,10 @@ export interface ElectronAPI {
   openAppData(): Promise<string>;
   uninstallLauncher(): Promise<ActionResult>;
   /** Dossier d'installation des jeux (réglage général). */
-  getGamesRoot(): Promise<{ path: string; isDefault: boolean }>;
+  /** Dossier des jeux, espace libre du volume, et `needsChoice` : premier lancement, choix à demander. */
+  getGamesRoot(): Promise<GamesRootInfo>;
+  /** Garde le dossier proposé (le choix n'est plus redemandé). */
+  confirmGamesRoot(): Promise<void>;
   /** Déplacement du dossier des jeux en cours (fichiers copiés / total). */
   getGamesRootMove(): Promise<GamesRootMove>;
   onGamesRootProgress(callback: (progress: GamesRootMove) => void): void;
@@ -132,6 +135,13 @@ export interface ElectronUpdaterAPI {
   removeUpdateListeners(): void;
   closeUpdateWindow(): void;
   openMainWindow(): void;
+}
+
+export interface GamesRootInfo {
+  path: string;
+  isDefault: boolean;
+  freeBytes: number | null;
+  needsChoice: boolean;
 }
 
 export interface GamesRootMove {

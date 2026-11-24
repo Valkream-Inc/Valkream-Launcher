@@ -40,7 +40,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
     installationStatusLoaded: false,
   });
   const { actionLoading } = useAction();
-  const { actualInstanceId, actualChannel } = useGames();
+  const { actualInstanceId, actualChannel, refreshTick } = useGames();
   const { activePanel } = usePanels();
 
   const [event, setEvent] = useState<GameEvent | false | null>(null);
@@ -167,7 +167,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
         intervalRef.current = null;
       }
     };
-  }, [actionLoading, actualInstanceId, actualChannel]);
+  }, [actionLoading, actualInstanceId, actualChannel, refreshTick]);
 
   const contextValue: InfosContextValue = {
     isLoading,

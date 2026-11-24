@@ -28,7 +28,7 @@ Seules les tâches **ouvertes** sont listées. Légende : (+) petit · (++) moye
 - [ ] (++) Accessibilité : clavier, contraste des thèmes, `prefers-reduced-motion`.
 - [ ] (++) Mode hors ligne explicite : bandeau « dernière version connue » quand seul le cache répond.
 - [ ] (++) Migrer les CSS des thèmes vers MUI (modern → old → futuristic), avec contrôle visuel (base : `windows/launcher/theme/mui-themes.ts`).
-- [ ] (++) Chemin d'installation par défaut demandé au premier démarrage (panel « info » + sélecteur de dossier).
+- [x] Chemin d'installation demandé au premier démarrage : à valider dans Electron (panneau, choix d'un autre disque, rechargement).
 
 ## Code, tests, sécurité
 
