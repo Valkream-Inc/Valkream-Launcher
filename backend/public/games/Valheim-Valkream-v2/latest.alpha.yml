@@ -10,7 +10,7 @@
 #
 # À FAIRE avant publication (rien de tout cela ne peut être deviné) :
 #   1. Sur une installation Steam PROPRE de la version alpha (branche bêta Steam « public-test » par exemple) :
-#        yarn build:manifest <dossier-du-jeu> <sortie> --manifest-only --ignore "*.log" --latest latest.alpha.yml --entry game-base.valheim
+#        yarn build:manifest <dossier-du-jeu> <sortie> --manifest-only --ignore "*.log" --ignore "BepInEx/**" --latest latest.alpha.yml --entry game-base.valheim
 #      → écrit hash.json (à servir sous /games/Valheim-Valkream-v2/hash/alpha-game.json) et le `hash` de l'entrée.
 #   2. Renseigner `buildid` (affiché par Steam / SteamDB) si on veut un message précis quand la version diffère.
 #   3. Facultatif : `depot` (id + manifeste de SteamDB) propose au joueur de télécharger la version exacte
@@ -27,11 +27,12 @@ game-base:
     buildid: 26249040 # Patch 1.0.21 (28 octobre 2026)
     # steam-beta: public-test # inutile pour la branche publique actuelle
     content: /games/Valheim-Valkream-v2/hash/alpha-game.json
-    hash: 744d6f0cea210138b02c53c6d11119a765424c7058ff87075e09192d57a5297d
+    hash: 70b7e3617e3c343d6ff6e3d1e0fece2ef7812cc3c2a5ff560fea6216a7bee89a
     depot: { id: 892972, manifest: "3316048117713314105" } # 892972 = Valheim Windows
     to_ignore:
       - "*.log"
       - BepInEx/**
+      - .DepotDownloader/** # métadonnées de DepotDownloader : ne font pas partie du jeu
 
   bepinex:
     version: 5.4.2333

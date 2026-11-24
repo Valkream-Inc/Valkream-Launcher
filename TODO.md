@@ -4,9 +4,8 @@ Seules les tâches **ouvertes** sont listées. Légende : (+) petit · (++) moye
 
 ## À faire avant la prochaine release
 
-- [ ] `yarn install` puis committer `yarn.lock` (dépendances retirées, réorganisées ; la CI en `--immutable` échoue sinon).
 - [ ] `yarn depot:pin <tag>` : renseigner `instances/install/depot/depot-config.ts` (URL + sha256 de DepotDownloader).
-- [ ] Migrer 7 Days to Die (et Valheim) vers `steam_library` : générer le manifeste depuis une installation Steam propre (`yarn build:manifest … --manifest-only`), puis retirer les zips hébergés.
+- [ ] Migrer vers `steam_library` : Valheim alpha est fait (`hash/alpha-game.json`, `depot` renseigné) ; reste Valheim stable / beta et 7 Days to Die (manifeste depuis une installation Steam propre : `yarn build:manifest … --manifest-only`), puis retirer les zips hébergés.
 - [ ] Valider dans Electron : zoom, barre d'outils, défilement, pastilles de portée, canaux, déplacement du dossier des jeux (dont entre deux disques), pagination, fond 3D chargé à la demande, installeur NSIS (jamais compilé ici).
 - [ ] Lancer `yarn build` complet : `check:build` et `check:runtime` (démarrage Electron) n'ont jamais tourné sur un vrai build.
 

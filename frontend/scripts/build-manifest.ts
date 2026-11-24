@@ -38,6 +38,9 @@ const main = async (): Promise<void> => {
     else positional.push(args[i]);
   }
 
+  // Dossier de travail de DepotDownloader (jeu téléchargé par depot) : jamais une partie du jeu
+  if (!ignore.includes(".DepotDownloader/**")) ignore.push(".DepotDownloader/**");
+
   const [source, output] = positional;
   if (!source || !output || ignore.includes("") || Boolean(latest) !== Boolean(entry)) {
     console.error("Usage : build-manifest <dossier-source> <dossier-sortie> [--ignore <motif>]... [--latest <latest.yml> --entry <niveau.nom>]");

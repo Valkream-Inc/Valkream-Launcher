@@ -1,7 +1,4 @@
 {
-  ".DepotDownloader/892972_3316048117713314105.manifest": "ecdb12bf4b0444ac8d04058ab3e6090740546aadb6cea424e4784ee53f968721",
-  ".DepotDownloader/892972_3316048117713314105.manifest.sha": "339e30de3567e2f8e5cfb883073210810fb8e43c3978d05fa3c89a206a146d07",
-  ".DepotDownloader/depot.config": "9c1e8c1d48e6ebe92c1252b4280e42b1c52f660fff1a3e4064154a6bef8cbba3",
   "D3D12/D3D12Core.dll": "31f364f2b3aa1753e7ba9ff912d0721c8f424be5fa14503efddafbb30c635d3b",
   "MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll": "49d3ebefc40c6dde6f7d7ee81bbae0c6262cc469ae91b04428e1907be95d3091",
   "MonoBleedingEdge/EmbedRuntime/mono-2.0-bdwgc.dll": "35fd9d8065ee84d0c9312b4b3bb19eca3c1196c952e66d74dc8895cfff0aa028",
