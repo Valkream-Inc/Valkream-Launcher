@@ -26,8 +26,7 @@
     "build:electron": "tsx build-script.ts --obf=true",
     "check:build": "tsx scripts/check-build.ts",
     "check:runtime": "tsx scripts/check-runtime.ts",
-    "clean:main": "node -e \"require('node:fs').rmSync('.tsbuild',{recursive:true,force:true})\"",
-    "rebuild": "electron-rebuild"
+    "clean:main": "node -e \"require('node:fs').rmSync('.tsbuild',{recursive:true,force:true})\""
   },
   "license": "MIT-NC",
   "browserslist": {
@@ -43,31 +42,18 @@
     ]
   },
   "dependencies": {
+    "electron-updater": "6.8.12",
+    "gamedig": "^5.3.3",
+    "unzipper": "^0.12.5",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.5.0",
     "@mui/material": "^9.5.0",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
-    "electron-updater": "6.8.12",
-    "fs-extra": "^11.4.1",
-    "gamedig": "^5.3.3",
-    "i18next": "^27.2.3",
-    "notistack": "^3.0.2",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "react-i18next": "^18.0.3",
-    "react-router-dom": "^7.18.6",
-    "three": "^0.187.0",
-    "unzipper": "^0.12.5",
-    "yaml": "^2.9.1"
-  },
-  "optionalDependencies": {
-    "better-sqlite3": "^13.2.0"
-  },
-  "devDependencies": {
-    "@types/better-sqlite3": "^9.6.0",
-    "@types/fs-extra": "^11.0.4",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
@@ -78,13 +64,19 @@
     "cross-env": "^10.1.0",
     "electron": "^45.4.1",
     "electron-builder": "26.18.1",
-    "electron-rebuild": "^3.2.9",
     "esbuild": "^0.28.2",
+    "i18next": "^27.2.3",
     "javascript-obfuscator": "^5.10.1",
     "jimp": "^1.6.1",
     "node-fetch": "^3.3.2",
     "nodemon": "^3.1.14",
+    "notistack": "^3.0.2",
     "png2icons": "^2.0.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-i18next": "^18.0.3",
+    "react-router-dom": "^7.18.6",
+    "three": "^0.187.0",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "vite": "^8.3.8",

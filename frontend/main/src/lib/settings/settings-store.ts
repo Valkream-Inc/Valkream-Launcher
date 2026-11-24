@@ -5,7 +5,6 @@
  * Réglages du launcher dans un simple fichier JSON (`settings.json`), écrit de façon atomique
  * (fichier temporaire puis renommage : une coupure ne laisse jamais un fichier à moitié écrit).
  * Un fichier illisible est mis de côté (`.corrupt`) et remplacé par les valeurs par défaut.
- * Au premier lancement, les réglages de l'ancienne base SQLite sont repris (`legacy`).
  */
 
 import fs from "fs";
@@ -17,13 +16,11 @@ export class SettingsStore<T extends object> {
   constructor(
     private readonly file: string,
     private readonly defaults: T,
-    /** Réglages à reprendre quand le fichier n'existe pas encore (ancienne base). */
-    private readonly legacy?: () => Promise<Partial<T> | undefined>,
   ) {
     this.data = { ...defaults };
   }
 
-  async init(): Promise<void> {
+  init(): void {
     if (fs.existsSync(this.file)) {
       try {
         const parsed: unknown = JSON.parse(fs.readFileSync(this.file, "utf8"));
@@ -35,13 +32,7 @@ export class SettingsStore<T extends object> {
         fs.renameSync(this.file, `${this.file}.corrupt`);
       }
     }
-    let imported: Partial<T> | undefined;
-    try {
-      imported = await this.legacy?.();
-    } catch {
-      imported = undefined; // migration facultative : jamais bloquante
-    }
-    this.data = { ...this.defaults, ...(imported ?? {}) };
+    this.data = { ...this.defaults };
     this.save();
   }
 

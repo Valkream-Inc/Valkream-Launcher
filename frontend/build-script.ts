@@ -14,7 +14,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 import * as builder from "electron-builder";
-import fse from "fs-extra";
 import JavaScriptObfuscator from "javascript-obfuscator";
 
 import { name } from "./package.json";
@@ -115,7 +114,7 @@ class LauncherBuilder {
       fs.rmSync("./build/frontend", { recursive: true });
     }
 
-    fse.copySync("./renderer/build", "./build/frontend");
+    fs.cpSync("./renderer/build", "./build/frontend", { recursive: true });
     console.log("✅ Copy React terminée !");
   }
 
@@ -226,25 +225,20 @@ class LauncherBuilder {
     const latestFile = "latest.yml";
 
     // La fonction 'filter' permet d'ignorer le fichier latest.yml
-    fse.copySync(tempInstall, distDir, {
-      overwrite: true,
-      filter: (src) => !src.includes(latestFile),
-    });
-    fse.copySync(tempUpdate, distDir, {
-      overwrite: true,
-      filter: (src) => !src.includes(latestFile),
-    });
+    const copyOptions = { recursive: true, force: true, filter: (src: string) => !src.includes(latestFile) };
+    fs.cpSync(tempInstall, distDir, copyOptions);
+    fs.cpSync(tempUpdate, distDir, copyOptions);
 
     // Copie le fichier latest.yml de manière explicite
     const latestSrc = path.join(tempUpdate, latestFile);
     const latestDest = path.join(distDir, latestFile);
     if (fs.existsSync(latestSrc)) {
-      fse.copySync(latestSrc, latestDest, { overwrite: true });
+      fs.copyFileSync(latestSrc, latestDest);
     }
 
     // Supprime les dossiers temporaires
-    fse.removeSync(tempInstall);
-    fse.removeSync(tempUpdate);
+    fs.rmSync(tempInstall, { recursive: true, force: true });
+    fs.rmSync(tempUpdate, { recursive: true, force: true });
 
     console.log("✅ Fusion terminée !");
   }

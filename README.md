@@ -64,7 +64,7 @@ Ce projet comprend :
 
 - `frontend/` : le launcher Electron ([frontend/README.md](frontend/README.md))
 - `backend/` : serveur Node.js qui sert les fichiers en dev ([backend/README.md](backend/README.md))
-- `doc/` : [système d'instances](doc/instance-system/README.md) (architecture, formats, ajouter un jeu) et [déploiement d'une version du launcher](doc/new-launcher-version.doc.md)
+- `doc/` : [guide des configs](doc/instance-system/configs.md) (quel fichier modifier, `latest.yml`), [système d'instances](doc/instance-system/README.md) (référence détaillée) et [déploiement d'une version du launcher](doc/new-launcher-version.doc.md)
 
 ---
 
@@ -92,7 +92,6 @@ fnm default 26
 npm install -g corepack
 yarn set version stable
 yarn install
-yarn workspace Valkream-Launcher rebuild
 ```
 
 ---
@@ -108,13 +107,11 @@ Le projet est entièrement en **TypeScript** (`.ts` / `.tsx`). Les types sont s�
 ```bash
 yarn dev          # backend + launcher : Vite, esbuild (main), Electron, typecheck en watch (turbo)
 yarn dev:fast     # idem sans les typecheck en watch (le plus léger)
-yarn dev:fresh    # electron-rebuild puis yarn dev (après un changement d'Electron)
 yarn dev:front    # launcher seul
 yarn dev:back     # serveur de fichiers seul (http://localhost:3000)
 yarn typecheck    # vérification des types (main, renderer, scripts, backend)
 yarn lint         # ESLint
 yarn build        # installeurs du launcher
-yarn rebuild      # recompilation des modules natifs pour Electron
 ```
 
 Des tâches équivalentes sont disponibles dans VS Code (`Terminal > Exécuter la tâche...`) et un profil de debug Electron est fourni dans `.vscode/launch.json`.

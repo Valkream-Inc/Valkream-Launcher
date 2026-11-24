@@ -8,7 +8,6 @@
 
 import fs from "fs";
 import path from "path";
-import unzipper from "unzipper";
 
 import { assertArchiveWithinLimits } from "../../lib/archive/archive-limits.js";
 import { downloadFile } from "../../lib/net/download-file.js";
@@ -41,6 +40,8 @@ export const realInstallIO: InstallIO = {
   async extract(zipPath, outDir, { folderInZip, accept, onProgress }) {
     const root = path.resolve(outDir);
     const prefix = folderInZip ? normalizeRelative(folderInZip) : "";
+    // Chargé à la demande : seuls les zip en ont besoin
+    const { default: unzipper } = await import("unzipper");
     const directory = await unzipper.Open.file(zipPath);
     const archived = directory.files.filter(
       (file) => file.type !== "Directory",

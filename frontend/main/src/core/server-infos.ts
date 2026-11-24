@@ -4,7 +4,6 @@
  */
 
 import dns from "dns";
-import { GameDig } from "gamedig";
 
 import type { ServerInfos } from "@shared/types";
 
@@ -56,6 +55,8 @@ class InfosManager {
   /** Interroge le serveur de jeu (GameDig). Ne lève jamais : « server offline » en cas d'échec. */
   async getServerInfos(server: ServerQueryConfig): Promise<ServerInfos> {
     try {
+      // Chargé à la demande : gamedig est lourd et n'est utile qu'à la première requête serveur
+      const { GameDig } = await import("gamedig");
       const res = await GameDig.query(server);
 
       return {

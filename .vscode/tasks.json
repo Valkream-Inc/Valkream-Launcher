@@ -14,7 +14,7 @@
     },
     {
       "label": "Dev : launcher",
-      "detail": "Vite + esbuild (main) + Electron + typecheck en watch (sans rebuild natif)",
+      "detail": "Vite + esbuild (main) + Electron + typecheck en watch",
       "type": "shell",
       "command": "yarn dev:front",
       "isBackground": true,
@@ -182,14 +182,6 @@
       "label": "Yarn : install",
       "type": "shell",
       "command": "yarn install",
-      "problemMatcher": [],
-      "presentation": { "panel": "shared", "reveal": "always" }
-    },
-    {
-      "label": "Yarn : rebuild natif (electron-rebuild)",
-      "detail": "À relancer après un changement de version d'Electron / better-sqlite3 (ou « yarn dev:fresh »)",
-      "type": "shell",
-      "command": "yarn rebuild",
       "problemMatcher": [],
       "presentation": { "panel": "shared", "reveal": "always" }
     },

@@ -30,6 +30,6 @@ scripts/              build-manifest (manifeste de hash d'un dossier), dev-main
 
 - Un seul pont IPC générique (`window.electron_API`) : les jeux sont désignés par leur `id` d'instance, jamais par une API par jeu.
 - Types partagés dans `shared/types`, types internes à côté du code (`*.types.ts`).
-- Réseau : un seul client, `fetch` natif (`lib/http.ts`) ; pas d'`axios`.
+- Réseau : un seul client, `fetch` natif (`lib/net/http.ts`) ; pas d'`axios`.
 - Onglets admin d'un jeu (Dev, Tools, Debug) : voir `doc/instance-system/README.md`.
 - Ajouter un jeu : voir `doc/instance-system/README.md`.

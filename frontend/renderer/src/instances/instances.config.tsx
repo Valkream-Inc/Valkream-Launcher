@@ -8,10 +8,15 @@
  * Ajouter un jeu = une entrée ici (+ une côté main et une dans l'index remote).
  */
 
+import { lazy } from "react";
 import { useTranslation } from "react-i18next";
 
-import SunsetEnvironment from "../windows/launcher/component/background/gltf-background/component/sunset-environement";
 import type { InstanceRenderConfig } from "./instances.types";
+
+// Chargé à la demande avec le fond 3D (three.js n'est pas dans le bundle de démarrage)
+const SunsetEnvironment = lazy(
+  () => import("../windows/launcher/component/background/gltf-background/component/sunset-environement"),
+);
 
 const DISCORD = "https://discord.com/invite/zn3TsumtyG";
 const SITE = "https://valkream.com";

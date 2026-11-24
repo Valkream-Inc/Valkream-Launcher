@@ -1,5 +1,7 @@
 # Système d'instances
 
+> **Nouveau ici ?** Commence par le [guide des configs](configs.md) (quel fichier modifier, `latest.yml` pas à pas, erreurs fréquentes). Ce document est la référence détaillée.
+
 Une **instance** = un jeu (ou une variante d'un jeu) décrit par trois couches reliées par un `id` unique (ex : `Valheim-Valkream-v2`).
 
 | Couche | Fichier | Décide |
@@ -15,30 +17,19 @@ Le remote ne décide jamais où le launcher écrit : `path` est interdit dans le
 ```
 backend/
   src/                            serveur statique (server.ts, app.ts, lib/request-log.ts)
-  public/                         voir backend/public/README.md
-    games/<id>-v2/                index.config.json, latest*.yml, config/, hash/
+  public/games/<id>/              index.config.json, latest*.yml, config/, hash/ (voir backend/public/README.md)
 frontend/
   shared/types/                   types partagés main / renderer (.d.ts seulement)
-  scripts/                        build-manifest, dev-main
+  scripts/                        build-manifest, check-build, check-runtime, update-latest, pin-depotdownloader, dev-main
   main/
     app.ts                        point d'entrée Electron
-    src/
-      core/                       services du launcher : constants, dirs, files, settings, launcher, server-infos
-      lib/                        helpers techniques sans logique métier : database, http (fetch), download-file
-                                  (reprise + watchdog), tar-extract (tar en flux), json-key (option `key`), archive-limits,
-                                  safe-link, platform-dir, format-bytes, console-stream, paths, patterns, version
-      windows/                    fenêtres (main, update) et preloads
-      ipc/                        handlers IPC : launcher-ipc, instance-ipc, admin-tools-ipc (onglet Tools),
-                                  sync-registry (une synchro par installation, annulation / relance), check-for-updates
-      instances/                  tout ce qui concerne les jeux
-        instances.config.ts       config main des instances (+ instances.types.d.ts)
-        remote/                   lien, résolveur + cache, validation, options par plateforme / lien, registre, index
-        install/                  installation : providers (zip, hash, thunderstore, archive, global-progress), conservation,
-                                  hash, cache, état, staging, stream-extract (.tar.gz en flux), local-content (`local:`)
-        tools/                    outils admin : hash-folder (hash + export), mods-list (liste de mods Thunderstore)
-        local/                    état local : rapport (inspector), infos d'accueil, statut, lancement, chemins
-        services.ts               assemble les services avec les dépendances réelles
-      types/                      types du main (core, utils)
+    src/                          détail de chaque dossier : frontend/main/src/README.md
+      core/                       constantes, dossiers, réglages, infos serveur, mise à jour du launcher
+      windows/                    fenêtres et preloads
+      ipc/                        handlers IPC (launcher, instances, outils admin), registre des synchronisations
+      instances/                  config main des jeux ; remote/ (index, cache), install/ (providers, depot/, files/, state/),
+                                  local/ (état, steam/, launch/), tools/ (outils admin)
+      lib/                        helpers sans logique métier : net/, archive/, fs/, settings/, errors/, format/
   renderer/src/
     instances/                    config render des instances + helpers
     windows/launcher/             contexts, composants, panneaux (home, settings, choose-games), theme/ (thèmes MUI)
@@ -48,14 +39,14 @@ frontend/
 
 - Fait : types partagés, règle de lien, validation de l'index et du `latest.yml`, résolveur avec cache disque, registre, confinement des chemins.
 - Fait : **installation par canal** (`instances/<id>/stable|beta/`) avec état (`instance.state.json`) et réglages (`instance.settings.json`) propres à chaque canal : la beta n'a aucun fichier en commun avec le stable.
-- Fait : **moteur d'installation** (`instances/install/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url` ; reprise par entrée ; une synchronisation à la fois par installation.
+- Fait : **moteur d'installation** (`instances/install/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url`, `nexus_modpack_url`, `steam_library` ; reprise par entrée ; une synchronisation à la fois par installation.
 - Fait : **rapport** (`instances:report`) : un statut par entrée + récapitulatif « fonctionne ou non ».
 - Fait : **UI 100 % générique** : choix du jeu, accueil (un seul `InstanceButton` : installer / réinstaller / mettre à jour / jouer, avec progression), réglages General / Launcher / Game / Mods (affichage joueur) / Dev (outils du jeu : désinstaller, ouvrir le dossier…) / Tools (préparation du remote : hash d'un dossier, liste de mods) / Debug (diagnostic : récapitulatif, tableaux filtrables, réglages, journal d'installation, « Réparer »). Dev, Tools et Debug sont réservés aux admins. Fonds image / vidéo / 3D, loader, liens et infos serveur lisent la config render de l'instance active.
 - Fait : instances `Valheim-Valkream-v2` et `SevenDtoD-Valkream-v2` (7 Days to Die installé entièrement dans le launcher, comme Valheim).
 - Fait : **une seule API** `window.electron_API` (`getInstances`, `getInstanceInfos`, `getInstanceStatus`, `getInstanceReport`, `syncInstance`, `launchInstance`, `openInstanceFolder`, `uninstallInstance`, `setInstanceSetting`, `onInstanceProgress`…). Les anciens managers, IPC, panneaux et API par jeu (`electron_Valheim_API`, `electron_SevenDtoD_API`) sont supprimés.
 - Fait : **réglages d'installation** : `instance.settings.json` contient tous les réglages (valeurs par défaut de l'instance incluses) dès le premier changement ; la lecture complète toujours avec les défauts.
 - Pas de migration des anciennes installations : réinstallation propre dans `instances/<id>/<canal>/` (les anciens dossiers ne sont pas touchés).
-- Pas encore : provider Nexus (signalé comme échec).
+- Fait : providers `nexus_modpack_url` (clé API Premium du joueur), Hexium (Thunderstore-compatible) et `steam_library`.
 
 ## Ajouter un jeu
 
@@ -145,7 +136,7 @@ Ce document n'est pas un avis juridique : le contrat d'abonné Steam et les cond
 
 ## Installation atomique et reprise
 
-- **Atomique par entrée** : chaque provider (`zip_url`, `hash_url`, Thunderstore) télécharge, vérifie et extrait d'abord dans `.tmp/<entrée>.stage`. Ce n'est qu'une fois tout prêt que `gameFolderToRemove` est appliqué et que les fichiers sont basculés dans le dossier du jeu par renommages (`install/staging.ts`). Une erreur, une annulation ou un hash invalide pendant la préparation laisse l'installation exactement dans son état précédent. La bascule elle-même (quelques renommages) n'est pas transactionnelle : une coupure à cet instant précis est rattrapée par « Vérifier / Réparer ». L'espace disque temporaire nécessaire est celui des fichiers à mettre à jour (ou de l'archive et de son extraction).
+- **Atomique par entrée** : chaque provider (`zip_url`, `hash_url`, Thunderstore) télécharge, vérifie et extrait d'abord dans `.tmp/<entrée>.stage`. Ce n'est qu'une fois tout prêt que `gameFolderToRemove` est appliqué et que les fichiers sont basculés dans le dossier du jeu par renommages (`install/files/staging.ts`). Une erreur, une annulation ou un hash invalide pendant la préparation laisse l'installation exactement dans son état précédent. La bascule elle-même (quelques renommages) n'est pas transactionnelle : une coupure à cet instant précis est rattrapée par « Vérifier / Réparer ». L'espace disque temporaire nécessaire est celui des fichiers à mettre à jour (ou de l'archive et de son extraction).
 - **Reprise HTTP** : un téléchargement interrompu (annulation, coupure, fermeture du launcher) est repris à la synchronisation suivante (`Range` + `If-Range`), à condition que l'URL soit la même et que le serveur annonce un `ETag` ou `Last-Modified` inchangé ; sinon il repart de zéro. Les partiels sont gardés 7 jours dans `.tmp` (`*.zip`, `*.part`, `*.meta`) et supprimés dès qu'une synchronisation réussit.
 
 ## Annulation, espace disque, journal
@@ -257,9 +248,9 @@ La résolution des dépendances **transitives** Thunderstore reste désactivée 
 
 ## Réseau et robustesse
 
-- Un seul client HTTP : `fetch` natif (`main/src/lib/http.ts`, `lib/download-file.ts`). Le téléchargeur reprend (Range / If-Range), coupe un flux muet après 30 s d'inactivité puis reprend, et n'insiste pas sur une 4xx.
+- Un seul client HTTP : `fetch` natif (`main/src/lib/net/http.ts`, `lib/net/download-file.ts`). Le téléchargeur reprend (Range / If-Range), coupe un flux muet après 30 s d'inactivité puis reprend, et n'insiste pas sur une 4xx.
 - `ipc/sync-registry.ts` : une synchro par installation ; relancer une installation bloquée ou plantée annule l'ancienne et repart aussitôt (les partiels sont repris). Tout est coupé à la fermeture ou sur erreur non gérée.
-- **Archives `.tar.gz` / `.tgz`** (`content` d'un `zip_url`, ou `zip` d'un `hash_url`) : téléchargement, gunzip et extraction se font en un seul flux (`install/stream-extract.ts`, `lib/tar-extract.ts`), sans archive sur le disque ; `folder_in_zip`, conservation/exclusions, limites et protection contre les chemins hors destination s'appliquent comme pour un zip. Pas de reprise HTTP : une coupure relance l'extraction (3 tentatives). Les `.zip` gardent téléchargement avec reprise, puis extraction avec progression.
+- **Archives `.tar.gz` / `.tgz`** (`content` d'un `zip_url`, ou `zip` d'un `hash_url`) : téléchargement, gunzip et extraction se font en un seul flux (`install/files/stream-extract.ts`, `lib/archive/tar-extract.ts`), sans archive sur le disque ; `folder_in_zip`, conservation/exclusions, limites et protection contre les chemins hors destination s'appliquent comme pour un zip. Pas de reprise HTTP : une coupure relance l'extraction (3 tentatives). Les `.zip` gardent téléchargement avec reprise, puis extraction avec progression.
 - **Progression globale** : `hash_url` et Thunderstore affichent un seul pourcentage pour toute l'entrée (cumul d'octets, débit moyen, jamais de nom de fichier ni de mod ; `providers/global-progress.ts`).
 - **Progression** : événements limités à 4 par seconde (`PROGRESS_INTERVAL_MS`), champ `elapsedMs` ; le bouton de l'accueil affiche un chronomètre ⏱ (horloge locale, mise à jour chaque seconde) en plus du pourcentage.
 
@@ -282,7 +273,7 @@ Interface traduite avec **i18next** + **react-i18next** : `frontend/renderer/src
 
 Ajouter un texte : l'écrire dans `fr.ts` ET `en.ts` (même clé, mêmes variables `{{x}}`) ; `i18n.test.ts` échoue sinon. Le mode d'emploi Steam est généré côté main dans la langue du réglage.
 
-Aussi traduits : onglets Debug / Tools, textes des jeux (`instances.config.tsx` : les `label` / `text` des réglages sont des clés de traduction, un texte brut reste accepté), boutons de popup. Côté main, `main/src/lib/messages.ts` (même principe, test de parité) traduit la progression d'installation et les messages de mise à jour du launcher, dans la langue du réglage ; le provider reçoit `context.t(...)`.
+Aussi traduits : onglets Debug / Tools, textes des jeux (`instances.config.tsx` : les `label` / `text` des réglages sont des clés de traduction, un texte brut reste accepté), boutons de popup. Côté main, `main/src/lib/errors/messages.ts` (même principe, test de parité) traduit la progression d'installation et les messages de mise à jour du launcher, dans la langue du réglage ; le provider reçoit `context.t(...)`.
 
 Restent en français (volontairement) : erreurs de configuration destinées aux administrateurs (validation du `latest.yml`, erreurs des providers), messages de console / développeur.
 
@@ -327,7 +318,7 @@ Chaque section affiche une pastille de **portée** :
 
 Seuls les réglages utiles au joueur sont dans les onglets General, Launcher et Game ; tout le reste est dans Dev. Une barre d'outils en haut des réglages offre Actualiser et le zoom (− / + / 100 %, ou Ctrl + molette, conservé entre deux lancements). Un contenu trop large défile horizontalement.
 
-- Les réglages globaux sont dans `settings.json` (dossier de données du launcher, écriture atomique). L'ancienne base SQLite est reprise automatiquement au premier lancement (`better-sqlite3` est optionnel et pourra être retiré).
+- Les réglages globaux sont dans `settings.json` (dossier de données du launcher, écriture atomique).
 - Les réglages d'un jeu sont dans `instance.settings.json` de son installation (un par canal).
 - Tools : source (liste collée, lien ou fichier) → clé JSON facultative pour un lien ou un fichier (`dependencies`, `packs.0.mods`…) → lancer avec barre de progression → résultat.
 - Debug : barre d'outils collante (recherche, problèmes seulement, recharger / vérifier / réparer, copier).

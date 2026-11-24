@@ -7,11 +7,9 @@ import path from "path";
 
 import type { SettingKey, Settings } from "@shared/types";
 
-import { readLegacySettings } from "../lib/settings/legacy-settings.js";
 import { setErrorLanguage } from "../lib/errors/localized-error.js";
 import type { Lang } from "../lib/errors/messages.js";
 import { SettingsStore } from "../lib/settings/settings-store.js";
-import { isDev } from "./constants.js";
 import DirsManager from "./dirs.js";
 
 class SettingsManager {
@@ -30,17 +28,12 @@ class SettingsManager {
   private readonly ready: Promise<void>;
 
   constructor() {
-    const databases = path.join(DirsManager.dbPath(), "databases");
-    this.store = new SettingsStore<Settings>(
-      path.join(DirsManager.dbPath(), "settings.json"),
-      this.defaultSettings,
-      () => readLegacySettings<Settings>(databases, isDev ? "Databases.sqlite" : "Databases.db"),
-    );
+    this.store = new SettingsStore<Settings>(path.join(DirsManager.dbPath(), "settings.json"), this.defaultSettings);
     this.ready = this.init();
   }
 
   async init(): Promise<void> {
-    await this.store.init();
+    this.store.init();
     this.language = this.store.get("language") === "en" ? "en" : "fr";
     setErrorLanguage(() => this.language);
   }

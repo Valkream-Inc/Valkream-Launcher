@@ -3,10 +3,14 @@
  * @license MIT-NC
  */
 
+import { lazy, Suspense } from "react";
+
 import "./background.css";
-import GltfBackground from "./gltf-background/gltf-background";
 import ImgBackground from "./img-background/img-background";
 import VideoBackground from "./video-background/video-background";
+
+// three.js / drei sont lourds : chargés seulement si le fond 3D est choisi
+const GltfBackground = lazy(() => import("./gltf-background/gltf-background"));
 
 import { useBackground } from "../../context/background.context";
 import { useInfos } from "../../context/infos.context";
@@ -27,7 +31,11 @@ function Background() {
         />
       )}
       {backgroundType === "image" && <ImgBackground />}
-      {backgroundType === "3d" && <GltfBackground />}
+      {backgroundType === "3d" && (
+        <Suspense fallback={null}>
+          <GltfBackground />
+        </Suspense>
+      )}
     </>
   );
 }

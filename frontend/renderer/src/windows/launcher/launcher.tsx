@@ -4,7 +4,7 @@
  */
 
 import Box from "@mui/material/Box";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 
 import { ActionProvider } from "./context/action.context";
 import { BackgroundProvider } from "./context/background.context";
@@ -26,7 +26,10 @@ import type {
 } from "./launcher.types";
 import ChooseGames from "./panels/choose-games/choose-games";
 import Home from "./panels/home/home";
-import Settings from "./panels/settings/settings";
+
+
+// Les réglages (mods, outils, debug) ne servent pas au démarrage : chargés à part
+const Settings = lazy(() => import("./panels/settings/settings"));
 
 function BetaEnabledPanel() {
   const { t } = useTranslation();
@@ -109,7 +112,9 @@ function Launcher() {
                 <Home />
               </Panel>
               <Panel id="settings">
-                <Settings />
+                <Suspense fallback={null}>
+                  <Settings />
+                </Suspense>
               </Panel>
             </LauncherBackground>
           </InfosProvider>

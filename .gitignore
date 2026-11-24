@@ -20,3 +20,6 @@ backend/public/games/SevenDtoD/latest/build-game-*.zip
 
 # Logs de session
 *.log
+
+# Journaux d'erreur copiés à la main
+*.error
