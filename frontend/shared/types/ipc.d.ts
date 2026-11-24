@@ -14,6 +14,7 @@ import type {
   InstanceReport,
   InstanceSettingValue,
   InstanceStatus,
+  DeprecatedInstall,
   InstanceSummary,
   InstanceSyncProgress,
   InstanceSyncResult,
@@ -96,6 +97,10 @@ export interface ElectronAPI {
   launchInstance(id: InstanceId, channel: Channel): Promise<void>;
   openInstanceFolder(id: InstanceId, channel: Channel): Promise<void>;
   uninstallInstance(id: InstanceId, channel: Channel): Promise<void>;
+  /** Installations du disque que le launcher ne propose plus (id retiré, désactivé, canal supprimé). */
+  getDeprecatedInstalls(): Promise<DeprecatedInstall[]>;
+  /** Désinstalle une installation même si son id ou son canal n'existe plus. */
+  uninstallDeprecated(id: string, channel: Channel): Promise<void>;
   onInstanceProgress(callback: Listener<InstanceSyncProgress>): void;
   removeInstanceProgressListeners(): void;
   setInstanceSetting(

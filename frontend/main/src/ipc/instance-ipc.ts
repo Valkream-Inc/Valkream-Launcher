@@ -26,6 +26,8 @@ import {
   getInstanceStatus,
 } from "../instances/services.js";
 import { isMovingGamesRoot } from "../lib/fs/games-root.js";
+import { instanceRootPath } from "../lib/fs/paths.js";
+import { deprecatedInstalls, scanInstalledInstances } from "../instances/local/installed-scan.js";
 import DirsManager from "../core/dirs.js";
 import LauncherManager from "../core/launcher.js";
 import { ensureSteamRunning, isSteamRunning } from "../instances/local/steam/steam.js";
@@ -250,6 +252,31 @@ const InstanceIpcHandlers = (): void => {
 
   ipcMain.handle("instances:depot-cancel", (_event, id: string, channel: Channel) => {
     cancelSync(`${resolve(id, channel).locations.installDir}#depot`);
+  });
+
+  // Installations que le launcher ne propose plus : listées pour pouvoir les désinstaller
+  ipcMain.handle("instances:deprecated", async () =>
+    deprecatedInstalls(
+      scanInstalledInstances(DirsManager.gamesRoot()),
+      new Set(instancesConfig.map((item) => item.id)),
+      await getInstanceRegistry().list(),
+    ),
+  );
+
+  // Désinstallation sans config : l'id ou le canal n'existe plus côté launcher (chemin validé, jamais hors des jeux)
+  ipcMain.handle("instances:uninstall-deprecated", (_event, id: unknown, channel: unknown) => {
+    assertNotMoving();
+    if (typeof id !== "string" || !isChannel(channel)) throw new LocalizedError("err.invalidInstanceId", { id: String(id) });
+    const installDir = instanceRootPath(DirsManager.gamesRoot(), id, channel);
+    if (getInstanceInstaller().isBusy(installDir)) throw new LocalizedError("install.alreadyRunning");
+    fs.rmSync(installDir, { recursive: true, force: true });
+    // Dossier du jeu vidé : retiré aussi (jamais s'il reste un autre canal)
+    const gameDir = path.dirname(installDir);
+    try {
+      if (fs.readdirSync(gameDir).length === 0) fs.rmdirSync(gameDir);
+    } catch {
+      /* déjà supprimé */
+    }
   });
 
   ipcMain.handle("instances:uninstall", (_event, id: string, channel: Channel) => {

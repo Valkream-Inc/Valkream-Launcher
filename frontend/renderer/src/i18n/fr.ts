@@ -210,6 +210,20 @@ const fr: Messages = {
     offline: "🔴 Hors ligne",
   },
   games: {
+    deprecated: {
+      title: "Installations qui ne sont plus proposées",
+      label: "OBSOLÈTE",
+      uninstall: "Désinstaller",
+      reason: {
+        removed: "Ce jeu n'existe plus dans le launcher.",
+        disabled: "Ce jeu est désactivé.",
+        "channel-removed": "Ce canal n'est plus proposé.",
+      },
+      confirmTitle: "Désinstaller ce jeu ?",
+      confirmText: "Les fichiers de « {{name}} » seront supprimés de cet ordinateur (sauvegardes du jeu comprises si elles sont dans son dossier).",
+      done: "Jeu désinstallé",
+      failed: "Désinstallation impossible (jeu en cours d'utilisation ?)",
+    },
     search: "Rechercher un jeu...",
     searchLabel: "Rechercher",
     none: "Aucun jeu trouvé pour « {{search}} »",

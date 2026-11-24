@@ -72,6 +72,9 @@ const electronAPI: ElectronAPI = {
     ipcRenderer.invoke("instances:open-folder", id, channel),
   uninstallInstance: (id, channel) =>
     ipcRenderer.invoke("instances:uninstall", id, channel),
+  getDeprecatedInstalls: () => ipcRenderer.invoke("instances:deprecated"),
+  uninstallDeprecated: (id, channel) =>
+    ipcRenderer.invoke("instances:uninstall-deprecated", id, channel),
   onInstanceProgress: (callback) =>
     ipcRenderer.on("instances:progress", (_event, data) => callback(data)),
   removeInstanceProgressListeners: () =>

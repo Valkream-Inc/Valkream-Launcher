@@ -207,6 +207,20 @@ const en: Messages = {
     offline: "🔴 Offline",
   },
   games: {
+    deprecated: {
+      title: "Installations no longer offered",
+      label: "DEPRECATED",
+      uninstall: "Uninstall",
+      reason: {
+        removed: "This game no longer exists in the launcher.",
+        disabled: "This game is disabled.",
+        "channel-removed": "This channel is no longer offered.",
+      },
+      confirmTitle: "Uninstall this game?",
+      confirmText: "The files of “{{name}}” will be deleted from this computer (including game saves if they are in its folder).",
+      done: "Game uninstalled",
+      failed: "Could not uninstall (game in use?)",
+    },
     search: "Search for a game...",
     searchLabel: "Search",
     none: "No game found for “{{search}}”",

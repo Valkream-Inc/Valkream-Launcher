@@ -3,9 +3,10 @@
  * @license MIT-NC
  */
 
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
+  Button,
   Card,
   CardActionArea,
   Chip,
@@ -15,7 +16,8 @@ import {
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { LauncherTheme } from "@shared/types";
+import type { DeprecatedInstall, LauncherTheme } from "@shared/types";
+import { enqueueSnackbar } from "notistack";
 
 import instancesRenderConfig from "../../../../instances/instances.config";
 import {
@@ -23,6 +25,7 @@ import {
   isSelectable,
   pickerChannels,
 } from "../../../../instances/instances.helpers";
+import Popup from "../../component/popup/popup";
 import { useGames } from "../../context/games.context";
 import { usePanels } from "../../context/panels.context";
 import { useTheme } from "../../context/theme.context";
@@ -258,6 +261,31 @@ export default function ChooseGames() {
       .catch(console.error);
   }, []);
 
+  // Installations que le serveur ne propose plus (id retiré, désactivé, canal supprimé) : à désinstaller
+  const [deprecated, setDeprecated] = useState<DeprecatedInstall[]>([]);
+  const [toRemove, setToRemove] = useState<DeprecatedInstall | null>(null);
+  const [removing, setRemoving] = useState(false);
+
+  useEffect(() => {
+    window.electron_API.getDeprecatedInstalls().then(setDeprecated).catch(console.error);
+  }, []);
+
+  const removeDeprecated = useCallback(async () => {
+    if (!toRemove || removing) return;
+    setRemoving(true);
+    try {
+      await window.electron_API.uninstallDeprecated(toRemove.id, toRemove.channel);
+      setDeprecated((list) => list.filter((item) => !(item.id === toRemove.id && item.channel === toRemove.channel)));
+      enqueueSnackbar(t("games.deprecated.done"), { variant: "success" });
+      setToRemove(null);
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar(t("games.deprecated.failed"), { variant: "error" });
+    } finally {
+      setRemoving(false);
+    }
+  }, [toRemove, removing, t]);
+
   const { changePanel } = usePanels();
   const { theme } = useTheme();
   const [search, setSearch] = useState("");
@@ -468,7 +496,40 @@ export default function ChooseGames() {
             ))}
           </Grid>
 
-          {filteredGames.length === 0 && (
+          {deprecated.length > 0 && (
+            <Box sx={{ mt: 5 }}>
+              <Typography sx={{ textAlign: "center", color: colors.text, opacity: 0.8, mb: 2 }}>
+                {t("games.deprecated.title")}
+              </Typography>
+              <Grid container spacing={3} sx={{ display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
+                {deprecated.map((item) => {
+                  const render = instancesRenderConfig.find((game) => game.id === item.id);
+                  const name = render?.name ?? item.id;
+                  return (
+                    <Grid key={`${item.id}@${item.channel}`}>
+                      <GameCard accent="#9e9e9e">
+                        <Box sx={{ p: 3, width: 220, display: "flex", flexDirection: "column", alignItems: "center", gap: 1.5, opacity: 0.85 }}>
+                          <Typography sx={{ fontFamily: "inherit", fontWeight: 600, fontSize: "1rem", textAlign: "center" }}>
+                            {name}
+                            {item.channel !== "stable" ? ` (${t(`channel.${item.channel}`)})` : ""}
+                          </Typography>
+                          <Chip size="small" label={t("games.deprecated.label")} sx={{ bgcolor: "#9e9e9e", color: "#000", fontWeight: 700, letterSpacing: 1 }} />
+                          <Typography variant="caption" sx={{ textAlign: "center" }}>
+                            {t(`games.deprecated.reason.${item.reason}`)}
+                          </Typography>
+                          <Button size="small" color="error" variant="outlined" onClick={() => setToRemove(item)}>
+                            {t("games.deprecated.uninstall")}
+                          </Button>
+                        </Box>
+                      </GameCard>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Box>
+          )}
+
+          {filteredGames.length === 0 && deprecated.length === 0 && (
             <Typography
               sx={{
                 textAlign: "center",
@@ -482,6 +543,18 @@ export default function ChooseGames() {
           )}
         </Box>
       </Box>
+      <Popup
+        open={toRemove !== null}
+        onClose={() => !removing && setToRemove(null)}
+        type="warning"
+        title={t("games.deprecated.confirmTitle")}
+        message={t("games.deprecated.confirmText", { name: toRemove?.id ?? "" })}
+        dismissible={!removing}
+        buttons={[
+          { text: t("games.deprecated.uninstall"), action: removeDeprecated, variant: "main", disabled: removing },
+          { text: t("common.cancel"), action: () => setToRemove(null), variant: "secondary", disabled: removing },
+        ]}
+      />
     </>
   );
 }

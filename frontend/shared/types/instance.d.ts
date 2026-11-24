@@ -249,6 +249,14 @@ export type InstanceAvailability =
   /** Index reçu mais invalide. */
   | "invalid";
 
+/** Installation présente sur le disque mais que le launcher ne propose plus. */
+export interface DeprecatedInstall {
+  id: string;
+  channel: Channel;
+  /** `removed` : id retiré du launcher ; `disabled` : instance désactivée ; `channel-removed` : canal supprimé. */
+  reason: "removed" | "disabled" | "channel-removed";
+}
+
 export interface InstanceSummary {
   id: InstanceId;
   availability: InstanceAvailability;
