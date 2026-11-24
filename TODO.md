@@ -68,3 +68,28 @@ Seules les tâches **ouvertes** sont listées. Légende : (+) petit · (++) moye
 - [ ] (+) Export / import des réglages du launcher (support et changement de PC).
 - [ ] (+) Raccourcis clavier (Entrée = Jouer, Échap = retour) et focus visible sur tous les boutons.
 - [ ] (++) Notifications de fin d'installation quand le launcher est en arrière-plan.
+
+## Idées de fonctionnalités
+
+### Pour les joueurs
+- [ ] (++) Profils de mods : activer / désactiver des groupes (ex : « boost FPS », « graphismes ») avec aperçu de l'espace et du gain, sans réinstaller (base : entrées `optional`).
+- [ ] (++) Sauvegarde et restauration des mondes / configs avant chaque mise à jour du jeu (zip daté, 3 dernières conservées).
+- [ ] (+) Restauration de la version précédente d'une entrée après une mise à jour qui pose problème (rollback local).
+- [ ] (++) Journal des changements (changelog) affiché avant la mise à jour : généré depuis le `latest.yml` ou un `changelog.json` du remote.
+- [ ] (+) Statut du serveur enrichi : liste des joueurs en ligne, historique de disponibilité, bouton « Rejoindre » (`steam://connect/ip:port`).
+- [ ] (+) Prévenir quand le serveur redevient disponible ou quand une maintenance se termine.
+- [ ] (++) Limite de bande passante et pause / reprise manuelle des téléchargements.
+- [ ] (+) Lancer le jeu directement connecté au serveur (argument de connexion déclaré dans `launchArgs`).
+
+### Pour les admins
+- [ ] (++) Onglet « Publier » : assistant qui calcule le hash, met à jour `latest.beta.yml`, incrémente la version et vérifie les liens avant publication.
+- [ ] (+) Comparaison de deux `latest.yml` (beta vs stable) : entrées ajoutées, retirées, versions différentes.
+- [ ] (++) Tableau de bord des erreurs d'installation remontées volontairement par les joueurs (rapport Debug envoyé en un clic, sans données personnelles).
+- [ ] (+) Planification d'une maintenance : message affiché à l'avance et blocage du lancement pendant la fenêtre.
+- [ ] (+) Vérification automatique des liens du `latest.yml` (HTTP 200, taille, hash) en CI, avec alerte si un lien Thunderstore / Nexus disparaît.
+
+### Écosystème
+- [ ] (++) Import d'un modpack Thunderstore complet (profil `r2modman`) comme entrée du `latest.yml`.
+- [ ] (++) Support de Linux / macOS dans le test de démarrage et les installeurs (AppImage, dmg), avec les chemins par plateforme déjà prévus dans les configs.
+- [ ] (+++) Mode « serveur dédié » : installer et mettre à jour le serveur de jeu avec le même moteur (instances de type serveur, sans interface de jeu).
+- [ ] (++) API publique en lecture seule du backend (liste des jeux, versions, événements) pour un site web ou un bot Discord.
