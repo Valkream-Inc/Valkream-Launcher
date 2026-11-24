@@ -38,3 +38,33 @@ Seules les tâches **ouvertes** sont listées. Légende : (+) petit · (++) moye
 - [ ] (+) Fenêtres Electron : activer `sandbox` et une CSP plus stricte.
 - [ ] (+) `yarn audit` / Dependabot.
 - [ ] (+) Nombres et unités (« Mo ») de la progression : localiser le format.
+
+## Propositions (à trier)
+
+### Fiabilité des installations
+- [ ] (++) Bouton « Réparer » proposé automatiquement quand le rapport détecte un fichier modifié ou manquant (aujourd'hui : onglet Debug seulement).
+- [ ] (+) Vérification d'intégrité en arrière-plan après une mise à jour du jeu (hash des fichiers critiques) avec notification discrète.
+- [ ] (+) Reprise après coupure de la bascule atomique : écrire un petit journal « bascule en cours » pour que « Vérifier » sache quoi terminer.
+- [ ] (++) Test d'installation complète sur un faux serveur local (backend de dev + faux zips) dans la CI : installation, mise à jour, annulation, reprise.
+
+### Performance
+- [ ] (++) Fond 3D : réduire la définition et le nombre de particules selon la machine (`navigator.hardwareConcurrency`), pause quand la fenêtre est masquée ou minimisée.
+- [ ] (+) Vidéos des jeux : poster + chargement différé, formats plus légers (WebM/AV1) pour alléger l'installeur (les 3 vidéos et 2 modèles 3D pèsent le plus).
+- [ ] (+) Mesurer le temps de démarrage (fenêtre visible, premier panneau) et le garder sous un budget vérifié dans la CI.
+- [ ] (+) Analyseur de bundle Vite (`rollup-plugin-visualizer`) pour repérer les modules lourds du renderer (MUI icons importés un par un).
+
+### Build et release
+- [ ] (+) CI : lancer `yarn check:build` et `yarn check:runtime` sur chaque PR (aujourd'hui seulement dans le workflow de build).
+- [ ] (++) Signature de code Windows de l'installeur (SmartScreen) et publication automatique des notes de version.
+- [ ] (+) Dependabot / Renovate groupé (renderer, outils de build, main) pour garder un `yarn.lock` à jour.
+- [ ] (+) `yarn knip` (ou équivalent) en CI : détecte fichiers, exports et dépendances inutilisés avant qu'ils s'accumulent.
+
+### Documentation
+- [ ] (+) Schéma JSON de `index.config.json` et du `latest.yml` (`$schema`) : autocomplétion et validation dans VS Code pour les admins.
+- [ ] (+) Commande `yarn new:game <id>` qui génère les trois fichiers de config d'un jeu à partir des exemples.
+- [ ] (+) Page « Dépannage joueur » (jeu qui ne se lance pas, Steam introuvable, dossier non vide, pare-feu) liée depuis le launcher.
+
+### Interface et accessibilité
+- [ ] (+) Export / import des réglages du launcher (support et changement de PC).
+- [ ] (+) Raccourcis clavier (Entrée = Jouer, Échap = retour) et focus visible sur tous les boutons.
+- [ ] (++) Notifications de fin d'installation quand le launcher est en arrière-plan.
