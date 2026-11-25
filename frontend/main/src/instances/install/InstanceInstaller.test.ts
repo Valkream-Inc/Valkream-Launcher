@@ -593,7 +593,7 @@ describe("InstanceInstaller", () => {
 
     it("depot déclaré : DepotDownloader est proposé", async () => {
       const remote = steamRemote(false);
-      remote["/stable.yml"]["game-base"].base.depot = { id: 7, manifest: "123456789" };
+      (remote["/stable.yml"]["game-base"].base as Record<string, unknown>).depot = { id: 7, manifest: "123456789" };
       const { result } = await run(null, remote);
       assert.equal(result.failed[0]?.steamIssue?.depotAvailable, true);
       assert.match(result.failed[0]?.steamIssue?.guide ?? "", /DepotDownloader/);

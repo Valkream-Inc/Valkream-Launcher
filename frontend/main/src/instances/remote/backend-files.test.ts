@@ -23,7 +23,8 @@ const backendPublic = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 const local = (link: string) =>
   path.join(backendPublic, link.replace(/^\//, ""));
 /** YAML ou JSON, détecté par l'extension du fichier (comme le launcher). */
-const readData = (link: string) => parseData(fs.readFileSync(local(link), "utf8"), link);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const readData = async (link: string): Promise<any> => parseData(fs.readFileSync(local(link), "utf8"), link);
 
 const resolver = new ParamResolver({
   baseUrl: "https://files.test",
