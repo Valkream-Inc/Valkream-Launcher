@@ -10,6 +10,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { notify } from "@/src/utils/notify";
+import { useAction } from "../../../../context/action.context";
+
 import { Alert, Box, LinearProgress, Stack, Typography } from "@mui/material";
 import type {
   Channel,
@@ -262,6 +265,7 @@ export default function SteamSourceDialog({
   onRetry,
 }: Props) {
   const { t } = useTranslation();
+  const { setKeepAlive } = useAction();
   const [depotRunning, setDepotRunning] = useState(false);
   const [lines, setLines] = useState<string[]>([]);
   const [percent, setPercent] = useState<number | null>(null);
@@ -272,6 +276,9 @@ export default function SteamSourceDialog({
   const [info, setInfo] = useState<DepotInfo | null>(null);
   const logBoxRef = useRef<HTMLPreElement | null>(null);
   const mounted = useRef(true);
+  // Dernier `onRetry` : appelé même si le popup a été démonté entre-temps (la suite de l'installation ne doit pas se perdre)
+  const retryRef = useRef(onRetry);
+  retryRef.current = onRetry;
 
   useEffect(() => {
     mounted.current = true;
@@ -286,6 +293,12 @@ export default function SteamSourceDialog({
     if (issue === null) return;
     setError(null);
   }, [issue]);
+
+  // Téléchargement de fond : l'accueil reste monté (changer de thème / ouvrir les réglages ne l'interrompt pas)
+  useEffect(() => {
+    setKeepAlive(depotRunning);
+    return () => setKeepAlive(false);
+  }, [depotRunning]);
 
   // Le bouton principal affiche la progression quand le popup est masqué
   useEffect(() => {
@@ -370,6 +383,7 @@ export default function SteamSourceDialog({
 
       if (data.step !== undefined) {
         setStep(data.step);
+        if (data.step === "login") notify(t("notify.actionTitle"), t("notify.qrAction"));
         if (data.step !== "login") setQrLines([]);
         setPercent(null);
       }
@@ -379,9 +393,12 @@ export default function SteamSourceDialog({
 
     try {
       await window.electron_API.depotDownloadInstance(instanceId, channel);
-      if (mounted.current) onRetry();
+      notify(t("notify.doneTitle"), t("notify.depotDone"));
+      retryRef.current();
     } catch (err) {
-      if (mounted.current) setError(ipcErrorMessage(err));
+      const message = ipcErrorMessage(err);
+      if (mounted.current) setError(message);
+      notify(t("notify.errorTitle"), message);
     } finally {
       window.electron_API.removeDepotOutputListeners();
       if (mounted.current) setDepotRunning(false);
@@ -455,7 +472,7 @@ export default function SteamSourceDialog({
             >
               {percent === null
                 ? "…"
-                : `${percent.toFixed(percent >= 100 ? 0 : 1)} %`}
+                : `${percent.toFixed(percent >= 100 ? 0 : 2)} %`}
             </Typography>
           </Stack>
         </Stack>

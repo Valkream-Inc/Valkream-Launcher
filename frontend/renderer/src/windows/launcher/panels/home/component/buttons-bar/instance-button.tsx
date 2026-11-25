@@ -16,6 +16,7 @@ import type { InstanceSyncProgress, SteamSourceIssue } from "@shared/types";
 import Popup from "../../../../component/popup/popup";
 
 import { instanceText } from "@/src/i18n";
+import { notify } from "@/src/utils/notify";
 import { useTranslation } from "react-i18next";
 import { useAction } from "../../../../context/action.context";
 import { useBackground } from "../../../../context/background.context";
@@ -46,8 +47,13 @@ export default function InstanceButton() {
   const { t, i18n } = useTranslation();
   const { actionLoading, runAction } = useAction();
   const { pause, play } = useBackground();
-  const { actualInstanceId, actualInstance, actualChannel, gamesRootMove } =
-    useGames();
+  const {
+    actualInstanceId,
+    actualInstance,
+    actualChannel,
+    gamesRootMove,
+    refreshChannel,
+  } = useGames();
   const { installationStatut, maintenance } = useInfos();
 
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
@@ -159,18 +165,24 @@ export default function InstanceButton() {
           result.failed.find((item) => item.steamIssue)?.steamIssue ?? null,
         );
         setSteamOpen(true);
+        notify(t("notify.actionTitle"), t("notify.steamAction"));
       } else if (result.failed.length > 0) {
         error(actionName, result.failed.map((item) => item.name).join(", "));
+        notify(t("notify.errorTitle"), result.failed.map((item) => item.name).join(", "));
         setSyncErrors(result.failed.map((item) => `${item.name} : ${item.error}`));
       } else {
         enqueueSnackbar(doneText, { variant: "success" });
+        notify(t("notify.doneTitle"), doneText);
       }
     } catch (err) {
       error(actionName, err);
+      notify(t("notify.errorTitle"), actionName);
     } finally {
       clearInterval(clock);
       cleanup();
       setSyncing(false);
+      // Statut et infos relus tout de suite (sinon le bouton garde l'ancien état après la fin)
+      void refreshChannel();
     }
   };
 
@@ -252,7 +264,7 @@ export default function InstanceButton() {
               percent:
                 depotState.percent === null
                   ? "…"
-                  : `${depotState.percent.toFixed(0)} %`,
+                  : `${depotState.percent.toFixed(1)} %`,
             }),
             playIcon: false,
             onClick: () => setSteamOpen(true),

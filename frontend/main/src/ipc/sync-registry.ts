@@ -55,6 +55,16 @@ export const anySyncRunning = (): boolean => running.size > 0;
 
 export const isSyncRunning = (key: string): boolean => running.has(key);
 
+/** Coupe toutes les synchros et attend (brièvement) la fin de leurs processus : DepotDownloader ne doit pas survivre au launcher. */
+export const stopAllSyncs = async (timeoutMs = 3000): Promise<void> => {
+  const entries = [...running.values()];
+  for (const entry of entries) entry.controller.abort();
+  await Promise.race([
+    Promise.all(entries.map((entry) => entry.done.catch(() => undefined))),
+    new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+  ]);
+};
+
 /** Coupe toutes les synchros (fermeture de l'application, erreur fatale). */
 export const abortAllSyncs = (): void => {
   for (const entry of running.values()) entry.controller.abort();

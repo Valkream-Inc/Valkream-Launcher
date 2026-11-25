@@ -184,7 +184,7 @@ const attemptDownload = async (
         if (now - lastReport >= PROGRESS_INTERVAL) {
           const speed = ((transferred - lastBytes) * 1000) / (now - lastReport);
           const percent =
-            totalSize > 0 ? Math.round((transferred / totalSize) * 100) : 0;
+            totalSize > 0 ? Math.floor((transferred / totalSize) * 1000) / 10 : 0;
           void callback(transferred, totalSize, percent, speed);
           lastReport = now;
           lastBytes = transferred;

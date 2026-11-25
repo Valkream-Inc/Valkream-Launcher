@@ -11,14 +11,17 @@ import type { PanelProps } from "./panel.types";
 
 function Panel({ id, children }: PanelProps) {
   const { activePanel } = usePanels();
-  const { actionLoading } = useAction();
+  const { actionLoading, keepAlive } = useAction();
+  // Une tâche en cours (action ou téléchargement de fond) garde les panneaux montés : changer de thème ou ouvrir
+  // les réglages ne doit jamais l'interrompre.
+  const busy = actionLoading || keepAlive;
 
   return (
     <Fade
       in={activePanel === id}
       timeout={500}
-      unmountOnExit={id !== "settings" && !actionLoading} // exclude settings for applying settings on launch
-      mountOnEnter={id !== "settings" && !actionLoading} // exclude settings for applying settings on launch
+      unmountOnExit={id !== "settings" && !busy} // exclude settings for applying settings on launch
+      mountOnEnter={id !== "settings" && !busy} // exclude settings for applying settings on launch
     >
       <Box
         sx={{

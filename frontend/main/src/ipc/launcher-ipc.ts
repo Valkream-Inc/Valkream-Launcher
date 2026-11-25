@@ -3,6 +3,7 @@
  * @license MIT-NC
  */
 
+import { stopAllSyncs } from "./sync-registry.js";
 import fs from "fs";
 import path from "path";
 import { ipcMain, app, dialog, shell } from "electron";
@@ -96,8 +97,12 @@ class IpcHandlers {
 
     // general
     ipcMain.on("app-quit", () => {
-      app.quit();
-      app.exit(0);
+      // Les téléchargements en cours (DepotDownloader…) sont arrêtés AVANT de quitter, sinon le processus
+      // survit au launcher et bloque la réouverture (fichiers verrouillés, console figée).
+      void stopAllSyncs().finally(() => {
+        app.quit();
+        app.exit(0);
+      });
     });
 
     // infos

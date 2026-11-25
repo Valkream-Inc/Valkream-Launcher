@@ -12,7 +12,7 @@ export const progressOf = (processed: number, total: number, startedAt: number):
   return {
     processedBytes: formatBytes(processed),
     totalBytes: formatBytes(total),
-    percent: total > 0 ? Math.min(100, Math.round((processed / total) * 100)) : 0,
+    percent: total > 0 ? Math.min(100, Math.floor((processed / total) * 1000) / 10) : 0,
     speed: formatBytes(processed / seconds),
     processed,
     total,

@@ -90,7 +90,7 @@ export const createGlobalProgress = (
     report({
       processedBytes: formatBytes(bytes),
       totalBytes: weighted ? `${exact ? "" : "~"}${formatBytes(totalWeight)}` : "",
-      percent: (shown = Math.max(shown, Math.min(100, Math.floor(fraction * 100)))),
+      percent: (shown = Math.max(shown, Math.min(100, Math.floor(fraction * 1000) / 10))),
       speed: formatBytes(bytes / seconds),
       processed: bytes,
       ...(weighted ? { total: totalWeight } : {}),
