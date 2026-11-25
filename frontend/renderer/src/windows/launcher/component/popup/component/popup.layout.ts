@@ -16,6 +16,7 @@ export const TINY = "@media (max-height: 560px)";
 export const paperLayout = {
   display: "flex",
   flexDirection: "column",
+  boxSizing: "border-box",
   margin: "12px",
   width: "calc(100% - 24px)",
   maxHeight: "calc(100vh - 24px)",
@@ -29,8 +30,9 @@ export const innerLayout = {
   display: "flex",
   flexDirection: "column",
   flex: "1 1 auto",
+  // Pas de maxHeight propre : il dépasserait la zone utile du Paper (marges + bordure) et ferait défiler la fenêtre
+  // EN PLUS de la zone de contenu. La hauteur est bornée par le Paper (flex), seul le contenu défile.
   minHeight: 0,
-  maxHeight: "calc(100vh - 24px)",
 } as const;
 
 /** Zone de contenu : unique zone défilante, barre discrète. */
