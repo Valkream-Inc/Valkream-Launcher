@@ -16,6 +16,8 @@ export class SettingsStore<T extends object> {
   constructor(
     private readonly file: string,
     private readonly defaults: T,
+    /** Valeur acceptable pour cette clé ? Sinon la valeur par défaut est conservée (fichier modifié à la main, ancienne version). */
+    private readonly isValid: (key: keyof T, value: unknown) => boolean = () => true,
   ) {
     this.data = { ...defaults };
   }
@@ -26,7 +28,12 @@ export class SettingsStore<T extends object> {
         const parsed: unknown = JSON.parse(fs.readFileSync(this.file, "utf8"));
         if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("objet attendu");
         // Réglage absent (ancienne version du launcher) : valeur par défaut
-        this.data = { ...this.defaults, ...(parsed as Partial<T>) };
+        const data = { ...this.defaults };
+        for (const key of Object.keys(this.defaults) as (keyof T)[]) {
+          const value = (parsed as Partial<T>)[key];
+          if (value !== undefined && this.isValid(key, value)) data[key] = value as T[keyof T];
+        }
+        this.data = data;
         return;
       } catch {
         fs.renameSync(this.file, `${this.file}.corrupt`);
@@ -41,6 +48,7 @@ export class SettingsStore<T extends object> {
   }
 
   set<K extends keyof T>(key: K, value: T[K]): void {
+    if (!this.isValid(key, value)) throw new Error(`Invalid value for setting "${String(key)}".`);
     this.data = { ...this.data, [key]: value };
     this.save();
   }

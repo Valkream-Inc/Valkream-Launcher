@@ -14,7 +14,9 @@ export interface InstanceSettingProps {
   channel: Channel;
   values: InstanceSettingValues;
   /** Appelé avec les réglages à jour après une sauvegarde. */
-  onChange: (values: InstanceSettingValues) => void;
+  onChange: (
+    values: InstanceSettingValues | ((previous: InstanceSettingValues) => InstanceSettingValues),
+  ) => void;
 }
 
 /** Props des boutons d'action sur l'installation. */

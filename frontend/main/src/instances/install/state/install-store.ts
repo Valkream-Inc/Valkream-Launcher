@@ -117,8 +117,8 @@ export const readInstanceSettings = (
 
 /**
  * Enregistre un réglage et retourne les réglages EFFECTIFS : valeurs par défaut de l'instance
- * (`defaults`) complétées par celles du fichier. Le fichier créé contient donc tous les réglages
- * avec leur valeur par défaut, pas seulement celui qui vient de changer.
+ * (`defaults`) complétées par celles du fichier. Le fichier ne contient QUE les choix du joueur :
+ * un défaut modifié par une nouvelle version du launcher s'applique donc à tous ceux qui ne l'ont pas changé.
  */
 export const writeInstanceSetting = (
   installDir: string,
@@ -130,7 +130,7 @@ export const writeInstanceSetting = (
   if (!isSettingValue(value)) {
     throw new LocalizedError("err.settingValue", { name });
   }
-  const settings = { ...defaults, ...readInstanceSettings(installDir), [name]: value };
-  writeJsonFile(path.join(installDir, SETTINGS_FILE), settings);
-  return settings;
+  const chosen = { ...readInstanceSettings(installDir), [name]: value };
+  writeJsonFile(path.join(installDir, SETTINGS_FILE), chosen);
+  return { ...defaults, ...chosen };
 };

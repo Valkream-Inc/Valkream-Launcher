@@ -380,11 +380,24 @@ export interface InstanceSyncProgress {
   transfer?: Pick<ProgressData, "processedBytes" | "totalBytes" | "percent" | "speed">;
 }
 
+/** Données brutes du mode d'emploi Steam (sans texte : les phrases viennent des clés `steam.guide.*`). */
+export interface SteamGuideData {
+  entry: string;
+  appId?: number;
+  branch?: string;
+  expectedBuild?: string | number;
+  installedBuild?: string;
+  files?: string[];
+  chosenFolder?: boolean;
+}
+
 /** `steam_library` : le jeu du joueur est absent ou d'une autre version → solutions proposées. */
 export interface SteamSourceIssue {
   issue: "missing" | "version";
-  /** Mode d'emploi Markdown. */
+  /** Mode d'emploi Markdown (langue du lancement de la synchro ; l'interface le reconstruit avec `guideData`). */
   guide: string;
+  /** Données du mode d'emploi : l'interface le traduit elle-même (changement de langue pris en compte). */
+  guideData: SteamGuideData;
   /** DepotDownloader est possible (l'entrée déclare `depot`). */
   depotAvailable: boolean;
   /** Entrée `depot_steam` : DepotDownloader est la seule source (ni bibliothèque Steam, ni dossier à indiquer). */

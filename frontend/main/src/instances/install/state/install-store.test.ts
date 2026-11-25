@@ -31,6 +31,12 @@ describe("install-store", () => {
     assert.deepEqual(readInstanceSettings(dir), {});
   });
 
+  it("réglages : le fichier ne garde que les choix du joueur, le retour ajoute les défauts", () => {
+    const result = writeInstanceSetting(dir, "quality", "high", { launchSteam: true, quality: "low" });
+    assert.deepEqual(result, { launchSteam: true, quality: "high" });
+    assert.deepEqual(readInstanceSettings(dir), { quality: "high" });
+  });
+
   it("réglages : fusionne, refuse noms et valeurs invalides", () => {
     writeInstanceSetting(dir, "modsAdmin", true);
     assert.deepEqual(writeInstanceSetting(dir, "quality", "high"), { modsAdmin: true, quality: "high" });

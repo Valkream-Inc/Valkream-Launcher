@@ -49,3 +49,17 @@ describe("SettingsStore", () => {
     assert.equal(fs.readFileSync(`${file}.corrupt`, "utf8"), "{pas du json");
   });
 });
+
+describe("SettingsStore : validation", () => {
+  it("valeur invalide dans le fichier : défaut conservé ; écriture invalide refusée", () => {
+    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "settings-")), "settings.json");
+    fs.writeFileSync(file, JSON.stringify({ theme: "inconnu", zoom: 1.5, extra: 1 }));
+    const store = new SettingsStore<{ theme: string; zoom: number }>(file, { theme: "modern", zoom: 1 }, (key, value) =>
+      key === "theme" ? value === "modern" || value === "old" : typeof value === "number",
+    );
+    store.init();
+    assert.equal(store.get("theme"), "modern");
+    assert.equal(store.get("zoom"), 1.5);
+    assert.throws(() => store.set("theme", "foo"), /Invalid value/);
+  });
+});

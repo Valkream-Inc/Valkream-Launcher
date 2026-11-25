@@ -20,15 +20,20 @@ export const saveInstanceSetting = async (
   value: InstanceSettingValue,
   message?: string
 ): Promise<void> => {
-  onChange({ ...values, [name]: value });
+  const before = values[name];
+  // Mises à jour fonctionnelles : plusieurs changements rapprochés ne s'écrasent pas (pas de valeurs périmées)
+  onChange((previous) => ({ ...previous, [name]: value }));
   try {
-    onChange(
-      await window.electron_API.setInstanceSetting(id, channel, name, value)
-    );
+    const saved = await window.electron_API.setInstanceSetting(id, channel, name, value);
+    // Seule la clé enregistrée est alignée sur le main : les autres changements en cours restent intacts
+    onChange((previous) => ({ ...previous, [name]: saved[name] ?? value }));
     if (message) enqueueSnackbar(message, { variant: "info" });
   } catch (error) {
     console.error(error);
-    onChange(values);
+    onChange((previous) => {
+      const { [name]: _discarded, ...rest } = previous;
+      return before === undefined ? rest : { ...rest, [name]: before };
+    });
     enqueueSnackbar(i18n.t("instance.saveFailed"), { variant: "error" });
   }
 };

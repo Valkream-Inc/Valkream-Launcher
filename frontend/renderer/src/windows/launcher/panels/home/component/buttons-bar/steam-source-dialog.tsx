@@ -10,6 +10,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { buildSteamGuideText } from "@/src/i18n/steam-guide";
 import { notify } from "@/src/utils/notify";
 import { useAction } from "../../../../context/action.context";
 
@@ -302,6 +303,7 @@ export default function SteamSourceDialog({
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<DepotInfo | null>(null);
   const logBoxRef = useRef<HTMLPreElement | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
   const mounted = useRef(true);
   // Dernier `onRetry` : appelé même si le popup a été démonté entre-temps (la suite de l'installation ne doit pas se perdre)
   const retryRef = useRef(onRetry);
@@ -331,6 +333,13 @@ export default function SteamSourceDialog({
   useEffect(() => {
     onDepotState?.({ running: depotRunning, percent, step });
   }, [depotRunning, percent, step]);
+
+  // Le contenu utile change avec l'étape (QR code, barre de progression) : on le ramène à l'écran
+  useEffect(() => {
+    if (!depotRunning) return;
+    const id = window.setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 80);
+    return () => window.clearTimeout(id);
+  }, [step, depotRunning, error, qrLines.length > 0]);
 
   // Auto-scroll en bas de la console de logs à chaque nouvelle ligne
   useEffect(() => {
@@ -437,15 +446,10 @@ export default function SteamSourceDialog({
 
   const content = (
     <Box
-      sx={{
-        textAlign: "left",
-        maxHeight: "52vh",
-        overflowY: "auto",
-        pr: 1,
-        ...CLEAN_SCROLLBAR_SX,
-      }}
+      // Un seul défilement : celui du popup (pas de zone défilante dans la zone défilante)
+      sx={{ textAlign: "left", pr: 1 }}
     >
-      {issue && <SimpleMarkdown source={issue.guide} />}
+      {issue && <SimpleMarkdown source={buildSteamGuideText(t as never, issue)} />}
       {depotRunning && (
         <Stack spacing={1.5} sx={{ mt: 2 }}>
           <Alert severity="info" variant="outlined" sx={{ color: "inherit" }}>
@@ -516,6 +520,7 @@ export default function SteamSourceDialog({
           {error}
         </Alert>
       )}
+      <div ref={endRef} />
     </Box>
   );
 
@@ -556,7 +561,7 @@ export default function SteamSourceDialog({
   ];
 
   const infoMessage = info && (
-    <Box sx={{ textAlign: "left", maxHeight: "52vh", overflowY: "auto", ...CLEAN_SCROLLBAR_SX }}>
+    <Box sx={{ textAlign: "left" }}>
       <SimpleMarkdown
         source={[
           t("steam.info.what"),

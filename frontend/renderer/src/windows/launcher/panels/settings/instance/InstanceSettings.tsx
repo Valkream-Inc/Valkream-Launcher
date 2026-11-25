@@ -8,7 +8,7 @@
  */
 
 import { Typography } from "@mui/material";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import type { InstanceId } from "@shared/types";
 
@@ -129,14 +129,15 @@ export default function InstanceSettings({
 
   // Les réglages viennent du rapport au premier chargement de chaque instance / canal seulement :
   // ensuite l'état local fait foi (sinon un rechargement en retard écrase le réglage qu'on vient de changer).
-  const loadedKey = useRef<string | null>(null);
+  const settingsKey = `${instanceId}@${channel}`;
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
   useEffect(() => {
-    const key = `${instanceId}@${channel}`;
-    if (report && loadedKey.current !== key) {
-      loadedKey.current = key;
+    // `report` est déjà celui de CETTE instance / ce canal (le hook ne sert jamais le rapport d'une autre)
+    if (report && loadedFor !== settingsKey) {
       setValues(report.settings);
+      setLoadedFor(settingsKey);
     }
-  }, [report, instanceId, channel]);
+  }, [report, settingsKey, loadedFor]);
 
   // Pendant une action (installation…), on ne reste pas sur les onglets qui modifient le jeu
   useEffect(() => {
@@ -156,8 +157,9 @@ export default function InstanceSettings({
   const settingProps = {
     id: instanceId,
     channel,
-    values,
-    onChange: (next: InstanceSettingValues) => {
+    // Tant que les réglages de CETTE installation ne sont pas chargés, on n'affiche pas ceux de la précédente
+    values: loadedFor === settingsKey ? values : ({} as InstanceSettingValues),
+    onChange: (next: InstanceSettingValues | ((previous: InstanceSettingValues) => InstanceSettingValues)) => {
       setValues(next);
       void reload({ silent: true }); // une entrée `optional` peut avoir changé d'état
     },

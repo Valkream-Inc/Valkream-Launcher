@@ -23,7 +23,10 @@ interface ReportState {
 
 /** Charge le rapport d'une installation (instance + canal) et permet de le recharger. */
 export const useInstanceReport = (id: InstanceId, channel: Channel): ReportState => {
-  const [report, setReport] = useState<InstanceReport | null>(null);
+  // Le rapport garde la clé (instance@canal) pour laquelle il a été chargé : jamais servi pour une autre
+  const key = `${id}@${channel}`;
+  const [loaded, setLoaded] = useState<{ key: string; report: InstanceReport } | null>(null);
+  const report = loaded?.key === key ? loaded.report : null;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // Seule la réponse du dernier appel est prise en compte (les anciennes arrivent parfois après)
@@ -40,7 +43,7 @@ export const useInstanceReport = (id: InstanceId, channel: Channel): ReportState
       try {
         const next = await window.electron_API.getInstanceReport(id, channel, { verify });
         if (request === lastRequest.current) {
-          setReport(next);
+          setLoaded({ key: `${id}@${channel}`, report: next });
           setError(null);
         }
       } catch (e) {
@@ -54,7 +57,7 @@ export const useInstanceReport = (id: InstanceId, channel: Channel): ReportState
 
   // Changement d'instance ou de canal : on repart d'un état vide
   useEffect(() => {
-    setReport(null);
+    setLoaded(null);
     void reload();
   }, [reload]);
 

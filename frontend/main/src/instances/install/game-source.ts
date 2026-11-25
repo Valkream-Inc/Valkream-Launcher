@@ -197,6 +197,15 @@ export const buildSteamGuide = (input: GuideInput): string => {
 export const toSteamSourceIssue = (error: GameSourceError, input: Omit<GuideInput, "issue" | "expectedBuild" | "installedBuild" | "files" | "chosenFolder">): SteamSourceIssue => ({
   issue: error.issue,
   guide: buildSteamGuide({ ...input, issue: error.issue, ...error.details }),
+  guideData: {
+    entry: input.entry,
+    appId: input.appId,
+    branch: input.branch,
+    expectedBuild: error.details.expectedBuild,
+    installedBuild: error.details.installedBuild,
+    files: error.details.files,
+    chosenFolder: error.details.chosenFolder,
+  },
   depotAvailable: input.depotAvailable,
   depotOnly: input.depotOnly === true,
 });

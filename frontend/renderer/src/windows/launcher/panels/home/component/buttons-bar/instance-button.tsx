@@ -57,6 +57,10 @@ export default function InstanceButton() {
   const { installationStatut, maintenance } = useInfos();
 
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
+  // `t` toujours à jour : les rafraîchissements du bouton pendant une action (horloge, progression) tournent dans
+  // des fermetures anciennes, qui garderaient sinon la langue d'origine après un changement de langue.
+  const tRef = useRef(t);
+  tRef.current = t;
   const [action, setAction] = useState<InstanceButtonAction>(LOADING_ACTION);
   const [syncing, setSyncing] = useState(false);
   // Jeu Steam absent / autre version : solutions proposées au joueur
@@ -84,7 +88,10 @@ export default function InstanceButton() {
     version ? t("button.playVersion", { version }) : t("button.play");
 
   const render = () => {
-    const { text: actionName, progress } = lastProgress.current;
+    const t = tRef.current;
+    // `text` est une CLÉ de traduction (traduite ici, dans la langue courante)
+    const { text: actionKey, progress } = lastProgress.current;
+    const actionName = actionKey ? (t as unknown as (k: string) => string)(actionKey) : "";
     // Message traduit ICI (pas dans le main) : un changement de langue en cours de synchronisation
     // est pris en compte au prochain rafraîchissement (chaque seconde au plus).
     const rank =
@@ -111,7 +118,8 @@ export default function InstanceButton() {
     const transfer = progress?.transfer;
     const elapsed = `⏱ ${formatElapsed(Date.now() - syncStartedAt.current)}`;
     // Progression globale : pourcentage, cumul d'octets (total connu seulement pour un fichier unique)
-    const details = transfer
+    const hasTransfer = transfer && (transfer.percent > 0 || transfer.processedBytes);
+    const details = hasTransfer
       ? `\n ${t("button.speed", { percent: transfer.percent, done: transfer.processedBytes, total: transfer.totalBytes ? `/${transfer.totalBytes}` : "", speed: transfer.speed })} · ${elapsed}`
       : `\n ${elapsed}`;
     setAction({
@@ -121,8 +129,8 @@ export default function InstanceButton() {
     });
   };
 
-  const callback = (text: string, progress?: InstanceSyncProgress) => {
-    lastProgress.current = { text, progress };
+  const callback = (actionKey: string, progress?: InstanceSyncProgress) => {
+    lastProgress.current = { text: actionKey, progress };
     render();
   };
 
@@ -134,7 +142,10 @@ export default function InstanceButton() {
   };
 
   // Installation, réinstallation et mise à jour : une même synchronisation
-  const sync = async (actionName: string, doneText: string) => {
+  const sync = async (actionKey: string, doneKey: string) => {
+    const translate = t as unknown as (k: string) => string;
+    const actionName = translate(actionKey);
+    const doneText = translate(doneKey);
     const cleanup = () => window.electron_API.removeInstanceProgressListeners();
 
     let clock: ReturnType<typeof setInterval> | undefined;
@@ -142,7 +153,7 @@ export default function InstanceButton() {
       setSyncing(true);
       setSyncErrors([]); // les erreurs de la tentative précédente ne restent pas affichées
       syncStartedAt.current = Date.now();
-      lastProgress.current = { text: actionName };
+      lastProgress.current = { text: actionKey };
       render();
       clock = setInterval(render, 1000);
       window.electron_API.onInstanceProgress((progress) => {
@@ -151,7 +162,7 @@ export default function InstanceButton() {
           progress.channel !== actualChannel
         )
           return;
-        callback(actionName, progress);
+        callback(actionKey, progress);
       });
 
       const result = await window.electron_API.syncInstance(
@@ -191,13 +202,13 @@ export default function InstanceButton() {
 
   const handleInstall = () =>
     runAction(
-      () => sync(t("button.installing"), t("button.installDone")),
+      () => sync("button.installing", "button.installDone"),
       `${actualInstanceId}-install`,
     );
 
   const handleUpdate = () =>
     runAction(
-      () => sync(t("button.updating"), t("button.updateDone")),
+      () => sync("button.updating", "button.updateDone"),
       `${actualInstanceId}-update`,
     );
 

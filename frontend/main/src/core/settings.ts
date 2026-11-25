@@ -12,6 +12,30 @@ import type { Lang } from "../lib/errors/messages.js";
 import { SettingsStore } from "../lib/settings/settings-store.js";
 import DirsManager from "./dirs.js";
 
+const THEMES = ["old", "modern", "futuristic"];
+const BACKGROUNDS = ["video", "image", "3d"];
+
+/** Valeur plausible pour ce réglage (type, liste de choix, bornes). */
+export const isValidSetting = (key: SettingKey, value: unknown): boolean => {
+  switch (key) {
+    case "launcherTheme":
+      return typeof value === "string" && THEMES.includes(value);
+    case "backgroundType":
+      return typeof value === "string" && BACKGROUNDS.includes(value);
+    case "language":
+      return value === "fr" || value === "en";
+    case "nexusApiKey":
+      return typeof value === "string";
+    case "settingsZoom":
+      return typeof value === "number" && Number.isFinite(value) && value >= 0.5 && value <= 3;
+    case "musicEnabled":
+    case "betaEnabled":
+      return typeof value === "boolean";
+    default:
+      return false;
+  }
+};
+
 class SettingsManager {
   /** Langue en cache : les erreurs traduites (`LocalizedError`) la lisent de façon synchrone. */
   private language: Lang = "fr";
@@ -29,7 +53,11 @@ class SettingsManager {
   private readonly ready: Promise<void>;
 
   constructor() {
-    this.store = new SettingsStore<Settings>(path.join(DirsManager.dbPath(), "settings.json"), this.defaultSettings);
+    this.store = new SettingsStore<Settings>(
+      path.join(DirsManager.dbPath(), "settings.json"),
+      this.defaultSettings,
+      (key, value) => isValidSetting(key, value),
+    );
     this.ready = this.init();
   }
 
