@@ -210,7 +210,9 @@ class LauncherBuilder {
           console.log(`✅ Build ${build.type} terminé !`);
         })
         .catch((err: unknown) => {
+          // On propage : un build en échec ne doit jamais produire un « succès » (release incomplète).
           console.error(`❌ Erreur pendant le build ${build.type} !`, err);
+          throw err;
         });
     }
   }

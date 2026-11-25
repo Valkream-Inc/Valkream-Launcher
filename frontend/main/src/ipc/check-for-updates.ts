@@ -14,12 +14,15 @@ import { baseUrl } from "../core/constants.js";
 import InfosManager from "../core/server-infos.js";
 import FilesManager from "../core/files.js";
 import LauncherManager from "../core/launcher.js";
+import { createThrottle, withTimeout } from "./update-throttle.js";
 
 import electronUpdater from "electron-updater";
 const { autoUpdater } = electronUpdater;
 
 class CheckForUpdates {
   timeout: number;
+  private allowProgress = createThrottle(250);
+  private detailsCleared = false;
   t: Translate = translator("fr");
   event!: IpcMainEvent;
 
@@ -42,7 +45,8 @@ class CheckForUpdates {
     this.attachListeners();
 
     try {
-      await autoUpdater.checkForUpdates();
+      // Un serveur qui ne répond pas ne doit pas bloquer le lancement du launcher
+      await withTimeout(autoUpdater.checkForUpdates(), 30_000, "checkForUpdates timeout");
     } catch (err) {
       this.onError(err, this.t("update.checkFailed"));
     }
@@ -84,6 +88,7 @@ class CheckForUpdates {
     });
 
     autoUpdater.on("download-progress", (progress) => {
+      if (!this.allowProgress(progress.percent >= 100)) return;
       const percent = progress.percent?.toFixed(1) ?? "0.0";
       const speed = `${formatBytes(progress.bytesPerSecond)}/s`;
       const transferred = formatBytes(progress.transferred);
@@ -97,6 +102,7 @@ class CheckForUpdates {
       setTimeout(() => {
         try {
           fs.writeFileSync(FilesManager.updaterDetailsPath(), "update");
+          this.detailsCleared = false;
         } catch (err) {
           console.warn("Impossible d'écrire updaterDetails:", err);
         }
@@ -110,6 +116,8 @@ class CheckForUpdates {
   }
 
   deleteUpdaterDetails(): void {
+    if (this.detailsCleared) return;
+    this.detailsCleared = true;
     try {
       if (!fs.existsSync(FilesManager.updaterDetailsPath())) return;
       fs.unlinkSync(FilesManager.updaterDetailsPath());

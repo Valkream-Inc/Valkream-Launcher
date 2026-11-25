@@ -7,6 +7,10 @@ on:
       - "frontend/**"
       - ".github/workflows/**"
 
+concurrency:
+  group: launcher-build
+  cancel-in-progress: false
+
 jobs:
   create-release:
     runs-on: ubuntu-latest
@@ -47,19 +51,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Yarn 4 (Berry) est fourni par corepack (champ packageManager de package.json).
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: "22.17.0"
-          cache: "yarn"
-          cache-dependency-path: "./yarn.lock"
+
+      # Yarn 4 (Berry) via corepack, APRÈS setup-node : le shim doit appartenir au Node 22 installé
+      # (avec `cache: yarn` dans setup-node, c'est le yarn 1 global qui était résolu → échec packageManager).
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Yarn cache dir
+        id: yarn-cache
+        shell: bash
+        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Yarn
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-
 
       - name: Install dependencies
         run: yarn install --immutable
+        working-directory: ./
+
+      - name: Tests
+        run: yarn workspace Valkream-Launcher test
         working-directory: ./
 
       - name: Typecheck
