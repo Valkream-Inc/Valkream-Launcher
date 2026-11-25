@@ -13,7 +13,17 @@ import { useEffect, useRef, useState } from "react";
 import { notify } from "@/src/utils/notify";
 import { useAction } from "../../../../context/action.context";
 
-import { Alert, Box, LinearProgress, Stack, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import {
+  Alert,
+  Box,
+  ButtonBase,
+  Dialog,
+  IconButton,
+  LinearProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import type {
   Channel,
   DepotInfo,
@@ -54,9 +64,13 @@ const STEP_NUMBER: Record<DepotStepName, number> = {
   "tool-download": 1,
   "tool-extract": 1,
   login: 2,
-  download: 3,
-  finish: 4,
+  scan: 3,
+  download: 4,
+  finish: 5,
 };
+
+/** Nombre d'étapes affichées. */
+const STEP_TOTAL = 5;
 
 /** Styles de barre de défilement propres et cohérents avec le thème MUI. */
 const CLEAN_SCROLLBAR_SX = {
@@ -181,21 +195,44 @@ const trimGrid = (grid: boolean[][]): boolean[][] => {
 
 /** QR code de connexion redessiné en SVG (carrés pleins noirs sur fond blanc, marge symétrique de 2 modules). */
 const QrCode = ({ lines }: { lines: string[] }) => {
+  const { t } = useTranslation();
+  const [zoomed, setZoomed] = useState(false);
   const parsed = qrModules(lines) ?? parseQrFallback(lines);
   const normalized = normalizeGrid(parsed);
   const grid = normalized ? trimGrid(normalized) : null;
   if (!grid) return null;
 
   const margin = 2;
-  const height = grid.length;
-  const width = grid[0].length;
-  const viewBoxWidth = width + margin * 2;
-  const viewBoxHeight = height + margin * 2;
-  const pixelSize = Math.min(280, viewBoxWidth * 6);
+  const viewBoxWidth = grid[0].length + margin * 2;
+  const viewBoxHeight = grid.length + margin * 2;
+
+  const svg = (size: number) => (
+    <svg
+      viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
+      width={size}
+      height={Math.round((size * viewBoxHeight) / viewBoxWidth)}
+      shapeRendering="crispEdges"
+      role="img"
+      aria-label="Steam QR code"
+      style={{ display: "block", maxWidth: "100%", height: "auto" }}
+    >
+      <rect x={0} y={0} width={viewBoxWidth} height={viewBoxHeight} fill="#ffffff" />
+      {grid.map((row, y) =>
+        row.map((dark, x) =>
+          dark ? (
+            <rect key={`${x}-${y}`} x={x + margin} y={y + margin} width={1} height={1} fill="#000000" />
+          ) : null,
+        ),
+      )}
+    </svg>
+  );
 
   return (
     <Box sx={{ display: "flex", justifyContent: "center", my: 1 }}>
-      <Box
+      {/* Clic : le QR code s'ouvre en grand (comme l'image d'un événement), plus simple à scanner */}
+      <ButtonBase
+        onClick={() => setZoomed(true)}
+        title={t("steam.qrZoom")}
         sx={{
           p: 1.5,
           bgcolor: "#ffffff",
@@ -204,40 +241,30 @@ const QrCode = ({ lines }: { lines: string[] }) => {
           borderColor: "divider",
           boxShadow: 1,
           display: "inline-flex",
+          cursor: "zoom-in",
+          "&:hover": { opacity: 0.85 },
         }}
       >
-        <svg
-          viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
-          width={pixelSize}
-          height={Math.round((pixelSize * viewBoxHeight) / viewBoxWidth)}
-          shapeRendering="crispEdges"
-          role="img"
-          aria-label="Steam QR code"
-          style={{ display: "block" }}
+        {svg(Math.min(280, viewBoxWidth * 6))}
+      </ButtonBase>
+      <Dialog open={zoomed} onClose={() => setZoomed(false)} maxWidth="lg">
+        <IconButton
+          onClick={() => setZoomed(false)}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: "black",
+            background: "rgba(0,0,0,0.08)",
+            "&:hover": { background: "rgba(0,0,0,0.16)" },
+          }}
         >
-          <rect
-            x={0}
-            y={0}
-            width={viewBoxWidth}
-            height={viewBoxHeight}
-            fill="#ffffff"
-          />
-          {grid.map((row, y) =>
-            row.map((dark, x) =>
-              dark ? (
-                <rect
-                  key={`${x}-${y}`}
-                  x={x + margin}
-                  y={y + margin}
-                  width={1}
-                  height={1}
-                  fill="#000000"
-                />
-              ) : null,
-            ),
-          )}
-        </svg>
-      </Box>
+          <CloseIcon />
+        </IconButton>
+        <Box sx={{ bgcolor: "#ffffff", p: 3, display: "flex", justifyContent: "center" }}>
+          {svg(Math.min(window.innerHeight * 0.85, window.innerWidth * 0.85, 640))}
+        </Box>
+      </Dialog>
     </Box>
   );
 };
@@ -265,7 +292,7 @@ export default function SteamSourceDialog({
   onRetry,
 }: Props) {
   const { t } = useTranslation();
-  const { setKeepAlive } = useAction();
+  const { setKeepAlive, devActive } = useAction();
   const [depotRunning, setDepotRunning] = useState(false);
   const [lines, setLines] = useState<string[]>([]);
   const [percent, setPercent] = useState<number | null>(null);
@@ -423,7 +450,7 @@ export default function SteamSourceDialog({
         <Stack spacing={1.5} sx={{ mt: 2 }}>
           <Alert severity="info" variant="outlined" sx={{ color: "inherit" }}>
             {step
-              ? `${t("steam.stepCount", { current: STEP_NUMBER[step], total: 4 })} — ${t(`steam.step.${step}`)}`
+              ? `${t("steam.stepCount", { current: STEP_NUMBER[step], total: STEP_TOTAL })} — ${t(`steam.step.${step}`)}`
               : t("steam.step.tool-verify")}
           </Alert>
           {(step === "login" || qrLines.length > 0) && (
@@ -432,13 +459,17 @@ export default function SteamSourceDialog({
             </Alert>
           )}
           {(step === "login" || qrLines.length > 0) && <QrCode lines={qrLines} />}
-          <Typography variant="caption" sx={{ opacity: 0.7 }}>
-            {t("steam.logTitle")}
-          </Typography>
+          {devActive && (
+            <Typography variant="caption" sx={{ opacity: 0.7 }}>
+              {t("steam.logTitle")}
+            </Typography>
+          )}
           <Box
             ref={logBoxRef}
             component="pre"
             sx={{
+              // Console : seulement avec le mode dev (gardée montée pour ne pas perdre le défilement)
+              display: devActive ? "block" : "none",
               m: 0,
               p: 1.5,
               maxHeight: 200,
@@ -456,6 +487,8 @@ export default function SteamSourceDialog({
           >
             {lines.join("\n")}
           </Box>
+          {/* Barre : uniquement pendant le vrai téléchargement (pas pendant l'analyse ni la connexion) */}
+          {step === "download" && (
           <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
             <LinearProgress
               sx={{ flexGrow: 1, height: 8, borderRadius: 999 }}
@@ -475,6 +508,7 @@ export default function SteamSourceDialog({
                 : `${percent.toFixed(percent >= 100 ? 0 : 2)} %`}
             </Typography>
           </Stack>
+          )}
         </Stack>
       )}
       {error && (

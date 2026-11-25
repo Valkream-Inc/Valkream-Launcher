@@ -14,12 +14,14 @@ import type {
   Channel,
   GamePlatform,
   Maintenance,
+  RemoteServer,
   ServerInfos,
 } from "@shared/types";
 
 import type { ServerQueryConfig } from "../../types/core.js";
 import type { InstanceMainConfig } from "../instances.types.js";
 import { loadRemoteIndex } from "../remote/InstanceRegistry.js";
+import { checkServer } from "../remote/validate.js";
 import { variantContext } from "../remote/variant-context.js";
 import type { VariantContext } from "../remote/variants.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
@@ -41,7 +43,13 @@ interface Cached {
   at: number;
   event: GameEvent | false;
   maintenance: Maintenance | false;
+  /** Adresse du serveur déclarée par le remote (sinon celle du launcher). */
+  server: RemoteServer | false;
 }
+
+/** Clés définies d'un objet (une valeur `undefined` n'écrase pas la valeur par défaut). */
+const definedOnly = <T extends object>(value: T | undefined): Partial<T> =>
+  Object.fromEntries(Object.entries(value ?? {}).filter(([, item]) => item !== undefined)) as Partial<T>;
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -57,10 +65,8 @@ export class InstanceInfos {
     const config = this.options.configs.find((item) => item.id === id);
     if (!config) throw new LocalizedError("err.unknownInstance", { id });
 
-    const [serverInfos, remote] = await Promise.all([
-      this.server(config),
-      this.remote(config, channel),
-    ]);
+    const remote = await this.remote(config, channel);
+    const serverInfos = await this.server(config, remote.server || undefined);
     return { serverInfos, event: remote.event, maintenance: remote.maintenance };
   }
 
@@ -71,12 +77,15 @@ export class InstanceInfos {
   }
 
   /** Réponse du serveur de jeu gardée quelques secondes ; une requête en cours est réutilisée. */
-  private server(config: InstanceMainConfig): Promise<ServerInfos> {
+  private server(config: InstanceMainConfig, override?: RemoteServer): Promise<ServerInfos> {
     const { serverTtlMs = 4000, now = Date.now } = this.options;
-    const cached = this.servers.get(config.id);
+    // Adresse du remote par-dessus celle du launcher (le type de protocole reste celui du launcher)
+    const target: ServerQueryConfig = { ...config.server, ...definedOnly(override) };
+    const key = `${config.id}|${target.host}:${target.port}`;
+    const cached = this.servers.get(key);
     if (cached && now() - cached.at < serverTtlMs) return cached.value;
-    const value = this.options.queryServer(config.server);
-    this.servers.set(config.id, { at: now(), value });
+    const value = this.options.queryServer(target);
+    this.servers.set(key, { at: now(), value });
     return value;
   }
 
@@ -96,6 +105,18 @@ export class InstanceInfos {
       at: now(),
       event: event === undefined ? false : await this.read<GameEvent>(event, "événement", context, (value) => this.withImage(value)),
       maintenance: maintenance === undefined ? false : await this.read<Maintenance>(maintenance, "maintenance", context),
+      server:
+        entry?.server === undefined
+          ? false
+          : await this.read<RemoteServer>(entry.server, "serveur", context, (value) => {
+              // Un lien n'est pas validé à l'avance : une adresse invalide est ignorée (celle du launcher reste)
+              const problems = checkServer(value, "server");
+              if (problems.length > 0) {
+                console.error(problems.join(" ; "));
+                return {};
+              }
+              return value;
+            }),
     };
     this.cache.set(key, fresh);
     return fresh;

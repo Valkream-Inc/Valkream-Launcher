@@ -56,6 +56,14 @@ export interface ModDisplay {
   link?: string;
 }
 
+/** Adresse du serveur de jeu déclarée par le remote (`server` de l'index). */
+export interface RemoteServer {
+  host?: string;
+  port?: number;
+  /** Délai de réponse maximal (ms). */
+  timeout?: number;
+}
+
 /**
  * `games/<id>/index.config.json` : tout ce que le remote déclare pour UN jeu.
  * Le lien vers ce fichier est dans la config main de l'instance (`indexUrl`) ;
@@ -73,6 +81,11 @@ export interface RemoteIndex {
   requiredSpaceMb?: number;
   event?: PerChannel<LinkOrData<GameEvent>>;
   maintenance?: PerChannel<LinkOrData<Maintenance>>;
+  /**
+   * Adresse du serveur de jeu interrogé (statut, joueurs) : remplace celle par défaut du launcher, sans nouvelle
+   * version de celui-ci. Seuls l'hôte, le port et le délai sont modifiables (le protocole reste celui du launcher).
+   */
+  server?: PerChannel<LinkOrData<RemoteServer>>;
   contributors?: PerChannel<LinkOrData<Contributor[]>>;
   mods?: PerChannel<LinkOrData<ModDisplay[]>>;
 }
@@ -392,6 +405,9 @@ export type DepotStepName =
   | "tool-verify"
   | "tool-extract"
   | "login"
+  /** Analyse : connexion établie, manifeste, fichiers déjà présents (aucun octet téléchargé encore). */
+  | "scan"
+  /** Transfert réel des fichiers (un pourcentage est publié). */
   | "download"
   | "finish";
 

@@ -100,6 +100,26 @@ const checkMods = (data: unknown, where: string): string[] => {
 const checkObject = (data: unknown, where: string): string[] =>
   isObject(data) ? [] : [`${where} : objet attendu`];
 
+const HOST_PATTERN = /^[A-Za-z0-9]([A-Za-z0-9.:-]{0,251}[A-Za-z0-9])?$/;
+
+/** `server` : hôte (nom ou IP), port et délai uniquement. */
+export const checkServer = (data: unknown, where: string): string[] => {
+  if (!isObject(data)) return [`${where} : objet attendu`];
+  const errors: string[] = [];
+  for (const [key, value] of Object.entries(data)) {
+    if (key === "host") {
+      if (typeof value !== "string" || !HOST_PATTERN.test(value)) errors.push(`${where}.host : nom d'hôte ou adresse IP invalide`);
+    } else if (key === "port") {
+      if (!Number.isInteger(value) || (value as number) < 1 || (value as number) > 65535) errors.push(`${where}.port : entier entre 1 et 65535 attendu`);
+    } else if (key === "timeout") {
+      if (!Number.isInteger(value) || (value as number) < 100 || (value as number) > 10000) errors.push(`${where}.timeout : entier entre 100 et 10000 (ms) attendu`);
+    } else {
+      errors.push(`${where}.${key} : clé inconnue (host, port, timeout)`);
+    }
+  }
+  return errors;
+};
+
 /**
  * Valide l'index d'UN jeu (`index.config.json` ou `.yml`). Toute clé peut être déclinée par canal, plateforme et
  * langue : l'index est validé pour chacune des 18 combinaisons, les erreurs sont réunies sans doublon.
@@ -184,6 +204,7 @@ const validateResolvedIndex = (
   const optionalParams: [string, (data: unknown, where: string) => string[]][] = [
     ["event", checkObject],
     ["maintenance", checkObject],
+    ["server", checkServer],
     ["contributors", checkContributors],
     ["mods", checkMods],
   ];

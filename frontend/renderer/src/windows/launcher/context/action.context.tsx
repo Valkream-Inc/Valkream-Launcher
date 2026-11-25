@@ -16,6 +16,7 @@ export const ActionProvider = ({ children }: ActionProviderProps) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [currentKey, setCurrentKey] = useState<string | null>(null);
   const [keepAlive, setKeepAlive] = useState(false);
+  const [devActive, setDevActive] = useState(false);
 
   const startAction = useCallback(
     (id: string = "default"): string | null => {
@@ -60,6 +61,8 @@ export const ActionProvider = ({ children }: ActionProviderProps) => {
     currentKey,
     keepAlive,
     setKeepAlive,
+    devActive,
+    setDevActive,
     startAction,
     finishAction,
     runAction,

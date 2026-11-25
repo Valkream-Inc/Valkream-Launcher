@@ -406,6 +406,7 @@ const fr: Messages = {
     depotOnly: "Télécharger avec DepotDownloader (QR)",
     cancelDepot: "Annuler le téléchargement",
     retry: "J'ai installé la bonne version : réessayer",
+    qrZoom: "Cliquer pour agrandir le QR code",
     stepCount: "Étape {{current}} / {{total}}",
     step: {
       "tool-verify": "Préparation : vérification de l'outil DepotDownloader…",
@@ -413,7 +414,8 @@ const fr: Messages = {
         "Préparation : téléchargement de l'outil DepotDownloader…",
       "tool-extract": "Préparation : installation de l'outil DepotDownloader…",
       login: "Connexion à Steam : en attente du scan du QR code.",
-      download: "Téléchargement de la version exacte du jeu depuis Steam…",
+      scan: "Analyse de la version : manifeste et fichiers déjà présents…",
+      download: "Téléchargement des fichiers du jeu depuis Steam…",
       finish:
         "Téléchargement terminé. Les fichiers vont être vérifiés puis copiés dans le jeu.",
     },

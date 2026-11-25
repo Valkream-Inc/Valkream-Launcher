@@ -135,11 +135,14 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
 
   // Progression globale (tous les fichiers à récupérer) : un pourcentage, pas de nom de fichier.
   // Le téléchargement compte pour 90 % d'un fichier, la vérification pour 10 %.
+  // Libellé fidèle à l'opération : copie depuis Steam (source locale) ou téléchargement
+  const transferKey = source === "remote" ? "progress.download" : "progress.copy";
   const progress = createGlobalProgress(
-    (transfer) => context.report("download", context.t("progress.download", { label: name }), transfer),
+    (transfer) => context.report("download", context.t(transferKey, { label: name }), transfer),
     () => toFetch.length,
   );
-  context.report("download", context.t("progress.download", { label: name }));
+  // Mesure des tailles (requêtes HEAD, fichiers locaux) : c'est une analyse, pas encore un transfert
+  context.report("verify", context.t("progress.scan", { label: name }));
 
   // Tailles connues d'avance pour un vrai pourcentage et un total : fichier local (archive extraite, copie Steam)
   // sinon taille distante (requête HEAD, tolérante : une taille inconnue est estimée à la moyenne des autres).
@@ -167,6 +170,7 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
     });
   }
   progress.lock(); // le total ne bouge plus pendant le téléchargement
+  context.report("download", context.t(transferKey, { label: name }));
   progress.emit();
 
   await runPool(toFetch, DOWNLOAD_CONCURRENCY, async ([file, expected]) => {

@@ -17,6 +17,9 @@ export interface ActionContextValue {
   currentKey: string | null;
   /** Démarre une action ; retourne son id, ou `null` si une action est déjà en cours. */
   /** Tâche de fond (ex : DepotDownloader) : garde les panneaux montés sans bloquer les boutons. */
+  /** Mode dev activé dans les réglages (affiche les outils techniques, ex : journal de DepotDownloader). */
+  devActive: boolean;
+  setDevActive: (value: boolean) => void;
   keepAlive: boolean;
   setKeepAlive: (value: boolean) => void;
   startAction: (id?: string) => string | null;

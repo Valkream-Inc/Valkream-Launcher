@@ -8,6 +8,7 @@ import { useState } from "react";
 import SpecialPanel from "../../component/special-panel/special-panel";
 
 import { useTranslation } from "react-i18next";
+import { useAction } from "../../context/action.context";
 import { useGames } from "../../context/games.context";
 import InstanceSettings from "./instance/InstanceSettings";
 
@@ -17,7 +18,7 @@ function Settings() {
   const [activeTab, setActiveTab] = useState("general");
   const [isConfirmAdminVisible, setIsConfirmAdminVisible] = useState(false);
   const [isAdminActive, setIsAdminActive] = useState(false);
-  const [isDevActive, setIsDevActive] = useState(false);
+  const { devActive: isDevActive, setDevActive: setIsDevActive } = useAction();
 
   const toogleAdmin = () => {
     enqueueSnackbar(isAdminActive ? t("admin.off") : t("admin.on"), {

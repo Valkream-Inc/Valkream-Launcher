@@ -308,3 +308,21 @@ describe("gameFolderToPreserve et to_ignore", () => {
     assert.match(check(entry({ dependencies: { skip: [1] } })), /dependencies.skip/);
   });
 });
+
+describe("server (adresse du serveur de jeu dans l'index)", () => {
+  it("accepte hôte, port et délai", () => {
+    const result = validateRemoteIndex({ ...validIndex(), server: { host: "play.example.com", port: 2457, timeout: 1500 } });
+    assert.equal(result.ok, true, errorsOf(result));
+  });
+
+  it("accepte une adresse déclinée par canal", () => {
+    const result = validateRemoteIndex({ ...validIndex(), server: { stable: { host: "10.0.0.1" }, beta: { host: "10.0.0.2", port: 2458 } } });
+    assert.equal(result.ok, true, errorsOf(result));
+  });
+
+  it("refuse un hôte, un port ou une clé invalides", () => {
+    for (const server of [{ host: "bad host!" }, { host: "a.com", port: 70000 }, { port: "2457" }, { type: "valheim" }, { timeout: 5 }]) {
+      assert.equal(validateRemoteIndex({ ...validIndex(), server }).ok, false, JSON.stringify(server));
+    }
+  });
+});

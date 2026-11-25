@@ -403,13 +403,15 @@ const en: Messages = {
     depotOnly: "Download with DepotDownloader (QR)",
     cancelDepot: "Cancel the download",
     retry: "I installed the right version: retry",
+    qrZoom: "Click to enlarge the QR code",
     stepCount: "Step {{current}} / {{total}}",
     step: {
       "tool-verify": "Preparing: checking the DepotDownloader tool…",
       "tool-download": "Preparing: downloading the DepotDownloader tool…",
       "tool-extract": "Preparing: installing the DepotDownloader tool…",
       login: "Signing in to Steam: waiting for the QR code to be scanned.",
-      download: "Downloading the exact game version from Steam…",
+      scan: "Analysing the version: manifest and files already present…",
+      download: "Downloading the game files from Steam…",
       finish:
         "Download finished. The files will now be checked and copied into the game.",
     },

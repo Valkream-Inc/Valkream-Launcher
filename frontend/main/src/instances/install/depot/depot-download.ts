@@ -15,7 +15,7 @@ import path from "path";
 import type { DepotOptions, DepotStepName } from "@shared/types";
 
 import { DEPOT_DIR } from "../game-source.js";
-import { classifyDepotFailure, parseDepotStep } from "./depot-output.js";
+import { advanceDepotStep, classifyDepotFailure, parseDepotStep } from "./depot-output.js";
 import { parseDepotPercent, type DepotRunner } from "./depot-runner.js";
 import { LocalizedError } from "../../../lib/errors/localized-error.js";
 
@@ -73,8 +73,8 @@ export const downloadWithDepot = async (input: DepotDownloadInput): Promise<stri
         recent.push(line);
         if (recent.length > 80) recent.shift();
         input.onLine?.(line);
-        const next = parseDepotStep(line);
-        if (next !== undefined && next !== step) {
+        const next = advanceDepotStep(step, parseDepotStep(line));
+        if (next !== undefined) {
           step = next;
           input.onStep?.(next);
         }

@@ -19,8 +19,27 @@ import { parseDepotPercent } from "./depot-runner.js";
 export const parseDepotStep = (line: string): DepotStepName | undefined => {
   if (parseDepotPercent(line) !== undefined) return "download";
   if (/qr|logging .* into steam|logging in|waiting for .*(confirm|approv|scan)|steam guard/i.test(line)) return "login";
-  if (/logged in|got depot key|downloading depot|pre-?allocating|validating|manifest .*(download|got)|\bbuilding\b/i.test(line)) return "download";
+  // Préparation / analyse : rien n'est encore téléchargé (le vrai transfert est reconnu à son pourcentage)
+  if (/logged in|got depot key|downloading depot|pre-?allocating|validating|manifest .*(download|got)|\bbuilding\b/i.test(line)) return "scan";
   if (/total downloaded|disconnected from steam|download(ed)? complete/i.test(line)) return "finish";
+  return undefined;
+};
+
+/** Ordre des étapes : l'affichage ne recule jamais (une ligne « validating » après un pourcentage reste « téléchargement »). */
+const STEP_RANK: Record<DepotStepName, number> = {
+  "tool-verify": 0,
+  "tool-download": 0,
+  "tool-extract": 0,
+  login: 1,
+  scan: 2,
+  download: 3,
+  finish: 4,
+};
+
+/** Étape à afficher après une nouvelle ligne : seulement si elle fait avancer (ou change dans la préparation de l'outil). */
+export const advanceDepotStep = (current: DepotStepName | undefined, next: DepotStepName | undefined): DepotStepName | undefined => {
+  if (next === undefined || next === current) return undefined;
+  if (current === undefined || STEP_RANK[next] >= STEP_RANK[current]) return next;
   return undefined;
 };
 

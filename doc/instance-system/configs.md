@@ -37,6 +37,7 @@ joueur ouvre le launcher
 | Ajouter une **nouvelle entrée** (nouveau dossier d'installation) | 1 (`entryPaths`) **et** 4 | l'entrée doit exister dans les deux, sinon elle est refusée |
 | Changer l'emplacement d'une entrée | 1 (`entryPaths`) | le launcher réinstalle l'entrée au nouvel endroit |
 | Afficher un événement / une maintenance | 5 (`event.json`, `maintenance.json`) | bandeau dans l'accueil ; une valeur par canal possible (§5) |
+| Changer l'adresse du serveur de jeu (statut, joueurs) | 2 (`index.config`, clé `server`) | `{ "host": "play.example.com", "port": 2457, "timeout": 2000 }` : remplace l'adresse par défaut du launcher (champs facultatifs, déclinables par canal) ; le type de protocole reste celui du launcher |
 | Changer la liste des mods affichée aux joueurs | 5 (`mods.json`) | l'onglet Tools génère ce fichier |
 | Changer l'exécutable, les arguments de lancement, Java | 1 | `executable`, `command`, `launchArgs` |
 | Ajouter un réglage joueur (case, liste, curseur) | 2 (`customGamesSettings`) | utilisable dans `launchArgs` via `{nom}` |
