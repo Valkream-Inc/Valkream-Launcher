@@ -232,7 +232,7 @@ const searchColors = (theme: LauncherTheme): SearchColors => {
 
 export default function ChooseGames() {
   const { t } = useTranslation();
-  const { changeActualInstance } = useGames();
+  const { changeActualInstance, refreshChannel } = useGames();
   const [games, setGames] = useState<GameEntry[]>([]);
 
   // Instances activées par le remote ET décrites côté render : une entrée par canal proposé
@@ -266,9 +266,31 @@ export default function ChooseGames() {
   const [toRemove, setToRemove] = useState<DeprecatedInstall | null>(null);
   const [removing, setRemoving] = useState(false);
 
-  useEffect(() => {
+  const loadDeprecated = useCallback(() => {
     window.electron_API.getDeprecatedInstalls().then(setDeprecated).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    loadDeprecated();
+  }, [loadDeprecated]);
+
+  // Un jeu obsolète (désactivé, canal supprimé) se lance tel qu'il est installé
+  const [launching, setLaunching] = useState(false);
+  const launchDeprecated = useCallback(
+    async (item: DeprecatedInstall) => {
+      if (launching) return;
+      setLaunching(true);
+      try {
+        await window.electron_API.launchInstance(item.id, item.channel);
+      } catch (error) {
+        console.error(error);
+        enqueueSnackbar(t("button.launchError"), { variant: "error" });
+      } finally {
+        setLaunching(false);
+      }
+    },
+    [launching, t],
+  );
 
   const removeDeprecated = useCallback(async () => {
     if (!toRemove || removing) return;
@@ -276,6 +298,8 @@ export default function ChooseGames() {
     try {
       await window.electron_API.uninstallDeprecated(toRemove.id, toRemove.channel);
       setDeprecated((list) => list.filter((item) => !(item.id === toRemove.id && item.channel === toRemove.channel)));
+      loadDeprecated(); // liste relue depuis le disque
+      void refreshChannel(); // statut et infos de l'accueil relus tout de suite
       enqueueSnackbar(t("games.deprecated.done"), { variant: "success" });
       setToRemove(null);
     } catch (error) {
@@ -284,7 +308,7 @@ export default function ChooseGames() {
     } finally {
       setRemoving(false);
     }
-  }, [toRemove, removing, t]);
+  }, [toRemove, removing, t, loadDeprecated, refreshChannel]);
 
   const { changePanel } = usePanels();
   const { theme } = useTheme();
@@ -517,6 +541,11 @@ export default function ChooseGames() {
                           <Typography variant="caption" sx={{ textAlign: "center" }}>
                             {t(`games.deprecated.reason.${item.reason}`)}
                           </Typography>
+                          {item.reason !== "removed" && (
+                            <Button size="small" variant="contained" disabled={launching} onClick={() => void launchDeprecated(item)}>
+                              {t("games.deprecated.play")}
+                            </Button>
+                          )}
                           <Button size="small" color="error" variant="outlined" onClick={() => setToRemove(item)}>
                             {t("games.deprecated.uninstall")}
                           </Button>

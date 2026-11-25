@@ -213,6 +213,7 @@ const fr: Messages = {
     deprecated: {
       title: "Installations qui ne sont plus proposées",
       label: "OBSOLÈTE",
+      play: "Jouer",
       uninstall: "Désinstaller",
       reason: {
         removed: "Ce jeu n'existe plus dans le launcher.",

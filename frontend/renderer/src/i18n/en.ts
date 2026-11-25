@@ -210,6 +210,7 @@ const en: Messages = {
     deprecated: {
       title: "Installations no longer offered",
       label: "DEPRECATED",
+      play: "Play",
       uninstall: "Uninstall",
       reason: {
         removed: "This game no longer exists in the launcher.",

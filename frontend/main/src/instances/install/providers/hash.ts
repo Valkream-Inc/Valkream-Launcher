@@ -166,6 +166,7 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
       if (size !== undefined) progress.expect(file, size);
     });
   }
+  progress.lock(); // le total ne bouge plus pendant le téléchargement
   progress.emit();
 
   await runPool(toFetch, DOWNLOAD_CONCURRENCY, async ([file, expected]) => {
@@ -176,7 +177,7 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
     if (fromZip && fs.existsSync(fromZip) && (await hashFile(fromZip)) === expected) {
       const size = fs.statSync(fromZip).size;
       stageVerified(file, fromZip);
-      progress.skip(size);
+      progress.skip(size, file);
       return;
     }
 
@@ -198,12 +199,12 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
         }
         if (baseUrl === undefined) {
           mismatched.push(file); // fichier du jeu d'une autre version, rien d'autre pour le fournir
-          progress.skip();
+          progress.skip(undefined, file);
           return;
         }
       } else if (baseUrl === undefined) {
         mismatched.push(file);
-        progress.skip();
+        progress.skip(undefined, file);
         return;
       }
     }

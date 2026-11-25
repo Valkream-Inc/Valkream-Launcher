@@ -67,6 +67,14 @@ const resolve = (id: unknown, channel: unknown) => {
   };
 };
 
+/** Installations que le launcher ne propose plus (id retiré, instance désactivée, canal supprimé). */
+const listDeprecated = async () =>
+  deprecatedInstalls(
+    scanInstalledInstances(DirsManager.gamesRoot()),
+    new Set(instancesConfig.map((item) => item.id)),
+    await getInstanceRegistry().list(),
+  );
+
 const InstanceIpcHandlers = (): void => {
   // Le registre ne lève jamais : une instance injoignable ou invalide est décrite dans son résumé.
   ipcMain.handle("instances:list", () => getInstanceRegistry().list());
@@ -110,7 +118,7 @@ const InstanceIpcHandlers = (): void => {
           if (!event.sender.isDestroyed()) event.sender.send("instances:progress", progress);
         },
       })
-    );
+    ).finally(() => getInstanceInfos().invalidate());
   });
 
   // Journal d'installation du canal (texte), pour le support.
@@ -128,10 +136,17 @@ const InstanceIpcHandlers = (): void => {
     assertNotMoving();
     const { config, locations } = resolve(id, channel);
 
-    // On ne lance jamais un jeu dont une partie bloquante manque (sauf hors ligne : on joue l'installé).
-    const status = await getInstanceStatus(id, channel);
-    if (!status.canPlay) {
-      throw new LocalizedError("err.notUpToDate");
+    // Une installation obsolète (désactivée, canal supprimé) n'a plus de remote à comparer : elle se lance telle
+    // quelle si elle est présente. Sinon, on ne lance jamais un jeu dont une partie bloquante manque
+    // (sauf hors ligne : on joue l'installé).
+    const deprecated = (await listDeprecated()).some((item) => item.id === id && item.channel === channel);
+    if (deprecated) {
+      if (!fs.existsSync(locations.installDir)) throw new LocalizedError("err.gameDirMissing");
+    } else {
+      const status = await getInstanceStatus(id, channel);
+      if (!status.canPlay) {
+        throw new LocalizedError("err.notUpToDate");
+      }
     }
 
     const settings = { ...config.defaultSettings, ...readInstanceSettings(locations.installDir) };
@@ -255,13 +270,7 @@ const InstanceIpcHandlers = (): void => {
   });
 
   // Installations que le launcher ne propose plus : listées pour pouvoir les désinstaller
-  ipcMain.handle("instances:deprecated", async () =>
-    deprecatedInstalls(
-      scanInstalledInstances(DirsManager.gamesRoot()),
-      new Set(instancesConfig.map((item) => item.id)),
-      await getInstanceRegistry().list(),
-    ),
-  );
+  ipcMain.handle("instances:deprecated", () => listDeprecated());
 
   // Désinstallation sans config : l'id ou le canal n'existe plus côté launcher (chemin validé, jamais hors des jeux)
   ipcMain.handle("instances:uninstall-deprecated", (_event, id: unknown, channel: unknown) => {
@@ -270,6 +279,7 @@ const InstanceIpcHandlers = (): void => {
     const installDir = instanceRootPath(DirsManager.gamesRoot(), id, channel);
     if (getInstanceInstaller().isBusy(installDir)) throw new LocalizedError("install.alreadyRunning");
     fs.rmSync(installDir, { recursive: true, force: true });
+    getInstanceInfos().invalidate();
     // Dossier du jeu vidé : retiré aussi (jamais s'il reste un autre canal)
     const gameDir = path.dirname(installDir);
     try {
@@ -287,6 +297,7 @@ const InstanceIpcHandlers = (): void => {
     }
     // Un seul canal est supprimé : l'autre (stable/beta) n'est jamais touché.
     fs.rmSync(locations.installDir, { recursive: true, force: true });
+    getInstanceInfos().invalidate();
   });
 };
 

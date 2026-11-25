@@ -19,6 +19,7 @@ import { keyframes } from "@mui/system";
 
 import { typeConfig } from "./component/popup.config";
 import { createButtons } from "./component/popup.button";
+import { COMPACT, TINY, actionsLayout, buttonText, innerLayout, paperLayout, scrollArea } from "./component/popup.layout";
 import type {
   AnimatedRunesProps,
   PopupProps,
@@ -94,9 +95,12 @@ function OldPopup({
       slotProps={{
         paper: {
           sx: {
+            ...paperLayout,
             position: "relative",
             background: "linear-gradient(145deg, #3b2e2e, #5c4438)",
             padding: "2.5rem 3rem",
+            [COMPACT]: { padding: "1.2rem 1.6rem", borderWidth: "4px" },
+            [TINY]: { padding: "0.8rem 1.2rem" },
             borderRadius: "20px",
             border: `6px double #7b5e57`,
             boxShadow:
@@ -104,8 +108,8 @@ function OldPopup({
             color: "#f5f1e0",
             fontFamily: "'MedievalSharp', cursive",
             overflow: "visible",
-            minWidth: "80vw",
-            maxWidth: "80vw",
+            minWidth: "min(80vw, 900px)",
+            maxWidth: "min(80vw, 900px)",
             //Transition Fade
             opacity: open ? 1 : 0,
             transition: "opacity 600ms ease",
@@ -119,18 +123,22 @@ function OldPopup({
         },
       }}
     >
-      <Box sx={{ position: "relative", zIndex: 1, textAlign: "left" }}>
+      <Box sx={{ ...innerLayout, textAlign: "left" }}>
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             mb: 2,
+            flexShrink: 0,
+            [COMPACT]: { mb: 0.5 },
           }}
         >
           <Box
             sx={{
               mr: 3,
               fontSize: "100px",
+              [COMPACT]: { fontSize: "44px", mr: 1.5, "& svg": { fontSize: "44px" } },
+              [TINY]: { display: "none" },
               color,
               float: "left",
               textShadow: "0 0 10px #000, 2px 2px 0 #222",
@@ -142,6 +150,7 @@ function OldPopup({
             sx={{
               margin: 0,
               fontSize: "2.5rem",
+              [COMPACT]: { fontSize: "1.5rem", p: 0 },
               color,
               textShadow: "1px 1px 0 #000",
               fontFamily: "inherit",
@@ -151,7 +160,7 @@ function OldPopup({
             {title}
           </DialogTitle>
         </Box>
-        <DialogContent sx={{ overflow: "visible", p: 0 }}>
+        <DialogContent sx={{ ...scrollArea, p: 0, pr: 1 }}>
           <Typography
             variant="body1"
             className="old-theme"
@@ -161,8 +170,7 @@ function OldPopup({
               lineHeight: "1.6rem",
               textAlign: "left",
               fontFamily: "inherit",
-              maxHeight: "calc(80vh - 10cm)",
-              overflowY: "auto",
+              [COMPACT]: { margin: "0.4rem 0", fontSize: "1rem", lineHeight: "1.3rem" },
             }}
             component="div"
           >
@@ -170,7 +178,7 @@ function OldPopup({
           </Typography>
         </DialogContent>
         <DialogActions
-          sx={{ justifyContent: "flex-start", mt: 4, gap: "1rem", p: 0 }}
+          sx={{ justifyContent: "flex-start", ...actionsLayout, mt: 4, gap: "1rem", p: 0, [COMPACT]: { mt: 1.5, gap: "0.5rem" } }}
         >
           {buttons.map((button, index) => (
             <Button
@@ -184,9 +192,11 @@ function OldPopup({
                     ? `2px solid ${color}`
                     : "2px solid black",
                 color: button.variant === "main" ? color : "black",
+                ...buttonText,
                 padding: "0.8rem 1.6rem",
                 borderRadius: "8px",
                 fontSize: "1.1rem",
+                [COMPACT]: { padding: "0.4rem 1rem", fontSize: "0.9rem" },
                 fontFamily: "inherit",
                 transition: "0.3s",
                 textShadow: "1px 1px 0 #000",

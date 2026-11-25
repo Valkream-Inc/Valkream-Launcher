@@ -60,7 +60,7 @@ export const deprecatedInstalls = (
     // Serveur injoignable ou index invalide : on ne sait rien, rien n'est déclaré obsolète
     if (!summary || (summary.availability !== "enabled" && summary.availability !== "disabled")) continue;
     if (summary.availability === "disabled") result.push({ id, channel, reason: "disabled" });
-    else if (summary.channels.length > 0 && !summary.channels.includes(channel)) {
+    else if (!summary.channels.includes(channel)) {
       result.push({ id, channel, reason: "channel-removed" });
     }
   }

@@ -64,6 +64,12 @@ export class InstanceInfos {
     return { serverInfos, event: remote.event, maintenance: remote.maintenance };
   }
 
+  /** Oublie les réponses gardées : à appeler après une action locale (désinstallation…) pour relire tout de suite. */
+  invalidate(): void {
+    this.cache.clear();
+    this.servers.clear();
+  }
+
   /** Réponse du serveur de jeu gardée quelques secondes ; une requête en cours est réutilisée. */
   private server(config: InstanceMainConfig): Promise<ServerInfos> {
     const { serverTtlMs = 4000, now = Date.now } = this.options;

@@ -21,8 +21,13 @@ export interface GlobalProgress {
   update(key: string, fraction: number, bytes?: number): void;
   /** Unité terminée. */
   finish(key: string, bytes?: number): void;
-  /** Unité déjà prête (rien à faire) : compte comme terminée. `bytes` : sa taille, si connue. */
-  skip(bytes?: number): void;
+  /** Unité déjà prête (rien à faire) : compte comme terminée. `bytes` : sa taille, si connue ; `key` : son identifiant. */
+  skip(bytes?: number, key?: string): void;
+  /**
+   * Fige le total : à appeler une fois les tailles initiales collectées. Ensuite le total affiché ne change plus
+   * (une unité de taille inconnue pèse la moyenne figée, même quand sa vraie taille arrive en route).
+   */
+  lock(): void;
   /** Émet l'état courant même sans changement. */
   emit(): void;
 }
@@ -41,6 +46,9 @@ export const createGlobalProgress = (
   let doneKnownSizes = 0;
   let doneKnownCount = 0;
   let shown = 0; // le pourcentage ne recule jamais (le total peut grandir)
+  let locked = false;
+  let lockedAverage = 0;
+  let estimatedDone = 0; // unités terminées dont le poids est estimé (total « ~ »)
 
   const knownSizes = (): number[] => [...sizes.values()];
 
@@ -50,7 +58,7 @@ export const createGlobalProgress = (
     const knownCount = sizesSeen.length + doneKnownCount;
     const knownSum = sizesSeen.reduce((sum, size) => sum + size, 0) + doneKnownSizes;
     const weighted = knownCount > 0;
-    const average = weighted ? knownSum / knownCount : 0;
+    const average = locked ? lockedAverage : weighted ? knownSum / knownCount : 0;
 
     let progress = done;
     let bytes = doneBytes;
@@ -63,12 +71,21 @@ export const createGlobalProgress = (
       processedWeight += unit.fraction * weight;
       totalWeight += weight;
     }
-    // Unités pas encore commencées (ni en cours ni terminées) : estimées à la taille moyenne
-    const pending = Math.max(units - done - inflight.size, 0);
+    // Unités pas encore commencées : taille connue (déjà mesurée) sinon taille moyenne
+    let notStartedKnown = 0;
+    let notStartedKnownCount = 0;
+    for (const [key, size] of sizes) {
+      if (inflight.has(key)) continue;
+      notStartedKnown += size;
+      notStartedKnownCount++;
+    }
+    totalWeight += notStartedKnown;
+    const pending = Math.max(units - done - inflight.size - notStartedKnownCount, 0);
     totalWeight += pending * average;
 
     const fraction = weighted && totalWeight > 0 ? processedWeight / totalWeight : progress / units;
-    const exact = weighted && pending === 0 && [...inflight.keys()].every((key) => sizes.has(key));
+    const exact =
+      weighted && pending === 0 && estimatedDone === 0 && [...inflight.keys()].every((key) => sizes.has(key));
     const seconds = Math.max((Date.now() - startedAt) / 1000, 0.001);
     report({
       processedBytes: formatBytes(bytes),
@@ -94,9 +111,14 @@ export const createGlobalProgress = (
       doneKnownSizes += known;
       doneKnownCount++;
       doneWeight += known;
+    } else if (locked) {
+      // Total figé : l'unité garde le poids estimé qu'elle avait dans le total
+      doneWeight += lockedAverage;
+      estimatedDone++;
     } else {
       // Taille inconnue au départ : le poids est ce qui a été réellement traité
       doneWeight += processed;
+      estimatedDone++;
       if (processed > 0) {
         doneKnownSizes += processed;
         doneKnownCount++;
@@ -106,7 +128,15 @@ export const createGlobalProgress = (
 
   return {
     expect: (key, bytes) => {
-      if (bytes > 0) sizes.set(key, bytes);
+      // Total figé : une taille qui arrive en retard ne modifie plus le total
+      if (bytes > 0 && !(locked && !sizes.has(key))) sizes.set(key, bytes);
+    },
+    lock: () => {
+      if (locked) return;
+      const known = [...sizes.values()];
+      const count = known.length + doneKnownCount;
+      lockedAverage = count > 0 ? (known.reduce((sum, size) => sum + size, 0) + doneKnownSizes) / count : 0;
+      locked = true;
     },
     update: (key, fraction, bytes = 0) => {
       inflight.set(key, { fraction: Math.min(Math.max(fraction, 0), 1), bytes });
@@ -116,8 +146,8 @@ export const createGlobalProgress = (
       settle(key, bytes);
       emit();
     },
-    skip: (bytes) => {
-      settle(undefined, bytes);
+    skip: (bytes, key) => {
+      settle(key, bytes);
       emit();
     },
     emit,

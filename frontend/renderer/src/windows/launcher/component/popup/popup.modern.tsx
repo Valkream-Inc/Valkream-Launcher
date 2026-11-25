@@ -17,6 +17,7 @@ import {
 
 import { typeConfig } from "./component/popup.config";
 import { createButtons } from "./component/popup.button";
+import { COMPACT, TINY, actionsLayout, buttonText, paperLayout, scrollArea } from "./component/popup.layout";
 import type {
   PopupProps,
   PopupTransitionProps,
@@ -68,8 +69,11 @@ export default function ModernPopup({
             borderRadius: "20px",
             border: "1px solid rgba(255,255,255,0.15)",
             boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+            ...paperLayout,
             p: 2,
-            maxHeight: "80vh",
+            overflow: "hidden",
+            [COMPACT]: { p: 1.5 },
+            [TINY]: { p: 1 },
             // Transition Fade
             opacity: open ? 1 : 0,
             transition: "opacity 600ms ease",
@@ -83,11 +87,11 @@ export default function ModernPopup({
         },
       }}
     >
-      <Box sx={{ textAlign: "center", color: color }}>{icon}</Box>
-      <DialogTitle sx={{ textAlign: "center", color, fontWeight: "bold" }}>
+      <Box sx={{ textAlign: "center", color: color, flexShrink: 0, [COMPACT]: { "& svg": { fontSize: "1.6rem" } }, [TINY]: { display: "none" } }}>{icon}</Box>
+      <DialogTitle sx={{ textAlign: "center", color, fontWeight: "bold", flexShrink: 0, [COMPACT]: { py: 0.5, fontSize: "1.1rem" } }}>
         {title}
       </DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ ...scrollArea, [COMPACT]: { py: 0.5 } }}>
         <Typography
           variant="body1"
           sx={{ color: "text.secondary", textAlign: "center" }}
@@ -96,7 +100,7 @@ export default function ModernPopup({
           {message}
         </Typography>
       </DialogContent>
-      <DialogActions sx={{ justifyContent: "center" }}>
+      <DialogActions sx={{ justifyContent: "center", ...actionsLayout, [COMPACT]: { py: 0.5 } }}>
         {buttons.map((button, index) => (
           <Button
             key={index}
@@ -105,7 +109,9 @@ export default function ModernPopup({
             sx={{
               bgcolor: button.variant === "main" ? color : "grey.800",
               color: "common.white",
+              ...buttonText,
               px: 3,
+              [COMPACT]: { px: 2, py: 0.5, fontSize: "0.8rem" },
               "&:hover": {
                 opacity: 0.9,
                 bgcolor: button.variant === "main" ? color : "grey.700",

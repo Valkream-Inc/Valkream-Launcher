@@ -40,11 +40,11 @@ export const resolveChannel = (
 
 /**
  * Entrées du choix du jeu pour une instance : un canal par entrée. Un jeu dont aucun canal n'est proposé
- * (ex : seulement alpha, canaux de test désactivés) n'est pas affiché. Sans information du remote
- * (hors ligne, pas de cache), le jeu reste accessible en stable.
+ * (ex : seulement alpha, canaux de test désactivés, ou aucun canal déclaré) n'est pas affiché ; ses installations
+ * apparaissent alors comme obsolètes. (Sans information du remote, l'instance n'est pas « enabled » : déjà masquée.)
  */
 export const pickerChannels = (channels: readonly Channel[], testChannelsEnabled: boolean): Channel[] =>
-  channels.length === 0 ? ["stable"] : selectableChannels(channels, testChannelsEnabled);
+  selectableChannels(channels, testChannelsEnabled);
 
 /** Une instance est affichable si le remote l'active et que le renderer sait la décrire. */
 export const isSelectable = (

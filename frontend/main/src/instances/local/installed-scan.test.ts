@@ -50,9 +50,19 @@ describe("installations du disque", () => {
     ]);
   });
 
-  it("serveur injoignable ou sans canaux : rien n'est déclaré obsolète à tort", () => {
+  it("serveur injoignable : rien n'est déclaré obsolète à tort", () => {
     const installed = [{ id: "g", channel: "alpha" as const }];
     assert.deepEqual(deprecatedInstalls(installed, new Set(["g"]), [summary({ availability: "unreachable", channels: [] })]), []);
-    assert.deepEqual(deprecatedInstalls(installed, new Set(["g"]), [summary({ channels: [] })]), []);
+  });
+
+  it("aucun canal spécifié : toutes les installations deviennent obsolètes", () => {
+    const installed = [
+      { id: "g", channel: "stable" as const },
+      { id: "g", channel: "beta" as const },
+    ];
+    assert.deepEqual(deprecatedInstalls(installed, new Set(["g"]), [summary({ channels: [] })]), [
+      { id: "g", channel: "stable", reason: "channel-removed" },
+      { id: "g", channel: "beta", reason: "channel-removed" },
+    ]);
   });
 });

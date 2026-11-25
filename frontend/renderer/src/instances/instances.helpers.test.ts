@@ -30,7 +30,7 @@ describe("canaux", () => {
     assert.deepEqual(pickerChannels(["alpha"], true), ["alpha"]);
     assert.deepEqual(pickerChannels(["beta"], true), ["beta"]); // pas de stable : pas d'entrée stable
     assert.deepEqual(pickerChannels(["stable", "beta"], false), ["stable"]);
-    assert.deepEqual(pickerChannels([], false), ["stable"]); // hors ligne sans cache
+    assert.deepEqual(pickerChannels([], false), []); // aucun canal déclaré : pas d'entrée (installations obsolètes)
   });
 });
 

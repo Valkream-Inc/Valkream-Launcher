@@ -72,3 +72,18 @@ describe("createGlobalProgress : pondéré par les octets", () => {
     assert.equal(seen.at(-1)?.total, undefined);
   });
 });
+
+it("lock : le total ne change plus quand une taille arrive en retard", () => {
+  const reports: { total?: number }[] = [];
+  const progress = createGlobalProgress((t) => reports.push(t), () => 3);
+  progress.expect("a", 100);
+  progress.expect("b", 100);
+  progress.lock(); // « c » inconnu : estimé à 100
+  progress.update("c", 0.5, 10);
+  const before = reports.at(-1)?.total;
+  progress.expect("c", 5000);
+  progress.update("c", 0.6, 20);
+  assert.equal(reports.at(-1)?.total, before);
+  progress.finish("c", 20);
+  assert.equal(reports.at(-1)?.total, before);
+});
