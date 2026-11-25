@@ -56,7 +56,7 @@ const main = async (): Promise<void> => {
   console.log(`${fileCount} fichier(s) → ${output}`);
 
   if (latest && entry) {
-    fs.writeFileSync(latest, setEntryHash(fs.readFileSync(latest, "utf8"), entry, hash));
+    fs.writeFileSync(latest, setEntryHash(fs.readFileSync(latest, "utf8"), entry, hash, latest));
     console.log(`\nhash ${hash} écrit dans ${latest} (${entry})`);
     if (ignore.length > 0) console.log(`Pensez à déclarer to_ignore : ${ignore.join(", ")}`);
     return;

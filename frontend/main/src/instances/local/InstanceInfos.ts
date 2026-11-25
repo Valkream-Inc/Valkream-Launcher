@@ -20,7 +20,8 @@ import type {
 import type { ServerQueryConfig } from "../../types/core.js";
 import type { InstanceMainConfig } from "../instances.types.js";
 import { loadRemoteIndex } from "../remote/InstanceRegistry.js";
-import { pickChannel } from "../remote/channel-value.js";
+import { variantContext } from "../remote/variant-context.js";
+import type { VariantContext } from "../remote/variants.js";
 import type { ParamResolver } from "../remote/ParamResolver.js";
 import { LocalizedError } from "../../lib/errors/localized-error.js";
 
@@ -75,19 +76,20 @@ export class InstanceInfos {
 
   private async remote(config: InstanceMainConfig, channel: Channel): Promise<Cached> {
     const { resolver, ttlMs = 5000, now = Date.now } = this.options;
-    const key = `${config.id}@${channel}`;
+    const context = variantContext(channel, this.options.platform);
+    const key = `${config.id}@${channel}@${context.language}`;
     const cached = this.cache.get(key);
     if (cached && now() - cached.at < ttlMs) return cached;
 
-    const load = await loadRemoteIndex(resolver, config.indexUrl, config.id);
+    const load = await loadRemoteIndex(resolver, config.indexUrl, config.id, context);
     const entry = load.kind === "ok" ? load.index : undefined;
 
-    const event = pickChannel(entry?.event, channel);
-    const maintenance = pickChannel(entry?.maintenance, channel);
+    const event = entry?.event;
+    const maintenance = entry?.maintenance;
     const fresh: Cached = {
       at: now(),
-      event: event === undefined ? false : await this.read<GameEvent>(event, "événement", (value) => this.withImage(value)),
-      maintenance: maintenance === undefined ? false : await this.read<Maintenance>(maintenance, "maintenance"),
+      event: event === undefined ? false : await this.read<GameEvent>(event, "événement", context, (value) => this.withImage(value)),
+      maintenance: maintenance === undefined ? false : await this.read<Maintenance>(maintenance, "maintenance", context),
     };
     this.cache.set(key, fresh);
     return fresh;
@@ -96,10 +98,11 @@ export class InstanceInfos {
   private async read<T extends object>(
     param: unknown,
     label: string,
+    context: VariantContext,
     transform: (value: T) => T = (value) => value,
   ): Promise<T | false> {
     try {
-      const { value } = await this.options.resolver.getJson<T>(param as string | T);
+      const { value } = await this.options.resolver.getJson<T>(param as string | T, context);
       return value && typeof value === "object" ? transform(value) : false;
     } catch (error) {
       console.error(`Error getting ${label}:`, messageOf(error));

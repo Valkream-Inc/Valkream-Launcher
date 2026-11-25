@@ -4,7 +4,7 @@
  *
  * Du latest.yml écrit sur le serveur à l'entrée utilisable sur cette machine.
  * Toutes les options d'une entrée, sauf `version`, peuvent :
- * - être déclinées par plateforme (`{ win32: …, linux: …, default: … }`) ;
+ * - être déclinées par canal, plateforme et langue (`{ win32: …, linux: …, default: … }`, voir variants.ts) ;
  * - prendre une valeur inline, ou un lien (`https://…`, `/chemin`) vers un fichier
  *   JSON / YAML qui la contient.
  * `content`, `hash-folder` et `api-url` sont déjà des liens vers ce que télécharge le
@@ -20,6 +20,7 @@ import type { GamePlatform, RawOption, ReleaseConfig } from "@shared/types";
 
 import { isFetchableLink } from "./link.js";
 import type { ParamResolver } from "./ParamResolver.js";
+import { resolveVariants, type VariantContext } from "./variants.js";
 
 export const RELEASE_TIERS = ["game-base", "game-details"] as const;
 
@@ -85,7 +86,7 @@ export const selectEntryPlatform = (entry: unknown, platform: GamePlatform): Raw
 /** Lit les options dont la valeur est un lien vers un fichier de données. */
 const resolveEntryLinks = async (
   entry: unknown,
-  platform: GamePlatform,
+  context: VariantContext,
   resolver: ParamResolver,
   prefix: string,
 ): Promise<{ entry: unknown; errors: string[] }> => {
@@ -99,9 +100,9 @@ const resolveEntryLinks = async (
       const value = entry[key];
       if (typeof value !== "string" || !isFetchableLink(value)) return;
       try {
-        const { value: data } = await resolver.getYaml<unknown>(value);
-        // Le fichier peut lui-même être décliné par plateforme.
-        const picked = pickPlatform(data, platform);
+        const { value: data } = await resolver.getJson<unknown>(value);
+        // Le fichier peut lui-même être décliné par canal, plateforme et langue.
+        const picked = resolveVariants(data, context);
         if (picked === undefined || picked === null) delete resolved[key];
         else resolved[key] = picked;
       } catch (error) {
@@ -123,7 +124,8 @@ export interface FlatRelease {
 }
 
 /**
- * Applique la plateforme puis lit les liens de données de toutes les entrées.
+ * Applique la plateforme puis lit les liens de données de toutes les entrées (variantes de canal et de langue
+ * du `context` appliquées aux données lues ; celles du latest lui-même l'ont déjà été à la lecture).
  * Les clés inconnues sont conservées telles quelles (la validation les signale).
  */
 export const flattenRelease = async (
@@ -131,6 +133,7 @@ export const flattenRelease = async (
   platform: GamePlatform,
   resolver: ParamResolver,
   entryPaths: Readonly<Record<string, RawOption<string>>>,
+  context: VariantContext = {},
 ): Promise<FlatRelease> => {
   if (!isRecord(raw)) return { release: raw as ReleaseConfig, errors: [] };
 
@@ -160,7 +163,7 @@ export const flattenRelease = async (
           selected.path = installPath;
         }
 
-        const result = await resolveEntryLinks(selected, platform, resolver, prefix);
+        const result = await resolveEntryLinks(selected, { ...context, platform }, resolver, prefix);
         flat[name] = result.entry;
         errors.push(...result.errors);
       }),

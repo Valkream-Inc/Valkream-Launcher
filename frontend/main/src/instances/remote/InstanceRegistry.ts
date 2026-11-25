@@ -13,6 +13,7 @@ import type { InstanceMainConfig } from "../instances.types.js";
 import { isFetchableLink } from "./link.js";
 import type { ParamResolver } from "./ParamResolver.js";
 import { validateRemoteIndex } from "./validate.js";
+import { resolveVariants, type VariantContext } from "./variants.js";
 
 export interface InstanceRegistryOptions {
   configs: readonly InstanceMainConfig[];
@@ -61,11 +62,16 @@ export class InstanceRegistry {
   }
 }
 
-/** Télécharge et valide l'`index.config.json` d'un jeu. Ne lève jamais. */
+/**
+ * Télécharge et valide l'index d'un jeu (YAML ou JSON, selon l'extension). Ne lève jamais.
+ * `context` : canal / plateforme / langue du joueur, appliqués aux valeurs déclinées (les types absents du contexte
+ * laissent leurs tables intactes ; `channels` et `enabled` ne sont jamais résolus).
+ */
 export async function loadRemoteIndex(
   resolver: ParamResolver,
   indexUrl: string,
   expectedId: string,
+  context: VariantContext = {},
 ): Promise<IndexLoad> {
   try {
     const { value, source } = await resolver.getJson<unknown>(indexUrl);
@@ -75,7 +81,7 @@ export async function loadRemoteIndex(
 
     const result = validateRemoteIndex(value, expectedId);
     return result.ok
-      ? { kind: "ok", index: result.value, source }
+      ? { kind: "ok", index: resolveVariants(result.value, context) as RemoteIndex, source }
       : { kind: "invalid", errors: result.errors, source };
   } catch (error) {
     return {

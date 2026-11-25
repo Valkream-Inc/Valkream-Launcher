@@ -32,6 +32,14 @@ describe("setEntryHash", () => {
     assert.doesNotMatch(out, /hash: old/);
   });
 
+  it("fichier .json : même mise à jour, format conservé", () => {
+    const json = JSON.stringify({ version: "1.0.0", "game-base": { valheim: { type: "hash_url", hash: "old" } } });
+    const out = JSON.parse(setEntryHash(json, "game-base.valheim", "abc", "latest.json"));
+    assert.equal(out["game-base"].valheim.hash, "abc");
+    assert.equal(out.version, "1.0.0");
+    assert.throws(() => setEntryHash(json, "game-base.autre", "x", "latest.json"), /introuvable/);
+  });
+
   it("refuse une entrée mal formée ou inconnue", () => {
     assert.throws(() => setEntryHash(SAMPLE, "valheim", "x"), /entrée invalide/);
     assert.throws(() => setEntryHash(SAMPLE, "game-base.inconnue", "x"), /introuvable/);

@@ -95,8 +95,23 @@ describe("paramètres par canal", () => {
       mods: { alpha: [{ icon: "x" }] },
     };
     const errors = errorsOf(validateRemoteIndex(index));
-    assert.match(errors, /\.event\.beta : lien invalide/);
-    assert.match(errors, /\.mods\.alpha\[0\] : « name » requis/);
+    assert.match(errors, /index\.event : lien invalide.*\[canal beta\]/);
+    assert.match(errors, /index\.mods\[0\] : « name » requis \[canal alpha\]/);
+  });
+
+  it("toute clé peut être déclinée par plateforme et par langue, en profondeur", () => {
+    const index = {
+      ...validIndex(),
+      event: { stable: { win32: { fr: "/e-fr.json", en: "/e-en.json" } }, default: "/e.json" },
+      requiredSpaceMb: { win32: 3000, linux: 2000 },
+      mods: { fr: [{ name: "m" }], en: "/mods-en.json" },
+    };
+    assert.equal(validateRemoteIndex(index).ok, true);
+  });
+
+  it("une variante fautive est localisée (plateforme et langue)", () => {
+    const index = { ...validIndex(), event: { linux: { en: "pas-un-lien", fr: "/e.json" }, default: "/e.json" } };
+    assert.match(errorsOf(validateRemoteIndex(index)), /index\.event : lien invalide.*\[plateforme linux, langue en\]/);
   });
 
   it("un événement avec ses propres champs n'est pas pris pour une table de canaux", () => {

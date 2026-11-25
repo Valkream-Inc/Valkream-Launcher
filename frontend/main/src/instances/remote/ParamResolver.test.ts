@@ -36,6 +36,26 @@ describe("ParamResolver", () => {
     assert.equal(cache.store.get("https://base.test/index.json"), '{"a":1}');
   });
 
+  it("format détecté par l'extension : YAML ou JSON, par getJson comme par getYaml", async () => {
+    const r = resolver(async (url) => (url.endsWith(".yml") ? "a: 1\nb:\n  - x\n" : '{"a":1,"b":["x"]}'));
+    const expected = { a: 1, b: ["x"] };
+    assert.deepEqual((await r.getJson("/f.yml")).value, expected);
+    assert.deepEqual((await r.getYaml("/f.json")).value, expected);
+    assert.deepEqual((await r.get("/f.yml?v=2")).value, expected);
+  });
+
+  it("avec un contexte : variantes canal / plateforme / langue résolues, fichier brut gardé en cache", async () => {
+    const cache = memoryCache();
+    const raw = JSON.stringify({ title: { fr: "Bonjour", en: "Hello" }, mods: { beta: ["b"], stable: ["s"] }, os: { win32: "w", linux: "l" } });
+    const r = resolver(async () => raw, { cache });
+    const beta = await r.get<Record<string, unknown>>("/e.json", { channel: "beta", platform: "linux", language: "en" });
+    assert.deepEqual(beta.value, { title: "Hello", mods: ["b"], os: "l" });
+    assert.equal(cache.store.get("https://base.test/e.json"), raw);
+    // Même fichier, autre langue : résolu depuis le texte brut sans changer ce qui est en cache
+    const stable = await r.get<Record<string, unknown>>("/e.json", { channel: "stable", platform: "win32", language: "fr" });
+    assert.deepEqual(stable.value, { title: "Bonjour", mods: ["s"], os: "w" });
+  });
+
   it("parse le YAML", async () => {
     const r = resolver(async () => "version: 0.0.0.0\nlist:\n  - a\n");
     const result = await r.getYaml<{ version: string; list: string[] }>("/latest.yml");

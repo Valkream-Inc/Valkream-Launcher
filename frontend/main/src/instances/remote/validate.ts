@@ -19,7 +19,7 @@ import type {
 
 import { isLocalContent, parseLocalContent } from "../install/files/local-content.js";
 import { isValidKey } from "../../lib/format/json-key.js";
-import { isChannelTable } from "./channel-value.js";
+import { allVariantContexts, resolveVariants, type VariantContext } from "./variants.js";
 import { classifyLink, isFetchableLink, isPerPlatformContent } from "./link.js";
 import { RELEASE_TIERS } from "./release-options.js";
 import { isSafeRelativePath, isSafeSegment } from "../../lib/fs/paths.js";
@@ -101,10 +101,35 @@ const checkObject = (data: unknown, where: string): string[] =>
   isObject(data) ? [] : [`${where} : objet attendu`];
 
 /**
- * Valide le `index.config.json` d'UN jeu.
+ * Valide l'index d'UN jeu (`index.config.json` ou `.yml`). Toute clé peut être déclinée par canal, plateforme et
+ * langue : l'index est validé pour chacune des 18 combinaisons, les erreurs sont réunies sans doublon.
  * @param expectedId id de l'instance qui charge ce fichier (doit être identique).
  */
 export const validateRemoteIndex = (
+  raw: unknown,
+  expectedId?: string,
+): ValidationResult<RemoteIndex> => {
+  const contexts = allVariantContexts();
+  const failing = new Map<string, VariantContext[]>();
+  for (const context of contexts) {
+    const result = validateResolvedIndex(resolveVariants(raw, context), expectedId);
+    for (const error of result.errors) failing.set(error, [...(failing.get(error) ?? []), context]);
+  }
+  if (failing.size === 0) return { ok: true, value: raw as RemoteIndex, errors: [] };
+  // Une erreur propre à une variante précise indique laquelle : « [canal beta] », « [plateforme linux, langue en] »
+  const errors = [...failing].map(([error, where]) => {
+    if (where.length === contexts.length) return error;
+    const parts: string[] = [];
+    for (const [dimension, label] of [["channel", "canal"], ["platform", "plateforme"], ["language", "langue"]] as const) {
+      const values = new Set(where.map((context) => context[dimension]));
+      if (values.size === 1) parts.push(`${label} ${[...values][0]}`);
+    }
+    return parts.length > 0 ? `${error} [${parts.join(", ")}]` : error;
+  });
+  return { ok: false, errors };
+};
+
+const validateResolvedIndex = (
   raw: unknown,
   expectedId?: string,
 ): ValidationResult<RemoteIndex> => {
@@ -165,14 +190,8 @@ export const validateRemoteIndex = (
   for (const [key, checkData] of optionalParams) {
     const value = raw[key];
     if (value === undefined) continue;
-    if (isChannelTable(value)) {
-      // Une valeur par canal : chacune est un lien ou des données
-      for (const [channel, perChannel] of Object.entries(value)) {
-        errors.push(...checkLinkOrData(perChannel, `${where}.${key}.${channel}`, checkData));
-      }
-    } else {
-      errors.push(...checkLinkOrData(value, `${where}.${key}`, checkData));
-    }
+    // Les variantes (canal, plateforme, langue) sont déjà résolues : un lien ou des données
+    errors.push(...checkLinkOrData(value, `${where}.${key}`, checkData));
   }
 
   return finish<RemoteIndex>(raw, errors);

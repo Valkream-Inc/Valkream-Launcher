@@ -13,6 +13,8 @@ export type ErrorVars = Record<string, string | number>;
 
 /** Langue des `message` : « fr » par défaut, branchée sur le réglage de langue au démarrage (`app.ts`). */
 let currentLanguage: () => Lang = () => "fr";
+/** Langue courante (celle du joueur) : sert aussi à choisir la variante par langue des fichiers de config. */
+export const getErrorLanguage = (): Lang => currentLanguage();
 export const setErrorLanguage = (provider: () => Lang): void => {
   currentLanguage = provider;
 };

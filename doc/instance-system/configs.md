@@ -11,7 +11,7 @@ Un jeu (une **instance**) est décrit par une clé commune, son `id` (ex : `Valh
 | --- | --- | --- | --- | --- |
 | 1 | `frontend/main/src/instances/instances.config.ts` | développeur | nouvelle version du **launcher** | **où** installer, **comment** lancer, serveur de jeu |
 | 2 | `frontend/renderer/src/instances/instances.config.tsx` | développeur | nouvelle version du **launcher** | **look** : images, fonds, textes, réglages affichés |
-| 3 | `backend/public/games/<id>/index.config.json` | admin | immédiat (serveur) | **quels canaux** existent, plateformes, événement, mods affichés |
+| 3 | `backend/public/games/<id>/index.config.json` (ou `.yml`) | admin | immédiat (serveur) | **quels canaux** existent, plateformes, événement, mods affichés |
 | 4 | `backend/public/games/<id>/latest.yml` (`latest.beta.yml`…) | admin | immédiat (serveur) | **quoi** installer et **quelle version** |
 | 5 | `backend/public/games/<id>/config/*.json` | admin | immédiat (serveur) | événement, maintenance, liste des mods, contributeurs (affichage) |
 
@@ -149,23 +149,39 @@ Sinon                                        → zip_url
 - Un canal absent d'`index.config.json` n'existe pas. Un jeu **sans `stable`** n'apparaît que si les tests sont activés.
 - Workflow type : modifier `latest.beta.yml` → tester → copier dans `latest.yml`.
 
-**Événement, maintenance, mods, contributeurs : une valeur par canal.** Ces quatre champs de `index.config.json` acceptent
-soit une valeur unique (lien `/chemin` ou données en ligne), soit une table par canal :
+**Format des fichiers : YAML ou JSON, au choix.** Tous les fichiers de config (index, latest, listes de mods, événement,
+maintenance, contributeurs…) peuvent être écrits en YAML ou en JSON : le launcher détecte le format par l'**extension** du lien
+(`.yml` / `.yaml` → YAML, `.json` → JSON ; sans extension, JSON puis YAML). On peut donc mélanger : un `index.config.yml` qui
+pointe vers un `event.json`. Le champ `indexUrl` de la config main désigne le bon fichier. Les manifestes de hash restent du JSON.
 
-```json
-"event": {
-  "stable": "/games/Valheim-Valkream-v2/config/event.json",
-  "beta":   "/games/Valheim-Valkream-v2/config/event.beta.json"
-},
-"maintenance": { "beta": { "enabled": true, "description": "Test en cours", "end_date": "2026-12-01" } },
-"mods": { "default": "/games/Valheim-Valkream-v2/config/mods.json", "alpha": "/games/Valheim-Valkream-v2/config/mods.alpha.json" }
+**Toute clé peut être déclinée par canal, puis plateforme, puis langue** (même quand cela n'a pas de sens, par exemple un BepInEx
+différent selon la langue : le but est une base commune, la même règle partout) :
+
+```yaml
+event:                                   # par canal
+  stable: /games/Valheim-Valkream-v2/config/event.json
+  beta:   /games/Valheim-Valkream-v2/config/event.beta.json
+requiredSpaceMb: { win32: 3000, linux: 2200 }          # par plateforme
+description: { fr: "Bonjour", en: "Hello" }            # par langue
+mods:                                                   # combinable, dans n'importe quel ordre
+  default: /games/Valheim-Valkream-v2/config/mods.json
+  beta:
+    win32: { fr: /…/mods-beta-win-fr.json, en: /…/mods-beta-win-en.json }
 ```
 
-- Chaque valeur est un lien ou des données, comme pour une valeur unique.
-- Canal absent de la table : `default`, puis `stable`. S'il n'y a ni l'un ni l'autre, rien n'est affiché pour ce canal.
-- Une table n'est reconnue que si **toutes** ses clés sont `stable`, `beta`, `alpha` ou `default` : un événement qui a ses propres champs
-  (`name`, `description`…) reste une donnée.
+- Une **table de variantes** est un objet dont **toutes** les clés sont du même type : `stable`/`beta`/`alpha` (canaux),
+  `win32`/`linux`/`darwin` (plateformes) ou `fr`/`en` (langues), plus éventuellement `default`. Un objet qui a ses propres champs
+  (`name`, `description`…) ou qui mélange les types reste une donnée.
+- Valeur absente : canal → `default`, sinon `stable` ; plateforme → `default` ; langue → `default`, sinon `fr`, sinon `en`.
+  Sans valeur applicable, la clé est ignorée (pour une entrée du latest : sans `type` ou `content`, l'entrée n'est pas proposée).
+- Les tables s'imbriquent à toute profondeur. Les fichiers liés (liste de mods, événement…) peuvent eux aussi contenir des variantes.
+- Exceptions : `channels` (lien du latest par canal) et `enabled` (activation par plateforme) de l'index sont déjà des tables du
+  format et ne sont jamais traitées comme des variantes. Les **manifestes de hash** (chemin → hash) ne sont pas concernés.
+- La langue suivie est celle du launcher ; un changement de langue s'applique sans retélécharger.
+- À la validation (`validateRemoteIndex`), l'index est vérifié pour **chacune des 18 combinaisons** canal × plateforme × langue :
+  une erreur propre à une variante l'indique (`index.event : lien invalide … [canal beta]`).
 - L'accueil affiche l'événement et la maintenance **du canal sélectionné** ; les onglets Mods et Contributeurs, ceux du canal ouvert.
+- Côté outils : `build-manifest --latest <fichier>` met à jour le `hash` d'un latest `.yml` (commentaires conservés) comme `.json`.
 
 ## 6. Ajouter un jeu en 3 étapes
 

@@ -22,7 +22,8 @@ import type {
   ReleaseTier,
 } from "@shared/types";
 
-import { pickChannel } from "../remote/channel-value.js";
+import { variantContext } from "../remote/variant-context.js";
+import type { VariantContext } from "../remote/variants.js";
 import type { InstanceMainConfig } from "../instances.types.js";
 import { entryDirectory, installLocations, type InstallLocations } from "./instance-paths.js";
 import { loadRemoteIndex } from "../remote/InstanceRegistry.js";
@@ -87,7 +88,8 @@ export class InstanceInspector {
     };
 
     // 1. index.config.json du jeu : activation, lien du canal, mods et contributeurs.
-    const load = await loadRemoteIndex(resolver, config.indexUrl, id);
+    const context = variantContext(channel, platform);
+    const load = await loadRemoteIndex(resolver, config.indexUrl, id, context);
     let releaseLink: string | undefined;
 
     if (load.kind !== "ok") {
@@ -99,8 +101,8 @@ export class InstanceInspector {
       }
       releaseLink = index.channels?.[channel];
       loaded.requiredSpaceMb = index.requiredSpaceMb;
-      loaded.mods = await this.loadList<ModDisplay>(pickChannel(index.mods, channel), "mods", errors);
-      loaded.contributors = await this.loadList<Contributor>(pickChannel(index.contributors, channel), "contributeurs", errors);
+      loaded.mods = await this.loadList<ModDisplay>(index.mods, "mods", context, errors);
+      loaded.contributors = await this.loadList<Contributor>(index.contributors, "contributeurs", context, errors);
     }
 
     // 2. latest.yml du canal.
@@ -110,10 +112,10 @@ export class InstanceInspector {
     }
 
     try {
-      const fetched = await resolver.getYaml<unknown>(releaseLink);
+      const fetched = await resolver.getYaml<unknown>(releaseLink, { channel: context.channel, language: context.language });
       loaded.releaseSource = fetched.source === "cache" ? "cache" : "online";
       // Plateforme choisie et liens de données lus, puis validation de ce qui sera réellement installé.
-      const flat = await flattenRelease(fetched.value, platform, resolver, config.entryPaths);
+      const flat = await flattenRelease(fetched.value, platform, resolver, config.entryPaths, context);
       loaded.releaseErrors = [
         ...flat.errors,
         ...validateReleaseConfig(flat.release).errors,
@@ -203,11 +205,12 @@ export class InstanceInspector {
   private async loadList<T extends { name: string }>(
     param: unknown,
     label: string,
+    context: VariantContext,
     errors: string[],
   ): Promise<T[]> {
     if (param === undefined) return [];
     try {
-      const { value } = await this.options.resolver.getJson<unknown>(param as string | unknown[]);
+      const { value } = await this.options.resolver.getJson<unknown>(param as string | unknown[], context);
       if (!Array.isArray(value)) throw new Error("tableau attendu");
       return value.filter(
         (item): item is T =>
