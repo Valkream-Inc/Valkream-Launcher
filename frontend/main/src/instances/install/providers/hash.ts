@@ -31,16 +31,21 @@ import { GameSourceError } from "../game-source.js";
 import { LocalizedError } from "../../../lib/errors/localized-error.js";
 import { hashFile, manifestHash, type Manifest } from "../state/manifest.js";
 import { runPool } from "../../../lib/net/concurrency.js";
+import { copyFileWithProgress } from "../../../lib/fs/copy-progress.js";
 import { resolveInside } from "../../../lib/fs/paths.js";
 import { matchesAny, normalizeRelative } from "../../../lib/format/patterns.js";
 import { shouldWriteFile } from "../files/preserve.js";
 import { commitStaged, stageFile } from "../files/staging.js";
 import { fetchArchive } from "./archive.js";
 import { createGlobalProgress } from "./global-progress.js";
+import { progressOf } from "../state/progress.js";
 import type { Provider, ProviderContext } from "./types.js";
 
 /** Téléchargements simultanés de fichiers individuels. */
 const DOWNLOAD_CONCURRENCY = 4;
+
+/** Requêtes de taille simultanées (HEAD) avant le téléchargement. */
+const SIZE_CONCURRENCY = 8;
 
 /** Part de fichiers à récupérer au-delà de laquelle on préfère l'archive aux fichiers un par un. */
 const ZIP_MIN_RATIO = 0.5;
@@ -90,12 +95,28 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
     .filter(([file]) => !matchesAny(file, plan.ignored));
 
   // Fichiers à récupérer : absents ou différents (et pas conservés).
+  // La vérification des fichiers déjà présents (plusieurs Go) a sa propre progression, en octets.
   const toFetch: (readonly [string, string])[] = [];
-  for (const item of wanted) {
+  const existing = wanted.map(([file]) => resolveInside(entryDir, file)).map((destination) => {
+    try {
+      return fs.statSync(destination).size;
+    } catch {
+      return 0;
+    }
+  });
+  const verifyTotal = existing.reduce((sum, size) => sum + size, 0);
+  const verifyStartedAt = Date.now();
+  let verified = 0;
+  for (const [index, item] of wanted.entries()) {
     const [file, expected] = item;
     const destination = resolveInside(entryDir, file);
-    const exists = fs.existsSync(destination);
-    if (exists && (await hashes.hash(destination)) === expected) continue;
+    const exists = existing[index] > 0 || fs.existsSync(destination);
+    if (exists && (await hashes.hash(destination)) === expected) {
+      verified += existing[index];
+      if (verifyTotal > 0) context.report("verify", context.t("progress.verify", { label: name }), progressOf(verified, verifyTotal, verifyStartedAt));
+      continue;
+    }
+    verified += existing[index];
     if (shouldWriteFile(file, plan, exists)) toFetch.push(item);
   }
 
@@ -120,14 +141,42 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
   );
   context.report("download", context.t("progress.download", { label: name }));
 
+  // Tailles connues d'avance pour un vrai pourcentage et un total : fichier local (archive extraite, copie Steam)
+  // sinon taille distante (requête HEAD, tolérante : une taille inconnue est estimée à la moyenne des autres).
+  const sizeOfLocal = (file: string): number | undefined => {
+    for (const base of [unzipped, steamGame?.dir]) {
+      if (!base) continue;
+      try {
+        return fs.statSync(path.join(base, ...file.split("/"))).size;
+      } catch {
+        /* pas dans cette source */
+      }
+    }
+    return undefined;
+  };
+  const remoteSizes: string[] = [];
+  for (const [file] of toFetch) {
+    const local = sizeOfLocal(file);
+    if (local !== undefined) progress.expect(file, local);
+    else remoteSizes.push(file);
+  }
+  if (baseUrl !== undefined && io.size) {
+    await runPool(remoteSizes, SIZE_CONCURRENCY, async (file) => {
+      const size = await io.size?.(resolver.urlOf(baseUrl + encodePath(file)), signal);
+      if (size !== undefined) progress.expect(file, size);
+    });
+  }
+  progress.emit();
+
   await runPool(toFetch, DOWNLOAD_CONCURRENCY, async ([file, expected]) => {
     // Nom stable (hash du chemin) : un téléchargement interrompu est repris à la synchro suivante.
     const partial = path.join(tempDir, `${name}.${createHash("sha1").update(file).digest("hex").slice(0, 12)}.part`);
 
     const fromZip = unzipped ? path.join(unzipped, file) : undefined;
     if (fromZip && fs.existsSync(fromZip) && (await hashFile(fromZip)) === expected) {
+      const size = fs.statSync(fromZip).size;
       stageVerified(file, fromZip);
-      progress.skip();
+      progress.skip(size);
       return;
     }
 
@@ -136,9 +185,15 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
       const fromSteam = path.join(steamGame.dir, ...file.split("/"));
       if (fs.existsSync(fromSteam)) {
         if ((await hashFile(fromSteam)) === expected) {
-          fs.copyFileSync(fromSteam, partial);
+          // Copie par flux : la progression avance aussi pendant un fichier de plusieurs Go
+          const size = fs.statSync(fromSteam).size;
+          let copied = 0;
+          await copyFileWithProgress(fromSteam, partial, (bytes) => {
+            copied += bytes;
+            progress.update(file, size > 0 ? (copied / size) * 0.9 : 0.9, copied);
+          });
           stageVerified(file, partial);
-          progress.skip();
+          progress.finish(file, size);
           return;
         }
         if (baseUrl === undefined) {
@@ -157,6 +212,7 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
     let bytes = 0;
     await io.download(resolver.urlOf(baseUrl + encodePath(file)), partial, signal, (transfer) => {
       bytes = transfer.processed ?? bytes;
+      if (transfer.total) progress.expect(file, transfer.total);
       progress.update(file, (transfer.percent / 100) * 0.9, bytes);
     });
 

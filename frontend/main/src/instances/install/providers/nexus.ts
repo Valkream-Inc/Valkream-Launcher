@@ -100,6 +100,7 @@ export const nexusProvider: Provider = async (context) => {
     let bytes = 0;
     await io.download(url, zipPath, signal, (transfer) => {
       bytes = transfer.processed ?? bytes;
+      if (transfer.total) progress.expect(ref.folder, transfer.total);
       progress.update(ref.folder, (transfer.percent / 100) * 0.8, bytes);
     });
     progress.update(ref.folder, 0.8, bytes);

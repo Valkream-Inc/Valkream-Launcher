@@ -19,6 +19,8 @@ import type { UpdatePlan } from "../files/preserve.js";
 export type TransferProgress = Pick<ProgressData, "processedBytes" | "totalBytes" | "percent" | "speed"> & {
   /** Octets traités (valeur brute) : sert à additionner plusieurs fichiers en une progression globale. */
   processed?: number;
+  /** Taille totale (valeur brute) quand elle est connue : permet un vrai pourcentage et « x Go / y Go ». */
+  total?: number;
 };
 
 export interface InstallIO {
@@ -29,6 +31,8 @@ export interface InstallIO {
     signal?: AbortSignal,
     onProgress?: (progress: TransferProgress) => void,
   ): Promise<void>;
+  /** Taille (octets) du fichier distant sans le télécharger ; `undefined` si inconnue. Facultatif. */
+  size?(url: string, signal?: AbortSignal): Promise<number | undefined>;
   /**
    * Extrait `zipPath` dans `outDir`. `folderInZip` limite l'extraction à ce dossier de
    * l'archive (son contenu arrive à la racine de `outDir`). `accept` reçoit le chemin

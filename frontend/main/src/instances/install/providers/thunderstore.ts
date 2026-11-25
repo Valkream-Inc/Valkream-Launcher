@@ -105,6 +105,7 @@ export const thunderstoreProvider: Provider = async (context) => {
     let bytes = 0;
     await io.download(url, zipPath, signal, (transfer) => {
       bytes = transfer.processed ?? bytes;
+      if (transfer.total) progress.expect(mod.folder, transfer.total);
       progress.update(mod.folder, (transfer.percent / 100) * 0.8, bytes);
     });
 

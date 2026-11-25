@@ -13,6 +13,7 @@
 import fs from "fs";
 import path from "path";
 
+import { copyFileWithProgress } from "./copy-progress.js";
 import { isPathInside } from "./paths.js";
 import { LocalizedError } from "../errors/localized-error.js";
 
@@ -137,18 +138,6 @@ const folderBytes = async (dir: string): Promise<number> => {
   }
   return bytes;
 };
-
-/** Copie d'un fichier par flux : la progression avance aussi pendant les gros fichiers (plusieurs Go). */
-const copyFileWithProgress = (from: string, to: string, onBytes: (bytes: number) => void): Promise<void> =>
-  new Promise((resolve, reject) => {
-    const input = fs.createReadStream(from);
-    const output = fs.createWriteStream(to);
-    input.on("data", (chunk) => onBytes(chunk.length));
-    input.once("error", reject);
-    output.once("error", reject);
-    output.once("close", () => resolve());
-    input.pipe(output);
-  });
 
 /** Copie récursive (progression en octets), liens symboliques conservés. */
 const copyTree = async (from: string, to: string, onBytes: (bytes: number) => void): Promise<void> => {

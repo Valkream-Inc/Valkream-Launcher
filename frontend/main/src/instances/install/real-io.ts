@@ -32,9 +32,20 @@ export const realInstallIO: InstallIO = {
           percent,
           speed: formatBytes(speed),
           processed,
+          total,
         }),
       signal,
     );
+  },
+
+  async size(url, signal) {
+    try {
+      const response = await fetch(url, { method: "HEAD", signal: AbortSignal.any([...(signal ? [signal] : []), AbortSignal.timeout(8000)]) });
+      const length = Number(response.headers.get("content-length"));
+      return response.ok && Number.isFinite(length) && length > 0 ? length : undefined;
+    } catch {
+      return undefined; // taille inconnue : la progression se rabat sur une estimation
+    }
   },
 
   async extract(zipPath, outDir, { folderInZip, accept, onProgress }) {
