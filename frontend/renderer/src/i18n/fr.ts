@@ -351,7 +351,7 @@ const fr: Messages = {
     mode: { list: "Liste", url: "Lien", file: "Fichier" },
     copied: "{{label}} copié",
     saved: "Enregistré : {{target}}",
-    units: { b: "o", kb: "Ko", mb: "Mo", gb: "Go" },
+    units: { b: "o", kb: "Ko", mb: "Mo", gb: "Go", tb: "To" },
     hashTitle: "Hash d'un dossier",
     ignoreLabel:
       "to_ignore (un motif par ligne : logs, *.cfg, config/client.cfg…)",

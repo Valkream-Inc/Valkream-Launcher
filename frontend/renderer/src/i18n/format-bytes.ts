@@ -13,6 +13,7 @@ export const formatBytes = (bytes: number): string => {
     i18n.t("tools.units.kb"),
     i18n.t("tools.units.mb"),
     i18n.t("tools.units.gb"),
+    i18n.t("tools.units.tb"),
   ];
   let value = bytes;
   let unit = 0;

@@ -348,7 +348,7 @@ const en: Messages = {
     mode: { list: "List", url: "Link", file: "File" },
     copied: "{{label}} copied",
     saved: "Saved: {{target}}",
-    units: { b: "B", kb: "KB", mb: "MB", gb: "GB" },
+    units: { b: "B", kb: "KB", mb: "MB", gb: "GB", tb: "TB" },
     hashTitle: "Folder hash",
     ignoreLabel:
       "to_ignore (one pattern per line: logs, *.cfg, config/client.cfg…)",
