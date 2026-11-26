@@ -1,0 +1,47 @@
+# Valheim Valkream v3 : entrées du latest.yml.
+# Le format est décrit dans doc/instance-system/configs.md (voir aussi le latest.yml de Valheim-Valkream-v2).
+#
+# `type: empty` = entrée réservée, qui ne télécharge rien : à remplacer par un vrai type
+# (zip_url, hash_url, thunderstore_modpack_url…) dès que son contenu est publié.
+# Une entrée sans type ou sans contenu est ignorée.
+
+version: 3.0.0
+buildDate: 2026-11-26T00:00:00.000Z
+
+game-base: # réinstallation complète si en retard
+  valheim:
+    version: 0.221.12
+    type: zip_url
+    content:
+      win32: https://play.valkream.com/games/Valheim/latest/build-game-win32.zip
+      linux: https://play.valkream.com/games/Valheim/latest/build-game-linux.zip
+      darwin: https://play.valkream.com/games/Valheim/latest/build-game-darwin.zip
+  bepinex:
+    version: 5.4.2333
+    type: zip_url
+    folder_in_zip: BepInExPack_Valheim
+    content: https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2333/
+    gameFolderToRemove:
+      - BepInEx/cache
+
+game-details: # mods et configuration
+  configs: # configuration BepInEx de Valkream v3 (à renseigner)
+    version: 3.0.0
+    type: empty
+  mods-thunderstore: # modpack Thunderstore de Valkream v3 (à renseigner)
+    version: 3.0.0
+    type: empty
+  mods-hexium: # mods Hexium (à renseigner)
+    version: 3.0.0
+    type: empty
+  mods-admin:
+    version: 3.0.0
+    optional:
+      setting: modsAdmin
+    type: thunderstore_modpack_url
+    content:
+      - JereKuusela-Infinity_Hammer-1.79.0
+      - JereKuusela-Server_devcommands-1.106.0
+      - JereKuusela-Upgrade_World-1.80.0
+      - JereKuusela-World_Edit_Commands-1.70.0
+      - Astropilot-ValheimTooler-1.11.0

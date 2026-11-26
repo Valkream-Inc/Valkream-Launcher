@@ -12,6 +12,7 @@ import { Box, Button, LinearProgress, Typography } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 
 import { formatBytes } from "../../../../../../i18n/format-bytes";
+import { describeError, notify, shortNotice } from "@/src/utils/notify";
 import { useGames } from "../../../../context/games.context";
 import SettingsBox from "../../component/settings-box/settings-box";
 import { useTranslation } from "react-i18next";
@@ -35,14 +36,15 @@ function GamesRootSetting() {
       const folder = await action();
       if (folder) {
         enqueueSnackbar(t("settings.gamesRoot.moved", { folder }), { variant: "success" });
+        notify(t("notify.movedTitle"), t("settings.gamesRoot.moved", { folder }));
         await load();
         await refreshChannel();
       }
     } catch (error) {
-      const raw = error instanceof Error ? error.message : String(error);
       // Electron préfixe les erreurs IPC : on ne garde que le message utile
-      const message = raw.replace(/^Error invoking remote method '[^']+': (\w*Error: )?/, "");
+      const message = describeError(error);
       enqueueSnackbar(message, { variant: "error" });
+      notify(t("notify.errorTitle"), shortNotice(message));
     } finally {
       setStarting(false);
     }

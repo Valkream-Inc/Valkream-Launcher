@@ -38,6 +38,32 @@ const instancesConfig: InstanceMainConfig[] = [
     defaultSettings: DEFAULT_SETTINGS,
   },
   {
+    id: "Valheim-Valkream-v3",
+    server: {
+      type: "valheim",
+      host: "51.222.46.122",
+      port: 2460,
+      timeout: 2000,
+    },
+    indexUrl: "/games/Valheim-Valkream-v3/index.config.json",
+    // Chaque dossier peut être décliné par plateforme (win32, linux, darwin, default).
+    entryPaths: {
+      valheim: { win32: "game", linux: "game", darwin: "game" },
+      bepinex: { win32: "game", linux: "game", darwin: "game" },
+      configs: { win32: "game/BepInEx/config", linux: "game/BepInEx/config", darwin: "game/BepInEx/config" },
+      "mods-thunderstore": { win32: "game/BepInEx/plugins", linux: "game/BepInEx/plugins", darwin: "game/BepInEx/plugins" },
+      "mods-hexium": { win32: "game/BepInEx/plugins", linux: "game/BepInEx/plugins", darwin: "game/BepInEx/plugins" },
+      "mods-admin": { win32: "game/BepInEx/plugins", linux: "game/BepInEx/plugins", darwin: "game/BepInEx/plugins" },
+    },
+    executable: {
+      win32: "game/valheim.exe",
+      linux: "game/valheim.x86_64",
+      darwin: "game/valheim.app/Contents/MacOS/valheim",
+    },
+    steamAppId: 892970,
+    defaultSettings: DEFAULT_SETTINGS,
+  },
+  {
     id: "SevenDtoD-Valkream-v2",
     server: {
       type: "sdtd",

@@ -133,6 +133,49 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
     unzipped = await extractFromZip(context, zipUrl, new Set(toFetch.map(([file]) => file)));
   }
 
+  // Steam / depot : AVANT toute copie, chaque fichier du joueur est vérifié par son hash. Un fichier invalide (autre version)
+  // est repris dans `hash-folder` s'il est déclaré ; sinon l'installation s'arrête tout de suite avec la
+  // liste des fichiers en cause (rien n'est copié pour rien).
+  const steamUsable = new Set<string>();
+  const throwVersionMismatch = (): never => {
+    // `build` : texte traduit à la construction du message (fr par défaut), voir `GameSourceError`.
+    throw new GameSourceError(
+      entry.buildid === undefined ? "err.versionMismatch" : steamGame?.buildId ? "err.versionMismatchBuild" : "err.versionMismatchBuildUnknown",
+      {
+        name,
+        count: mismatched.length,
+        files: mismatched.slice(0, 3).join(", "),
+        expected: String(entry.buildid ?? ""),
+        installed: steamGame?.buildId ?? "",
+      },
+      "version",
+      { expectedBuild: entry.buildid, installedBuild: steamGame?.buildId, files: mismatched.slice(0, 3), chosenFolder: steamGame?.chosen },
+    );
+  };
+  if (steamGame) {
+    const candidates = toFetch.filter(([file]) => !(unzipped && fs.existsSync(path.join(unzipped, file))));
+    const sizes = candidates.map(([file]) => {
+      try {
+        return fs.statSync(path.join(steamGame.dir, ...file.split("/"))).size;
+      } catch {
+        return 0;
+      }
+    });
+    const checkTotal = sizes.reduce((sum, size) => sum + size, 0);
+    const checkStartedAt = Date.now();
+    let checked = 0;
+    context.report("verify", context.t("progress.checkSource", { label: name }));
+    for (const [index, [file, expected]] of candidates.entries()) {
+      signal?.throwIfAborted();
+      const fromSteam = path.join(steamGame.dir, ...file.split("/"));
+      if (sizes[index] > 0 && (await hashFile(fromSteam)) === expected) steamUsable.add(file);
+      else if (baseUrl === undefined) mismatched.push(file); // rien d'autre pour fournir ce fichier
+      checked += sizes[index];
+      if (checkTotal > 0) context.report("verify", context.t("progress.checkSource", { label: name }), progressOf(checked, checkTotal, checkStartedAt));
+    }
+    if (mismatched.length > 0) throwVersionMismatch();
+  }
+
   // Progression globale (tous les fichiers à récupérer) : un pourcentage, pas de nom de fichier.
   // Le téléchargement compte pour 90 % d'un fichier, la vérification pour 10 %.
   // Libellé fidèle à l'opération : copie depuis Steam (source locale) ou téléchargement
@@ -185,32 +228,19 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
       return;
     }
 
-    // Steam : copie du fichier du joueur s'il a la bonne version (le dossier Steam n'est jamais modifié).
-    if (steamGame) {
+    // Steam : copie du fichier du joueur, déjà vérifié avant le début des copies (le dossier Steam n'est jamais modifié).
+    if (steamGame && steamUsable.has(file)) {
       const fromSteam = path.join(steamGame.dir, ...file.split("/"));
-      if (fs.existsSync(fromSteam)) {
-        if ((await hashFile(fromSteam)) === expected) {
-          // Copie par flux : la progression avance aussi pendant un fichier de plusieurs Go
-          const size = fs.statSync(fromSteam).size;
-          let copied = 0;
-          await copyFileWithProgress(fromSteam, partial, (bytes) => {
-            copied += bytes;
-            progress.update(file, size > 0 ? (copied / size) * 0.9 : 0.9, copied);
-          });
-          stageVerified(file, partial);
-          progress.finish(file, size);
-          return;
-        }
-        if (baseUrl === undefined) {
-          mismatched.push(file); // fichier du jeu d'une autre version, rien d'autre pour le fournir
-          progress.skip(undefined, file);
-          return;
-        }
-      } else if (baseUrl === undefined) {
-        mismatched.push(file);
-        progress.skip(undefined, file);
-        return;
-      }
+      // Copie par flux : la progression avance aussi pendant un fichier de plusieurs Go
+      const size = fs.statSync(fromSteam).size;
+      let copied = 0;
+      await copyFileWithProgress(fromSteam, partial, (bytes) => {
+        copied += bytes;
+        progress.update(file, size > 0 ? (copied / size) * 0.9 : 0.9, copied);
+      });
+      stageVerified(file, partial);
+      progress.finish(file, size);
+      return;
     }
     if (baseUrl === undefined) throw new LocalizedError("err.hashFolderMissing", { name, file });
 
@@ -231,22 +261,6 @@ const createHashProvider = (source: "remote" | "steam" | "depot"): Provider => a
   });
 
   if (unzipped) fs.rmSync(unzipped, { recursive: true, force: true });
-
-  if (mismatched.length > 0) {
-    // `build` : texte traduit à la construction du message (fr par défaut), voir `GameSourceError`.
-    throw new GameSourceError(
-      entry.buildid === undefined ? "err.versionMismatch" : steamGame?.buildId ? "err.versionMismatchBuild" : "err.versionMismatchBuildUnknown",
-      {
-        name,
-        count: mismatched.length,
-        files: mismatched.slice(0, 3).join(", "),
-        expected: String(entry.buildid ?? ""),
-        installed: steamGame?.buildId ?? "",
-      },
-      "version",
-      { expectedBuild: entry.buildid, installedBuild: steamGame?.buildId, files: mismatched.slice(0, 3), chosenFolder: steamGame?.chosen },
-    );
-  }
 
   // Tout est prêt et vérifié : bascule.
   beforeCommit();

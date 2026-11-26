@@ -3,31 +3,27 @@
 @import "./event-card.futuristic.css";
 
 /*
- * Bannière d'événement : zone sûre entre les infos serveur/jeu (à gauche) et les liens (à droite).
- * Largeur calculée à partir de ces deux marges : la bannière ne chevauche jamais l'un ou l'autre.
- * (Le conteneur de l'accueil a une largeur nulle : on positionne avec `left` + `width`, jamais `right`.)
+ * Bannière d'événement : position et dimensions d'origine (centrée dans la zone d'accueil).
+ * Le style (fond, bordure, police) vient du fichier de chaque thème.
  */
 .event-container {
-  --event-left: 18rem; /* infos serveur / jeu */
-  --event-right: 9rem; /* colonne des liens */
-  --event-top: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: absolute;
-  top: var(--event-top);
-  left: var(--event-left);
-  width: min(46rem, calc(100vw - var(--event-left) - var(--event-right)));
-  min-height: 110px;
+  top: 36px;
+  left: calc((100vw - 140px) / 4 + 140px);
+  width: 50vw;
+  min-height: 120px;
   box-sizing: border-box;
-  gap: 1.2rem;
-  padding: 1.2rem 1.6rem !important;
+  gap: 1.5rem;
+  padding: 1.5rem 2rem !important;
   overflow: hidden;
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .event-container:hover {
-  transform: scale(1.03);
+  transform: scale(1.05);
 }
 
 .event-image {
@@ -43,8 +39,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
+  justify-content: space-between;
+  height: 90px;
+  padding: 0;
 }
 
 .event-title {
@@ -61,46 +58,8 @@
 }
 
 .event-date {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   color: var(--color);
+  margin-top: 10px;
   text-align: center;
-}
-
-/* Écran étroit : la bannière passe SOUS les infos serveur/jeu au lieu de les recouvrir */
-@media (max-width: 960px) {
-  .event-container {
-    --event-left: 1rem;
-    --event-top: 12rem;
-    min-height: 84px;
-  }
-  .event-image {
-    width: 64px !important;
-    height: 64px !important;
-  }
-  .event-title {
-    font-size: 1.15rem;
-  }
-  .event-date {
-    font-size: 0.95rem;
-  }
-}
-
-/* Écran peu haut : version compacte */
-@media (max-height: 640px) {
-  .event-container {
-    min-height: 64px;
-    padding: 0.6rem 1rem !important;
-    gap: 0.8rem;
-  }
-  .event-image {
-    width: 48px !important;
-    height: 48px !important;
-  }
-  .event-title {
-    font-size: 1.05rem;
-    -webkit-line-clamp: 1;
-  }
-  .event-date {
-    font-size: 0.85rem;
-  }
 }

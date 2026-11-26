@@ -46,7 +46,7 @@ const WelcomeMessage = () => {
   );
 };
 
-const instancesRenderConfig: InstanceRenderConfig[] = [
+const baseInstances: InstanceRenderConfig[] = [
   {
     id: "Valheim-Valkream-v2",
     name: "Valheim v2",
@@ -194,6 +194,27 @@ const instancesRenderConfig: InstanceRenderConfig[] = [
       },
     },
     debugContent: [{ entry: "sevendtod" }, { entry: "modpack" }],
+  },
+];
+
+// Valheim v3 : mêmes visuels et textes que la v2 ; seul le réglage « mods admin » existe (pas de boost FPS / graphismes).
+const valheimV2 = baseInstances[0];
+const instancesRenderConfig: InstanceRenderConfig[] = [
+  ...baseInstances,
+  {
+    ...valheimV2,
+    id: "Valheim-Valkream-v3",
+    name: "Valheim v3",
+    serverLabel: "Valheim v3",
+    customGamesSettings: valheimV2.customGamesSettings?.filter((setting) => setting.settingsName === "modsAdmin"),
+    debugContent: [
+      { entry: "valheim" },
+      { entry: "bepinex" },
+      { entry: "configs" },
+      { entry: "mods-thunderstore" },
+      { entry: "mods-hexium" },
+      { entry: "mods-admin" },
+    ],
   },
 ];
 

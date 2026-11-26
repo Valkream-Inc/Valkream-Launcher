@@ -57,10 +57,12 @@ import {
 import { nexusProvider, nexusUninstall } from "./providers/nexus.js";
 import type { InstallIO, Provider, Uninstaller } from "./providers/types.js";
 import { zipProvider } from "./providers/zip.js";
+import { emptyProvider } from "./providers/empty.js";
 import { errorText, errorTexts, LocalizedError } from "../../lib/errors/localized-error.js";
 
 const DEFAULT_PROVIDERS: Record<string, Provider> = {
   zip_url: zipProvider,
+  empty: emptyProvider,
   hash_url: hashProvider,
   steam_library: steamLibraryProvider,
   depot_steam: depotSteamProvider,

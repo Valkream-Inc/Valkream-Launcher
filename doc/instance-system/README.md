@@ -39,7 +39,7 @@ frontend/
 
 - Fait : types partagés, règle de lien, validation de l'index et du `latest.yml`, résolveur avec cache disque, registre, confinement des chemins.
 - Fait : **installation par canal** (`instances/<id>/stable|beta/`) avec état (`instance.state.json`) et réglages (`instance.settings.json`) propres à chaque canal : la beta n'a aucun fichier en commun avec le stable.
-- Fait : **moteur d'installation** (`instances/install/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url`, `nexus_modpack_url`, `steam_library` ; reprise par entrée ; une synchronisation à la fois par installation.
+- Fait : **moteur d'installation** (`instances/install/InstanceInstaller.ts`) : providers `zip_url`, `hash_url`, `thunderstore_modpack_url`, `nexus_modpack_url`, `steam_library`, `empty` (ne fait rien) ; reprise par entrée ; une synchronisation à la fois par installation.
 - Fait : **rapport** (`instances:report`) : un statut par entrée + récapitulatif « fonctionne ou non ».
 - Fait : **UI 100 % générique** : choix du jeu, accueil (un seul `InstanceButton` : installer / réinstaller / mettre à jour / jouer, avec progression), réglages General / Launcher / Game / Mods (affichage joueur) / Dev (outils du jeu : désinstaller, ouvrir le dossier…) / Tools (préparation du remote : hash d'un dossier, liste de mods) / Debug (diagnostic : récapitulatif, tableaux filtrables, réglages, journal d'installation, « Réparer »). Dev, Tools et Debug sont réservés aux admins. Fonds image / vidéo / 3D, loader, liens et infos serveur lisent la config render de l'instance active.
 - Fait : instances `Valheim-Valkream-v2` et `SevenDtoD-Valkream-v2` (7 Days to Die installé entièrement dans le launcher, comme Valheim).

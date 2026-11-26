@@ -107,12 +107,24 @@ describe("dossier d'installation (config main)", () => {
     assert.deepEqual(Object.keys(linux.release["game-details"] ?? {}), ["all"]);
   });
 
-  it("entrée inconnue du main : sans path, refusée par la validation", async () => {
-    const { release, errors } = await run({ version: "1.0.0", "game-details": { inconnue: entry } });
+  it("entrée inconnue du main : ignorée (aucune config pour elle)", async () => {
+    const { release, errors } = await run({ version: "1.0.0", "game-details": { inconnue: entry, mods: entry } });
     assert.deepEqual(errors, []);
-    const result = validateReleaseConfig(release);
-    assert.equal(result.ok, false);
-    assert.match(result.errors.join(" "), /latest\.game-details\.inconnue\.path : aucun dossier d'installation dans la config main/);
+    assert.deepEqual(Object.keys(release["game-details"] ?? {}), ["mods"]);
+  });
+
+  it("entrée sans type ou sans contenu : ignorée ; type empty : conservée sans contenu", async () => {
+    const { release, errors } = await run({
+      version: "1.0.0",
+      "game-details": {
+        mods: { version: "1" },
+        perplatform: { version: "1", type: "zip_url" },
+        all: { version: "1", type: "empty" },
+      },
+    });
+    assert.deepEqual(errors, []);
+    assert.deepEqual(Object.keys(release["game-details"] ?? {}), ["all"]);
+    assert.equal(validateReleaseConfig(release).ok, true);
   });
 
   it("path écrit dans le latest.yml : erreur, la valeur du main l'emporte", async () => {

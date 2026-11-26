@@ -16,7 +16,7 @@ import type { InstanceSyncProgress, SteamSourceIssue } from "@shared/types";
 import Popup from "../../../../component/popup/popup";
 
 import { instanceText } from "@/src/i18n";
-import { notify } from "@/src/utils/notify";
+import { describeError, notify, shortNotice } from "@/src/utils/notify";
 import { useTranslation } from "react-i18next";
 import { useAction } from "../../../../context/action.context";
 import { useBackground } from "../../../../context/background.context";
@@ -38,7 +38,7 @@ const formatElapsed = (ms: number): string => {
 };
 
 const LOADING_ACTION: InstanceButtonAction = {
-  text: "Loading...",
+  text: "…",
   playIcon: false,
   onClick: () => {},
 };
@@ -56,7 +56,22 @@ export default function InstanceButton() {
   } = useGames();
   const { installationStatut, maintenance } = useInfos();
 
+  const { setKeepAlive } = useAction();
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
+  // Jeu affiché (suivi dans une ref : les rafraîchissements d'une synchronisation tournent dans des fermetures anciennes)
+  const shownRef = useRef({ id: actualInstanceId, channel: actualChannel });
+  shownRef.current = { id: actualInstanceId, channel: actualChannel };
+  // Jeu en cours de synchronisation : le bouton n'affiche sa progression que pour lui
+  const syncTarget = useRef<{ id: string; channel: string } | null>(null);
+  // Jeu pour lequel le popup Steam a été ouvert : les rappels du bouton ne concernent que lui
+  const issueTarget = useRef<{ id: string; channel: string } | null>(null);
+  const isIssueShown = () =>
+    issueTarget.current === null ||
+    (issueTarget.current.id === shownRef.current.id && issueTarget.current.channel === shownRef.current.channel);
+  const isSyncTargetShown = () =>
+    syncTarget.current !== null &&
+    syncTarget.current.id === shownRef.current.id &&
+    syncTarget.current.channel === shownRef.current.channel;
   // `t` toujours à jour : les rafraîchissements du bouton pendant une action (horloge, progression) tournent dans
   // des fermetures anciennes, qui garderaient sinon la langue d'origine après un changement de langue.
   const tRef = useRef(t);
@@ -88,6 +103,7 @@ export default function InstanceButton() {
     version ? t("button.playVersion", { version }) : t("button.play");
 
   const render = () => {
+    if (!isSyncTargetShown()) return; // un autre jeu est affiché : son bouton garde son propre état
     const t = tRef.current;
     // `text` est une CLÉ de traduction (traduite ici, dans la langue courante)
     const { text: actionKey, progress } = lastProgress.current;
@@ -150,6 +166,7 @@ export default function InstanceButton() {
 
     let clock: ReturnType<typeof setInterval> | undefined;
     try {
+      syncTarget.current = { id: actualInstanceId, channel: actualChannel };
       setSyncing(true);
       setSyncErrors([]); // les erreurs de la tentative précédente ne restent pas affichées
       syncStartedAt.current = Date.now();
@@ -171,7 +188,9 @@ export default function InstanceButton() {
       );
       if (result.cancelled) {
         enqueueSnackbar(t("button.cancelled"), { variant: "info" });
+        notify(t("notify.doneTitle"), t("notify.cancelled"));
       } else if (result.failed.some((item) => item.steamIssue)) {
+        issueTarget.current = { id: actualInstanceId, channel: actualChannel };
         setSteamIssue(
           result.failed.find((item) => item.steamIssue)?.steamIssue ?? null,
         );
@@ -179,7 +198,10 @@ export default function InstanceButton() {
         notify(t("notify.actionTitle"), t("notify.steamAction"));
       } else if (result.failed.length > 0) {
         error(actionName, result.failed.map((item) => item.name).join(", "));
-        notify(t("notify.errorTitle"), result.failed.map((item) => item.name).join(", "));
+        // Erreur parlante : première entrée en échec avec sa cause (les autres sont dans le popup)
+        const first = result.failed[0];
+        const more = result.failed.length > 1 ? ` (+${result.failed.length - 1})` : "";
+        notify(t("notify.errorTitle"), shortNotice(`${first.name} : ${first.error}${more}`));
         setSyncErrors(result.failed.map((item) => `${item.name} : ${item.error}`));
       } else {
         enqueueSnackbar(doneText, { variant: "success" });
@@ -187,15 +209,20 @@ export default function InstanceButton() {
       }
     } catch (err) {
       error(actionName, err);
-      notify(t("notify.errorTitle"), actionName);
+      notify(t("notify.errorTitle"), shortNotice(describeError(err)));
     } finally {
       clearInterval(clock);
       cleanup();
+      syncTarget.current = null;
       setSyncing(false);
-      // Statut et infos relus tout de suite (sinon le bouton garde l'ancien état après la fin)
+      // Le bouton quitte tout de suite l'affichage de la progression, puis statut et infos sont relus
+      if (isSyncTargetShownAt(actualInstanceId, actualChannel)) setAction(LOADING_ACTION);
       void refreshChannel();
     }
   };
+
+  const isSyncTargetShownAt = (id: string, channel: string) =>
+    shownRef.current.id === id && shownRef.current.channel === channel;
 
   const cancel = () =>
     window.electron_API.cancelInstanceSync(actualInstanceId, actualChannel);
@@ -226,9 +253,11 @@ export default function InstanceButton() {
       await window.electron_API.launchInstance(actualInstanceId, actualChannel);
     } catch (err) {
       console.error("Erreur lors du démarrage du jeu :", err);
-      enqueueSnackbar(t("button.launchError"), {
+      const detail = describeError(err);
+      enqueueSnackbar(`${t("button.launchError")} ${detail}`.trim(), {
         variant: "error",
       });
+      notify(t("notify.launchTitle"), shortNotice(detail || t("button.launchError")));
     } finally {
       if (hidden) play();
     }
@@ -253,7 +282,8 @@ export default function InstanceButton() {
   useEffect(() => {
     const run = async () => {
       try {
-        if (actionLoading) return;
+        // Une synchronisation du jeu affiché pilote le bouton elle-même (progression) ; un autre jeu garde son état normal
+        if (actionLoading && isSyncTargetShown()) return;
 
         // Déplacement du dossier des jeux : ni lancement ni installation tant qu'il n'est pas terminé
         if (gamesRootMove.active) {
@@ -269,7 +299,7 @@ export default function InstanceButton() {
         }
 
         // Téléchargement DepotDownloader en cours (popup masqué) : un clic le rouvre
-        if (depotState.running) {
+        if (depotState.running && isIssueShown()) {
           return setAction({
             text: t("steam.depotRunning", {
               percent:
@@ -283,7 +313,7 @@ export default function InstanceButton() {
         }
 
         // Jeu Steam à fournir (popup fermé) : un clic le rouvre
-        if (steamIssue !== null && !steamOpen) {
+        if (steamIssue !== null && !steamOpen && isIssueShown()) {
           return setAction({
             text: t("steam.reopen"),
             playIcon: false,
@@ -407,7 +437,16 @@ export default function InstanceButton() {
     depotState.percent,
     steamIssue,
     steamOpen,
+    actionLoading,
   ]);
+
+  // Popups et téléchargement de fond : l'accueil reste monté (changer de thème / ouvrir les réglages ne les ferme pas)
+  const hasOpenDialog =
+    isWelcomeOpen || syncErrors.length > 0 || steamIssue !== null || depotState.running;
+  useEffect(() => {
+    setKeepAlive(hasOpenDialog);
+    return () => setKeepAlive(false);
+  }, [hasOpenDialog]);
 
   return (
     <>
@@ -472,7 +511,7 @@ export default function InstanceButton() {
 
       {syncing && (
         <Button color="error" variant="contained" size="large" onClick={cancel}>
-          Annuler
+          {t("common.cancel")}
         </Button>
       )}
     </>

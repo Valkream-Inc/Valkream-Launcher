@@ -157,13 +157,17 @@ export const flattenRelease = async (
           errors.push(`${prefix}.path : interdit dans le latest.yml (le dossier est décidé par la config main, entryPaths)`);
         }
         delete selected.path;
-        if (name in entryPaths) {
-          const installPath = pickPlatform(entryPaths[name], platform);
-          if (installPath === undefined || installPath === null) return; // pas de dossier pour cette plateforme
-          selected.path = installPath;
-        }
+        // Aucun dossier d'installation (entrée inconnue du main, ou sans valeur pour cette plateforme) : ignorée.
+        if (!(name in entryPaths)) return;
+        const installPath = pickPlatform(entryPaths[name], platform);
+        if (installPath === undefined || installPath === null) return;
+        selected.path = installPath;
 
         const result = await resolveEntryLinks(selected, { ...context, platform }, resolver, prefix);
+        // Aucune config pour cette entrée (type absent, ou contenu absent sauf type `empty`) : ignorée.
+        const resolvedEntry = result.entry as RawRecord;
+        if (resolvedEntry.type === undefined || resolvedEntry.type === null) return;
+        if (resolvedEntry.type !== "empty" && (resolvedEntry.content === undefined || resolvedEntry.content === null)) return;
         flat[name] = result.entry;
         errors.push(...result.errors);
       }),

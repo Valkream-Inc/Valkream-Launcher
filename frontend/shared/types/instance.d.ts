@@ -101,7 +101,9 @@ export type EntryType =
   | "thunderstore_modpack_url"
   | "steam_library"
   | "depot_steam"
-  | "nexus_modpack_url";
+  | "nexus_modpack_url"
+  /** Entrée déclarée mais sans téléchargement : ne fait rien (utile pour réserver une entrée ou la désactiver). */
+  | "empty";
 
 /**
  * Niveau d'une entrée (les deux forcent la mise à jour : le jeu n'est jouable

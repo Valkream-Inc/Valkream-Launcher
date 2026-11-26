@@ -12,12 +12,13 @@ import {
   Chip,
   Grid,
   InputAdornment,
-  LinearProgress,
   TextField,
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { DeprecatedInstall, LauncherTheme, UninstallProgress } from "@shared/types";
+import type { DeprecatedInstall, LauncherTheme } from "@shared/types";
+import { describeError, notify, shortNotice } from "@/src/utils/notify";
+import UninstallDialog from "../../component/uninstall-dialog/uninstall-dialog";
 import { enqueueSnackbar } from "notistack";
 
 import instancesRenderConfig from "../../../../instances/instances.config";
@@ -26,7 +27,6 @@ import {
   isSelectable,
   pickerChannels,
 } from "../../../../instances/instances.helpers";
-import Popup from "../../component/popup/popup";
 import { useGames } from "../../context/games.context";
 import { usePanels } from "../../context/panels.context";
 import { useTheme } from "../../context/theme.context";
@@ -265,16 +265,6 @@ export default function ChooseGames() {
   // Installations que le serveur ne propose plus (id retiré, désactivé, canal supprimé) : à désinstaller
   const [deprecated, setDeprecated] = useState<DeprecatedInstall[]>([]);
   const [toRemove, setToRemove] = useState<DeprecatedInstall | null>(null);
-  const [removing, setRemoving] = useState(false);
-  const [removeProgress, setRemoveProgress] = useState<UninstallProgress | null>(null);
-
-  // Progression de la suppression (fichiers supprimés / total) pendant que le popup est ouvert
-  useEffect(() => {
-    if (!removing) return;
-    window.electron_API.onUninstallProgress(setRemoveProgress);
-    return () => window.electron_API.removeUninstallProgressListeners();
-  }, [removing]);
-
   const loadDeprecated = useCallback(() => {
     window.electron_API.getDeprecatedInstalls().then(setDeprecated).catch(console.error);
   }, []);
@@ -293,7 +283,9 @@ export default function ChooseGames() {
         await window.electron_API.launchInstance(item.id, item.channel);
       } catch (error) {
         console.error(error);
-        enqueueSnackbar(t("button.launchError"), { variant: "error" });
+        const detail = describeError(error);
+        enqueueSnackbar(`${t("button.launchError")} ${detail}`.trim(), { variant: "error" });
+        notify(t("notify.launchTitle"), shortNotice(detail || t("button.launchError")));
       } finally {
         setLaunching(false);
       }
@@ -301,25 +293,6 @@ export default function ChooseGames() {
     [launching, t],
   );
 
-  const removeDeprecated = useCallback(async () => {
-    if (!toRemove || removing) return;
-    setRemoveProgress(null);
-    setRemoving(true);
-    try {
-      await window.electron_API.uninstallDeprecated(toRemove.id, toRemove.channel);
-      setDeprecated((list) => list.filter((item) => !(item.id === toRemove.id && item.channel === toRemove.channel)));
-      loadDeprecated(); // liste relue depuis le disque
-      void refreshChannel(); // statut et infos de l'accueil relus tout de suite
-      enqueueSnackbar(t("games.deprecated.done"), { variant: "success" });
-      setToRemove(null);
-    } catch (error) {
-      console.error(error);
-      enqueueSnackbar(t("games.deprecated.failed"), { variant: "error" });
-    } finally {
-      setRemoving(false);
-      setRemoveProgress(null);
-    }
-  }, [toRemove, removing, t, loadDeprecated, refreshChannel]);
 
   const { changePanel } = usePanels();
   const { theme } = useTheme();
@@ -583,37 +556,13 @@ export default function ChooseGames() {
           )}
         </Box>
       </Box>
-      <Popup
-        open={toRemove !== null}
-        onClose={() => !removing && setToRemove(null)}
-        type="warning"
-        title={removing ? t("games.deprecated.removingTitle") : t("games.deprecated.confirmTitle")}
-        message={
-          removing ? (
-            <Box sx={{ width: "100%", minWidth: { sm: 280 } }}>
-              <Typography sx={{ mb: 1.5, fontFamily: "inherit" }}>
-                {t("games.deprecated.removingText", { name: toRemove?.id ?? "" })}
-              </Typography>
-              <LinearProgress
-                variant={removeProgress && removeProgress.total > 0 ? "determinate" : "indeterminate"}
-                value={removeProgress && removeProgress.total > 0 ? (removeProgress.done / removeProgress.total) * 100 : 0}
-              />
-              {removeProgress && removeProgress.total > 0 && (
-                <Typography variant="caption" sx={{ display: "block", mt: 0.5, textAlign: "right", fontFamily: "inherit" }}>
-                  {Math.floor((removeProgress.done / removeProgress.total) * 1000) / 10} % ·{" "}
-                  {t("games.deprecated.removingCount", { done: removeProgress.done, total: removeProgress.total })}
-                </Typography>
-              )}
-            </Box>
-          ) : (
-            t("games.deprecated.confirmText", { name: toRemove?.id ?? "" })
-          )
-        }
-        dismissible={!removing}
-        buttons={[
-          { text: t("games.deprecated.uninstall"), action: removeDeprecated, variant: "main", disabled: removing },
-          { text: t("common.cancel"), action: () => setToRemove(null), variant: "secondary", disabled: removing },
-        ]}
+      <UninstallDialog
+        target={toRemove ? { id: toRemove.id, channel: toRemove.channel, name: toRemove.id, kind: "deprecated" } : null}
+        onClose={() => setToRemove(null)}
+        onDone={() => {
+          loadDeprecated(); // liste relue depuis le disque
+          void refreshChannel(); // statut et infos de l'accueil relus tout de suite
+        }}
       />
     </>
   );

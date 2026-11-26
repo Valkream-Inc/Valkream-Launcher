@@ -293,7 +293,7 @@ export default function SteamSourceDialog({
   onRetry,
 }: Props) {
   const { t } = useTranslation();
-  const { setKeepAlive, devActive } = useAction();
+  const { devActive } = useAction();
   const [depotRunning, setDepotRunning] = useState(false);
   const [lines, setLines] = useState<string[]>([]);
   const [percent, setPercent] = useState<number | null>(null);
@@ -322,12 +322,6 @@ export default function SteamSourceDialog({
     if (issue === null) return;
     setError(null);
   }, [issue]);
-
-  // Téléchargement de fond : l'accueil reste monté (changer de thème / ouvrir les réglages ne l'interrompt pas)
-  useEffect(() => {
-    setKeepAlive(depotRunning);
-    return () => setKeepAlive(false);
-  }, [depotRunning]);
 
   // Le bouton principal affiche la progression quand le popup est masqué
   useEffect(() => {

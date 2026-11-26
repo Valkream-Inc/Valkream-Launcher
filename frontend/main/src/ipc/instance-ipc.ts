@@ -295,6 +295,8 @@ const InstanceIpcHandlers = (): void => {
     if (typeof id !== "string" || !isChannel(channel)) throw new LocalizedError("err.invalidInstanceId", { id: String(id) });
     const installDir = instanceRootPath(DirsManager.gamesRoot(), id, channel);
     if (getInstanceInstaller().isBusy(installDir)) throw new LocalizedError("install.alreadyRunning");
+    // Le renderer reconnaît ce message (texte traduit côté interface) : rien n'est installé là
+    if (!fs.existsSync(installDir)) throw new Error("err.notInstalled");
     await removeWithProgress(event.sender, id, channel, installDir);
     getInstanceInfos().invalidate();
     // Dossier du jeu vidé : retiré aussi (jamais s'il reste un autre canal)
@@ -312,6 +314,7 @@ const InstanceIpcHandlers = (): void => {
     if (getInstanceInstaller().isBusy(locations.installDir)) {
       throw new LocalizedError("install.alreadyRunning");
     }
+    if (!fs.existsSync(locations.installDir)) throw new Error("err.notInstalled");
     // Un seul canal est supprimé : l'autre (stable/beta) n'est jamais touché.
     await removeWithProgress(event.sender, id, channel, locations.installDir);
     getInstanceInfos().invalidate();

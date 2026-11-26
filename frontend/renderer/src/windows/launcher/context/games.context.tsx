@@ -20,6 +20,9 @@ import type {
   GamesProviderProps,
 } from "./games.context.types";
 
+/** Relecture de l'index remote (jeux proposés, canaux, maintenance) tant que le launcher est ouvert. */
+const INDEX_REFRESH_MS = 30_000;
+
 const GamesContext = createContext<GamesContextValue | undefined>(undefined);
 export const useGames = (): GamesContextValue => {
   const ctx = useContext(GamesContext);
@@ -85,6 +88,17 @@ export const GamesProvider = ({ children }: GamesProviderProps) => {
 
   useEffect(() => {
     refreshChannel();
+  }, [refreshChannel]);
+
+  // L'index est relu régulièrement et au retour sur la fenêtre (le joueur revient souvent après avoir attendu une mise à jour)
+  useEffect(() => {
+    const timer = setInterval(() => void refreshChannel(), INDEX_REFRESH_MS);
+    const onFocus = () => void refreshChannel();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+    };
   }, [refreshChannel]);
 
   const contextValue: GamesContextValue = {

@@ -39,6 +39,7 @@ const ENTRY_TYPES = [
   "steam_library",
   "depot_steam",
   "nexus_modpack_url",
+  "empty",
 ];
 
 /** Types dont `content` est un manifeste de hash (`{ fichier: sha256 }`). */
@@ -335,7 +336,9 @@ const checkEntry = (entry: unknown, where: string): string[] => {
     errors.push(`${where}.hash : sha256 hexadécimal attendu`);
   }
 
-  if (entry.content === undefined || entry.content === null) {
+  if (type === "empty") {
+    // Rien à télécharger : ni content ni hash n'ont de sens.
+  } else if (entry.content === undefined || entry.content === null) {
     errors.push(`${where}.content : requis`);
   } else if (ENTRY_TYPES.includes(type)) {
     const content = entry.content as Parameters<typeof isPerPlatformContent>[0];

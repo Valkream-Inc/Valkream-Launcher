@@ -585,6 +585,21 @@ describe("InstanceInstaller", () => {
       assert.equal(fs.readFileSync(path.join(steamDir, "valheim.exe"), "utf8"), "EXE-v2");
     });
 
+    it("fichier Steam invalide mais hash-folder déclaré : seul ce fichier est téléchargé et remplacé", async () => {
+      const { result, downloads } = await run({ "valheim.exe": "EXE-v2", "data/a.dat": "A" });
+      assert.deepEqual(result.failed, []);
+      assert.equal(read("stable", "game/valheim.exe"), "EXE-v1"); // pris dans hash-folder, pas dans Steam
+      assert.equal(read("stable", "game/data/a.dat"), "A");
+      assert.ok(downloads.some((url) => url.includes("valheim.exe")));
+      assert.deepEqual(downloads.filter((url) => url.includes("a.dat")), []); // valide : copié depuis Steam
+    });
+
+    it("version incompatible sans hash-folder : arrêt avant toute copie (rien dans le dossier d'installation)", async () => {
+      const { result } = await run({ "valheim.exe": "EXE-v2", "data/a.dat": "A", "mod.cfg": "OURS" }, steamRemote(false));
+      assert.equal(result.failed.length, 1);
+      assert.ok(!fs.existsSync(path.join(dir("stable"), "game", "data", "a.dat")), "les fichiers valides ne sont pas copiés pour rien");
+    });
+
     it("jeu absent de Steam : message clair", async () => {
       const { result } = await run(null);
       assert.match(result.failed[0]?.error ?? "", /introuvable dans Steam/);
@@ -884,7 +899,7 @@ describe("InstanceInstaller", () => {
       const first = build(baseRemote(), files);
       await first.installer.sync("g", "stable");
       const remote = baseRemote() as Record<string, any>;
-      remote["/stable.yml"]["game-details"].extra = { version: "1", type: "zip_url", content: "/broken.zip" };
+      remote["/stable.yml"]["game-details"].admin = { version: "1", type: "zip_url", content: "/broken.zip" };
       const second = build(remote, { ...files, "/broken.zip": "pas du json" });
       const result = await second.installer.sync("g", "stable");
       assert.equal(result.failed.length, 1);

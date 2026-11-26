@@ -16,7 +16,7 @@ Un jeu (une **instance**) est décrit par une clé commune, son `id` (ex : `Valh
 | 5 | `backend/public/games/<id>/config/*.json` | admin | immédiat (serveur) | événement, maintenance, liste des mods, contributeurs (affichage) |
 
 Règle d'or : **le serveur ne décide jamais où le launcher écrit sur le disque.** Les chemins sont dans le fichier 1
-(`entryPaths`) ; mettre `path` dans un `latest.yml` est refusé. Un serveur compromis ne peut donc pas écrire n'importe où.
+(`entryPaths`) ; mettre `path` dans un `latest.yml` est refusé. Une entrée du `latest.yml` sans dossier dans `entryPaths` (pour la plateforme), sans `type`, ou sans `content` (hors type `empty`) est **ignorée** : elle n'est ni installée ni signalée comme erreur. Un serveur compromis ne peut donc pas écrire n'importe où.
 
 ```
 joueur ouvre le launcher
@@ -119,6 +119,7 @@ valheim:
 | un dossier de fichiers **vérifié par hash** | `hash_url` | lien vers `hash.json` | réparable, mises à jour fichier par fichier ; `hash` obligatoire |
 | des mods Thunderstore | `thunderstore_modpack_url` | liste `[Auteur-Nom-Version, …]` | chaque mod a son dossier ; `api-url` pour Hexium |
 | des mods Nexus Mods | `nexus_modpack_url` | liste `jeu-idMod-idFichier` | clé API **Premium** du joueur, `.zip` seulement |
+| rien (entrée réservée) | `empty` | aucun | ne télécharge ni ne supprime rien ; la version est simplement enregistrée |
 | le jeu depuis la copie **Steam du joueur** | `steam_library` | manifeste de hash du jeu | rien n'est hébergé chez nous ; voir README « Jeux Steam » ; DepotDownloader en solution de secours |
 | la version **exacte** du jeu, toujours téléchargée depuis Steam | `depot_steam` | manifeste de hash du jeu | comme `steam_library`, mais la bibliothèque Steam du joueur n'est jamais utilisée ; `depot` **obligatoire** (QR code) |
 

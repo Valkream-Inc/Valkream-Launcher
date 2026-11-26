@@ -65,6 +65,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
 
   // Pour vérifier si le jeu (ou son canal) a changé
   const actualGameRef = useRef<string | null>(null);
+  const statusKeyRef = useRef<string | null>(null); // Jeu dont le statut est déjà connu (lecture seule : possible même pendant une action)
   const actionLoadingRef = useRef<boolean | null>(null); // Pour vérifier si une nouvelle action est en cours
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null); // Pour lancer une fois à blanc avant de lancer la boucle
   const isLoadingRef = useRef(false); // Pour empêcher les appels parallèles
@@ -97,6 +98,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
         installationStatusLoaded: false,
       });
       setInstallationStatut(null);
+      statusKeyRef.current = null;
     }
 
     const getAllInfos = async () => {
@@ -110,7 +112,9 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
 
       try {
         // get installation statut
-        if (!actionLoading) {
+        // Pendant une action, le statut n'est relu que pour un jeu qu'on n'a pas encore vu (changement de jeu)
+        const statusAllowed = !actionLoading || statusKeyRef.current !== gameKey;
+        if (statusAllowed) {
           const statut = await window.electron_API.getInstanceStatus(
             actualInstanceId,
             actualChannel
@@ -119,10 +123,11 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
             isLoadingRef.current = false;
             return; // Récupération des infos uniquement si le jeu n'a pas changé
           }
-          if (actionLoadingRef.current) {
+          if (actionLoadingRef.current && statusKeyRef.current === gameKey) {
             isLoadingRef.current = false;
             return; // Récupération des infos uniquement si l'action n'a pas changé
           }
+          statusKeyRef.current = gameKey;
           setIsInternetConnected(statut?.isInternetConnected || false);
           setIsServerReachable(statut?.isServerReachable || false);
           setInstallationStatut(statut);
@@ -131,6 +136,10 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
             installationStatusLoaded: true,
           }));
         }
+
+        // Pendant une action, les autres infos (serveur, événement) attendent : la relecture qui suit la fin
+        // de l'action ne doit pas être retardée par une requête serveur lente.
+        if (actionLoadingRef.current) return;
 
         // get other infos
         const infos = await window.electron_API.getInstanceInfos(

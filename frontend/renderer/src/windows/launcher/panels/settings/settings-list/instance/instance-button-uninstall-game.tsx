@@ -6,12 +6,15 @@
 import { Button } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import { useState } from "react";
-import Wait from "../../../../component/wait/wait";
+import { useTranslation } from "react-i18next";
+
+import instancesRenderConfig from "../../../../../../instances/instances.config";
+import { notify } from "@/src/utils/notify";
+import UninstallDialog, { type UninstallTarget } from "../../../../component/uninstall-dialog/uninstall-dialog";
 import { useAction } from "../../../../context/action.context";
 import { useGames } from "../../../../context/games.context";
 import SettingsBox from "../../component/settings-box/settings-box";
 import type { InstanceButtonProps } from "./instance-setting.types";
-import { useTranslation } from "react-i18next";
 
 const Instance_ButtonUninstallGame = ({
   id,
@@ -19,40 +22,45 @@ const Instance_ButtonUninstallGame = ({
   onDone = () => {},
 }: InstanceButtonProps) => {
   const { t } = useTranslation();
-  const { runAction } = useAction();
+  const { actionLoading } = useAction();
   const { refreshChannel } = useGames();
-  const [isWaiting, setIsWaiting] = useState(false);
+  const [target, setTarget] = useState<UninstallTarget | null>(null);
+  const name = instancesRenderConfig.find((item) => item.id === id)?.name ?? id;
 
-  const handleClick = () => {
-    runAction(async () => {
-      try {
-        setIsWaiting(true);
-        await window.electron_API.uninstallInstance(id, channel);
-        enqueueSnackbar(t("instance.uninstall.done"), { variant: "success" });
-        onDone();
-        void refreshChannel(); // statut et infos relus tout de suite (bouton principal, liste des jeux)
-      } catch (error) {
-        console.error(error);
-        enqueueSnackbar(t("instance.uninstall.failed"), { variant: "error" });
-      } finally {
-        setIsWaiting(false);
+  const handleClick = async () => {
+    try {
+      // Un jeu qui n'est pas installé : message clair au lieu d'une « désinstallation » sans effet
+      const status = await window.electron_API.getInstanceStatus(id, channel);
+      if (!status?.isInstalled) {
+        const message = t("uninstall.notInstalled", { name });
+        enqueueSnackbar(message, { variant: "warning" });
+        notify(t("notify.errorTitle"), message);
+        return;
       }
-    }, "uninstallGame");
+    } catch (error) {
+      console.error(error); // statut illisible : la confirmation est proposée quand même
+    }
+    setTarget({ id, channel, name, kind: "installed" });
   };
 
   return (
     <>
-      <Wait isVisible={isWaiting} />
-      <SettingsBox
-        warn={false}
-        text={t("instance.uninstall.text")}
-      >
+      <UninstallDialog
+        target={target}
+        onClose={() => setTarget(null)}
+        onDone={() => {
+          onDone();
+          void refreshChannel(); // statut et infos relus tout de suite (bouton principal, liste des jeux)
+        }}
+      />
+      <SettingsBox warn={false} text={t("instance.uninstall.text")}>
         <Button
           variant="contained"
           size="large"
           sx={{ fontSize: "1.2rem" }}
           color="error"
-          onClick={handleClick}
+          disabled={actionLoading}
+          onClick={() => void handleClick()}
         >
           {t("instance.uninstall.button")}
         </Button>
