@@ -39,18 +39,18 @@ Ce dépôt (monorepo `yarn` + `turbo`) contient :
 ### Jeux et mises à jour
 
 - 🧩 **Installation, mise à jour et réparation** d'un jeu, de ses mods et de son modpack (archives zip, manifestes de hash, Thunderstore, Nexus Mods), avec reprise après coupure et cache de hash : seuls les fichiers absents ou modifiés sont retraités.
-- 🗂️ **Canaux isolés** (stable / beta / alpha) : une installation indépendante par canal, jamais de fichier en commun.
+- 🗂️ **Canaux isolés** (stable / beta / alpha) : une installation indépendante par canal.
 - 🎮 **Jeux Steam sans héberger les fichiers du jeu** : copie depuis la bibliothèque Steam du joueur (`steam_library`) ou version exacte téléchargée avec DepotDownloader, connexion par **QR code** (`depot_steam`).
-- 🔀 **Config remote déclinable** : toute clé peut varier par canal, plateforme et langue ; fichiers YAML ou JSON détectés par l'extension ; adresse du serveur de jeu modifiable depuis l'`index.config`.
-- 🗑️ **Installations obsolètes** (jeu retiré, désactivé, canal supprimé) : listées avec un label, lançables tant que possible, désinstallables.
+- 🔀 **Config remote déclinable** : toute clé peut varier par canal, plateforme et langue ; fichiers YAML ou JSON ; adresse du serveur de jeu définie dans l'`index.config`.
+- 🗑️ **Installations obsolètes** (jeu retiré, désactivé, canal supprimé) : listées avec un label, lançables, désinstallables.
 - 📦 **Dossier des jeux déplaçable** (même vers un autre disque), progression en octets.
 
 ### Interface
 
-- 📊 **Progression précise** (pourcentage à la décimale, octets traités / total, vitesse), sans « 0/0 » : analyse, copie et téléchargement sont distingués.
-- 🔔 **Notifications système** : téléchargement terminé, erreur, action requise (QR code à scanner, popup Steam) quand le launcher n'est pas au premier plan.
-- 🎨 **Trois thèmes** (moderne, old, futuriste), popups sans double défilement et compacts sur petits écrans, bannière d'événement propre à chaque thème.
-- 🌐 **Français / anglais** (interface, erreurs, étapes), zoom des réglages mémorisé.
+- 📊 **Progression détaillée** : pourcentage à la décimale, octets traités / total, vitesse, étapes d'analyse, de copie et de téléchargement.
+- 🔔 **Notifications système** : téléchargement terminé, erreur, action requise (QR code à scanner, popup Steam).
+- 🎨 **Trois thèmes** (moderne, old, futuriste), popups adaptés aux petits écrans, bannière d'événement propre à chaque thème.
+- 🌐 **Français / anglais** (interface, erreurs, étapes) et zoom mémorisé.
 - 🎉 **Événements, mode maintenance, infos serveur** (joueurs, statut, ping), liens vers Discord / site / classement.
 
 ### Launcher
