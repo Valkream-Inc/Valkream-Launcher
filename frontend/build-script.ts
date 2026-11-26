@@ -144,6 +144,8 @@ class LauncherBuilder {
 
       await builder
         .build({
+          // Build à blanc (workflow manuel) : jamais de publication.
+          publish: process.env.DRY_RUN === "true" ? "never" : undefined,
           config: {
             generateUpdatesFilesForAllChannels: true,
             appId: name,

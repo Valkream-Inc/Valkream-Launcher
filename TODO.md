@@ -4,9 +4,8 @@ Seules les tâches **ouvertes** sont listées. Légende : (+) petit · (++) moye
 
 ## Avant une beta publique (bloquant)
 
-- [ ] Valider `version` : le format `beta-3.0.0` n'est pas du SemVer (electron-builder / electron-updater non validés avec) → `3.0.0-beta.1`.
+- [ ] Lancer le **build à blanc** (Actions → *Launcher Build* → *Run workflow*), télécharger l'artefact `launcher-dry-run` et tester les installeurs sur Windows (la version est désormais `3.0.0-beta.1`, SemVer valide).
 - [ ] Vérifier le workflow *Launcher Build* sur `main` après correction (corepack) : première exécution complète jamais observée (NSIS, `check:build`, `check:runtime`, assets de release).
-- [ ] Renseigner `depot-config.ts` (`yarn depot:pin <tag>`) : sans lui, `depot_steam` et la solution DepotDownloader ne sont pas proposés.
 - [ ] Faire un parcours complet sur une machine Windows propre : installation du launcher, mise à jour depuis la version précédente, installation d'un jeu, désinstallation.
 - [ ] Rendre le lint bloquant en CI (ou le traiter) et lancer `check:build` / `check:runtime` en CI sur les pull requests.
 

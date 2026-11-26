@@ -62,13 +62,17 @@ Linux et macOS sont désactivés pour le moment (le workflow garde les lignes à
 ## Publier une version, pas à pas
 
 1. Choisir la nouvelle version et la mettre dans `frontend/package.json` (`version`). **Elle doit être nouvelle** : le tag de la release en est déduit.
-   - Format recommandé : SemVer, `3.1.0` ou `3.1.0-beta.1`. Le format historique `beta-3.0.0` n'est pas du SemVer : electron-updater compare les versions avec SemVer, un format invalide peut empêcher la mise à jour.
+   - Format recommandé : SemVer, `3.1.0` ou `3.1.0-beta.1`. Le format historique `beta-3.0.0` n'est pas du SemVer (electron-updater compare avec SemVer). Une pré-version (`-beta.N`) est publiée en *pre-release* GitHub ; le launcher force le canal `latest` pour toujours lire `latest.yml`.
    - Une version **majeure** différente de l'installée nettoie les installations au premier démarrage (réglages conservés) ; mineures et correctifs ne suppriment rien.
 2. Vérifier en local : `yarn workspace Valkream-Launcher test` et `yarn typecheck`.
 3. Fusionner sur `main` (pull request, la CI doit être verte).
 4. Suivre le workflow **Launcher Build** (onglet Actions) jusqu'à la fin.
 5. Télécharger `combined-install-win.zip` et `combined-update-win.zip` depuis la [page des releases](https://github.com/Valkream-Inc/Valkream-Launcher/releases).
 6. Les déployer (section suivante), puis installer sur une machine de test et lancer le launcher.
+
+## Tester sans publier (build à blanc)
+
+Onglet **Actions → Launcher Build → Run workflow** (n'importe quelle branche) : tests, typecheck et `yarn build` complet (NSIS install + update, `check:build`, `check:runtime`) avec `DRY_RUN=true` (`publish: never`). Aucune release n'est créée ; les installeurs et `latest.yml` sont dans l'artefact `launcher-dry-run` (7 jours).
 
 ## Déployer sur le serveur
 

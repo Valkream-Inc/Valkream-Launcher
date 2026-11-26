@@ -6,6 +6,9 @@ on:
     paths:
       - "frontend/**"
       - ".github/workflows/**"
+  # Build à blanc : compile les installeurs Windows et les expose en artefact, SANS créer de release.
+  # Onglet Actions → Launcher Build → Run workflow (sur n'importe quelle branche).
+  workflow_dispatch:
 
 concurrency:
   group: launcher-build
@@ -13,6 +16,7 @@ concurrency:
 
 jobs:
   create-release:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     outputs:
       skip: ${{ steps.create_release.outputs.skip }}
@@ -57,7 +61,7 @@ jobs:
 
   build-launcher:
     needs: create-release
-    if: needs.create-release.outputs.skip != 'true'
+    if: github.event_name == 'push' && needs.create-release.outputs.skip != 'true'
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -110,10 +114,58 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
+  # Build à blanc (déclenchement manuel) : mêmes étapes que le build réel, mais rien n'est publié
+  # (DRY_RUN → electron-builder `publish: never`, pas de token). Les installeurs sont à télécharger
+  # dans l'artefact « launcher-dry-run » pour être testés sur une machine Windows.
+  dry-run:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.17.0"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+        working-directory: ./
+
+      - name: Tests
+        run: yarn workspace Valkream-Launcher test
+        working-directory: ./
+
+      - name: Typecheck
+        run: yarn typecheck
+        working-directory: ./
+
+      - name: Build Electron launcher (sans publication)
+        run: yarn run build
+        working-directory: ./frontend
+        env:
+          DRY_RUN: "true"
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: launcher-dry-run
+          path: |
+            frontend/dist/*.exe
+            frontend/dist/*.blockmap
+            frontend/dist/latest*.yml
+          if-no-files-found: error
+          retention-days: 7
+
   download-global:
     name: Combine & Upload All Artifacts
     needs: [create-release, build-launcher]
-    if: needs.create-release.outputs.skip != 'true'
+    if: github.event_name == 'push' && needs.create-release.outputs.skip != 'true'
     runs-on: ubuntu-latest
 
     steps:

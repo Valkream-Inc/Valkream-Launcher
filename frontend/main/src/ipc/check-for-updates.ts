@@ -58,9 +58,14 @@ class CheckForUpdates {
     autoUpdater.autoInstallOnAppQuit = false; // ⚠️ mieux pour les updates manuelles
     autoUpdater.autoRunAppAfterInstall = true; // relance automatique après install
     autoUpdater.fullChangelog = false;
+    // Canal « latest » imposé : pour une version `x.y.z-beta.N`, electron-updater chercherait sinon
+    // `beta.yml` alors que le serveur ne publie que `latest.yml`.
+    autoUpdater.channel = "latest";
+    autoUpdater.allowPrerelease = true;
     autoUpdater.setFeedURL({
       provider: "generic",
       url: `${baseUrl}/launcher/latest/`,
+      channel: "latest",
     });
 
     autoUpdater.removeAllListeners();

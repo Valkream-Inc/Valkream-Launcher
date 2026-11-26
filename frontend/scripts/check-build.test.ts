@@ -108,6 +108,15 @@ describe("isNewerVersion", () => {
     assert.equal(isNewerVersion("2.4.4", "2.4.5"), false);
     assert.equal(isNewerVersion("n/a", "2.4.5"), false);
   });
+
+  it("gère les pré-versions SemVer", () => {
+    assert.equal(isNewerVersion("3.0.0-beta.2", "3.0.0-beta.1"), true);
+    assert.equal(isNewerVersion("3.0.0-beta.1", "3.0.0-beta.1"), false);
+    assert.equal(isNewerVersion("3.0.0-beta.10", "3.0.0-beta.9"), true);
+    assert.equal(isNewerVersion("3.0.0", "3.0.0-beta.9"), true);
+    assert.equal(isNewerVersion("3.0.0-beta.1", "3.0.0"), false);
+    assert.equal(isNewerVersion("3.0.0-beta.1", "2.4.5"), true);
+  });
 });
 
 describe("build réel (si présent)", () => {

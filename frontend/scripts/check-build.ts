@@ -36,18 +36,33 @@ interface UpdateFile {
   size?: unknown;
 }
 
-const parseSemver = (version: string): [number, number, number] | undefined => {
-  const match = /^v?(\d+)\.(\d+)\.(\d+)/.exec(version);
-  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : undefined;
+const parseSemver = (version: string): { core: [number, number, number]; pre: string[] } | undefined => {
+  const match = /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/.exec(version);
+  return match
+    ? { core: [Number(match[1]), Number(match[2]), Number(match[3])], pre: match[4] ? match[4].split(".") : [] }
+    : undefined;
 };
 
-/** `a > b` en comparant majeure, mineure, correctif. */
+/** `a > b` en SemVer : majeure, mineure, correctif, puis pré-version (`3.0.0` > `3.0.0-beta.2` > `3.0.0-beta.1`). */
 export const isNewerVersion = (a: string, b: string): boolean => {
   const left = parseSemver(a);
   const right = parseSemver(b);
   if (!left || !right) return false;
   for (let index = 0; index < 3; index++) {
-    if (left[index] !== right[index]) return left[index] > right[index];
+    if (left.core[index] !== right.core[index]) return left.core[index] > right.core[index];
+  }
+  if (left.pre.length === 0 || right.pre.length === 0) return left.pre.length === 0 && right.pre.length > 0;
+  for (let index = 0; index < Math.max(left.pre.length, right.pre.length); index++) {
+    const x = left.pre[index];
+    const y = right.pre[index];
+    if (x === y) continue;
+    if (x === undefined) return false;
+    if (y === undefined) return true;
+    const nx = /^\d+$/.test(x);
+    const ny = /^\d+$/.test(y);
+    if (nx && ny) return Number(x) > Number(y);
+    if (nx !== ny) return ny;
+    return x > y;
   }
   return false;
 };
