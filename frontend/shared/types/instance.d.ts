@@ -360,6 +360,14 @@ export interface InstanceReport {
 /* Installation / mise à jour (`instances:sync`)                       */
 /* ------------------------------------------------------------------ */
 
+/** Progression de la suppression d'une installation (éléments supprimés / total). */
+export interface UninstallProgress {
+  id: InstanceId;
+  channel: Channel;
+  done: number;
+  total: number;
+}
+
 export interface InstanceSyncProgress {
   id: InstanceId;
   channel: Channel;

@@ -17,6 +17,7 @@ import type {
   DeprecatedInstall,
   InstanceSummary,
   InstanceSyncProgress,
+  UninstallProgress,
   InstanceSyncResult,
   DepotOutput,
   DepotInfo,
@@ -101,6 +102,9 @@ export interface ElectronAPI {
   getDeprecatedInstalls(): Promise<DeprecatedInstall[]>;
   /** Désinstalle une installation même si son id ou son canal n'existe plus. */
   uninstallDeprecated(id: string, channel: Channel): Promise<void>;
+  /** Progression d'une désinstallation (installation normale ou obsolète). */
+  onUninstallProgress(callback: Listener<UninstallProgress>): void;
+  removeUninstallProgressListeners(): void;
   onInstanceProgress(callback: Listener<InstanceSyncProgress>): void;
   removeInstanceProgressListeners(): void;
   setInstanceSetting(

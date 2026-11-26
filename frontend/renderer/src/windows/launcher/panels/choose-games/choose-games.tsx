@@ -12,11 +12,12 @@ import {
   Chip,
   Grid,
   InputAdornment,
+  LinearProgress,
   TextField,
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { DeprecatedInstall, LauncherTheme } from "@shared/types";
+import type { DeprecatedInstall, LauncherTheme, UninstallProgress } from "@shared/types";
 import { enqueueSnackbar } from "notistack";
 
 import instancesRenderConfig from "../../../../instances/instances.config";
@@ -265,6 +266,14 @@ export default function ChooseGames() {
   const [deprecated, setDeprecated] = useState<DeprecatedInstall[]>([]);
   const [toRemove, setToRemove] = useState<DeprecatedInstall | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [removeProgress, setRemoveProgress] = useState<UninstallProgress | null>(null);
+
+  // Progression de la suppression (fichiers supprimés / total) pendant que le popup est ouvert
+  useEffect(() => {
+    if (!removing) return;
+    window.electron_API.onUninstallProgress(setRemoveProgress);
+    return () => window.electron_API.removeUninstallProgressListeners();
+  }, [removing]);
 
   const loadDeprecated = useCallback(() => {
     window.electron_API.getDeprecatedInstalls().then(setDeprecated).catch(console.error);
@@ -294,6 +303,7 @@ export default function ChooseGames() {
 
   const removeDeprecated = useCallback(async () => {
     if (!toRemove || removing) return;
+    setRemoveProgress(null);
     setRemoving(true);
     try {
       await window.electron_API.uninstallDeprecated(toRemove.id, toRemove.channel);
@@ -307,6 +317,7 @@ export default function ChooseGames() {
       enqueueSnackbar(t("games.deprecated.failed"), { variant: "error" });
     } finally {
       setRemoving(false);
+      setRemoveProgress(null);
     }
   }, [toRemove, removing, t, loadDeprecated, refreshChannel]);
 
@@ -576,8 +587,28 @@ export default function ChooseGames() {
         open={toRemove !== null}
         onClose={() => !removing && setToRemove(null)}
         type="warning"
-        title={t("games.deprecated.confirmTitle")}
-        message={t("games.deprecated.confirmText", { name: toRemove?.id ?? "" })}
+        title={removing ? t("games.deprecated.removingTitle") : t("games.deprecated.confirmTitle")}
+        message={
+          removing ? (
+            <Box sx={{ width: "100%", minWidth: { sm: 280 } }}>
+              <Typography sx={{ mb: 1.5, fontFamily: "inherit" }}>
+                {t("games.deprecated.removingText", { name: toRemove?.id ?? "" })}
+              </Typography>
+              <LinearProgress
+                variant={removeProgress && removeProgress.total > 0 ? "determinate" : "indeterminate"}
+                value={removeProgress && removeProgress.total > 0 ? (removeProgress.done / removeProgress.total) * 100 : 0}
+              />
+              {removeProgress && removeProgress.total > 0 && (
+                <Typography variant="caption" sx={{ display: "block", mt: 0.5, textAlign: "right", fontFamily: "inherit" }}>
+                  {Math.floor((removeProgress.done / removeProgress.total) * 1000) / 10} % ·{" "}
+                  {t("games.deprecated.removingCount", { done: removeProgress.done, total: removeProgress.total })}
+                </Typography>
+              )}
+            </Box>
+          ) : (
+            t("games.deprecated.confirmText", { name: toRemove?.id ?? "" })
+          )
+        }
         dismissible={!removing}
         buttons={[
           { text: t("games.deprecated.uninstall"), action: removeDeprecated, variant: "main", disabled: removing },

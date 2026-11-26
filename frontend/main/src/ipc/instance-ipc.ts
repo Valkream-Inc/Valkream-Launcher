@@ -27,6 +27,7 @@ import {
 } from "../instances/services.js";
 import { isMovingGamesRoot } from "../lib/fs/games-root.js";
 import { instanceRootPath } from "../lib/fs/paths.js";
+import { removeTreeWithProgress } from "../lib/fs/remove-progress.js";
 import { deprecatedInstalls, scanInstalledInstances } from "../instances/local/installed-scan.js";
 import DirsManager from "../core/dirs.js";
 import LauncherManager from "../core/launcher.js";
@@ -74,6 +75,22 @@ const listDeprecated = async () =>
     new Set(instancesConfig.map((item) => item.id)),
     await getInstanceRegistry().list(),
   );
+
+/** Supprime un dossier d'installation en prévenant le renderer (`instances:uninstall-progress`, ~10 fois / s). */
+const removeWithProgress = async (
+  sender: Electron.WebContents,
+  id: string,
+  channel: Channel,
+  dir: string,
+): Promise<void> => {
+  let last = 0;
+  await removeTreeWithProgress(dir, ({ done, total }) => {
+    const now = Date.now();
+    if (done > 0 && done < total && now - last < 100) return;
+    last = now;
+    if (!sender.isDestroyed()) sender.send("instances:uninstall-progress", { id, channel, done, total });
+  });
+};
 
 const InstanceIpcHandlers = (): void => {
   // Le registre ne lève jamais : une instance injoignable ou invalide est décrite dans son résumé.
@@ -273,12 +290,12 @@ const InstanceIpcHandlers = (): void => {
   ipcMain.handle("instances:deprecated", () => listDeprecated());
 
   // Désinstallation sans config : l'id ou le canal n'existe plus côté launcher (chemin validé, jamais hors des jeux)
-  ipcMain.handle("instances:uninstall-deprecated", (_event, id: unknown, channel: unknown) => {
+  ipcMain.handle("instances:uninstall-deprecated", async (event, id: unknown, channel: unknown) => {
     assertNotMoving();
     if (typeof id !== "string" || !isChannel(channel)) throw new LocalizedError("err.invalidInstanceId", { id: String(id) });
     const installDir = instanceRootPath(DirsManager.gamesRoot(), id, channel);
     if (getInstanceInstaller().isBusy(installDir)) throw new LocalizedError("install.alreadyRunning");
-    fs.rmSync(installDir, { recursive: true, force: true });
+    await removeWithProgress(event.sender, id, channel, installDir);
     getInstanceInfos().invalidate();
     // Dossier du jeu vidé : retiré aussi (jamais s'il reste un autre canal)
     const gameDir = path.dirname(installDir);
@@ -289,14 +306,14 @@ const InstanceIpcHandlers = (): void => {
     }
   });
 
-  ipcMain.handle("instances:uninstall", (_event, id: string, channel: Channel) => {
+  ipcMain.handle("instances:uninstall", async (event, id: string, channel: Channel) => {
     assertNotMoving();
     const { locations } = resolve(id, channel);
     if (getInstanceInstaller().isBusy(locations.installDir)) {
       throw new LocalizedError("install.alreadyRunning");
     }
     // Un seul canal est supprimé : l'autre (stable/beta) n'est jamais touché.
-    fs.rmSync(locations.installDir, { recursive: true, force: true });
+    await removeWithProgress(event.sender, id, channel, locations.installDir);
     getInstanceInfos().invalidate();
   });
 };
