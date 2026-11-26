@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import type { ReactNode } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 
 export interface ActionProviderProps {
   children: ReactNode;
@@ -19,9 +19,9 @@ export interface ActionContextValue {
   /** Tâche de fond (ex : DepotDownloader) : garde les panneaux montés sans bloquer les boutons. */
   /** Mode dev activé dans les réglages (affiche les outils techniques, ex : journal de DepotDownloader). */
   devActive: boolean;
-  setDevActive: (value: boolean) => void;
+  setDevActive: Dispatch<SetStateAction<boolean>>;
   keepAlive: boolean;
-  setKeepAlive: (value: boolean) => void;
+  setKeepAlive: Dispatch<SetStateAction<boolean>>;
   startAction: (id?: string) => string | null;
   finishAction: () => void;
   /** Exécute `fn` en marquant l'action comme en cours (lève si une action est déjà active). */
