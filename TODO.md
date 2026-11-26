@@ -2,6 +2,14 @@
 
 Seules les tâches **ouvertes** sont listées. Légende : (+) petit · (++) moyen · (+++) gros.
 
+## Avant une beta publique (bloquant)
+
+- [ ] Valider `version` : le format `beta-3.0.0` n'est pas du SemVer (electron-builder / electron-updater non validés avec) → `3.0.0-beta.1`.
+- [ ] Vérifier le workflow *Launcher Build* sur `main` après correction (corepack) : première exécution complète jamais observée (NSIS, `check:build`, `check:runtime`, assets de release).
+- [ ] Renseigner `depot-config.ts` (`yarn depot:pin <tag>`) : sans lui, `depot_steam` et la solution DepotDownloader ne sont pas proposés.
+- [ ] Faire un parcours complet sur une machine Windows propre : installation du launcher, mise à jour depuis la version précédente, installation d'un jeu, désinstallation.
+- [ ] Rendre le lint bloquant en CI (ou le traiter) et lancer `check:build` / `check:runtime` en CI sur les pull requests.
+
 ## À faire avant la prochaine release
 
 - [ ] Migrer vers `steam_library` : Valheim alpha est fait (`hash/alpha-game.json`, `depot` renseigné) ; reste Valheim stable / beta et 7 Days to Die (manifeste depuis une installation Steam propre : `yarn build:manifest … --manifest-only`), puis retirer les zips hébergés.

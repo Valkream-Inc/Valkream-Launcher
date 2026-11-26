@@ -44,7 +44,7 @@ frontend/
 - Fait : **UI 100 % générique** : choix du jeu, accueil (un seul `InstanceButton` : installer / réinstaller / mettre à jour / jouer, avec progression), réglages General / Launcher / Game / Mods (affichage joueur) / Dev (outils du jeu : désinstaller, ouvrir le dossier…) / Tools (préparation du remote : hash d'un dossier, liste de mods) / Debug (diagnostic : récapitulatif, tableaux filtrables, réglages, journal d'installation, « Réparer »). Dev, Tools et Debug sont réservés aux admins. Fonds image / vidéo / 3D, loader, liens et infos serveur lisent la config render de l'instance active.
 - Fait : instances `Valheim-Valkream-v2` et `SevenDtoD-Valkream-v2` (7 Days to Die installé entièrement dans le launcher, comme Valheim).
 - Fait : **une seule API** `window.electron_API` (`getInstances`, `getInstanceInfos`, `getInstanceStatus`, `getInstanceReport`, `syncInstance`, `launchInstance`, `openInstanceFolder`, `uninstallInstance`, `setInstanceSetting`, `onInstanceProgress`…). Les anciens managers, IPC, panneaux et API par jeu (`electron_Valheim_API`, `electron_SevenDtoD_API`) sont supprimés.
-- Fait : **réglages d'installation** : `instance.settings.json` contient tous les réglages (valeurs par défaut de l'instance incluses) dès le premier changement ; la lecture complète toujours avec les défauts.
+- Fait : **réglages d'installation** : `instance.settings.json` ne contient que les **choix du joueur** ; la lecture ajoute toujours les valeurs par défaut de l'instance, donc un défaut modifié par une nouvelle version du launcher s'applique à tous ceux qui ne l'ont pas changé.
 - Pas de migration des anciennes installations : réinstallation propre dans `instances/<id>/<canal>/` (les anciens dossiers ne sont pas touchés).
 - Fait : providers `nexus_modpack_url` (clé API Premium du joueur), Hexium (Thunderstore-compatible) et `steam_library`.
 
@@ -143,7 +143,7 @@ Quand `steam_library` échoue (jeu introuvable ou fichiers d'une autre version),
 
 Règles de sécurité appliquées : pas de mot de passe côté launcher (QR, stdin fermé, aucun `-username` / `-password`) ; `appId` pris dans la config main, `depot` / `manifest` strictement numériques, arguments en tableau (pas de shell), dossier de sortie forcé dans l'installation ; le dossier téléchargé n'est pas cru : chaque fichier est vérifié par le manifeste de hash. Un écran d'information (outil, version, emplacements, QR, vérifications) s'affiche avant la première utilisation.
 
-**Étapes et erreurs affichées dans la langue du joueur** : le dialogue indique l'étape en cours (1 outil → 2 connexion Steam / QR → 3 téléchargement → 4 vérification), détectée depuis la sortie de l'outil (`depot/depot-output.ts`, `parseDepotStep`). En cas d'échec, la cause est classée (`classifyDepotFailure` : QR expiré, connexion refusée, trop de tentatives, jeu non possédé, disque plein, réseau, lancement impossible) et traduite via `err.depot*` (`main/src/lib/errors/messages.ts`), la dernière ligne utile de l'outil étant jointe en détail. Le journal brut reste en anglais (utile au support). Les motifs de détection sont basés sur les messages usuels de DepotDownloader : une cause inconnue retombe sur `err.depotFailed` avec le détail brut.
+**Étapes et erreurs affichées dans la langue du joueur** : le dialogue indique l'étape en cours (1 outil → 2 connexion Steam / QR → 3 analyse → 4 téléchargement → 5 vérification), détectée depuis la sortie de l'outil (`depot/depot-output.ts`, `parseDepotStep`). En cas d'échec, la cause est classée (`classifyDepotFailure` : QR expiré, connexion refusée, trop de tentatives, jeu non possédé, disque plein, réseau, lancement impossible) et traduite via `err.depot*` (`main/src/lib/errors/messages.ts`), la dernière ligne utile de l'outil étant jointe en détail. Le journal brut reste en anglais (utile au support). Les motifs de détection sont basés sur les messages usuels de DepotDownloader : une cause inconnue retombe sur `err.depotFailed` avec le détail brut.
 
 Dans tous les cas le serveur n'héberge plus que nos fichiers (zip de config, mods Thunderstore).
 
@@ -340,6 +340,21 @@ Seuls les réglages utiles au joueur sont dans les onglets General, Launcher et 
 
 Tools, liste de mods : le lien peut être celui d'une **page Thunderstore ou Hexium** (`https://thunderstore.io/c/valheim/p/Auteur/Nom/`) : le mod (et, au choix, ses dépendances) est lu via l'API. Les images viennent de l'API, sinon du CDN Thunderstore (`gcdn.thunderstore.io/live/repository/icons/Auteur-Nom-Version.png`).
 
+
+## Installations obsolètes
+
+Une installation qui n'a plus d'entrée dans le launcher est listée dans le choix du jeu avec un label **obsolète** : id retiré du launcher (`removed`), instance désactivée (`disabled`) ou canal supprimé du remote (`channel-removed`, y compris quand l'instance ne déclare **aucun** canal). Rien n'est déclaré obsolète tant que le serveur est injoignable. Les deux derniers cas peuvent être **lancés** tels qu'installés (bouton « Jouer ») ; dans tous les cas, « Désinstaller » supprime le dossier puis relit la liste, le statut et les infos de l'accueil. Un id retiré ne peut pas être lancé (plus de configuration).
+
+## Notifications et popup Steam
+
+- Notifications système (si la fenêtre n'est pas au premier plan) : installation / mise à jour terminée, téléchargement Steam terminé, erreur, QR code à scanner, popup Steam à traiter (`renderer/src/utils/notify.ts`).
+- Le mode d'emploi Steam est construit **dans l'interface** à partir des clés `steam.guide.*` (le main n'envoie que `guideData`) : il change de langue en direct.
+- Le QR code s'agrandit au clic. La console de DepotDownloader n'apparaît qu'en mode développeur ; la barre de progression seulement pendant l'étape de téléchargement. Un téléchargement DepotDownloader garde l'accueil monté (changer de thème ou ouvrir les réglages ne l'interrompt pas) et il est arrêté proprement à la fermeture du launcher.
+- Progression : le total est **figé** une fois les tailles mesurées (`~` si certaines sont estimées) ; le pourcentage a une décimale. Les libellés distinguent « analyse », « copie depuis Steam » et « téléchargement ».
+
+## Adresse du serveur de jeu
+
+L'`index.config` peut porter une clé `server` (`host`, `port`, `timeout`, tous facultatifs, déclinables par canal) qui remplace l'adresse par défaut de `instances.config.ts` sans nouvelle version du launcher. Le protocole reste celui du launcher ; hôte, port et délai sont validés.
 
 ## Canaux et choix du jeu
 

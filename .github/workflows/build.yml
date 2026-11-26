@@ -15,7 +15,7 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      skip: ${{ steps.create_release.outputs.skip }}
       version: ${{ steps.get_version.outputs.version }}
 
     steps:
@@ -26,19 +26,38 @@ jobs:
         id: get_version
         run: echo "version=$(jq -r .version frontend/package.json)" >> $GITHUB_OUTPUT
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      # Version attendue : SemVer (ex : 3.0.0 ou 3.0.0-beta.1). Un avertissement seulement : le format
+      # historique « beta-3.0.0 » n'est pas du SemVer et n'a jamais été validé par electron-builder / electron-updater.
+      - name: Check version format
         env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.get_version.outputs.version }}
-          release_name: release ${{ steps.get_version.outputs.version }}
-          draft: false
-          prerelease: ${{ contains(steps.get_version.outputs.version, 'beta') || contains(steps.get_version.outputs.version, 'alpha') }}
+          VERSION: ${{ steps.get_version.outputs.version }}
+        run: |
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::warning title=Version non SemVer::'$VERSION' n'est pas une version SemVer (ex : 3.0.0-beta.1) : electron-updater peut refuser de la comparer."
+          fi
+
+      # Idempotent : une release déjà publiée pour cette version n'est ni recréée ni reconstruite
+      # (pour publier, incrémenter la version de frontend/package.json).
+      - name: Create release (if missing)
+        id: create_release
+        env:
+          GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.version }}
+          REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$VERSION" --repo "$REPO" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Release existante::La release $VERSION existe déjà : build ignoré. Incrémentez la version pour publier."
+          else
+            flags=""
+            case "$VERSION" in *beta*|*alpha*) flags="--prerelease" ;; esac
+            gh release create "$VERSION" --repo "$REPO" --title "release $VERSION" --notes "Launcher $VERSION" $flags
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
 
   build-launcher:
     needs: create-release
+    if: needs.create-release.outputs.skip != 'true'
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -94,6 +113,7 @@ jobs:
   download-global:
     name: Combine & Upload All Artifacts
     needs: [create-release, build-launcher]
+    if: needs.create-release.outputs.skip != 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -134,21 +154,13 @@ jobs:
           ls -lh ../*.zip
         shell: bash
 
+      # --clobber : un second passage remplace les zips au lieu d'échouer
       - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ needs.create-release.outputs.version }}
-          name: Release ${{ needs.create-release.outputs.version }}
-          files: |
-            ./combined-install-win.zip
-            ./combined-update-win.zip
-          # Désactivations du cross plateforme pour le momment.
-          # files: |
-          #   ./combined-install-win.zip
-          #   ./combined-install-linux.zip
-          #   ./combined-install-mac.zip
-          #   ./combined-update-win.zip
-          #   ./combined-update-linux.zip
-          #   ./combined-update-mac.zip
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          VERSION: ${{ needs.create-release.outputs.version }}
+        run: |
+          # Cross-plateforme désactivé pour le moment : seuls les zips Windows sont publiés.
+          # (Ajouter combined-install-{linux,mac}.zip et combined-update-{linux,mac}.zip à leur réactivation.)
+          gh release upload "$VERSION" ./combined-install-win.zip ./combined-update-win.zip \
+            --repo "${{ github.repository }}" --clobber
