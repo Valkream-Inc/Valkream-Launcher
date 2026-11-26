@@ -160,11 +160,11 @@ describe("InstanceInstaller", () => {
     assert.ok(download.message); // texte de repli toujours présent
   });
 
-  it("réglage : le fichier créé et le résultat contiennent aussi les valeurs par défaut", () => {
+  it("réglage : le résultat ajoute les défauts, le fichier ne garde que le choix du joueur", () => {
     const defaults = { modsAdmin: false, launchSteam: true, launcherBehavior: "hide" };
     const result = writeInstanceSetting(dir("stable"), "modsAdmin", true, defaults);
     assert.deepEqual(result, { modsAdmin: true, launchSteam: true, launcherBehavior: "hide" });
-    assert.deepEqual(readInstanceSettings(dir("stable")), result);
+    assert.deepEqual(readInstanceSettings(dir("stable")), { modsAdmin: true });
   });
 
   it("réglage numérique (curseur) enregistré et relu tel quel", () => {
