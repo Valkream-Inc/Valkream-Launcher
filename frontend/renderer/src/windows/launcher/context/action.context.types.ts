@@ -21,7 +21,8 @@ export interface ActionContextValue {
   devActive: boolean;
   setDevActive: Dispatch<SetStateAction<boolean>>;
   keepAlive: boolean;
-  setKeepAlive: Dispatch<SetStateAction<boolean>>;
+  /** Un composant demande (`true`) ou lâche (`false`) le maintien des panneaux montés ; plusieurs demandeurs possibles (clé = demandeur). */
+  setKeepAlive: (owner: string, active: boolean) => void;
   startAction: (id?: string) => string | null;
   finishAction: () => void;
   /** Exécute `fn` en marquant l'action comme en cours (lève si une action est déjà active). */

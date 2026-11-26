@@ -309,11 +309,22 @@ export default function SteamSourceDialog({
   const retryRef = useRef(onRetry);
   retryRef.current = onRetry;
 
+  const depotRunningRef = useRef(false);
+  depotRunningRef.current = depotRunning;
+  // Fermeture voulue avant la fin du QR code : l'arrêt du téléchargement n'est pas une erreur à afficher
+  const closedByUser = useRef(false);
+  const instanceRef = useRef({ instanceId, channel });
+  instanceRef.current = { instanceId, channel };
+
   useEffect(() => {
     mounted.current = true;
     return () => {
       mounted.current = false;
       window.electron_API.removeDepotOutputListeners();
+      // Popup détruit pendant un téléchargement : plus personne ne le suit, il est arrêté (pas de processus orphelin)
+      if (depotRunningRef.current) {
+        void window.electron_API.cancelDepotDownload(instanceRef.current.instanceId, instanceRef.current.channel);
+      }
     };
   }, []);
 
@@ -426,9 +437,13 @@ export default function SteamSourceDialog({
       notify(t("notify.doneTitle"), t("notify.depotDone"));
       retryRef.current();
     } catch (err) {
-      const message = ipcErrorMessage(err);
-      if (mounted.current) setError(message);
-      notify(t("notify.errorTitle"), message);
+      if (closedByUser.current) {
+        closedByUser.current = false; // arrêt voulu : rien à signaler
+      } else {
+        const message = ipcErrorMessage(err);
+        if (mounted.current) setError(message);
+        notify(t("notify.errorTitle"), message);
+      }
     } finally {
       window.electron_API.removeDepotOutputListeners();
       if (mounted.current) setDepotRunning(false);
@@ -437,6 +452,18 @@ export default function SteamSourceDialog({
 
   const cancelDepot = () =>
     window.electron_API.cancelDepotDownload(instanceId, channel);
+
+  // Avant la fin de la connexion (QR code pas encore validé) rien ne peut avancer seul : fermer le popup arrête le
+  // téléchargement et toute action bloquante ; le bouton principal propose de rouvrir le popup avec toutes les options.
+  // Une fois connecté, fermer masque seulement le popup (le téléchargement continue).
+  const beforeDownload = step === null || step === "login" || step === "tool-verify" || step === "tool-download" || step === "tool-extract";
+  const handleClose = () => {
+    if (depotRunning && beforeDownload) {
+      closedByUser.current = true;
+      void cancelDepot();
+    }
+    onClose();
+  };
 
   const content = (
     <Box
@@ -548,8 +575,8 @@ export default function SteamSourceDialog({
     },
     {
       // Pendant un téléchargement, fermer masque seulement le popup : le bouton principal le rouvre
-      text: depotRunning ? t("steam.hide") : t("common.close"),
-      action: onClose,
+      text: depotRunning && !beforeDownload ? t("steam.hide") : t("common.close"),
+      action: handleClose,
       variant: "secondary",
     },
   ];
@@ -578,7 +605,7 @@ export default function SteamSourceDialog({
     <>
       <Popup
         open={open && issue !== null}
-        onClose={onClose}
+        onClose={handleClose}
         type={error ? "error" : "warning"}
         title={t("steam.dialogTitle")}
         message={content}

@@ -15,7 +15,19 @@ const ActionContext = createContext<ActionContextValue | undefined>(undefined);
 export const ActionProvider = ({ children }: ActionProviderProps) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [currentKey, setCurrentKey] = useState<string | null>(null);
-  const [keepAlive, setKeepAlive] = useState(false);
+  // Plusieurs composants peuvent demander le maintien des panneaux (popup, téléchargement, suppression) :
+  // il dure tant qu'au moins un demandeur est actif, sans qu'un composant ne puisse écraser la demande d'un autre.
+  const [keepAliveOwners, setKeepAliveOwners] = useState<ReadonlySet<string>>(new Set());
+  const keepAlive = keepAliveOwners.size > 0;
+  const setKeepAlive = useCallback((owner: string, active: boolean) => {
+    setKeepAliveOwners((previous) => {
+      if (previous.has(owner) === active) return previous;
+      const next = new Set(previous);
+      if (active) next.add(owner);
+      else next.delete(owner);
+      return next;
+    });
+  }, []);
   const [devActive, setDevActive] = useState(false);
 
   const startAction = useCallback(

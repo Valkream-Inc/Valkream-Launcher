@@ -43,8 +43,8 @@ export default function UninstallDialog({ target, onClose, onDone }: Props) {
 
   // La suppression continue même si le thème change ou si les réglages s'ouvrent
   useEffect(() => {
-    setKeepAlive(removing);
-    return () => setKeepAlive(false);
+    setKeepAlive("uninstall", removing);
+    return () => setKeepAlive("uninstall", false);
   }, [removing, setKeepAlive]);
 
   useEffect(() => {

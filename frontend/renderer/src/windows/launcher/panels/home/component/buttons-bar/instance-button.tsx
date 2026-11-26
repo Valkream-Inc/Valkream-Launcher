@@ -444,9 +444,9 @@ export default function InstanceButton() {
   const hasOpenDialog =
     isWelcomeOpen || syncErrors.length > 0 || steamIssue !== null || depotState.running;
   useEffect(() => {
-    setKeepAlive(hasOpenDialog);
-    return () => setKeepAlive(false);
-  }, [hasOpenDialog]);
+    setKeepAlive("instance-button", hasOpenDialog);
+    return () => setKeepAlive("instance-button", false);
+  }, [hasOpenDialog, setKeepAlive]);
 
   return (
     <>
