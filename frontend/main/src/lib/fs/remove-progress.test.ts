@@ -9,7 +9,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 
-import { removeTreeWithProgress, type RemoveProgress } from "./remove-progress";
+import { removeTreeWithProgress, type RemoveProgress } from "./remove-progress.js";
 
 describe("removeTreeWithProgress", () => {
   it("supprime tout et rapporte une progression croissante jusqu'au total", async () => {
