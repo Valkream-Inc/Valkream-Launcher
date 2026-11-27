@@ -34,7 +34,7 @@ class LauncherBuilder {
 
     if (!fs.existsSync(COMPILED_MAIN_DIR)) {
       throw new Error(
-        `Dossier "${COMPILED_MAIN_DIR}" introuvable : lance d'abord "yarn build:main".`
+        `Dossier "${COMPILED_MAIN_DIR}" introuvable : lance d'abord "yarn build:main".`,
       );
     }
     this.filesList = this.getFiles(COMPILED_MAIN_DIR);
@@ -75,7 +75,7 @@ class LauncherBuilder {
 
       const destination = path.join(
         BUILD_DIR,
-        path.relative(COMPILED_MAIN_DIR, filePath)
+        path.relative(COMPILED_MAIN_DIR, filePath),
       );
       fs.mkdirSync(path.dirname(destination), { recursive: true });
 
@@ -148,11 +148,11 @@ class LauncherBuilder {
           publish: process.env.DRY_RUN === "true" ? "never" : undefined,
           config: {
             generateUpdatesFilesForAllChannels: true,
-            appId: name,
-            productName: name,
+            appId: "com.valkream.launcher",
+            productName: "Valkream Launcher",
             copyright: "Copyright © 2026 Valkream Team",
             // Template electron-builder (résolu par electron-builder, pas par JS).
-             
+
             artifactName: `${name}-${build.type}-` + "${os}-${arch}.${ext}",
             extraMetadata: { main: "build/app.js" },
             files: ["build/**/*", "package.json", "LICENSE.md"],
@@ -229,7 +229,11 @@ class LauncherBuilder {
     const latestFile = "latest.yml";
 
     // La fonction 'filter' permet d'ignorer le fichier latest.yml
-    const copyOptions = { recursive: true, force: true, filter: (src: string) => !src.includes(latestFile) };
+    const copyOptions = {
+      recursive: true,
+      force: true,
+      filter: (src: string) => !src.includes(latestFile),
+    };
     fs.cpSync(tempInstall, distDir, copyOptions);
     fs.cpSync(tempUpdate, distDir, copyOptions);
 

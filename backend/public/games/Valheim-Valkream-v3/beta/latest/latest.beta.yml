@@ -8,16 +8,19 @@
 version: 3.0.0
 buildDate: 2026-11-26T00:00:00.000Z
 
-game-base: # réinstallation complète si en retard
+game-base:
   valheim:
-    version: 1.0.21
+    version: 1.0.30
     type: steam_library
-    buildid: 26948984 # Patch 1.0.21 (26 November 2026 – 14:05:59 UTC)
+    buildid: 26948984 # Patch 1.0.30 (26 November 2026 – 14:05:59 UTC)
     content:
-      win32: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.21-win32.hash.json
-      linux: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.21-linux.hash.json
-      darwin: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.21-darwin.hash.json
-    # hash: 70b7e3617e3c343d6ff6e3d1e0fece2ef7812cc3c2a5ff560fea6216a7bee89a
+      win32: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.30-win32.hash.json
+      linux: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.30-linux.hash.json
+      darwin: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.30-darwin.hash.json
+    hash:
+      win32: 51bfdd79365a8bdb7a9df97b0aa8a90cbe0e236c3833d6744bee97d2f2423573
+      linux: ca9e8cde440c219440d224c02e14c5cae9f3f8850caaa5266e1c60c033a31081
+      darwin: 75811034c9c6589807992de061fff067fa189753fb0e1c960510bb7777f97a76
     depot:
       win32: { id: 892972, manifest: "3007837673982863752" } # 892972 = Valheim Windows
       linux: { id: 892971, manifest: "853228340114251592" } # 892971 = Valheim Linux

@@ -5,19 +5,27 @@
 
 import { app } from "electron";
 
-import * as UpdateWindow from "./src/windows/updateWindow.js";
-import * as MainWindow from "./src/windows/mainWindow.js";
-import IpcHandlers from "./src/ipc/launcher-ipc.js";
-import { isDev } from "./src/core/constants.js";
 import path from "path";
+import { isDev } from "./src/core/constants.js";
 import DirsManager from "./src/core/dirs.js";
 import LauncherManager from "./src/core/launcher.js";
-import { cleanupInterruptedMove, cleanupPendingRemovals, INSTANCES_DIR } from "./src/lib/fs/games-root.js";
-import { applyLauncherVersion } from "./src/lib/settings/launcher-version.js";
-import { syncUninstallPaths, UNINSTALL_PATHS_FILE } from "./src/lib/fs/uninstall-paths.js";
+import IpcHandlers from "./src/ipc/launcher-ipc.js";
 import { abortAllSyncs } from "./src/ipc/sync-registry.js";
+import {
+  cleanupInterruptedMove,
+  cleanupPendingRemovals,
+  INSTANCES_DIR,
+} from "./src/lib/fs/games-root.js";
+import {
+  syncUninstallPaths,
+  UNINSTALL_PATHS_FILE,
+} from "./src/lib/fs/uninstall-paths.js";
+import { applyLauncherVersion } from "./src/lib/settings/launcher-version.js";
+import * as MainWindow from "./src/windows/mainWindow.js";
+import * as UpdateWindow from "./src/windows/updateWindow.js";
 
-if (process.platform === "win32") app.setAppUserModelId("Valkream-Launcher");
+if (process.platform === "win32")
+  app.setAppUserModelId("com.valkream.launcher");
 
 // Pour garder les parformances quand l'app est en arrière plan
 app.commandLine.appendSwitch("disable-renderer-backgrounding");
@@ -43,7 +51,10 @@ else {
           instancesDir: path.join(DirsManager.gamesRoot(), INSTANCES_DIR),
           current: LauncherManager.getVersion(),
         });
-        if (change === "major") console.log(`🧹 Nouvelle version majeure : ${cleaned.length} installation(s) nettoyée(s)`);
+        if (change === "major")
+          console.log(
+            `🧹 Nouvelle version majeure : ${cleaned.length} installation(s) nettoyée(s)`,
+          );
       }
     } catch (error) {
       console.error("Nettoyage au démarrage impossible :", error);

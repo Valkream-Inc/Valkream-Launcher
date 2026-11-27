@@ -23,14 +23,23 @@ function destroyWindow(): void {
 
 function createWindow(): void {
   destroyWindow();
+  const iconExt =
+    process.platform === "win32"
+      ? "icon.ico"
+      : process.platform === "darwin"
+        ? "icon.icns"
+        : "icon.png";
+
+  const iconPath = isDev
+    ? path.join(rendererPath, `public/images/icon/${iconExt}`)
+    : path.join(import.meta.dirname, `../../frontend/images/icon/${iconExt}`);
+
   updateWindow = new BrowserWindow({
     title: "Mise à jour",
     width: 512,
     height: 288,
     resizable: false,
-    icon: isDev
-      ? path.join(rendererPath, "public/images/icon/icon.png")
-      : path.join(import.meta.dirname, "../../frontend/images/icon/icon.png"),
+    icon: iconPath,
     frame: false,
     show: false,
     webPreferences: {
