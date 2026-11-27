@@ -10,7 +10,10 @@
 import type { InstanceMainConfig } from "./instances.types.js";
 
 /** Réglages par défaut d'une instance (le joueur peut les changer dans Réglages > Game). */
-const DEFAULT_SETTINGS = { launchSteam: true, launcherBehavior: "close" } as const;
+const DEFAULT_SETTINGS = {
+  launchSteam: true,
+  launcherBehavior: "close",
+} as const;
 
 const instancesConfig: InstanceMainConfig[] = [
   {
@@ -46,19 +49,20 @@ const instancesConfig: InstanceMainConfig[] = [
       timeout: 2000,
     },
     indexUrl: "/games/Valheim-Valkream-v3/index.config.json",
-    // Chaque dossier peut être décliné par plateforme (win32, linux, darwin, default).
+    // "default" évite la répétition quand le chemin est identique sur tous les OS.
     entryPaths: {
-      valheim: { win32: "game", linux: "game", darwin: "game" },
-      bepinex: { win32: "game", linux: "game", darwin: "game" },
-      configs: { win32: "game/BepInEx/config", linux: "game/BepInEx/config", darwin: "game/BepInEx/config" },
-      "mods-thunderstore": { win32: "game/BepInEx/plugins", linux: "game/BepInEx/plugins", darwin: "game/BepInEx/plugins" },
-      "mods-hexium": { win32: "game/BepInEx/plugins", linux: "game/BepInEx/plugins", darwin: "game/BepInEx/plugins" },
-      "mods-admin": { win32: "game/BepInEx/plugins", linux: "game/BepInEx/plugins", darwin: "game/BepInEx/plugins" },
+      valheim: "game",
+      bepinex: "game",
+      configs: "game/BepInEx/config",
+      "mods-thunderstore": "game/BepInEx/plugins/thunderstore",
+      "mods-hexium": "game/BepInEx/plugins/hexium",
+      "mods-admin": "game/BepInEx/plugins/admin",
     },
+    // Exécutables propres avec injection Doorstop active sur chaque plateforme
     executable: {
       win32: "game/valheim.exe",
-      linux: "game/valheim.x86_64",
-      darwin: "game/valheim.app/Contents/MacOS/valheim",
+      linux: "game/start_game_bepinex.sh",
+      darwin: "game/start_game_bepinex.sh",
     },
     steamAppId: 892970,
     defaultSettings: DEFAULT_SETTINGS,
