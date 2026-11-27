@@ -4,13 +4,11 @@
   "requiredSpaceMb": 5000,
   "enabled": {
     "win32": true,
-    "linux": true,
-    "darwin": true
+    "linux": false,
+    "darwin": false
   },
   "channels": {
-    "stable": "/games/Valheim-Valkream-v2/stable/latest/latest.yml",
-    "beta": "/games/Valheim-Valkream-v2/beta/latest/latest.beta.yml",
-    "alpha": "/games/Valheim-Valkream-v2/alpha/latest/latest.alpha.yml"
+    "stable": "/games/Valheim-Valkream-v2/stable/latest/latest.yml"
   },
   "event": {
     "stable": "/games/Valheim-Valkream-v2/stable/latest/config/event.json",

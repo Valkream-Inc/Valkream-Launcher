@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "Valheim-Valkream-v3",
-  "requiredSpaceMb": 5000,
+  "requiredSpaceMb": 6000,
   "enabled": {
     "win32": true,
-    "linux": true,
-    "darwin": true
+    "linux": false,
+    "darwin": false
   },
   "channels": {
     "beta": "/games/Valheim-Valkream-v3/beta/latest/latest.beta.yml"

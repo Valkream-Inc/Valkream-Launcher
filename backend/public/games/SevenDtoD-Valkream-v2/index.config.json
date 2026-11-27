@@ -8,8 +8,7 @@
     "darwin": true
   },
   "channels": {
-    "stable": "/games/SevenDtoD-Valkream-v2/latest.yml",
-    "beta": "/games/SevenDtoD-Valkream-v2/latest.beta.yml"
+    "stable": "/games/SevenDtoD-Valkream-v2/latest.yml"
   },
   "event": "/games/SevenDtoD-Valkream-v2/config/event.json",
   "maintenance": "/games/SevenDtoD-Valkream-v2/config/maintenance.json",

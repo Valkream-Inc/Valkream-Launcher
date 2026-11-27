@@ -37,14 +37,10 @@
 #                          nettoyage : fichiers locaux que l'entrée ne possède pas (logs, caches…)
 # ──────────────────────────────────────────────────────────────
 
-version: 2.34.37
+version: 2.35.38
 buildDate: 2025-09-18T19:00:00.929Z
 
-# Les mods du modpack Thunderstore (dépendances de son manifest.json) sont attendus dans
-# /games/Valheim-Valkream-v2/modpack.json : un tableau "Auteur-Nom-Version", à générer
-# depuis le manifest.json du package ValheimValkream/Valkream à chaque release.
-
-game-base: # X1 : réinstallation complète
+game-base: # X1 : réinstallation complète si en retard
   valheim:
     version: 0.221.12
     type: zip_url
@@ -60,28 +56,28 @@ game-base: # X1 : réinstallation complète
     gameFolderToRemove:
       - BepInEx/cache
 
-game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
+game-details: # X2 : mods, configuration et détails (mise à jour forcée)
   configs:
-    version: 2.34.37
+    version: 2.35.38
     type: zip_url
     folder_in_zip: config
-    content: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.34.37/
+    content: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.35.38/
     gameFolderToRemove:
       - wackysDatabase/Cache
       - Marketplace/SavedData
-    gameFolderToPreserve: # configs client conservées (chemins relatifs au dossier de l'entrée)
+    gameFolderToPreserve:
       - Azumatt.MinimalUI.cfg
       - WackyMole.EpicMMOSystemUI.cfg
       - shudnal.ExtraSlots.cfg
       - org.bepinex.plugins.groups.cfg
       - randyknapp.mods.minimalstatuseffects.cfg
   mods-thunderstore:
-    version: 2.34.37
+    version: 2.35.38
     type: thunderstore_modpack_url
     key: dependencies
-    content: https://thunderstore.io/api/experimental/package/ValheimValkream/Valkream/2.34.37/
+    content: https://thunderstore.io/api/experimental/package/ValheimValkream/Valkream/2.35.38/
   mods-admin:
-    version: 2.34.37
+    version: 2.35.38
     optional:
       setting: modsAdmin
     type: thunderstore_modpack_url
@@ -92,7 +88,7 @@ game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
       - JereKuusela-World_Edit_Commands-1.70.0
       - Astropilot-ValheimTooler-1.11.0
   mods-boostfps:
-    version: 2.34.37
+    version: 2.35.38
     optional:
       setting: boostFps
     type: thunderstore_modpack_url
@@ -100,7 +96,7 @@ game-details: # X2 : mods et configuration (mise à jour forcée avant de jouer)
       - castix-ValheimFPSBoost-1.0.0
       - vaffle1-FPSPlus-1.1.4
   mods-boostgraphic:
-    version: 2.34.37
+    version: 2.35.38
     optional:
       setting: boostGraphic
     type: thunderstore_modpack_url
