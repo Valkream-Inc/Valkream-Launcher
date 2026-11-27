@@ -7,6 +7,7 @@
 
 declare module "png2icons" {
   export const BILINEAR: number;
+  export const BICUBIC: number;
   export const HERMITE: number;
   export function createICNS(
     input: Buffer,
@@ -17,7 +18,8 @@ declare module "png2icons" {
     input: Buffer,
     scalingAlgorithm: number,
     numOfColors: number,
-    usePNG: boolean
+    usePNG: boolean,
+    forWinExe?: boolean
   ): Buffer | null;
 }
 
