@@ -2725,7 +2725,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^6.3.0"
     concurrently: "npm:^10.0.7"
     cross-env: "npm:^10.1.0"
-    electron: "npm:^45.5.0"
+    electron: "npm:45.5.0"
     electron-builder: "npm:26.18.1"
     electron-updater: "npm:6.8.12"
     esbuild: "npm:^0.28.2"
@@ -3985,7 +3985,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:^45.5.0":
+"electron@npm:45.5.0":
   version: 45.5.0
   resolution: "electron@npm:45.5.0"
   dependencies:
