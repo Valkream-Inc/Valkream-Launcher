@@ -11,13 +11,25 @@ export default function Updater() {
   const { t } = useTranslation();
   const preloadVideoRef = useRef<HTMLVideoElement>(null);
   const loadingSectionRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
   const [message, setMessage] = useState(t("updater.searching"));
 
   useEffect(() => {
     const preloadVideo = preloadVideoRef.current;
     const loadingSection = loadingSectionRef.current;
+    const page = pageRef.current;
 
-    if (!preloadVideo || !loadingSection) return;
+    if (!preloadVideo || !loadingSection || !page) return;
+
+    // La vidéo n'est montrée qu'une fois sa première image prête, à sa taille finale (pas d'image minuscule
+    // le temps du chargement des métadonnées).
+    const showVideo = () => {
+      preloadVideo.style.opacity = "1";
+    };
+    preloadVideo.addEventListener("loadeddata", showVideo);
+    preloadVideo.addEventListener("playing", showVideo);
+    if (preloadVideo.readyState >= 2) showVideo();
+    const showTimer = setTimeout(showVideo, 1500); // filet de sécurité : jamais de vidéo invisible
 
     const handleVideoEnd = () => {
       // Affiche le loader et masque la vidéo
@@ -42,29 +54,43 @@ export default function Updater() {
       });
     };
 
-    // Contournement de la mise à jour : Ctrl + Maj + clic sur la vidéo (avant la fin de la lecture)
+    // Contournement de la mise à jour : Ctrl + Maj + clic n'importe où dans la fenêtre (vidéo ou recherche en cours).
+    // L'écoute est sur la page : la vidéo ignore la souris (pointer-events: none), elle ne recevait donc jamais le clic.
+    let bypassed = false;
     const handleBypass = (event: MouseEvent) => {
-      if (!event.ctrlKey || !event.shiftKey || !window?.electron_API) return;
+      if (!event.ctrlKey || !event.shiftKey || !window?.electron_API || bypassed) return;
+      bypassed = true;
       preloadVideo.removeEventListener("ended", handleVideoEnd);
       window.electron_API.removeUpdateListeners();
       window.electron_API.openMainWindow();
       window.electron_API.closeUpdateWindow();
     };
-    preloadVideo.addEventListener("click", handleBypass);
+    page.addEventListener("click", handleBypass);
 
     // Événement équivalent à "DOMContentLoaded + ended"
     preloadVideo.addEventListener("ended", handleVideoEnd);
 
     return () => {
       preloadVideo.removeEventListener("ended", handleVideoEnd);
-      preloadVideo.removeEventListener("click", handleBypass);
+      clearTimeout(showTimer);
+      page.removeEventListener("click", handleBypass);
+      preloadVideo.removeEventListener("loadeddata", showVideo);
+      preloadVideo.removeEventListener("playing", showVideo);
     };
   }, []);
 
   return (
-    <div className="loading-page">
+    <div ref={pageRef} className="loading-page">
       {/* Vidéo de preload */}
-      <video ref={preloadVideoRef} id="preload-video" autoPlay playsInline>
+      <video
+        ref={preloadVideoRef}
+        id="preload-video"
+        autoPlay
+        playsInline
+        preload="auto"
+        // Taille et visibilité en ligne : valables dès le premier rendu, même avant le chargement de la feuille de style
+        style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", objectFit: "cover", opacity: 0 }}
+      >
         <source src="./videos/pre-loading.mp4" type="video/mp4" />
       </video>
 

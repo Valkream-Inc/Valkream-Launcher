@@ -19,6 +19,7 @@
   height: 100vh;
   object-fit: cover;
   pointer-events: none;
+  transition: opacity 0.2s ease-in;
 }
 
 #loading-section {
