@@ -12,7 +12,7 @@ import type { InstanceId, LocalizedText } from "@shared/types";
 
 import type { GltfGameData } from "../windows/launcher/component/background/gltf-background/gltf-background.types";
 
-/** Images du jeu (chemins relatifs à `renderer/public`). */
+/** Images du jeu (imports depuis `renderer/src/assets`). */
 export interface InstanceImages {
   /** Logo carré : loader. */
   icon: string;
@@ -22,7 +22,7 @@ export interface InstanceImages {
   name: string;
 }
 
-/** Fonds du launcher d'un jeu (chemins relatifs à `renderer/public`). */
+/** Fonds du launcher d'un jeu (imports depuis `renderer/src/assets`). */
 export interface InstanceBackground {
   /** Fond « image ». */
   image: string;
@@ -104,7 +104,7 @@ export interface InstanceRenderConfig {
   id: InstanceId;
   /** Nom affiché dans le choix du jeu. */
   name: string;
-  /** Images du jeu (chemins relatifs à `renderer/public`). */
+  /** Images du jeu (imports depuis `renderer/src/assets`). */
   images: InstanceImages;
   /** Fonds du launcher pour ce jeu : image, vidéo, musique, scène 3D. */
   background: InstanceBackground;

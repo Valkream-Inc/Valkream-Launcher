@@ -41,7 +41,7 @@ joueur ouvre le launcher
 | Changer la liste des mods affichée aux joueurs | 5 (`mods.json`) | l'onglet Tools génère ce fichier |
 | Changer l'exécutable, les arguments de lancement, Java | 1 | `executable`, `command`, `launchArgs` |
 | Ajouter un réglage joueur (case, liste, curseur) | 2 (`customGamesSettings`) | utilisable dans `launchArgs` via `{nom}` |
-| Changer images, fond, musique, modèle 3D, textes | 2 | fichiers dans `frontend/renderer/public/` |
+| Changer images, fond, musique, modèle 3D, textes | 2 | fichiers dans `frontend/renderer/src/assets/` (importés dans `instances.config.tsx`) |
 | **Ajouter un jeu** | 1 + 2 + un dossier `backend/public/games/<id>/` | voir §6 |
 | Désactiver un jeu sur une plateforme | 3 (`enabled`) | `win32` / `linux` / `darwin` |
 
@@ -190,7 +190,7 @@ mods:                                                   # combinable, dans n'imp
 1. **Main** (`instances.config.ts`) : `id`, `server` (type GameDig, host, port), `indexUrl`, `entryPaths` (où va chaque
    entrée), `executable` (ou `command` + `launchArgs`), `steamAppId` si c'est un jeu Steam.
 2. **Render** (`instances.config.tsx`) : `name`, `images`, `background` (image, vidéo, audio, modèle 3D), `translations`,
-   `customGamesSettings`. Déposer les fichiers dans `frontend/renderer/public/`.
+   `customGamesSettings`. Déposer les fichiers dans `frontend/renderer/src/assets/` (importés dans `instances.config.tsx`).
 3. **Remote** : créer `backend/public/games/<id>/` avec `index.config.json` et un `latest.yml`, puis lancer `yarn test` :
    `backend-files.test.ts` recoupe les trois couches et signale ce qui manque.
 

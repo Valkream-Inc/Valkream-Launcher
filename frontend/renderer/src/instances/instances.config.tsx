@@ -11,6 +11,20 @@
 import { lazy } from "react";
 import { useTranslation } from "react-i18next";
 
+import glb_SevenDtoD_3d from "../assets/models/SevenDtoD-3d.glb?url";
+import glb_Valheim_3d from "../assets/models/Valheim-3d.glb?url";
+import img_SevenDtoD_background from "../assets/images/SevenDtoD-background.png";
+import img_SevenDtoD_icon from "../assets/images/SevenDtoD-icon.png";
+import img_SevenDtoD_icon_with_name from "../assets/images/SevenDtoD-icon-with-name.png";
+import img_SevenDtoD_name from "../assets/images/SevenDtoD-name.png";
+import img_Valheim_background from "../assets/images/Valheim-background.png";
+import img_Valheim_icon from "../assets/images/Valheim-icon.png";
+import img_Valheim_icon_with_name from "../assets/images/Valheim-icon-with-name.png";
+import img_Valheim_name from "../assets/images/Valheim-name.png";
+import mp3_SevenDtoD_song from "../assets/audios/SevenDtoD-song.mp3";
+import mp3_Valheim_song from "../assets/audios/Valheim-song.mp3";
+import mp4_SevenDtoD_trailer from "../assets/videos/SevenDtoD-trailer.mp4";
+import mp4_Valheim_trailer from "../assets/videos/Valheim-trailer.mp4";
 import type { InstanceRenderConfig } from "./instances.types";
 
 // Chargé à la demande avec le fond 3D (three.js n'est pas dans le bundle de démarrage)
@@ -51,15 +65,15 @@ const baseInstances: InstanceRenderConfig[] = [
     id: "Valheim-Valkream-v2",
     name: "Valheim v2",
     images: {
-      icon: "./images/Valheim-icon.png",
-      iconWithName: "./images/Valheim-icon-with-name.png",
-      name: "./images/Valheim-name.png",
+      icon: img_Valheim_icon,
+      iconWithName: img_Valheim_icon_with_name,
+      name: img_Valheim_name,
     },
     background: {
-      image: "./images/Valheim-background.png",
-      video: "./videos/Valheim-trailer.mp4",
-      audio: "./audios/Valheim-song.mp3",
-      model: "./models/Valheim-3d.glb",
+      image: img_Valheim_background,
+      video: mp4_Valheim_trailer,
+      audio: mp3_Valheim_song,
+      model: glb_Valheim_3d,
       scene: {
         camera: { position: [0, 1.8, 4.5], fov: 75 },
         lights: { ambientIntensity: 0.4, color: "#ffffff" },
@@ -149,15 +163,15 @@ const baseInstances: InstanceRenderConfig[] = [
     id: "SevenDtoD-Valkream-v2",
     name: "7 Days to Die v2",
     images: {
-      icon: "./images/SevenDtoD-icon.png",
-      iconWithName: "./images/SevenDtoD-icon-with-name.png",
-      name: "./images/SevenDtoD-name.png",
+      icon: img_SevenDtoD_icon,
+      iconWithName: img_SevenDtoD_icon_with_name,
+      name: img_SevenDtoD_name,
     },
     background: {
-      image: "./images/SevenDtoD-background.png",
-      video: "./videos/SevenDtoD-trailer.mp4",
-      audio: "./audios/SevenDtoD-song.mp3",
-      model: "./models/SevenDtoD-3d.glb",
+      image: img_SevenDtoD_background,
+      video: mp4_SevenDtoD_trailer,
+      audio: mp3_SevenDtoD_song,
+      model: glb_SevenDtoD_3d,
       scene: {
         camera: { position: [60, 60, 60], fov: 75 },
         lights: { ambientIntensity: 30, color: "#ffffff" },

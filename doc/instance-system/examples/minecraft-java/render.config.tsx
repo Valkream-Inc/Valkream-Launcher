@@ -2,7 +2,7 @@
 {
   id: "Minecraft-Example",
   name: "Minecraft (exemple)",
-  images: { icon: "…", iconWithName: "…", name: "…" },     // chemins relatifs à renderer/public
+  images: { icon: "…", iconWithName: "…", name: "…" },     // imports depuis renderer/src/assets
   background: { image: "…", video: "…", audio: "…", model: "…", scene: {} as never },
   serverLabel: "Minecraft",
   description: ["d1"],

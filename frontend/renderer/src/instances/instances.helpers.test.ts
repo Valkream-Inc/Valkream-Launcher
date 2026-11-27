@@ -17,6 +17,14 @@ describe("canaux", () => {
     assert.deepEqual(selectableChannels(["beta"], true), ["beta"]);
   });
 
+  it("sans canal stable, la beta est proposée même canaux de test désactivés (pas l'alpha)", () => {
+    assert.deepEqual(selectableChannels(["beta"], false), ["beta"]);
+    assert.deepEqual(selectableChannels(["beta", "alpha"], false), ["beta"]);
+    assert.deepEqual(selectableChannels(["alpha"], false), []);
+    assert.deepEqual(selectableChannels(["stable", "beta"], false), ["stable"]);
+    assert.equal(resolveChannel("beta", ["beta"], false), "beta");
+  });
+
   it("resolveChannel : canal souhaité s'il est encore proposé, sinon null (retour au choix du jeu)", () => {
     assert.equal(resolveChannel("beta", ["stable", "beta"], true), "beta");
     assert.equal(resolveChannel("beta", ["stable", "beta"], false), null);

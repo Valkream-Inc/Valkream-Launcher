@@ -9,7 +9,8 @@
 ;   - les dossiers de jeux choisis ailleurs par le joueur, listés par l'application dans
 ;     uninstall-paths.txt (lib/uninstall-paths.ts). Chaque ligne doit finir par \instances ET contenir
 ;     le fichier repère .valkream-games : rien d'autre n'est jamais supprimé.
-;   Les réglages dans %APPDATA% sont supprimés par electron-builder (deleteAppDataOnUninstall).
+;   Les réglages dans %APPDATA%\Valkream-Launcher sont supprimés ci-dessous (le productName a une espace, donc
+;   deleteAppDataOnUninstall d'electron-builder ne vise plus ce dossier).
 ;
 ; Dossier de données : $INSTDIR\..\valkream-launcher-data (voir core/dirs.ts).
 
@@ -64,8 +65,12 @@
   valkream_read_done:
     FileClose $R1
 
-  ; === Désinstallation complète : dossier de données ===
+  ; === Désinstallation complète : réglages dans %APPDATA% (« Valkream-Launcher », voir core/dirs.ts) ===
+  ; deleteAppDataOnUninstall vise le dossier du productName (« Valkream Launcher ») : celui-ci est supprimé ici.
   valkream_data:
+  RMDir /r "$APPDATA\Valkream-Launcher"
+
+  ; === Désinstallation complète : dossier de données ===
   IfFileExists "$R0\*" 0 valkream_done
     RMDir /r "$R0"
     DetailPrint "Dossier de données supprimé : $R0"

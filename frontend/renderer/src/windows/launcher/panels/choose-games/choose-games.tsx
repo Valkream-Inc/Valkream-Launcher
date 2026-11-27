@@ -37,6 +37,7 @@ import type {
   SearchColors,
 } from "./choose-games.types";
 import { useTranslation } from "react-i18next";
+import iconWithName from "../../../../assets/icon/Valkream-icon-with-name.png";
 
 const CHANNEL_ORDER = ["stable", "beta", "alpha"];
 
@@ -375,7 +376,7 @@ export default function ChooseGames() {
               borderRadius: "8px",
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
             }}
-            src="./images/icon/Valkream-icon-with-name.png"
+            src={iconWithName}
             alt="Valkream"
           />
         </Box>

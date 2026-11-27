@@ -13,6 +13,7 @@ import Popup from "../../../../component/popup/popup";
 import { useInfos } from "../../../../context/infos.context";
 import EventCard from "../event-card/event-card";
 import { useTranslation } from "react-i18next";
+import valkreamIcon from "../../../../../../assets/icon/Valkream-icon.png";
 import { localized } from "../../../../../../i18n";
 
 function ServerInfo() {
@@ -78,7 +79,7 @@ function ServerInfo() {
       <div className="server-infos-container" onClick={handleClick}>
         <div className="header-logo">
           <img
-            src={`./images/icon/Valkream-icon.png`}
+            src={valkreamIcon}
             className="logo-image"
             alt="logo"
           />

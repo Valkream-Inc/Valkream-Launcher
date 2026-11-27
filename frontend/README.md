@@ -24,6 +24,7 @@ scripts/              build-manifest (manifeste de hash d'un dossier), dev-main
 | `yarn test` | tests (`node:test` via `tsx`, à côté du code : `*.test.ts`) |
 | `yarn typecheck` | types du main, du renderer, des tests et des scripts |
 | `yarn workspace Valkream-Launcher build:manifest <source> <sortie>` | génère le manifeste de hash d'un dossier |
+| `yarn workspace Valkream-Launcher hash:file <fichier>` | hash d'un zip (sha256) ou d'un manifeste `.json` ; `--latest … --entry …` l'écrit dans le latest.yml |
 | `yarn build` | installeurs |
 
 ## Conventions

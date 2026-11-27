@@ -2,7 +2,7 @@
 
 Launcher multi-jeux moddé pour les serveurs Valkream (Valheim, 7 Days to Die…) et serveur de fichiers de mise à jour.
 
-<img src="./frontend/renderer/public/images/icon/Valkream-icon-with-name.png" alt="Valkream" width="320">
+<img src="./frontend/renderer/src/assets/icon/Valkream-icon-with-name.png" alt="Valkream" width="320">
 
 [![License: MIT-NC](https://img.shields.io/badge/License-MIT--NC-blue.svg)](#licence)
 
@@ -134,6 +134,7 @@ Depuis la racine du dépôt :
 | `yarn lint` | ESLint |
 | `yarn build` | installeurs du launcher (compilation, build NSIS « install » et « update », vérifications `check:build` et `check:runtime`) |
 | `yarn workspace Valkream-Launcher build:manifest <source> <sortie>` | manifeste de hash d'un dossier (voir le guide des configs) |
+| `yarn workspace Valkream-Launcher hash:file <fichier>` | hash d'un zip (sha256) ou d'un manifeste `.json` (`--latest … --entry …` l'écrit dans le latest.yml) |
 | `yarn workspace Valkream-Launcher depot:pin <tag>` | épingle une version de DepotDownloader (hash sha256) |
 
 ---

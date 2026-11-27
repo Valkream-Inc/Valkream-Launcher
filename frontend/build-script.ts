@@ -169,6 +169,11 @@ class LauncherBuilder {
             ],
             nsis: {
               ...build.nsis,
+              // Identité NSIS (clé de registre de désinstallation) de l'ANCIEN appId « Valkream-Launcher »
+              // = uuid v5("Valkream-Launcher", espace de noms d'electron-builder). Sans elle, le nouvel appId
+              // donne un autre GUID : Windows ne reconnaît plus l'ancienne installation, la mise à jour s'installe
+              // à côté au lieu de la remplacer (deux launchers, anciens raccourcis conservés).
+              guid: "f327869c-247c-5c8d-9e8f-1de697c92c58",
               createDesktopShortcut: true,
               createStartMenuShortcut: true,
               runAfterFinish: true,

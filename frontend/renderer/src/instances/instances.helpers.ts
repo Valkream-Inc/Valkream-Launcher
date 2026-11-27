@@ -19,14 +19,23 @@ export const CHANNEL_COLOR: Record<Exclude<Channel, "stable">, string> = {
 /**
  * Canaux proposés dans le choix du jeu : `stable` toujours (s'il existe), les canaux de test
  * seulement si le joueur les a activés ET que le remote les propose.
+ * Exception : un jeu sans canal stable propose sa `beta` même canaux de test désactivés
+ * (sinon le jeu serait invisible tant qu'il n'est pas sorti en stable).
  */
 export const selectableChannels = (
   channels: readonly Channel[],
   testChannelsEnabled: boolean,
-): Channel[] => [
-  ...(channels.includes("stable") ? (["stable"] as const) : []),
-  ...(testChannelsEnabled ? TEST_CHANNELS.filter((channel) => channels.includes(channel)) : []),
-];
+): Channel[] => {
+  const hasStable = channels.includes("stable");
+  return [
+    ...(hasStable ? (["stable"] as const) : []),
+    ...TEST_CHANNELS.filter(
+      (channel) =>
+        channels.includes(channel) &&
+        (testChannelsEnabled || (!hasStable && channel === "beta")),
+    ),
+  ];
+};
 
 /**
  * Canal souhaité s'il est encore proposé, sinon `null` : le joueur revient au choix du jeu
