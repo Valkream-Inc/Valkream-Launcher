@@ -8,18 +8,18 @@
     "darwin": true
   },
   "channels": {
-    "stable": "/games/Valheim-Valkream-v3/stable/latest/latest.yml"
+    "beta": "/games/Valheim-Valkream-v3/beta/latest/latest.beta.yml"
   },
   "event": {
-    "stable": "/games/Valheim-Valkream-v3/stable/latest/config/event.json"
+    "beta": "/games/Valheim-Valkream-v3/beta/latest/config/event.beta.config.json"
   },
   "maintenance": {
-    "stable": "/games/Valheim-Valkream-v3/stable/latest/config/maintenance.json"
+    "beta": "/games/Valheim-Valkream-v3/beta/latest/config/maintenance.beta.config.json"
   },
   "contributors": {
-    "stable": "/games/Valheim-Valkream-v3/stable/latest/config/contributors.json"
+    "beta": "/games/Valheim-Valkream-v3/beta/latest/config/contributors.beta.config.json"
   },
   "mods": {
-    "stable": "/games/Valheim-Valkream-v3/stable/latest/config/mods.json"
+    "beta": "/games/Valheim-Valkream-v3/beta/latest/config/mods.beta.config.json"
   }
 }

@@ -10,17 +10,27 @@ buildDate: 2026-11-26T00:00:00.000Z
 
 game-base: # réinstallation complète si en retard
   valheim:
-    version: 0.221.12
-    type: zip_url
+    version: 1.0.21
+    type: steam_library
+    buildid: 26948984 # Patch 1.0.21 (26 November 2026 – 14:05:59 UTC)
     content:
-      win32: https://play.valkream.com/games/Valheim/latest/build-game-win32.zip
-      linux: https://play.valkream.com/games/Valheim/latest/build-game-linux.zip
-      darwin: https://play.valkream.com/games/Valheim/latest/build-game-darwin.zip
+      win32: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.21-win32.hash.json
+      linux: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.21-linux.hash.json
+      darwin: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.21-darwin.hash.json
+    # hash: 70b7e3617e3c343d6ff6e3d1e0fece2ef7812cc3c2a5ff560fea6216a7bee89a
+    depot:
+      win32: { id: 892972, manifest: "3007837673982863752" } # 892972 = Valheim Windows
+      linux: { id: 892971, manifest: "853228340114251592" } # 892971 = Valheim Linux
+      darwin: { id: 892973, manifest: "4903160343930100355" } # 892973 = Valheim macOS
+    to_ignore:
+      - "*.log"
+      - BepInEx/**
+      - .DepotDownloader/**
   bepinex:
-    version: 5.4.2333
+    version: 5.4.2360
     type: zip_url
     folder_in_zip: BepInExPack_Valheim
-    content: https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2333/
+    content: https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2360/
     gameFolderToRemove:
       - BepInEx/cache
 
@@ -36,12 +46,6 @@ game-details: # mods et configuration
     type: empty
   mods-admin:
     version: 3.0.0
+    type: empty
     optional:
       setting: modsAdmin
-    type: thunderstore_modpack_url
-    content:
-      - JereKuusela-Infinity_Hammer-1.79.0
-      - JereKuusela-Server_devcommands-1.106.0
-      - JereKuusela-Upgrade_World-1.80.0
-      - JereKuusela-World_Edit_Commands-1.70.0
-      - Astropilot-ValheimTooler-1.11.0
