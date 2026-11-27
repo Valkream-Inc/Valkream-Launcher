@@ -56,7 +56,7 @@ export default function InstanceButton() {
   } = useGames();
   const { installationStatut, maintenance } = useInfos();
 
-  const { setKeepAlive } = useAction();
+  const { setKeepAlive, setSwitchLock } = useAction();
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
   // Jeu affiché (suivi dans une ref : les rafraîchissements d'une synchronisation tournent dans des fermetures anciennes)
   const shownRef = useRef({ id: actualInstanceId, channel: actualChannel });
@@ -447,6 +447,12 @@ export default function InstanceButton() {
     setKeepAlive("instance-button", hasOpenDialog);
     return () => setKeepAlive("instance-button", false);
   }, [hasOpenDialog, setKeepAlive]);
+
+  // Téléchargement Steam (DepotDownloader) en cours : on ne change pas de jeu tant qu'il n'est pas terminé ou annulé
+  useEffect(() => {
+    setSwitchLock("steam-depot", depotState.running);
+    return () => setSwitchLock("steam-depot", false);
+  }, [depotState.running, setSwitchLock]);
 
   return (
     <>

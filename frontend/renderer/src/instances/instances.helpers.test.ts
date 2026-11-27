@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import type { EntryReport, InstanceSummary } from "@shared/types";
-import { groupEntriesByPath, isSelectable, overlappingPaths, paginate, pickerChannels, resolveChannel, selectableChannels } from "./instances.helpers";
+import { effectiveTestChannels, groupEntriesByPath, isSelectable, overlappingPaths, paginate, pickerChannels, resolveChannel, selectableChannels } from "./instances.helpers";
 
 const entry = (name: string, path: string, status: EntryReport["status"]): EntryReport => ({
   name, tier: "game-base", type: "zip_url", path, declaredVersion: "1", status,
@@ -17,12 +17,11 @@ describe("canaux", () => {
     assert.deepEqual(selectableChannels(["beta"], true), ["beta"]);
   });
 
-  it("sans canal stable, la beta est proposée même canaux de test désactivés (pas l'alpha)", () => {
-    assert.deepEqual(selectableChannels(["beta"], false), ["beta"]);
-    assert.deepEqual(selectableChannels(["beta", "alpha"], false), ["beta"]);
-    assert.deepEqual(selectableChannels(["alpha"], false), []);
-    assert.deepEqual(selectableChannels(["stable", "beta"], false), ["stable"]);
-    assert.equal(resolveChannel("beta", ["beta"], false), "beta");
+  it("effectiveTestChannels : forcés seulement si aucun jeu ne propose de stable", () => {
+    assert.equal(effectiveTestChannels([["beta"], ["beta", "alpha"]], false), true);
+    assert.equal(effectiveTestChannels([["beta"], ["stable", "beta"]], false), false);
+    assert.equal(effectiveTestChannels([], false), true);
+    assert.equal(effectiveTestChannels([["stable"]], true), true);
   });
 
   it("resolveChannel : canal souhaité s'il est encore proposé, sinon null (retour au choix du jeu)", () => {

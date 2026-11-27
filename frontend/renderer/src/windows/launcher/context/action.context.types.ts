@@ -23,6 +23,9 @@ export interface ActionContextValue {
   keepAlive: boolean;
   /** Un composant demande (`true`) ou lâche (`false`) le maintien des panneaux montés ; plusieurs demandeurs possibles (clé = demandeur). */
   setKeepAlive: (owner: string, active: boolean) => void;
+  /** Changement de jeu interdit (ex : téléchargement Steam en cours) : au moins un demandeur actif. */
+  switchLocked: boolean;
+  setSwitchLock: (owner: string, active: boolean) => void;
   startAction: (id?: string) => string | null;
   finishAction: () => void;
   /** Exécute `fn` en marquant l'action comme en cours (lève si une action est déjà active). */

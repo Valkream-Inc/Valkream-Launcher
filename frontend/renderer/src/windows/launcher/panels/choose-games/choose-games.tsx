@@ -25,6 +25,7 @@ import instancesRenderConfig from "../../../../instances/instances.config";
 import {
   CHANNEL_COLOR,
   isSelectable,
+  effectiveTestChannels,
   pickerChannels,
 } from "../../../../instances/instances.helpers";
 import { useGames } from "../../context/games.context";
@@ -246,12 +247,17 @@ export default function ChooseGames() {
     ])
       .then(([summaries, testChannelsEnabled]) => {
         const renderIds = instancesRenderConfig.map((item) => item.id);
+        const selectable = summaries.filter((summary) => isSelectable(summary, renderIds));
+        // Aucun jeu en stable : on propose les beta d'office (sinon page vide)
+        const tests = effectiveTestChannels(
+          selectable.map((summary) => summary.channels),
+          testChannelsEnabled,
+        );
         setGames(
-          summaries
-            .filter((summary) => isSelectable(summary, renderIds))
+          selectable
             .flatMap((summary) => {
               const render = instancesRenderConfig.find((item) => item.id === summary.id);
-              return pickerChannels(summary.channels, testChannelsEnabled).map((channel) => ({
+              return pickerChannels(summary.channels, tests).map((channel) => ({
                 id: summary.id,
                 channel,
                 name: render?.name ?? summary.id,

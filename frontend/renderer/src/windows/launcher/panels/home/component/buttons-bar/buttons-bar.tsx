@@ -34,14 +34,14 @@ function ButtonsBar({
   onTipsClick = () => {},
   onChangeGamesClick = () => {},
 }: ButtonsBarProps) {
-  const { actionLoading } = useAction();
+  const { actionLoading, switchLocked } = useAction();
 
   return (
     <>
       <TipsButton onClick={onTipsClick} />
 
       <div className="bottom-actions">
-        {!actionLoading && (
+        {!actionLoading && !switchLocked && (
           <Button
             variant="contained"
             className="settings-btn"

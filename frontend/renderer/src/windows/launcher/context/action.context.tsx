@@ -28,6 +28,17 @@ export const ActionProvider = ({ children }: ActionProviderProps) => {
       return next;
     });
   }, []);
+  const [switchLockOwners, setSwitchLockOwners] = useState<ReadonlySet<string>>(new Set());
+  const switchLocked = switchLockOwners.size > 0;
+  const setSwitchLock = useCallback((owner: string, active: boolean) => {
+    setSwitchLockOwners((previous) => {
+      if (previous.has(owner) === active) return previous;
+      const next = new Set(previous);
+      if (active) next.add(owner);
+      else next.delete(owner);
+      return next;
+    });
+  }, []);
   const [devActive, setDevActive] = useState(false);
 
   const startAction = useCallback(
@@ -73,6 +84,8 @@ export const ActionProvider = ({ children }: ActionProviderProps) => {
     currentKey,
     keepAlive,
     setKeepAlive,
+    switchLocked,
+    setSwitchLock,
     devActive,
     setDevActive,
     startAction,

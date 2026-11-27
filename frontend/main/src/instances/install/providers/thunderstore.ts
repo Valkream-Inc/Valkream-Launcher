@@ -47,25 +47,54 @@ const readDependencies = (modDir: string) => {
   }
 };
 
+type ModRef = ReturnType<typeof parseDependency>;
+
 /**
- * Lien de téléchargement d'un mod. Thunderstore : chemin standard. Autre site compatible (Hexium…) :
- * `download_url` donné par son API, avec repli sur le chemin standard si l'API ne répond pas.
+ * Lien de téléchargement d'un mod et, si l'API du site les donne, ses dépendances directes.
+ * Thunderstore : chemin standard. Autre site compatible (Hexium…) : `download_url` donné par son API,
+ * avec repli sur le chemin standard si l'API ne répond pas. Une seule requête d'API par mod.
  */
-const downloadLink = async (
+const describeMod = async (
   apiUrl: string,
-  mod: { author: string; name: string; version: string },
+  mod: ModRef,
   context: Pick<ProviderContext, "resolver">,
-): Promise<string> => {
+  withDependencies: boolean,
+): Promise<{ link: string; dependencies: ModRef[] | null }> => {
   const standard = `${apiUrl}/package/download/${encodeURIComponent(mod.author)}/${encodeURIComponent(mod.name)}/${encodeURIComponent(mod.version)}/`;
-  if (/^https:\/\/(www\.)?thunderstore\.io$/.test(apiUrl)) return standard;
+  // Thunderstore sans résolution des dépendances : le lien standard suffit, aucune requête d'API
+  if (/^https:\/\/(www\.)?thunderstore\.io$/.test(apiUrl) && !withDependencies) return { link: standard, dependencies: null };
   try {
-    const { value } = await context.resolver.getJson<{ download_url?: unknown }>(
+    const { value } = await context.resolver.getJson<{ download_url?: unknown; dependencies?: unknown }>(
       `${apiUrl}/api/experimental/package/${encodeURIComponent(mod.author)}/${encodeURIComponent(mod.name)}/${encodeURIComponent(mod.version)}/`,
     );
-    return typeof value.download_url === "string" && /^https:\/\//.test(value.download_url) ? value.download_url : standard;
+    const isStandardHost = /^https:\/\/(www\.)?thunderstore\.io$/.test(apiUrl);
+    const link =
+      !isStandardHost && typeof value.download_url === "string" && /^https:\/\//.test(value.download_url)
+        ? value.download_url
+        : standard;
+    const dependencies = Array.isArray(value.dependencies)
+      ? value.dependencies.flatMap((item) => {
+          try {
+            return [parseDependency(String(item))];
+          } catch {
+            return [];
+          }
+        })
+      : null;
+    return { link, dependencies };
   } catch {
-    return standard;
+    return { link: standard, dependencies: null }; // API muette : lien standard, dépendances lues après extraction
   }
+};
+
+/** Exécute `task` sur chaque élément, `limit` à la fois (pas de rafale vers l'API / le CDN). */
+const mapLimited = async <T>(items: readonly T[], limit: number, task: (item: T) => Promise<void>): Promise<void> => {
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (next < items.length) await task(items[next++]);
+    }),
+  );
 };
 
 export const thunderstoreProvider: Provider = async (context) => {
@@ -89,8 +118,9 @@ export const thunderstoreProvider: Provider = async (context) => {
   const stage = path.join(tempDir, `${name}.stage`);
   fs.rmSync(stage, { recursive: true, force: true });
 
-  // Progression globale sur l'ensemble des mods (la file peut grandir avec les dépendances) :
-  // téléchargement = 80 % d'un mod, extraction = 20 %. Aucun nom de mod affiché.
+  // Progression globale : un seul total, mesuré AVANT de télécharger (en-tête `content-length` de chaque mod,
+  // 4 requêtes à la fois), puis figé : le total affiché ne change plus pendant le téléchargement.
+  // Téléchargement = 80 % d'un mod, extraction = 20 %. Aucun nom de mod affiché.
   let total = queue.length;
   const progress = createGlobalProgress(
     (transfer) => context.report("download", context.t("progress.mods", { label: name }), transfer),
@@ -98,10 +128,41 @@ export const thunderstoreProvider: Provider = async (context) => {
   );
   context.report("download", context.t("progress.mods", { label: name }));
 
+  // 1) Résolution : lien + dépendances (si déclarées) de chaque mod, sans rien télécharger
+  const links = new Map<string, string>();
+  const resolved: ModRef[] = [];
+  for (let index = 0; index < queue.length; index++) {
+    const mod = queue[index];
+    const info = await describeMod(apiUrl, mod, context, Boolean(entry.dependencies));
+    signal?.throwIfAborted();
+    links.set(mod.folder, info.link);
+    resolved.push(mod);
+    if (entry.dependencies && info.dependencies) {
+      for (const dependency of info.dependencies) {
+        if (skip.has(dependency.folder) || owned.includes(dependency.folder)) continue;
+        owned.push(dependency.folder);
+        queue.push(dependency);
+        total++;
+      }
+    }
+  }
+
+  // 2) Tailles (HEAD) puis total figé
+  if (io.size) {
+    await mapLimited(resolved, 4, async (mod) => {
+      const size = await io.size?.(resolver.urlOf(links.get(mod.folder)!), signal);
+      if (size !== undefined) progress.expect(mod.folder, size);
+    });
+  }
+  progress.lock();
+
+  // 3) Téléchargement + extraction
+  queue.length = 0;
+  queue.push(...resolved);
   while (queue.length > 0) {
     const mod = queue.shift()!;
     const zipPath = path.join(tempDir, `${mod.folder}.zip`);
-    const url = resolver.urlOf(await downloadLink(apiUrl, mod, context));
+    const url = resolver.urlOf(links.get(mod.folder) ?? (await describeMod(apiUrl, mod, context, false)).link);
     let bytes = 0;
     await io.download(url, zipPath, signal, (transfer) => {
       bytes = transfer.processed ?? bytes;
