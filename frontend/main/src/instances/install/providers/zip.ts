@@ -4,6 +4,7 @@
  *
  * `zip_url` : télécharge une archive (`.zip`, ou `.tar.gz` extrait pendant le téléchargement) et l'extrait dans le dossier de l'entrée.
  * Conservation et exclusions s'appliquent fichier par fichier à l'extraction ;
+ * `hash` (sha256 de l'archive `.zip`, facultatif) est vérifié avant l'extraction ;
  * l'extraction se fait d'abord dans un dossier de préparation (installation atomique).
  */
 
@@ -33,6 +34,7 @@ export const zipProvider: Provider = async (context) => {
     stage,
     (relative) => shouldWriteFile(relative, plan, fs.existsSync(path.join(entryDir, relative))),
     name,
+    typeof entry.hash === "string" ? entry.hash : undefined,
   );
 
   beforeCommit();

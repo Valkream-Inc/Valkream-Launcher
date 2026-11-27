@@ -271,6 +271,25 @@ describe("InstanceInstaller", () => {
     assert.match(result.failed[0].error, /manifeste/);
   });
 
+  it("zip_url : hash du zip correct → installé", async () => {
+    const remote = baseRemote() as Record<string, any>;
+    remote["/stable.yml"]["game-details"].cfg.hash = sha(files["/cfg.zip"]);
+    const { installer } = build(remote, files);
+    const result = await installer.sync("g", "stable");
+    assert.deepEqual(result.failed, []);
+    assert.equal(readInstallState(dir("stable")).entries.cfg.version, "1.0.0");
+  });
+
+  it("zip_url : hash du zip faux → archive refusée, rien n'est installé pour cette entrée", async () => {
+    const remote = baseRemote() as Record<string, any>;
+    remote["/stable.yml"]["game-details"].cfg.hash = sha("autre archive");
+    const { installer } = build(remote, files);
+    const result = await installer.sync("g", "stable");
+    assert.equal(result.failed.length, 1);
+    assert.match(result.failed[0].error, /corrompue|corrupted/);
+    assert.equal(readInstallState(dir("stable")).entries.cfg, undefined);
+  });
+
   it("beta : installation indépendante du stable", async () => {
     const remote = baseRemote() as Record<string, any>;
     remote["/index.json"] = index({ stable: "/stable.yml", beta: "/beta.yml" });

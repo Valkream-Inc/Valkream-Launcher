@@ -76,7 +76,7 @@ correspondent plus au `hash`. **Si tu changes `content` sans changer `version`, 
 | --- | --- | --- |
 | `type` | provider d'installation | `zip_url` |
 | `content` | quoi télécharger : lien, liste ou manifeste | `https://…` |
-| `hash` | sha256 du manifeste (types à hash) | généré par `yarn build:manifest` |
+| `hash` | sha256 du manifeste (types à hash) ou de l'archive `.zip` (`zip_url`) | manifeste : `yarn build:manifest` ; zip : `sha256sum fichier.zip` |
 | `folder_in_zip` | sous-dossier de l'archive à extraire (sans `/` initial) | `config` |
 | `gameFolderToRemove` | supprimés avant la mise à jour | `[BepInEx/cache]` |
 | `gameFolderToPreserve` | gardés à la mise à jour (config du joueur) | `[fichier.cfg]` ou `{ path, from: ">=1.2.0" }` |
@@ -115,7 +115,7 @@ valheim:
 
 | Je veux installer… | `type` | `content` | Bon à savoir |
 | --- | --- | --- | --- |
-| une archive (jeu, BepInEx, config) | `zip_url` | lien vers un `.zip` ou `.tar.gz` | le plus simple ; pas de vérification fichier par fichier |
+| une archive (jeu, BepInEx, config) | `zip_url` | lien vers un `.zip` ou `.tar.gz` | le plus simple ; pas de vérification fichier par fichier. `hash` (facultatif) = sha256 du `.zip` : vérifié avant l'extraction, archive refusée si différent (sans effet sur un `.tar.gz`, extrait au fil du téléchargement) |
 | un dossier de fichiers **vérifié par hash** | `hash_url` | lien vers `hash.json` | réparable, mises à jour fichier par fichier ; `hash` obligatoire |
 | des mods Thunderstore | `thunderstore_modpack_url` | liste `[Auteur-Nom-Version, …]` | chaque mod a son dossier ; `api-url` pour Hexium |
 | des mods Nexus Mods | `nexus_modpack_url` | liste `jeu-idMod-idFichier` | clé API **Premium** du joueur, `.zip` seulement |
