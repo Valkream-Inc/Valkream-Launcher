@@ -78,6 +78,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: "22.17.0"
+          package-manager-cache: false  # v5 : cache auto désactivé (yarn 4 vient de corepack, activé après)
 
       # Yarn 4 (Berry) via corepack, APRÈS setup-node : le shim doit appartenir au Node 22 installé
       # (avec `cache: yarn` dans setup-node, c'est le yarn 1 global qui était résolu → échec packageManager).
@@ -129,6 +130,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: "22.17.0"
+          package-manager-cache: false  # v5 : cache auto désactivé (yarn 4 vient de corepack, activé après)
 
       - name: Enable Corepack
         run: corepack enable

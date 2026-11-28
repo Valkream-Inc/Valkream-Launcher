@@ -21,6 +21,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          package-manager-cache: false  # v5 : cache auto désactivé (yarn 4 vient de corepack, activé après)
 
       # Yarn 4 (Berry) est fourni par corepack (champ packageManager de package.json).
       - run: corepack enable
