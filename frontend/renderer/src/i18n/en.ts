@@ -370,7 +370,7 @@ const en: Messages = {
     hashFileTitle: 'File or manifest hash',
     hashFileHelp:
       "A manifest (.json { \"path\": sha256 }) gives the launcher hash: indentation and key order do not matter. Any other file (zip, tar.gz…) gives its sha256.",
-    pickFile: "Choose a file and hash it",
+    pickFileToHash: "Choose a file and hash it",
     kindManifest: "Manifest of {{count}} file(s)",
     kindFile: "{{size}} file (sha256 of the bytes)",
     computing: "Computing…",

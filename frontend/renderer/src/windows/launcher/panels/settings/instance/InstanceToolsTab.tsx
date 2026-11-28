@@ -267,7 +267,7 @@ function HashFileTool() {
           />
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
             <Button variant="contained" disabled={busy} onClick={pick}>
-              {busy ? t("tools.computing") : t("tools.pickFile")}
+              {busy ? t("tools.computing") : t("tools.pickFileToHash")}
             </Button>
           </Box>
           {result && (
