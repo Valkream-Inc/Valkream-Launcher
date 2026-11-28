@@ -370,6 +370,12 @@ const fr: Messages = {
     hashTitle: "Hash d'un dossier",
     ignoreLabel:
       "to_ignore (un motif par ligne : logs, *.cfg, config/client.cfg…)",
+    hashFileTitle: "Hash d'un fichier ou d'un manifeste",
+    hashFileHelp:
+      "Un manifeste (.json { \"chemin\": sha256 }) donne le hash du launcher : l'indentation et l'ordre des clés ne changent rien. Un autre fichier (zip, tar.gz…) donne son sha256.",
+    pickFileToHash: "Choisir un fichier et hasher",
+    kindManifest: "Manifeste de {{count}} fichier(s)",
+    kindFile: "Fichier de {{size}} (sha256 des octets)",
     computing: "Calcul…",
     pick: "Choisir un dossier et hasher",
     exportFiles: "Exporter hash.json + fichiers",
