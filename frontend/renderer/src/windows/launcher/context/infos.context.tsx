@@ -157,6 +157,9 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
         setLoadingState((prev) => ({ ...prev, infosLoaded: true }));
       } catch (error) {
         console.error("Erreur lors de la récupération des infos :", error);
+        // Hors ligne / serveur injoignable : on affiche quand même l'accueil (la prochaine lecture réessaie)
+        if (actualGameRef.current === gameKey)
+          setLoadingState({ infosLoaded: true, installationStatusLoaded: true });
       } finally {
         isLoadingRef.current = false;
         if (rerunRef.current) {

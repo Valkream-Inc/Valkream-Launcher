@@ -13,7 +13,9 @@ import path from "path";
 
 import type { ModsApi, ModsListResult, ToolsHashSummary } from "@shared/types";
 
+import { baseUrl } from "../core/constants.js";
 import SettingsManager from "../core/settings.js";
+import { classifyLink, resolveLinkUrl } from "../instances/remote/link.js";
 import { nexusGetJson } from "../instances/install/providers/nexus.js";
 import {
   exportHashFolder,
@@ -160,9 +162,9 @@ export default function registerAdminToolsIpc(): void {
       if (nexusPage)
         return showNexus([await nexusItemFromPage(nexusPage, nexusJson)]);
 
-      // Un lien vers la liste (JSON ou texte) est aussi accepté
-      if (/^https?:\/\/\S+$/.test(text))
-        text = await httpGetText(text, { timeout: 10_000 });
+      // Un lien vers la liste (JSON ou texte) est aussi accepté : `/chemin` = relatif au serveur de la config
+      if (/^https?:\/\/\S+$/.test(text) || /^\/[^\s]+$/.test(text) && classifyLink(text) === "relative")
+        text = await httpGetText(resolveLinkUrl(text, baseUrl), { timeout: 10_000 });
 
       // Liste Nexus (`jeu-idMod-idFichier`), lue avec la clé API du joueur (réglage local)
       if (choice === "nexus" || choice === "auto") {
