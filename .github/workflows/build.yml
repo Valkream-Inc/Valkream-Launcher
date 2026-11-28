@@ -154,7 +154,7 @@ jobs:
           DRY_RUN: "true"
 
       - name: Upload installers
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: launcher-dry-run
           path: |
