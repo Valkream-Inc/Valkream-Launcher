@@ -69,8 +69,8 @@ export async function load(url, context, next) {
 const REGISTER_SOURCE = (hooksUrl: string) =>
   `import { register } from "node:module"; register(${JSON.stringify(hooksUrl)});`;
 
-/** Modules qui démarrent l'application ou n'existent que dans Electron : vérifiés par la syntaxe (1) et le test Electron (4). */
-const NOT_IMPORTED = [/^app\.js$/, /\.cjs$/];
+/** Modules qui démarrent l'application, n'existent que dans Electron, ou sont le bundle du renderer (`frontend/`, besoin d'un DOM) : vérifiés par la syntaxe (1) et le test Electron (4). */
+const NOT_IMPORTED = [/^app\.js$/, /\.cjs$/, /^frontend\//];
 
 const RUNNER_SOURCE = `
 import path from "node:path";

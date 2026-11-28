@@ -46,6 +46,12 @@ describe("le build s'exécute", () => {
     assert.deepEqual(checkBehavior(dir), []);
   });
 
+  it("le bundle du renderer (frontend/, besoin d'un DOM) n'est pas importé dans Node", () => {
+    goodBuild();
+    write("frontend/assets/index.js", `document.title = "x";`);
+    assert.deepEqual(checkImports(dir), []);
+  });
+
   it("syntaxe invalide (obfuscation cassée) détectée", () => {
     goodBuild();
     write("src/lib/broken.js", "export const a = (;");
