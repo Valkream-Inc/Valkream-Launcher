@@ -134,11 +134,17 @@ export default function InstanceModsTab({
   const listRef = useRef<HTMLDivElement | null>(null);
   const prevPageRef = useRef<number | null>(null);
 
+  // Ordre alphabétique ; une recherche classe d'abord par pertinence, puis alphabétiquement
+  const sortedMods = useMemo(
+    () => [...mods].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "", undefined, { sensitivity: "base", numeric: true })),
+    [mods],
+  );
+
   const filteredMods = useMemo(() => {
     const trimmed = search.trim();
-    if (!trimmed) return mods;
+    if (!trimmed) return sortedMods;
 
-    return mods
+    return sortedMods
       .map((mod, index) => ({
         mod,
         index,
@@ -147,7 +153,7 @@ export default function InstanceModsTab({
       .filter((entry) => entry.score > 0)
       .sort((a, b) => b.score - a.score || a.index - b.index)
       .map((entry) => entry.mod);
-  }, [mods, search]);
+  }, [sortedMods, search]);
 
   useEffect(() => {
     setPage(1);

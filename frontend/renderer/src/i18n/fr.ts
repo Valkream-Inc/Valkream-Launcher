@@ -345,6 +345,9 @@ const fr: Messages = {
   },
   tools: {
     withDependencies: "Inclure ses dépendances (modpack)",
+    communityLabel: "Jeu (communauté)",
+    communityHelp:
+      "Slug du jeu sur Thunderstore / Hexium (ex : valheim). Sans lui, aucun lien de page n'est généré ; un lien de mod collé le fournit déjà.",
     keyLabel: "Clé JSON (facultatif)",
     keyHelp:
       "Chemin du tableau dans le JSON : dependencies, packs.0.mods… Vide : le fichier ou le lien est lui-même la liste.",

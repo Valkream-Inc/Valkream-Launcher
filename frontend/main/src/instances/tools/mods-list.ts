@@ -90,12 +90,14 @@ export interface PackagePage {
   name: string;
   /** Version indiquée dans le lien (sinon : la dernière). */
   version?: string;
+  /** Jeu (communauté) du lien `/c/<jeu>/p/…` : nécessaire pour fabriquer des liens de page valides. */
+  community?: string;
 }
 
 /** Sites à l'API compatible Thunderstore dont on lit les pages de mod. */
 const PACKAGE_HOSTS = ["thunderstore.io", "hexium.gg"];
 const PACKAGE_PAGE =
-  /^https:\/\/(?:www\.)?([a-z.]+)\/(?:c\/[\w-]+\/)?(?:p|package)\/([^/?#\s]+)\/([^/?#\s]+)(?:\/([\d.]+))?\/?(?:[?#]\S*)?$/;
+  /^https:\/\/(?:www\.)?([a-z.]+)\/(?:c\/([\w-]+)\/)?(?:p|package)\/([^/?#\s]+)\/([^/?#\s]+)(?:\/([\d.]+))?\/?(?:[?#]\S*)?$/;
 
 /** Lien vers la page d'un mod Thunderstore ou Hexium (`/c/valheim/p/Auteur/Nom/`) : `null` pour tout autre lien. */
 export const parsePackagePage = (url: string): PackagePage | null => {
@@ -103,9 +105,10 @@ export const parsePackagePage = (url: string): PackagePage | null => {
   if (!match || !PACKAGE_HOSTS.includes(match[1])) return null;
   return {
     origin: `https://${match[1]}`,
-    author: match[2],
-    name: match[3],
-    version: match[4],
+    author: match[3],
+    name: match[4],
+    version: match[5],
+    community: match[2],
   };
 };
 
@@ -153,9 +156,12 @@ export const buildModsDisplay = async (
   onProgress?: (done: number, total: number) => void,
   /** Charge sur l'API : appels simultanés, espacement, reprise sur 429 (voir `lib/limiter`). */
   limits?: LimitOptions,
+  /** Jeu (communauté) des mods : sans lui, aucun lien n'est généré (une page de mod n'existe que sous `/c/<jeu>/p/`). */
+  community?: string,
 ): Promise<ModsListResult> => {
   let done = 0;
   const base = apiUrl.replace(/\/+$/, "");
+  const game = community?.trim().replace(/^\/+|\/+$/g, "");
   const failed: ModsListResult["failed"] = [];
 
   const mods = await mapLimited(
@@ -165,7 +171,9 @@ export const buildModsDisplay = async (
       const display: ModDisplay = {
         id,
         name: ref.name.replace(/_/g, " "),
-        link: `${base}/package/${encodeURIComponent(ref.author)}/${encodeURIComponent(ref.name)}/`,
+        ...(game
+          ? { link: `${base}/c/${encodeURIComponent(game)}/p/${encodeURIComponent(ref.author)}/${encodeURIComponent(ref.name)}/` }
+          : {}),
       };
       try {
         const info = (await fetchJson(
@@ -185,8 +193,12 @@ export const buildModsDisplay = async (
     },
     limits,
   );
-  return { mods, failed };
+  return { mods: sortByName(mods), failed };
 };
+
+/** Ordre alphabétique (sans tenir compte de la casse ni des accents), stable. */
+export const sortByName = <T extends { name: string }>(items: readonly T[]): T[] =>
+  [...items].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base", numeric: true }));
 
 /** Lignes `jeu-idMod-idFichier` d'une liste Nexus (texte ou tableau JSON) : `null` si ce n'est pas une liste Nexus. */
 export const parseNexusList = (text: string, key?: string): string[] | null => {
@@ -254,7 +266,7 @@ export const buildNexusDisplay = async (
     },
     limits,
   );
-  return { mods, failed };
+  return { mods: sortByName(mods), failed };
 };
 
 /** Page d'un mod Nexus Mods : `https://www.nexusmods.com/<jeu>/mods/<id>` (le fichier est choisi via l'API). */

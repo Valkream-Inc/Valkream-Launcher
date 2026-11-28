@@ -54,9 +54,9 @@ describe("hashFolder / exportHashFolder", () => {
 
 describe("page de mod Thunderstore", () => {
   it("reconnaît les liens de page (avec ou sans communauté, avec version) et rejette le reste", () => {
-    assert.deepEqual(parsePackagePage("https://thunderstore.io/c/valheim/p/DirtyGames/TheGoodCitizen/"), { origin: "https://thunderstore.io", author: "DirtyGames", name: "TheGoodCitizen", version: undefined });
-    assert.deepEqual(parsePackagePage("https://thunderstore.io/package/A/B/1.2.3/"), { origin: "https://thunderstore.io", author: "A", name: "B", version: "1.2.3" });
-    assert.deepEqual(parsePackagePage("https://hexium.gg/c/valheim/p/A/B/"), { origin: "https://hexium.gg", author: "A", name: "B", version: undefined });
+    assert.deepEqual(parsePackagePage("https://thunderstore.io/c/valheim/p/DirtyGames/TheGoodCitizen/"), { origin: "https://thunderstore.io", author: "DirtyGames", name: "TheGoodCitizen", version: undefined, community: "valheim" });
+    assert.deepEqual(parsePackagePage("https://thunderstore.io/package/A/B/1.2.3/"), { origin: "https://thunderstore.io", author: "A", name: "B", version: "1.2.3", community: undefined });
+    assert.deepEqual(parsePackagePage("https://hexium.gg/c/valheim/p/A/B/"), { origin: "https://hexium.gg", author: "A", name: "B", version: undefined, community: "valheim" });
     assert.equal(parsePackagePage("https://evil.example/c/valheim/p/A/B/"), null);
     assert.equal(parsePackagePage("http://thunderstore.io/c/valheim/p/A/B/"), null);
     assert.equal(parsePackagePage("https://thunderstore.io/c/valheim/"), null);
@@ -95,12 +95,28 @@ describe("Hexium (API compatible Thunderstore)", () => {
     };
     const page = parsePackagePage("https://hexium.gg/c/valheim/p/A/B/")!;
     const refs = await refsFromPackagePage(page, api);
-    const display = await buildModsDisplay(refs, api, page.origin);
+    const display = await buildModsDisplay(refs, api, page.origin, undefined, undefined, page.community);
     assert.equal(urls[0], "https://hexium.gg/api/experimental/package/A/B/");
-    assert.equal(display.mods[0].link, "https://hexium.gg/package/A/B/");
+    assert.equal(display.mods[0].link, "https://hexium.gg/c/valheim/p/A/B/");
     assert.equal(display.mods[0].icon, "https://hexium.gg/i.png");
     const failing = await buildModsDisplay(refs, async () => { throw new Error("503"); }, page.origin);
     assert.equal(failing.mods[0].icon, undefined);
+  });
+});
+
+describe("liens et ordre de la liste générée", () => {
+  const refs = parseModList("Zed-Zulu-1.0.0\nAbe-alpha-1.0.0\nmid-Beta-2.0.0");
+
+  it("lien de page valide avec le jeu, aucun lien sans lui", async () => {
+    const withGame = await buildModsDisplay(refs, async () => ({}), "https://thunderstore.io", undefined, undefined, "valheim");
+    assert.equal(withGame.mods[0].link, "https://thunderstore.io/c/valheim/p/Abe/alpha/");
+    const without = await buildModsDisplay(refs, async () => ({}));
+    assert.ok(without.mods.every((mod) => mod.link === undefined));
+  });
+
+  it("trie les mods par ordre alphabétique (casse ignorée)", async () => {
+    const { mods } = await buildModsDisplay(refs, async () => ({}));
+    assert.deepEqual(mods.map((mod) => mod.name), ["alpha", "Beta", "Zulu"]);
   });
 });
 
@@ -193,15 +209,19 @@ describe("buildModsDisplay", () => {
         if (url.includes("/B/")) throw new Error("HTTP 404");
         return { description: "Un mod", icon: "https://cdn/x.png" };
       },
+      undefined,
+      undefined,
+      undefined,
+      "valheim",
     );
-    assert.deepEqual(result.mods[0], {
+    assert.deepEqual(result.mods.find((mod) => mod.id === "A-Cool_Mod"), {
       id: "A-Cool_Mod",
       name: "Cool Mod",
-      link: "https://thunderstore.io/package/A/Cool_Mod/",
+      link: "https://thunderstore.io/c/valheim/p/A/Cool_Mod/",
       icon: "https://cdn/x.png",
       description: "Un mod",
     });
-    assert.equal(result.mods[1].icon, "https://gcdn.thunderstore.io/live/repository/icons/B-Broken-1.0.0.png"); // repli CDN
+    assert.equal(result.mods.find((mod) => mod.id === "B-Broken")?.icon, "https://gcdn.thunderstore.io/live/repository/icons/B-Broken-1.0.0.png"); // repli CDN
     assert.equal(result.failed.length, 1);
   });
 

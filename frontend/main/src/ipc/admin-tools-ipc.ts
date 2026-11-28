@@ -115,7 +115,13 @@ export default function registerAdminToolsIpc(): void {
       apiChoice?: unknown,
       key?: unknown,
       withDependencies?: unknown,
+      community?: unknown,
     ): Promise<ModsListResult> => {
+      // Jeu (communauté) pour les liens de page : celui du lien collé, sinon celui demandé
+      const game =
+        typeof community === "string" && /^[\w-]+$/.test(community.trim())
+          ? community.trim()
+          : undefined;
       let text = String(source ?? "").trim();
       const choice: ModsApi = ["thunderstore", "hexium", "nexus"].includes(
         String(apiChoice),
@@ -144,6 +150,8 @@ export default function registerAdminToolsIpc(): void {
           fetchJson,
           page.origin,
           progress,
+          undefined,
+          page.community ?? game,
         );
       const nexusPage =
         choice === "thunderstore" || choice === "hexium"
@@ -169,6 +177,8 @@ export default function registerAdminToolsIpc(): void {
         fetchJson,
         origin,
         progress,
+        undefined,
+        game,
       );
     },
   );

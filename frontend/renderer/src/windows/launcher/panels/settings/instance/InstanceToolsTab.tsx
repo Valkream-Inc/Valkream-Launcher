@@ -241,6 +241,8 @@ function ModsListTool() {
   /** Chemin du tableau dans un JSON (liens et fichiers : `dependencies`, `packs.0.mods`…). */
   const [key, setKey] = useState("");
   const [withDependencies, setWithDependencies] = useState(true);
+  /** Jeu (communauté Thunderstore / Hexium) : sert aux liens de page des mods (`/c/<jeu>/p/…`). */
+  const [community, setCommunity] = useState("");
   /** API des mods : détection automatique, ou Thunderstore / Hexium / Nexus Mods (clé API des réglages). */
   const [api, setApi] = useState<ModsApi>("auto");
   /** Lien de page Thunderstore / Hexium : le mod (et ses dépendances) sont lus via l'API, pas de clé à donner. */
@@ -268,7 +270,7 @@ function ModsListTool() {
   const generate = async () => {
     setBusy(true);
     try {
-      setResult(await window.electron_API.toolsModsList(source, api, mode === "list" ? undefined : key.trim() || undefined, withDependencies));
+      setResult(await window.electron_API.toolsModsList(source, api, mode === "list" ? undefined : key.trim() || undefined, withDependencies, community.trim() || undefined));
     } catch (error) {
       fail(error);
     } finally {
@@ -340,6 +342,17 @@ function ModsListTool() {
                 {file ? t("tools.fileLoaded", { name: file.name }) : t("tools.noFile")}
               </Typography>
             </Box>
+          )}
+          {api !== "nexus" && (
+            <TextField
+              fullWidth
+              size="small"
+              label={t("tools.communityLabel")}
+              placeholder="valheim"
+              helperText={t("tools.communityHelp")}
+              value={community}
+              onChange={(event) => setCommunity(event.target.value)}
+            />
           )}
           {isPackagePage && (
             <FormControlLabel

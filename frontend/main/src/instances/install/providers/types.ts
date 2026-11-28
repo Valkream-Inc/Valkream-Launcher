@@ -56,7 +56,12 @@ export interface InstallIO {
   streamExtract(
     url: string,
     outDir: string,
-    options: { folderInZip?: string; accept: (relativePath: string) => boolean },
+    options: {
+      folderInZip?: string;
+      accept: (relativePath: string) => boolean;
+      /** sha256 attendu de l'archive : calculé au fil du flux, vérifié à la fin (`err.zipHashInvalid`, dossier vidé). */
+      expectedHash?: string;
+    },
     signal?: AbortSignal,
     onProgress?: (progress: TransferProgress) => void,
   ): Promise<void>;

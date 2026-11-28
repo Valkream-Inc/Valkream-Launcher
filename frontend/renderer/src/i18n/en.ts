@@ -342,6 +342,9 @@ const en: Messages = {
   },
   tools: {
     withDependencies: "Include its dependencies (modpack)",
+    communityLabel: "Game (community)",
+    communityHelp:
+      "Game slug on Thunderstore / Hexium (e.g. valheim). Without it no page link is generated; a pasted mod link already provides it.",
     keyLabel: "JSON key (optional)",
     keyHelp:
       "Path of the array inside the JSON: dependencies, packs.0.mods… Empty: the file or link is itself the list.",

@@ -131,11 +131,17 @@ export default function InstanceContributorsTab({
   const listRef = useRef<HTMLDivElement | null>(null);
   const prevPageRef = useRef<number | null>(null);
 
+  // Ordre alphabétique ; une recherche classe d'abord par pertinence, puis alphabétiquement
+  const sortedContributors = useMemo(
+    () => [...contributors].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "", undefined, { sensitivity: "base", numeric: true })),
+    [contributors],
+  );
+
   const filteredContributors = useMemo(() => {
     const trimmed = search.trim();
-    if (!trimmed) return contributors;
+    if (!trimmed) return sortedContributors;
 
-    return contributors
+    return sortedContributors
       .map((person, index) => ({
         person,
         index,
@@ -144,7 +150,7 @@ export default function InstanceContributorsTab({
       .filter((entry) => entry.score > 0)
       .sort((a, b) => b.score - a.score || a.index - b.index)
       .map((entry) => entry.person);
-  }, [contributors, search]);
+  }, [sortedContributors, search]);
 
   useEffect(() => {
     setPage(1);

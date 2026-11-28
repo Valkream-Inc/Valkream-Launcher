@@ -23,7 +23,7 @@ export const fetchArchive = async (
   outDir: string,
   accept: (relativePath: string) => boolean,
   label: string,
-  /** sha256 attendu de l'archive `.zip` (vérifié avant l'extraction). Sans effet sur un `.tar.gz` (extrait au fil du téléchargement). */
+  /** sha256 attendu de l'archive `.zip` (vérifié avant l'extraction ; `.tar.gz` : calculé pendant le flux). Un `.tar.gz` est vérifié au fil du flux (dossier vidé si le hash diffère). */
   expectedHash?: string,
 ): Promise<void> => {
   const { entry, tempDir, resolver, io, signal, archives } = context;
@@ -33,7 +33,7 @@ export const fetchArchive = async (
   if (isTarGz(url)) {
     const text = context.t("progress.downloadExtract", { label });
     context.report("download", text);
-    await io.streamExtract(url, outDir, { folderInZip: entry.folder_in_zip, accept }, signal, (transfer) =>
+    await io.streamExtract(url, outDir, { folderInZip: entry.folder_in_zip, accept, expectedHash }, signal, (transfer) =>
       context.report("download", text, transfer),
     );
     return;

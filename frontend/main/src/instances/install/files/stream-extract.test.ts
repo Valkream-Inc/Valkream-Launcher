@@ -4,6 +4,7 @@
  */
 
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
@@ -156,5 +157,19 @@ describe("realInstallIO.streamExtract", () => {
       accept: () => true,
     });
     assert.equal(fs.readFileSync(path.join(out, "a.txt"), "utf8"), "hello");
+  });
+
+  it("hash sha256 vérifié au fil du flux : bon hash accepté, mauvais hash refusé et dossier vidé", async () => {
+    const good = createHash("sha256").update(gz).digest("hex");
+    const ok = path.join(dir, "ok");
+    await realInstallIO.streamExtract(`${base}/pack.tar.gz`, ok, { folderInZip: "pack", accept: () => true, expectedHash: good.toUpperCase() });
+    assert.equal(fs.readFileSync(path.join(ok, "a.txt"), "utf8"), "hello");
+
+    const bad = path.join(dir, "bad");
+    await assert.rejects(
+      realInstallIO.streamExtract(`${base}/pack.tar.gz`, bad, { folderInZip: "pack", accept: () => true, expectedHash: "0".repeat(64) }),
+      /sha256/,
+    );
+    assert.ok(!fs.existsSync(bad));
   });
 });
