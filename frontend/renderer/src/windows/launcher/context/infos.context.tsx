@@ -10,14 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type {
-  ElectronSevenDtoDAPI,
-  ElectronValheimAPI,
-  GameEvent,
-  GameName,
-  Maintenance,
-  ServerInfos,
-} from "@shared/types";
+import type { GameEvent, Maintenance, ServerInfos } from "@shared/types";
 
 import Loader from "../component/loader/loader";
 import { useAction } from "./action.context";
@@ -29,6 +22,10 @@ import type {
   InfosProviderProps,
   InstallationStatut,
 } from "./infos.context.types";
+
+// Statut (disque + remote) et infos serveur : inutile de les relire chaque seconde.
+// Un changement d'action (installation terminée…) relance une lecture immédiate (voir l'effet).
+const REFRESH_INTERVAL_MS = 5000;
 
 const InfosContext = createContext<InfosContextValue | undefined>(undefined);
 export const useInfos = (): InfosContextValue => {
@@ -43,7 +40,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
     installationStatusLoaded: false,
   });
   const { actionLoading } = useAction();
-  const { actualGame } = useGames();
+  const { actualInstanceId, actualChannel, refreshTick } = useGames();
   const { activePanel } = usePanels();
 
   const [event, setEvent] = useState<GameEvent | false | null>(null);
@@ -66,15 +63,18 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
     loadingState.infosLoaded && loadingState.installationStatusLoaded
   );
 
-  const actualGameRef = useRef<GameName | null>(null); // Pour vérifier si le jeu a changé
+  // Pour vérifier si le jeu (ou son canal) a changé
+  const actualGameRef = useRef<string | null>(null);
+  const statusKeyRef = useRef<string | null>(null); // Jeu dont le statut est déjà connu (lecture seule : possible même pendant une action)
   const actionLoadingRef = useRef<boolean | null>(null); // Pour vérifier si une nouvelle action est en cours
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null); // Pour lancer une fois à blanc avant de lancer la boucle
   const isLoadingRef = useRef(false); // Pour empêcher les appels parallèles
+  const rerunRef = useRef(false); // Une demande arrivée pendant un appel en cours : relancée juste après (pas dans 5 s)
 
   useEffect(() => {
     if (
-      !window.electron_Valheim_API?.getInstallationStatut ||
-      !window.electron_API?.getInfos
+      !window.electron_API?.getInstanceStatus ||
+      !window.electron_API?.getInstanceInfos
     ) {
       console.warn(
         "L'API Electron n'est pas disponible. Vérification des infos impossible."
@@ -85,8 +85,9 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
     if (actionLoadingRef.current !== actionLoading)
       actionLoadingRef.current = actionLoading;
 
-    if (actualGameRef.current !== actualGame) {
-      actualGameRef.current = actualGame;
+    const gameKey = `${actualInstanceId}@${actualChannel}`;
+    if (actualGameRef.current !== gameKey) {
+      actualGameRef.current = gameKey;
 
       // Reset complet
       setEvent(null);
@@ -94,35 +95,39 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
       setServerInfos(null);
       setLoadingState({
         infosLoaded: false,
-        installationStatusLoaded: actualGame !== "Valheim",
+        installationStatusLoaded: false,
       });
+      setInstallationStatut(null);
+      statusKeyRef.current = null;
     }
 
-    const GAMES_APIS: Record<
-      GameName,
-      ElectronValheimAPI | ElectronSevenDtoDAPI
-    > = {
-      Valheim: window.electron_Valheim_API,
-      SevenDtoD: window.electron_SevenDtoD_API,
-    };
-
     const getAllInfos = async () => {
-      // Empêcher les appels parallèles
-      if (isLoadingRef.current) return;
+      // Pas d'appels parallèles ; la demande est mémorisée et rejouée dès que l'appel en cours se termine.
+      // Sinon, juste après une action (désinstallation…), la mise à jour attendait le prochain tour (5 s).
+      if (isLoadingRef.current) {
+        rerunRef.current = true;
+        return;
+      }
       isLoadingRef.current = true;
 
       try {
         // get installation statut
-        if (!actionLoading && GAMES_APIS[actualGame]) {
-          const statut = await GAMES_APIS[actualGame].getInstallationStatut();
-          if (actualGameRef.current !== actualGame) {
+        // Pendant une action, le statut n'est relu que pour un jeu qu'on n'a pas encore vu (changement de jeu)
+        const statusAllowed = !actionLoading || statusKeyRef.current !== gameKey;
+        if (statusAllowed) {
+          const statut = await window.electron_API.getInstanceStatus(
+            actualInstanceId,
+            actualChannel
+          );
+          if (actualGameRef.current !== gameKey) {
             isLoadingRef.current = false;
             return; // Récupération des infos uniquement si le jeu n'a pas changé
           }
-          if (actionLoadingRef.current) {
+          if (actionLoadingRef.current && statusKeyRef.current === gameKey) {
             isLoadingRef.current = false;
             return; // Récupération des infos uniquement si l'action n'a pas changé
           }
+          statusKeyRef.current = gameKey;
           setIsInternetConnected(statut?.isInternetConnected || false);
           setIsServerReachable(statut?.isServerReachable || false);
           setInstallationStatut(statut);
@@ -132,9 +137,16 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
           }));
         }
 
+        // Pendant une action, les autres infos (serveur, événement) attendent : la relecture qui suit la fin
+        // de l'action ne doit pas être retardée par une requête serveur lente.
+        if (actionLoadingRef.current) return;
+
         // get other infos
-        const infos = await window.electron_API.getInfos(actualGame);
-        if (actualGameRef.current !== actualGame) {
+        const infos = await window.electron_API.getInstanceInfos(
+          actualInstanceId,
+          actualChannel
+        );
+        if (actualGameRef.current !== gameKey) {
           isLoadingRef.current = false;
           return; // Récupération des infos uniquement si le jeu n'a pas changé
         }
@@ -147,6 +159,10 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
         console.error("Erreur lors de la récupération des infos :", error);
       } finally {
         isLoadingRef.current = false;
+        if (rerunRef.current) {
+          rerunRef.current = false;
+          void getAllInfos();
+        }
       }
     };
 
@@ -160,7 +176,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
     getAllInfos().then(() => {
       // Vérifier que le composant n'a pas été démonté ou que les dépendances n'ont pas changé
       if (intervalRef.current === null) {
-        intervalRef.current = setInterval(getAllInfos, 1000);
+        intervalRef.current = setInterval(getAllInfos, REFRESH_INTERVAL_MS);
       }
     });
 
@@ -170,7 +186,7 @@ export const InfosProvider = ({ children }: InfosProviderProps) => {
         intervalRef.current = null;
       }
     };
-  }, [actionLoading, actualGame]);
+  }, [actionLoading, actualInstanceId, actualChannel, refreshTick]);
 
   const contextValue: InfosContextValue = {
     isLoading,

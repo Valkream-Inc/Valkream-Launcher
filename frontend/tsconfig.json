@@ -7,7 +7,12 @@
     "moduleResolution": "bundler",
     "lib": ["ES2023"],
     "types": ["node"],
-    "noEmit": true
+    "noEmit": true,
+    // Les scripts importent du code du main qui utilise l'alias @shared/types (comme main/tsconfig.json)
+    "paths": {
+      "@shared/types": ["./shared/types/index.js"],
+      "@shared/*": ["./shared/*"]
+    }
   },
   "include": ["vite.config.ts", "build-script.ts", "set-icon.ts", "scripts/**/*.ts", "types/**/*.d.ts", "shared/**/*.d.ts"]
 }

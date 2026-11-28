@@ -14,17 +14,12 @@ export interface Settings {
   betaEnabled: boolean;
   launcherTheme: LauncherTheme;
   backgroundType: BackgroundType;
-  // Valheim
-  launchSteamWithValheim: boolean;
-  launcherBehaviorWithValheim: LauncherBehavior;
-  boostfpsModsEnabledWithValheim: boolean;
-  boostgraphicModsEnabledWithValheim: boolean;
-  adminModsEnabledWithValheim: boolean;
-  // SevenDtoD
-  launchSteamWithSevenDtoD: boolean;
-  launcherBehaviorWithSevenDtoD: LauncherBehavior;
-  /** Chemin du jeu 7 Days to Die choisi par le joueur (absent tant qu'il n'est pas défini). */
-  gamePathWithSevenDtoD?: string;
+  /** Langue de l'interface. */
+  language: "fr" | "en";
+  /** Clé API personnelle Nexus Mods (provider `nexus_modpack_url`). Locale : jamais envoyée au remote. */
+  nexusApiKey: string;
+  /** Niveau de zoom de la page des réglages (1 = 100 %). */
+  settingsZoom: number;
 }
 
 export type SettingKey = keyof Settings;

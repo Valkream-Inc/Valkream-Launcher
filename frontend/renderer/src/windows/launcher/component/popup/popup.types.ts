@@ -26,12 +26,17 @@ export interface PopupProps {
   type?: PopupType;
   title?: string;
   message?: ReactNode;
+  /** Boutons personnalisés (remplacent OK / Annuler). */
+  buttons?: PopupButton[];
+  /** `false` : ni clic à côté ni Échap ne ferment le popup (action en cours). */
+  dismissible?: boolean;
 }
 
 export interface PopupButton {
   text: string;
   action: () => void;
   variant: "main" | "secondary";
+  disabled?: boolean;
 }
 
 /** Configuration d'un type de popup (une valeur par thème). */

@@ -7,6 +7,7 @@
 
 declare module "png2icons" {
   export const BILINEAR: number;
+  export const BICUBIC: number;
   export const HERMITE: number;
   export function createICNS(
     input: Buffer,
@@ -17,7 +18,8 @@ declare module "png2icons" {
     input: Buffer,
     scalingAlgorithm: number,
     numOfColors: number,
-    usePNG: boolean
+    usePNG: boolean,
+    forWinExe?: boolean
   ): Buffer | null;
 }
 
@@ -37,24 +39,5 @@ declare module "gamedig" {
 
   export class GameDig {
     static query(options: GameDigQueryOptions): Promise<GameDigState>;
-  }
-}
-
-declare module "stream-throttle" {
-  import type { Transform } from "node:stream";
-
-  export interface ThrottleOptions {
-    rate: number;
-    chunksize?: number;
-    burst?: number;
-  }
-
-  export class Throttle extends Transform {
-    constructor(options: ThrottleOptions);
-  }
-
-  export class ThrottleGroup {
-    constructor(options: ThrottleOptions);
-    throttle(options?: ThrottleOptions): Throttle;
   }
 }

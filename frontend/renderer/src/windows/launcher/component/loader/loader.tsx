@@ -10,7 +10,7 @@ import { useGames } from "../../context/games.context";
 import type { LoaderProps } from "./loader.types";
 
 export default function Loader({ isVisible }: LoaderProps) {
-  const { actualGame } = useGames();
+  const { actualInstance } = useGames();
   const [shouldRender, setShouldRender] = useState(isVisible);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function Loader({ isVisible }: LoaderProps) {
   return (
     <div className={`loader-container ${!isVisible ? "hidden" : ""}`}>
       <img
-        src={`./images/${actualGame}-icon.png`}
+        src={actualInstance.images.icon}
         alt="logo"
         className="img-loader"
       />

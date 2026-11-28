@@ -6,9 +6,9 @@
 import { BrowserWindow, Menu } from "electron";
 import path from "path";
 
-const rendererPath = path.join(__dirname, "../../../renderer");
+const rendererPath = path.join(import.meta.dirname, "../../../renderer");
 
-import { isDev } from "../constants";
+import { isDev } from "../core/constants.js";
 let updateWindow: BrowserWindow | undefined = undefined;
 
 function getWindow(): BrowserWindow | undefined {
@@ -23,18 +23,27 @@ function destroyWindow(): void {
 
 function createWindow(): void {
   destroyWindow();
+  const iconExt =
+    process.platform === "win32"
+      ? "icon.ico"
+      : process.platform === "darwin"
+        ? "icon.icns"
+        : "icon.png";
+
+  const iconPath = isDev
+    ? path.join(rendererPath, `public/images/icon/${iconExt}`)
+    : path.join(import.meta.dirname, `../../frontend/images/icon/${iconExt}`);
+
   updateWindow = new BrowserWindow({
     title: "Mise à jour",
     width: 512,
     height: 288,
     resizable: false,
-    icon: isDev
-      ? path.join(rendererPath, "public/images/icon/icon.png")
-      : path.join(__dirname, "../../frontend/images/icon/icon.png"),
+    icon: iconPath,
     frame: false,
     show: false,
     webPreferences: {
-      preload: path.join(__dirname, "updatePreload.js"),
+      preload: path.join(import.meta.dirname, "updatePreload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -46,10 +55,10 @@ function createWindow(): void {
     isDev
       ? "http://localhost:8080/#/updater"
       : `file://${path.join(
-          __dirname,
+          import.meta.dirname,
           "../../frontend",
-          "index.html"
-        )}#/updater`
+          "index.html",
+        )}#/updater`,
   );
   updateWindow.once("ready-to-show", () => {
     if (updateWindow) {
@@ -59,8 +68,4 @@ function createWindow(): void {
   });
 }
 
-export {
-  getWindow,
-  createWindow,
-  destroyWindow,
-};
+export { createWindow, destroyWindow, getWindow };

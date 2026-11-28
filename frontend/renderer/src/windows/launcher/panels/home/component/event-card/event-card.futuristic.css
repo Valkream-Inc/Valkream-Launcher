@@ -1,0 +1,20 @@
+/* Futuriste : fond sombre, contour néon, coins coupés */
+.futuristic-theme .event-container {
+  background: rgba(10, 10, 15, 0.82) !important;
+  border: 2px solid var(--secondary-color, #00e5ff) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 14px var(--secondary-color, #00e5ff), inset 0 0 14px rgba(255, 255, 255, 0.06);
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+.futuristic-theme .event-container:hover {
+  box-shadow: 0 0 24px var(--secondary-color, #00e5ff), inset 0 0 18px rgba(255, 255, 255, 0.1);
+}
+.futuristic-theme .event-title {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 8px var(--secondary-color, #00e5ff);
+}
+.futuristic-theme .event-image {
+  border-radius: 2px !important;
+  border: 1px solid var(--secondary-color, #00e5ff);
+}

@@ -11,24 +11,14 @@ import Links from "./component/links/links";
 import ServerInfo from "./component/server-info/server-info";
 import Popup from "../../component/popup/popup";
 
+import { useGames } from "../../context/games.context";
 import { usePanels } from "../../context/panels.context";
-
-function TipsMessage() {
-  return (
-    <>
-      Lorsque vous êtes en jeu, soyez connecté sur le serveur Mumble et dans le
-      canal « Vocal en jeu » du serveur Discord Valkream.
-      <br />
-      <br />
-      Les informations et actualités sont disponibles sur la page Web et sur le
-      serveur Discord. (si vous avez besoin d'aide, n'hésitez pas à nous joindre
-      sur notre serveur Discord)
-    </>
-  );
-}
+import { useTranslation } from "react-i18next";
 
 function Home() {
+  const { t } = useTranslation();
   const { changePanel } = usePanels();
+  const { actualInstance } = useGames();
   const [isTipsOpen, setIsTipsOpen] = useState(false);
 
   return (
@@ -37,8 +27,8 @@ function Home() {
         open={isTipsOpen}
         onClose={() => setIsTipsOpen(false)}
         type="tips"
-        title="Astuces du jour"
-        message={<TipsMessage />}
+        title={t("home.tips")}
+        message={actualInstance.tipContent}
       />
 
       <ServerInfo />

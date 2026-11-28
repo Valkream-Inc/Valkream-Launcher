@@ -1,0 +1,54 @@
+# Valheim Valkream v3 : entrées du latest.yml.
+# Le format est décrit dans doc/instance-system/configs.md (voir aussi le latest.yml de Valheim-Valkream-v2).
+#
+# `type: empty` = entrée réservée, qui ne télécharge rien : à remplacer par un vrai type
+# (zip_url, hash_url, thunderstore_modpack_url…) dès que son contenu est publié.
+# Une entrée sans type ou sans contenu est ignorée.
+
+version: 3.0.0
+buildDate: 2026-11-26T00:00:00.000Z
+
+game-base:
+  valheim:
+    version: 1.0.30
+    type: steam_library
+    buildid: 26948984 # Patch 1.0.30 (26 November 2026 – 14:05:59 UTC)
+    content:
+      win32: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.30-win32.hash.json
+      linux: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.30-linux.hash.json
+      darwin: /games/Valheim-Valkream-v3/beta/latest/hash/valheim-1.0.30-darwin.hash.json
+    # hash:
+    #   win32: 51bfdd79365a8bdb7a9df97b0aa8a90cbe0e236c3833d6744bee97d2f2423573
+    #   linux: ca9e8cde440c219440d224c02e14c5cae9f3f8850caaa5266e1c60c033a31081
+    #   darwin: 75811034c9c6589807992de061fff067fa189753fb0e1c960510bb7777f97a76
+    depot:
+      win32: { id: 892972, manifest: "3007837673982863752" } # 892972 = Valheim Windows
+      linux: { id: 892971, manifest: "853228340114251592" } # 892971 = Valheim Linux
+      darwin: { id: 892973, manifest: "4903160343930100355" } # 892973 = Valheim macOS
+    to_ignore:
+      - "*.log"
+      - BepInEx/**
+      - .DepotDownloader/**
+  bepinex:
+    version: 5.4.2360
+    type: zip_url
+    folder_in_zip: BepInExPack_Valheim
+    content: https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2360/
+    gameFolderToRemove:
+      - BepInEx/cache
+
+game-details: # mods et configuration
+  configs: # configuration BepInEx de Valkream v3 (à renseigner)
+    version: 3.0.0
+    type: empty
+  mods-thunderstore: # modpack Thunderstore de Valkream v3 (à renseigner)
+    version: 3.0.0
+    type: empty
+  mods-hexium: # mods Hexium (à renseigner)
+    version: 3.0.0
+    type: empty
+  mods-admin:
+    version: 3.0.0
+    type: empty
+    optional:
+      setting: modsAdmin

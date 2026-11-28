@@ -4,117 +4,78 @@
  */
 
 import { enqueueSnackbar } from "notistack";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import SpecialPanel from "../../component/special-panel/special-panel";
 
+import { useTranslation } from "react-i18next";
+import { useAction } from "../../context/action.context";
 import { useGames } from "../../context/games.context";
-import SevenDtoDSettings from "./SevenDtoD/SevenDtoD-Settings";
-import type { ModsTabHandle } from "./settings.types";
-import ValheimSettings from "./Valheim/Valheim-Settings";
+import InstanceSettings from "./instance/InstanceSettings";
 
 function Settings() {
-  const { actualGame } = useGames();
+  const { t } = useTranslation();
+  const { actualInstanceId } = useGames();
   const [activeTab, setActiveTab] = useState("general");
-  const [isConfirmSpecialOptionVisible, setIsConfirmSpecialOptionVisible] =
-    useState(false);
-  const [isSpecialOptionVisible, setIsSpecialOptionVisible] = useState(false);
-  const [isDevActive, setIsDevActive] = useState(false);
+  const [isConfirmAdminVisible, setIsConfirmAdminVisible] = useState(false);
+  const [isAdminActive, setIsAdminActive] = useState(false);
+  const { devActive: isDevActive, setDevActive: setIsDevActive } = useAction();
 
-  const modsTabRef = useRef<ModsTabHandle>(null);
-
-  const toogleSpecialOption = () => {
-    enqueueSnackbar(
-      isSpecialOptionVisible
-        ? "Options Speciales désactivées !"
-        : "Options Speciales activées !",
-      { variant: "warning" }
-    );
-    setIsSpecialOptionVisible(!isSpecialOptionVisible);
+  const toogleAdmin = () => {
+    enqueueSnackbar(isAdminActive ? t("admin.off") : t("admin.on"), {
+      variant: "warning",
+    });
+    setIsAdminActive(!isAdminActive);
   };
 
-  const EnabledSpecialOption = () => {
+  const EnabledAdmin = () => {
     return (
       <SpecialPanel
         type="warning"
-        paragraph="Vous êtes sur le point d’activer des options avancées pouvant endommager votre installation (Admin Tools, Debug Tools, Dev Tools, Fonctionnalités Alpha). Êtes-vous sûr de vouloir continuer ?"
+        paragraph={t("admin.confirm")}
         buttons={[
           {
-            text: "Continuer",
+            text: t("common.continue"),
             onClick: () => {
-              toogleSpecialOption();
-              setIsConfirmSpecialOptionVisible(false);
+              toogleAdmin();
+              setIsConfirmAdminVisible(false);
             },
           },
           {
-            text: "Annuler et revenir",
-            onClick: () => setIsConfirmSpecialOptionVisible(false),
+            text: t("admin.cancelBack"),
+            onClick: () => setIsConfirmAdminVisible(false),
           },
         ]}
       />
     );
   };
-  if (isConfirmSpecialOptionVisible) return <EnabledSpecialOption />;
+  if (isConfirmAdminVisible) return <EnabledAdmin />;
 
-  const changeTab = (tab: string) => {
-    if (modsTabRef?.current?.stop) {
-      modsTabRef.current.stop();
-    }
+  const changeTab = (tab: string) => setActiveTab(tab);
 
-    setActiveTab(tab);
+  // Rien à libérer au retour à l'accueil : les onglets lisent le rapport de l'instance
+  const returnToHome = () => {};
 
-    if (tab === "mods" && modsTabRef?.current?.reload) {
-      modsTabRef.current.reload();
-    }
-  };
-
-  function returnToHome() {
-    if (modsTabRef?.current?.stop && modsTabRef?.current?.freeze) {
-      modsTabRef.current.stop();
-      modsTabRef.current.freeze();
-    }
-  }
-
-  function ToggleIsConfirmSpecialOptionVisible() {
+  function ToggleIsConfirmAdminVisible() {
     // si déja activés --> les désactivés
-    if (isSpecialOptionVisible) {
-      setIsSpecialOptionVisible(false);
-      setIsConfirmSpecialOptionVisible(false);
+    if (isAdminActive) {
+      toogleAdmin();
+      setIsConfirmAdminVisible(false);
     }
     // sinon rendre visible le panel de confirmation
-    else setIsConfirmSpecialOptionVisible(true);
+    else setIsConfirmAdminVisible(true);
   }
 
   return (
-    <>
-      {actualGame === "Valheim" && (
-        <ValheimSettings
-          returnToHome={returnToHome}
-          modsTabRef={modsTabRef}
-          changeTab={changeTab}
-          activeTab={activeTab}
-          ToggleIsConfirmSpecialOptionVisible={
-            ToggleIsConfirmSpecialOptionVisible
-          }
-          isSpecialOptionVisible={isSpecialOptionVisible}
-          setIsDevActive={setIsDevActive}
-          isDevActive={isDevActive}
-        />
-      )}
-      {actualGame === "SevenDtoD" && (
-        <SevenDtoDSettings
-          returnToHome={returnToHome}
-          modsTabRef={modsTabRef}
-          changeTab={changeTab}
-          activeTab={activeTab}
-          ToggleIsConfirmSpecialOptionVisible={
-            ToggleIsConfirmSpecialOptionVisible
-          }
-          isSpecialOptionVisible={isSpecialOptionVisible}
-          setIsDevActive={setIsDevActive}
-          isDevActive={isDevActive}
-        />
-      )}
-    </>
+    <InstanceSettings
+      instanceId={actualInstanceId}
+      returnToHome={returnToHome}
+      changeTab={changeTab}
+      activeTab={activeTab}
+      ToggleIsConfirmAdminVisible={ToggleIsConfirmAdminVisible}
+      isAdminActive={isAdminActive}
+      setIsDevActive={setIsDevActive}
+      isDevActive={isDevActive}
+    />
   );
 }
 

@@ -3,8 +3,11 @@
  * @license MIT-NC
  */
 
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, useMemo } from "react";
+import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import type { LauncherTheme } from "@shared/types";
+
+import { muiThemes } from "../theme/mui-themes";
 
 import type {
   ThemeContextValue,
@@ -24,27 +27,26 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [theme, setTheme] = useState<LauncherTheme>("modern");
 
   const changeTheme = async (value: LauncherTheme) => {
-    const themes: LauncherTheme[] = ["old", "modern", "futuristic"];
-    if (!themes.includes(value)) throw new Error("Invalid theme value");
+    if (!(value in muiThemes)) throw new Error("Invalid theme value");
 
     await window.electron_API.setSettings("launcherTheme", value);
-    return setTheme(value);
+    setTheme(value);
   };
 
+  // Thème enregistré : appliqué sans le réécrire.
   useEffect(() => {
-    const loadSettings = async () => {
-      const launcherTheme = await window.electron_API.getSettings(
-        "launcherTheme"
-      );
-      if (launcherTheme && launcherTheme !== theme) changeTheme(launcherTheme);
-    };
-
-    loadSettings();
+    window.electron_API
+      .getSettings("launcherTheme")
+      .then((saved) => saved && saved in muiThemes && setTheme(saved));
   }, []);
 
+  const value = useMemo(() => ({ theme, changeTheme }), [theme]);
+
   return (
-    <ThemeContext.Provider value={{ theme, changeTheme }}>
-      <span className={`${theme}-theme`}>{children}</span>
+    <ThemeContext.Provider value={value}>
+      <MuiThemeProvider theme={muiThemes[theme]}>
+        <span className={`${theme}-theme`}>{children}</span>
+      </MuiThemeProvider>
     </ThemeContext.Provider>
   );
 };

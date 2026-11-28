@@ -6,24 +6,25 @@
 import { Button } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import SettingsBox from "../../component/settings-box/settings-box";
+import { useTranslation } from "react-i18next";
 
 const ButtonDebug = () => {
+  const { t } = useTranslation();
   const handleClick = async () =>
     await window.electron_API
       .openDevTools()
       .then(() => {
-        enqueueSnackbar("Debug ouvert !", { variant: "success" });
+        enqueueSnackbar(t("settings.debug.opened"), { variant: "success" });
       })
       .catch((error) => {
         console.error(error);
-        enqueueSnackbar("Debug non ouvert !", { variant: "error" });
+        enqueueSnackbar(t("settings.debug.notOpened"), { variant: "error" });
       });
 
   return (
     <SettingsBox
       warn={true}
-      text="Vous pouvez ouvrir le debug (⚠️: cela doit etre fait uniquement dans un
-        but de debug et avec des personnes qualifiés :) )"
+      text={t("settings.debug.text")}
     >
       <Button
         variant="contained"
@@ -32,7 +33,7 @@ const ButtonDebug = () => {
         color="secondary"
         onClick={handleClick}
       >
-        Ouvrir le debug
+        {t("settings.debug.button")}
       </Button>
     </SettingsBox>
   );

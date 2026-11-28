@@ -14,7 +14,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 import * as builder from "electron-builder";
-import fse from "fs-extra";
 import JavaScriptObfuscator from "javascript-obfuscator";
 
 import { name } from "./package.json";
@@ -35,7 +34,7 @@ class LauncherBuilder {
 
     if (!fs.existsSync(COMPILED_MAIN_DIR)) {
       throw new Error(
-        `Dossier "${COMPILED_MAIN_DIR}" introuvable : lance d'abord "yarn build:main".`
+        `Dossier "${COMPILED_MAIN_DIR}" introuvable : lance d'abord "yarn build:main".`,
       );
     }
     this.filesList = this.getFiles(COMPILED_MAIN_DIR);
@@ -76,7 +75,7 @@ class LauncherBuilder {
 
       const destination = path.join(
         BUILD_DIR,
-        path.relative(COMPILED_MAIN_DIR, filePath)
+        path.relative(COMPILED_MAIN_DIR, filePath),
       );
       fs.mkdirSync(path.dirname(destination), { recursive: true });
 
@@ -115,7 +114,7 @@ class LauncherBuilder {
       fs.rmSync("./build/frontend", { recursive: true });
     }
 
-    fse.copySync("./renderer/build", "./build/frontend");
+    fs.cpSync("./renderer/build", "./build/frontend", { recursive: true });
     console.log("✅ Copy React terminée !");
   }
 
@@ -145,13 +144,15 @@ class LauncherBuilder {
 
       await builder
         .build({
+          // Build à blanc (workflow manuel) : jamais de publication.
+          publish: process.env.DRY_RUN === "true" ? "never" : undefined,
           config: {
             generateUpdatesFilesForAllChannels: true,
-            appId: name,
-            productName: name,
+            appId: "com.valkream.launcher",
+            productName: "Valkream Launcher",
             copyright: "Copyright © 2026 Valkream Team",
             // Template electron-builder (résolu par electron-builder, pas par JS).
-             
+
             artifactName: `${name}-${build.type}-` + "${os}-${arch}.${ext}",
             extraMetadata: { main: "build/app.js" },
             files: ["build/**/*", "package.json", "LICENSE.md"],
@@ -168,6 +169,11 @@ class LauncherBuilder {
             ],
             nsis: {
               ...build.nsis,
+              // Identité NSIS (clé de registre de désinstallation) de l'ANCIEN appId « Valkream-Launcher »
+              // = uuid v5("Valkream-Launcher", espace de noms d'electron-builder). Sans elle, le nouvel appId
+              // donne un autre GUID : Windows ne reconnaît plus l'ancienne installation, la mise à jour s'installe
+              // à côté au lieu de la remplacer (deux launchers, anciens raccourcis conservés).
+              guid: "f327869c-247c-5c8d-9e8f-1de697c92c58",
               createDesktopShortcut: true,
               createStartMenuShortcut: true,
               runAfterFinish: true,
@@ -211,7 +217,9 @@ class LauncherBuilder {
           console.log(`✅ Build ${build.type} terminé !`);
         })
         .catch((err: unknown) => {
+          // On propage : un build en échec ne doit jamais produire un « succès » (release incomplète).
           console.error(`❌ Erreur pendant le build ${build.type} !`, err);
+          throw err;
         });
     }
   }
@@ -226,25 +234,24 @@ class LauncherBuilder {
     const latestFile = "latest.yml";
 
     // La fonction 'filter' permet d'ignorer le fichier latest.yml
-    fse.copySync(tempInstall, distDir, {
-      overwrite: true,
-      filter: (src) => !src.includes(latestFile),
-    });
-    fse.copySync(tempUpdate, distDir, {
-      overwrite: true,
-      filter: (src) => !src.includes(latestFile),
-    });
+    const copyOptions = {
+      recursive: true,
+      force: true,
+      filter: (src: string) => !src.includes(latestFile),
+    };
+    fs.cpSync(tempInstall, distDir, copyOptions);
+    fs.cpSync(tempUpdate, distDir, copyOptions);
 
     // Copie le fichier latest.yml de manière explicite
     const latestSrc = path.join(tempUpdate, latestFile);
     const latestDest = path.join(distDir, latestFile);
     if (fs.existsSync(latestSrc)) {
-      fse.copySync(latestSrc, latestDest, { overwrite: true });
+      fs.copyFileSync(latestSrc, latestDest);
     }
 
     // Supprime les dossiers temporaires
-    fse.removeSync(tempInstall);
-    fse.removeSync(tempUpdate);
+    fs.rmSync(tempInstall, { recursive: true, force: true });
+    fs.rmSync(tempUpdate, { recursive: true, force: true });
 
     console.log("✅ Fusion terminée !");
   }

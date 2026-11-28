@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import React, { memo } from "react";
+import React from "react";
 import Dialog from "@mui/material/Dialog";
 import Slide from "@mui/material/Slide";
 import {
@@ -17,6 +17,7 @@ import {
 
 import { typeConfig } from "./component/popup.config";
 import { createButtons } from "./component/popup.button";
+import { COMPACT, TINY, actionsLayout, buttonText, paperLayout, scrollArea } from "./component/popup.layout";
 import type {
   PopupProps,
   PopupTransitionProps,
@@ -38,21 +39,23 @@ const Transition = React.forwardRef<unknown, PopupTransitionProps>(
   }
 );
 
-export default memo(function ModernPopup({
+export default function ModernPopup({
   open,
   onClose,
   onConfirm,
+  buttons: customButtons,
+  dismissible = true,
   type = "info",
   title = "Titre du popup",
   message = "<p>Message du popup</p>",
 }: PopupProps) {
   const { color, icon } = getModernTypeConfig(type);
-  const buttons = createButtons(onClose, onConfirm);
+  const buttons = customButtons ?? createButtons(onClose, onConfirm);
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={dismissible ? onClose : undefined}
       slots={{ transition: Transition }}
       keepMounted
       maxWidth="sm"
@@ -66,8 +69,11 @@ export default memo(function ModernPopup({
             borderRadius: "20px",
             border: "1px solid rgba(255,255,255,0.15)",
             boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+            ...paperLayout,
             p: 2,
-            maxHeight: "80vh",
+            overflow: "hidden",
+            [COMPACT]: { p: 1.5 },
+            [TINY]: { p: 1 },
             // Transition Fade
             opacity: open ? 1 : 0,
             transition: "opacity 600ms ease",
@@ -81,32 +87,34 @@ export default memo(function ModernPopup({
         },
       }}
     >
-      <Box sx={{ textAlign: "center", color: color }}>{icon}</Box>
-      <DialogTitle sx={{ textAlign: "center", color, fontWeight: "bold" }}>
+      <Box sx={{ textAlign: "center", color: color, flexShrink: 0, [COMPACT]: { "& svg": { fontSize: "1.6rem" } }, [TINY]: { display: "none" } }}>{icon}</Box>
+      <DialogTitle sx={{ textAlign: "center", color, fontWeight: "bold", flexShrink: 0, [COMPACT]: { py: 0.5, fontSize: "1.1rem" } }}>
         {title}
       </DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ ...scrollArea, [COMPACT]: { py: 0.5 } }}>
         <Typography
           variant="body1"
-          sx={{ color: "#e0e0e0", textAlign: "center" }}
+          sx={{ color: "text.secondary", textAlign: "center" }}
           component="div"
         >
           {message}
         </Typography>
       </DialogContent>
-      <DialogActions sx={{ justifyContent: "center" }}>
+      <DialogActions sx={{ justifyContent: "center", ...actionsLayout, [COMPACT]: { py: 0.5 } }}>
         {buttons.map((button, index) => (
           <Button
             key={index}
             onClick={button.action}
+            disabled={button.disabled}
             sx={{
-              background: button.variant === "main" ? color : "#444",
-              color: "#fff",
-              borderRadius: "10px",
+              bgcolor: button.variant === "main" ? color : "grey.800",
+              color: "common.white",
+              ...buttonText,
               px: 3,
+              [COMPACT]: { px: 2, py: 0.5, fontSize: "0.8rem" },
               "&:hover": {
                 opacity: 0.9,
-                background: button.variant === "main" ? color : "#555",
+                bgcolor: button.variant === "main" ? color : "grey.700",
               },
             }}
           >
@@ -116,4 +124,4 @@ export default memo(function ModernPopup({
       </DialogActions>
     </Dialog>
   );
-});
+}

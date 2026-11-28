@@ -3,19 +3,31 @@
  * @license MIT-NC
  */
 
-import { useMemo, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
+  Button,
   Card,
   CardActionArea,
+  Chip,
   Grid,
   InputAdornment,
   TextField,
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { LauncherTheme } from "@shared/types";
+import type { DeprecatedInstall, LauncherTheme } from "@shared/types";
+import { describeError, notify, shortNotice } from "@/src/utils/notify";
+import UninstallDialog from "../../component/uninstall-dialog/uninstall-dialog";
+import { enqueueSnackbar } from "notistack";
 
+import instancesRenderConfig from "../../../../instances/instances.config";
+import {
+  CHANNEL_COLOR,
+  isSelectable,
+  effectiveTestChannels,
+  pickerChannels,
+} from "../../../../instances/instances.helpers";
 import { useGames } from "../../context/games.context";
 import { usePanels } from "../../context/panels.context";
 import { useTheme } from "../../context/theme.context";
@@ -25,21 +37,10 @@ import type {
   GameEntry,
   SearchColors,
 } from "./choose-games.types";
+import { useTranslation } from "react-i18next";
+import iconWithName from "../../../../assets/icon/Valkream-icon-with-name.png";
 
-// 🧩 Tu peux mélanger icônes MUI et images personnalisées ici :
-// `name` sert à l'affichage (alt) et à la recherche.
-const games: GameEntry[] = [
-  {
-    id: "Valheim",
-    name: "Valheim",
-    icon: "./images/Valheim-name.png",
-  },
-  {
-    id: "SevenDtoD",
-    name: "7 Days to Die",
-    icon: "./images/SevenDtoD-name.png",
-  },
-];
+const CHANNEL_ORDER = ["stable", "beta", "alpha"];
 
 // Normalise : minuscules, sans accents, sans espaces
 const normalize = (str: string): string =>
@@ -175,11 +176,9 @@ const OldGameCard = styled(Card)(() => ({
   },
 }));
 
-const GameCard = ({ children }: GameCardProps) => {
+const ThemedCard = ({ children }: { children?: ReactNode }) => {
   const { theme } = useTheme();
   switch (theme) {
-    case "modern":
-      return <ModernGameCard>{children}</ModernGameCard>;
     case "futuristic":
       return <FuturisticGameCard>{children}</FuturisticGameCard>;
     case "old":
@@ -188,6 +187,24 @@ const GameCard = ({ children }: GameCardProps) => {
       return <ModernGameCard>{children}</ModernGameCard>;
   }
 };
+
+/** Carte d'un jeu. Un canal de test (beta, alpha) a un contour pointillé coloré et une pastille. */
+const GameCard = ({ children, accent }: GameCardProps) => (
+  <Box
+    sx={
+      accent
+        ? {
+            borderRadius: 3,
+            outline: `2px dashed ${accent}`,
+            outlineOffset: 3,
+            boxShadow: `0 0 18px ${accent}55`,
+          }
+        : undefined
+    }
+  >
+    <ThemedCard>{children}</ThemedCard>
+  </Box>
+);
 
 // Couleurs de la barre de recherche selon le thème
 const searchColors = (theme: LauncherTheme): SearchColors => {
@@ -217,13 +234,79 @@ const searchColors = (theme: LauncherTheme): SearchColors => {
 };
 
 export default function ChooseGames() {
-  const { changeActualGame } = useGames();
+  const { t } = useTranslation();
+  const { changeActualInstance, refreshChannel } = useGames();
+  const [games, setGames] = useState<GameEntry[]>([]);
+
+  // Instances activées par le remote ET décrites côté render : une entrée par canal proposé
+  // (stable, puis beta / alpha si le joueur les a activés), pour ne jamais recharger le jeu stable.
+  useEffect(() => {
+    Promise.all([
+      window.electron_API.getInstances(),
+      window.electron_API.getSettings("betaEnabled"),
+    ])
+      .then(([summaries, testChannelsEnabled]) => {
+        const renderIds = instancesRenderConfig.map((item) => item.id);
+        const selectable = summaries.filter((summary) => isSelectable(summary, renderIds));
+        // Aucun jeu en stable : on propose les beta d'office (sinon page vide)
+        const tests = effectiveTestChannels(
+          selectable.map((summary) => summary.channels),
+          testChannelsEnabled,
+        );
+        setGames(
+          selectable
+            .flatMap((summary) => {
+              const render = instancesRenderConfig.find((item) => item.id === summary.id);
+              return pickerChannels(summary.channels, tests).map((channel) => ({
+                id: summary.id,
+                channel,
+                name: render?.name ?? summary.id,
+                icon: render?.images.name ?? "",
+              }));
+            }),
+        );
+      })
+      .catch(console.error);
+  }, []);
+
+  // Installations que le serveur ne propose plus (id retiré, désactivé, canal supprimé) : à désinstaller
+  const [deprecated, setDeprecated] = useState<DeprecatedInstall[]>([]);
+  const [toRemove, setToRemove] = useState<DeprecatedInstall | null>(null);
+  const loadDeprecated = useCallback(() => {
+    window.electron_API.getDeprecatedInstalls().then(setDeprecated).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    loadDeprecated();
+  }, [loadDeprecated]);
+
+  // Un jeu obsolète (désactivé, canal supprimé) se lance tel qu'il est installé
+  const [launching, setLaunching] = useState(false);
+  const launchDeprecated = useCallback(
+    async (item: DeprecatedInstall) => {
+      if (launching) return;
+      setLaunching(true);
+      try {
+        await window.electron_API.launchInstance(item.id, item.channel);
+      } catch (error) {
+        console.error(error);
+        const detail = describeError(error);
+        enqueueSnackbar(`${t("button.launchError")} ${detail}`.trim(), { variant: "error" });
+        notify(t("notify.launchTitle"), shortNotice(detail || t("button.launchError")));
+      } finally {
+        setLaunching(false);
+      }
+    },
+    [launching, t],
+  );
+
+
   const { changePanel } = usePanels();
   const { theme } = useTheme();
   const [search, setSearch] = useState("");
 
-  const handleClick = (gameId: GameEntry["id"]) => {
-    changeActualGame(gameId);
+  const handleClick = (game: GameEntry) => {
+    changeActualInstance(game.id, game.channel);
     changePanel("home");
   };
 
@@ -245,7 +328,8 @@ export default function ChooseGames() {
     if (!query) return games;
     return games
       .map((game) => {
-        const byName = fuzzyMatch(query, normalize(game.name));
+        // « valheim beta » retrouve l'entrée beta : le canal fait partie du nom cherché
+        const byName = fuzzyMatch(query, normalize(`${game.name}${game.channel === "stable" ? "" : game.channel}`));
         const byId = fuzzyMatch(query, normalize(game.id));
         // On garde le meilleur des deux (distance la plus faible, puis position)
         const match = [byName, byId]
@@ -261,10 +345,11 @@ export default function ChooseGames() {
           // Tri par distance (pertinence), puis position, puis ordre alphabétique
           a.match.distance - b.match.distance ||
           a.match.position - b.match.position ||
-          a.game.name.localeCompare(b.game.name),
+          a.game.name.localeCompare(b.game.name) ||
+          CHANNEL_ORDER.indexOf(a.game.channel) - CHANNEL_ORDER.indexOf(b.game.channel),
       )
       .map(({ game }) => game);
-  }, [search]);
+  }, [search, games]);
 
   const colors = searchColors(theme);
 
@@ -297,7 +382,7 @@ export default function ChooseGames() {
               borderRadius: "8px",
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
             }}
-            src="./images/icon/Valkream-icon-with-name.png"
+            src={iconWithName}
             alt="Valkream"
           />
         </Box>
@@ -315,7 +400,7 @@ export default function ChooseGames() {
           <TextField
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un jeu..."
+            placeholder={t("games.search")}
             autoFocus
             fullWidth
             size="small"
@@ -323,13 +408,13 @@ export default function ChooseGames() {
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <span role="img" aria-label="Rechercher">
+                    <span role="img" aria-label={t("games.searchLabel")}>
                       🔍
                     </span>
                   </InputAdornment>
                 ),
               },
-              htmlInput: { "aria-label": "Rechercher un jeu" },
+              htmlInput: { "aria-label": t("games.search") },
             }}
             sx={{
               maxWidth: 420,
@@ -368,9 +453,9 @@ export default function ChooseGames() {
             }}
           >
             {filteredGames.map((game) => (
-              <Grid key={game.id}>
-                <GameCard>
-                  <CardActionArea onClick={() => handleClick(game.id)}>
+              <Grid key={`${game.id}@${game.channel}`}>
+                <GameCard accent={game.channel === "stable" ? undefined : CHANNEL_COLOR[game.channel]}>
+                  <CardActionArea onClick={() => handleClick(game)}>
                     <Box
                       sx={{
                         p: 3,
@@ -407,6 +492,18 @@ export default function ChooseGames() {
                       >
                         {game.name}
                       </Typography>
+                      {game.channel !== "stable" && (
+                        <Chip
+                          size="small"
+                          label={t(`channel.${game.channel}`)}
+                          sx={{
+                            bgcolor: CHANNEL_COLOR[game.channel],
+                            color: "#000",
+                            fontWeight: 700,
+                            letterSpacing: 1,
+                          }}
+                        />
+                      )}
                     </Box>
                   </CardActionArea>
                 </GameCard>
@@ -414,7 +511,45 @@ export default function ChooseGames() {
             ))}
           </Grid>
 
-          {filteredGames.length === 0 && (
+          {deprecated.length > 0 && (
+            <Box sx={{ mt: 5 }}>
+              <Typography sx={{ textAlign: "center", color: colors.text, opacity: 0.8, mb: 2 }}>
+                {t("games.deprecated.title")}
+              </Typography>
+              <Grid container spacing={3} sx={{ display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
+                {deprecated.map((item) => {
+                  const render = instancesRenderConfig.find((game) => game.id === item.id);
+                  const name = render?.name ?? item.id;
+                  return (
+                    <Grid key={`${item.id}@${item.channel}`}>
+                      <GameCard accent="#9e9e9e">
+                        <Box sx={{ p: 3, width: 220, display: "flex", flexDirection: "column", alignItems: "center", gap: 1.5, opacity: 0.85 }}>
+                          <Typography sx={{ fontFamily: "inherit", fontWeight: 600, fontSize: "1rem", textAlign: "center" }}>
+                            {name}
+                            {item.channel !== "stable" ? ` (${t(`channel.${item.channel}`)})` : ""}
+                          </Typography>
+                          <Chip size="small" label={t("games.deprecated.label")} sx={{ bgcolor: "#9e9e9e", color: "#000", fontWeight: 700, letterSpacing: 1 }} />
+                          <Typography variant="caption" sx={{ textAlign: "center" }}>
+                            {t(`games.deprecated.reason.${item.reason}`)}
+                          </Typography>
+                          {item.reason !== "removed" && (
+                            <Button size="small" variant="contained" disabled={launching} onClick={() => void launchDeprecated(item)}>
+                              {t("games.deprecated.play")}
+                            </Button>
+                          )}
+                          <Button size="small" color="error" variant="outlined" onClick={() => setToRemove(item)}>
+                            {t("games.deprecated.uninstall")}
+                          </Button>
+                        </Box>
+                      </GameCard>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Box>
+          )}
+
+          {filteredGames.length === 0 && deprecated.length === 0 && (
             <Typography
               sx={{
                 textAlign: "center",
@@ -423,11 +558,19 @@ export default function ChooseGames() {
                 opacity: 0.7,
               }}
             >
-              Aucun jeu trouvé pour « {search} »
+              {t("games.none", { search })}
             </Typography>
           )}
         </Box>
       </Box>
+      <UninstallDialog
+        target={toRemove ? { id: toRemove.id, channel: toRemove.channel, name: toRemove.id, kind: "deprecated" } : null}
+        onClose={() => setToRemove(null)}
+        onDone={() => {
+          loadDeprecated(); // liste relue depuis le disque
+          void refreshChannel(); // statut et infos de l'accueil relus tout de suite
+        }}
+      />
     </>
   );
 }

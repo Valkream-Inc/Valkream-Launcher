@@ -3,20 +3,18 @@
  * @license MIT-NC
  */
 
-import { useEffect, useState, memo } from "react";
+import { useContext, useEffect, useState, memo } from "react";
 import "./copyright.css";
 
-import { usePanels } from "../../context/panels.context";
+import { PanelsContext } from "../../context/panels.context";
 import type { PanelId } from "../../../../types/panels.types";
 import type { CopyrightProps } from "./copyright.types";
 
 function Copyright({ existPanels = true }: CopyrightProps) {
   const [versionLauncher, setVersionLauncher] = useState("");
-  let activePanel: PanelId | undefined;
-
-  if (!existPanels) {
-    activePanel = usePanels().activePanel;
-  }
+  // Hook appelé à chaque rendu (jamais conditionnel) ; ignoré si les panneaux n'existent pas.
+  const panels = useContext(PanelsContext);
+  const activePanel: PanelId | undefined = existPanels ? undefined : panels?.activePanel;
 
   useEffect(() => {
     // Only access the Electron API after the component has mounted

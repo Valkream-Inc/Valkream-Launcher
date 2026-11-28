@@ -3,20 +3,23 @@
  * @license MIT-NC
  */
 
-/** Contenu de `configs/<jeu>/event.json` (l'image est normalisée côté main). */
+import type { LocalizedText } from "./instance.js";
+
+/** Contenu de `games/<id>/config/event.json` (l'image est normalisée côté main). */
 export interface GameEvent {
-  name: string;
+  /** Chaîne, ou `{ "fr": "…", "en": "…" }` (repli sur le français). */
+  name: LocalizedText;
   enabled: boolean;
   date: string;
-  description: string;
+  description: LocalizedText;
   image: string;
   link: string;
 }
 
-/** Contenu de `configs/<jeu>/maintenance.json`. */
+/** Contenu de `games/<id>/config/maintenance.json`. */
 export interface Maintenance {
   enabled: boolean;
-  description: string;
+  description: LocalizedText;
   end_date: string;
 }
 
@@ -32,7 +35,7 @@ export interface ServerOfflineInfos {
 
 export type ServerInfos = ServerOnlineInfos | ServerOfflineInfos;
 
-/** Réponse de `electron_API.getInfos(game)`. `false` si indisponible. */
+/** Réponse de `electron_API.getInstanceInfos(id)`. `false` si indisponible. */
 export interface CheckInfosResult {
   serverInfos: ServerInfos;
   event: GameEvent | false;

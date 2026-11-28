@@ -1,0 +1,130 @@
+/**
+ * @author Valkream Team
+ * @license MIT-NC
+ *
+ * Config render d'une instance : tout ce qui ne concerne que l'affichage.
+ * Aucune URL de téléchargement ni chemin disque ici (ils vivent dans le remote).
+ */
+
+import type { ReactNode } from "react";
+
+import type { InstanceId, LocalizedText } from "@shared/types";
+
+import type { GltfGameData } from "../windows/launcher/component/background/gltf-background/gltf-background.types";
+
+/** Images du jeu (imports depuis `renderer/src/assets`). */
+export interface InstanceImages {
+  /** Logo carré : loader. */
+  icon: string;
+  /** Logo avec le nom : en-tête des réglages. */
+  iconWithName: string;
+  /** Nom du jeu : carte du choix du jeu. */
+  name: string;
+}
+
+/** Fonds du launcher d'un jeu (imports depuis `renderer/src/assets`). */
+export interface InstanceBackground {
+  /** Fond « image ». */
+  image: string;
+  /** Fond « vidéo ». */
+  video: string;
+  /** Musique, quand le fond est « audio ». */
+  audio: string;
+  /** Modèle 3D (.glb) du fond « 3d ». */
+  model: string;
+  /** Réglages de la scène 3D autour du modèle. */
+  scene: GltfGameData;
+}
+
+/**
+ * Visibilité d'un réglage dans l'onglet Game :
+ * - `normal` : toujours visible ;
+ * - `admin` : options admin activées (ctrl + shift + clic sur le logo) ;
+ * - `dev` : options dev activées (toggle) ;
+ * - `special` : options dev activées (toggle) ou options admin activées (ctrl + shift + clic sur le logo);
+ */
+export type SettingLevel = "normal" | "admin" | "dev" | "special";
+
+/**
+ * Zone d'un réglage dans l'onglet Game :
+ * - `normal` : category normal ;
+ * - `danger` : category attention (danger) ;
+ */
+export type SettingZone = "normal" | "danger";
+
+export type SettingCategory = {
+  level?: SettingLevel;
+  zone?: SettingZone;
+};
+
+/** Réglage propre à une instance, rendu par le composant de réglages générique. */
+export type CustomGameSetting =
+  | {
+      type: "toggle";
+      /** Nom du réglage, stocké par instance. Une entrée `optional.setting` du latest.yml s'y rattache. */
+      settingsName: string;
+      label: LocalizedText;
+      /** Texte d'aide affiché au-dessus du réglage (clé de `translations`, `{ fr, en }` ou texte brut). */
+      text?: LocalizedText;
+      category?: SettingCategory;
+      default?: boolean;
+    }
+  | {
+      type: "select";
+      settingsName: string;
+      label: LocalizedText;
+      text?: LocalizedText;
+      category?: SettingCategory;
+      options: { value: string; label: LocalizedText }[];
+      default?: string;
+    }
+  | {
+      /** Curseur numérique (ex : mémoire max d'un jeu Java, utilisable dans `launchArgs` du main : `-Xmx{ram}M`). */
+      type: "slider";
+      settingsName: string;
+      label: LocalizedText;
+      text?: LocalizedText;
+      category?: SettingCategory;
+      min: number;
+      max: number;
+      step?: number;
+      /** Unité affichée après la valeur (`Mo`, `%`…). */
+      unit?: string;
+      default?: number;
+    };
+
+/** Tableau de l'onglet Debug : rattaché à une entrée du latest.yml par son nom. */
+export interface DebugContent {
+  entry: string;
+  title?: string;
+}
+
+export interface InstanceRenderConfig {
+  /** Même `id` que la config main et l'index remote. */
+  id: InstanceId;
+  /** Nom affiché dans le choix du jeu. */
+  name: string;
+  /** Images du jeu (imports depuis `renderer/src/assets`). */
+  images: InstanceImages;
+  /** Fonds du launcher pour ce jeu : image, vidéo, musique, scène 3D. */
+  background: InstanceBackground;
+  /** Nom court affiché sur l'accueil à côté du nombre de joueurs. */
+  serverLabel?: string;
+  /** Contenu de la popup « Astuces du jour ». */
+  tipContent?: ReactNode;
+  /** Contenu de la popup de bienvenue avant la première installation. */
+  welcomeContent?: ReactNode;
+  /** Présentation affichée dans l'onglet General : une puce par élément (clé de `translations`, `{ fr, en }` ou texte brut). */
+  description?: LocalizedText[];
+  /** Présentation libre (ReactNode), affichée après `description`. */
+  descriptionContent?: ReactNode;
+  /**
+   * Textes propres au jeu, par langue (clés locales à l'instance : `"boostFps.label"`).
+   * Utilisables partout où un texte est attendu (`label`, `text`, `description`…). Ajouter une langue
+   * ou un texte = une ligne ici ; une clé absente dans une langue retombe sur le français.
+   */
+  translations?: Partial<Record<"fr" | "en", Record<string, string>>>;
+  links?: { discord?: string; topserver?: string; site?: string };
+  customGamesSettings?: CustomGameSetting[];
+  debugContent?: DebugContent[];
+}

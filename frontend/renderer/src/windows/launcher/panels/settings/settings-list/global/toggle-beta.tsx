@@ -8,9 +8,13 @@ import { Switch } from "@mui/material";
 import { useEffect, useState } from "react";
 
 import { enqueueSnackbar } from "notistack";
+import { useGames } from "../../../../context/games.context";
 import SettingsBox from "../../component/settings-box/settings-box";
+import { useTranslation } from "react-i18next";
 
 function ToggleAdmin() {
+  const { t } = useTranslation();
+  const { refreshChannel } = useGames();
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -27,8 +31,10 @@ function ToggleAdmin() {
     if (enabled === checked) return;
     setChecked(enabled);
     await window.electron_API.setSettings("betaEnabled", enabled);
+    // Le canal de l'installation active (stable / beta) change avec ce réglage
+    await refreshChannel();
     enqueueSnackbar(
-      enabled ? "Tests beta activées !" : "Tests beta désactivées !",
+      enabled ? t("beta.on") : t("beta.off"),
       { variant: "success" }
     );
   };
@@ -36,11 +42,10 @@ function ToggleAdmin() {
   return (
     <SettingsBox
       warn={true}
-      text="Activer les tests beta (cella vas recuperer les mises à jour beta et vas
-        desactiver la mise à jour du launcher)"
+      text={t("beta.text")}
     >
       <Switch onChange={handleChange} checked={checked} />
-      <span>Activer les tests Betas</span>
+      <span>{t("beta.label")}</span>
     </SettingsBox>
   );
 }

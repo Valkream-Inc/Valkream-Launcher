@@ -1,0 +1,238 @@
+[
+  {
+    "id": "0-Alter_OverrideSounds",
+    "name": "Alter_OverrideSounds"
+  },
+  {
+    "id": "0-CustomParticleLoader",
+    "name": "CustomParticleLoader"
+  },
+  {
+    "id": "0-ProjectZ_2.5",
+    "name": "ProjectZ_2.5"
+  },
+  {
+    "id": "0000_TFP_Harmony",
+    "name": "0000_TFP_Harmony"
+  },
+  {
+    "id": "1-SmartAI",
+    "name": "SmartAI"
+  },
+  {
+    "id": "7D1.0_Izayo_Visible_FPV_Gloves_mod",
+    "name": "7D1.0_Izayo_Visible_FPV_Gloves_mod"
+  },
+  {
+    "id": "7D1.0_Izayo_Visible_Mods_mod",
+    "name": "7D1.0_Izayo_Visible_Mods_mod"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackMisc_pack",
+    "name": "7D1.0_Izayo_WeaponpackMisc_pack"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackRemastered_44mag",
+    "name": "7D1.0_Izayo_WeaponpackRemastered_44mag"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackRemastered_45ACP",
+    "name": "7D1.0_Izayo_WeaponpackRemastered_45ACP"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackRemastered_556pack",
+    "name": "7D1.0_Izayo_WeaponpackRemastered_556pack"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackRemastered_762pack",
+    "name": "7D1.0_Izayo_WeaponpackRemastered_762pack"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackRemastered_9mmVAL",
+    "name": "7D1.0_Izayo_WeaponpackRemastered_9mmVAL"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackRemastered_DemolitionPack",
+    "name": "7D1.0_Izayo_WeaponpackRemastered_DemolitionPack"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackRemastered_Heavy_WeaponPack",
+    "name": "7D1.0_Izayo_WeaponpackRemastered_Heavy_WeaponPack"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackRemastered_SHOTGUNpackVAL",
+    "name": "7D1.0_Izayo_WeaponpackRemastered_SHOTGUNpackVAL"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackRemastered_Technicalpack",
+    "name": "7D1.0_Izayo_WeaponpackRemastered_Technicalpack"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackSpecial_Melee",
+    "name": "7D1.0_Izayo_WeaponpackSpecial_Melee"
+  },
+  {
+    "id": "7D1.0_Izayo_WeaponpackVanillaReplacer",
+    "name": "7D1.0_Izayo_WeaponpackVanillaReplacer"
+  },
+  {
+    "id": "7D2D-mod-utils",
+    "name": "mod-utils"
+  },
+  {
+    "id": "BdubsVehicles",
+    "name": "BdubsVehicles"
+  },
+  {
+    "id": "Craftable Flags",
+    "name": "Craftable Flags"
+  },
+  {
+    "id": "Craftable Posters Paintings Pictures",
+    "name": "Craftable Posters Paintings Pictures"
+  },
+  {
+    "id": "DW1982s Extra Dye Colors",
+    "name": "DW1982s Extra Dye Colors"
+  },
+  {
+    "id": "DamageNumbers1.9 for 2.5b18",
+    "name": "DamageNumbers1.9 for 2.5b18"
+  },
+  {
+    "id": "Dwarven_Citadel_Descent_Mahem3000",
+    "name": "Dwarven_Citadel_Descent_Mahem3000"
+  },
+  {
+    "id": "FalloutPropsMod",
+    "name": "FalloutPropsMod"
+  },
+  {
+    "id": "KevBal_MegaPack_I",
+    "name": "KevBal_MegaPack_I"
+  },
+  {
+    "id": "LittleRedSonja_CAS",
+    "name": "LittleRedSonja_CAS"
+  },
+  {
+    "id": "LittleRedSonja_Mumpfy_ArmorPack04_GNSArmor",
+    "name": "LittleRedSonja_Mumpfy_ArmorPack04_GNSArmor"
+  },
+  {
+    "id": "LittleRedSonja_Mumpfy_ArmorPack06_ResidentEvil",
+    "name": "LittleRedSonja_Mumpfy_ArmorPack06_ResidentEvil"
+  },
+  {
+    "id": "LittleRedSonja_Mumpfy_ArmorPack07_TWD",
+    "name": "LittleRedSonja_Mumpfy_ArmorPack07_TWD"
+  },
+  {
+    "id": "LittleRedSonja_Mumpfy_ArmorPack08_GoofyTime",
+    "name": "LittleRedSonja_Mumpfy_ArmorPack08_GoofyTime"
+  },
+  {
+    "id": "LittleRedSonja_T2IT3weapons",
+    "name": "LittleRedSonja_T2IT3weapons"
+  },
+  {
+    "id": "LittleRedSonja_Tractor",
+    "name": "LittleRedSonja_Tractor"
+  },
+  {
+    "id": "LittleRedSonja_ZRArmyTruck",
+    "name": "LittleRedSonja_ZRArmyTruck"
+  },
+  {
+    "id": "LittleRedSonja_ZT_UBBI_V2",
+    "name": "LittleRedSonja_ZT_UBBI_V2"
+  },
+  {
+    "id": "LittleRedSonja_ZombiePack",
+    "name": "LittleRedSonja_ZombiePack"
+  },
+  {
+    "id": "More_SharedTrapXP",
+    "name": "More_SharedTrapXP"
+  },
+  {
+    "id": "PewPewLearnbyDoing",
+    "name": "PewPewLearnbyDoing"
+  },
+  {
+    "id": "SCarRespawner",
+    "name": "SCarRespawner"
+  },
+  {
+    "id": "Serenity",
+    "name": "Serenity"
+  },
+  {
+    "id": "TheDescent",
+    "name": "TheDescent"
+  },
+  {
+    "id": "TheDescent-cave-assets",
+    "name": "TheDescent-cave-assets"
+  },
+  {
+    "id": "TheDescent-cave-entities",
+    "name": "TheDescent-cave-entities"
+  },
+  {
+    "id": "TheDescent-cave-lights",
+    "name": "TheDescent-cave-lights"
+  },
+  {
+    "id": "TheDescent-cave-prefabs",
+    "name": "TheDescent-cave-prefabs"
+  },
+  {
+    "id": "TheMeanOnes 3 Slot Forge",
+    "name": "TheMeanOnes 3 Slot Forge"
+  },
+  {
+    "id": "Vita_SkillpointTicket",
+    "name": "Vita_SkillpointTicket"
+  },
+  {
+    "id": "WMMAvoidBloodmoon",
+    "name": "WMMAvoidBloodmoon"
+  },
+  {
+    "id": "War3zuk FarmLife 2024",
+    "name": "War3zuk FarmLife 2024"
+  },
+  {
+    "id": "Working Bear Rug",
+    "name": "Working Bear Rug"
+  },
+  {
+    "id": "ZZZ_CATUI",
+    "name": "ZZZ_CATUI"
+  },
+  {
+    "id": "ZZZ_CATUI_ProjectZ_compatible",
+    "name": "ZZZ_CATUI_ProjectZ_compatible"
+  },
+  {
+    "id": "ZZZ_CATUI_local_load",
+    "name": "ZZZ_CATUI_local_load"
+  },
+  {
+    "id": "ZZ_CATUI_ProjectZ_local_load",
+    "name": "ZZ_CATUI_ProjectZ_local_load"
+  },
+  {
+    "id": "Z_Valkream",
+    "name": "Z_Valkream"
+  },
+  {
+    "id": "z_7D2.5_Izayo_WeaponFixes",
+    "name": "z_7D2.5_Izayo_WeaponFixes"
+  },
+  {
+    "id": "zzzzzzDzAntiCheat",
+    "name": "zzzzzzDzAntiCheat"
+  }
+]

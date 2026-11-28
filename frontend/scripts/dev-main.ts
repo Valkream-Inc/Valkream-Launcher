@@ -1,75 +1,102 @@
-/**
- * @author Valkream Team
- * @license MIT-NC
- *
- * Compilation rapide du process main en développement (esbuild, sans vérification de types).
- *
- * - même arborescence que `tsc` (`main/x.ts` -> `.tsbuild/x.js`) : les chemins relatifs
- *   basés sur `__dirname` (preload, renderer, package.json) restent valides ;
- * - recompile à chaque sauvegarde (quelques ms) ; Electron est relancé par nodemon ;
- * - détecte l'ajout / la suppression d'un fichier .ts et recrée alors le contexte.
- *
- * Les types sont vérifiés à part (`yarn dev:types:main`). Le build de production,
- * lui, utilise `tsc` (`yarn build:main`).
- */
-
+import type { BuildContext, BuildOptions } from "esbuild";
 import { context } from "esbuild";
-import type { BuildContext } from "esbuild";
 import fs from "node:fs";
 import path from "node:path";
 
 const MAIN_DIR = "main";
 const OUT_DIR = ".tsbuild";
 
-const isSource = (file: string) =>
+const isEsmSource = (file: string) =>
   file.endsWith(".ts") && !file.endsWith(".d.ts");
 
-/** Tous les fichiers .ts (hors .d.ts) de `main/`. */
-function collectEntries(dir: string): string[] {
-  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+const isCjsSource = (file: string) =>
+  file.endsWith(".cts") && !file.endsWith(".d.cts");
+
+const isSource = (file: string) => isEsmSource(file) || isCjsSource(file);
+
+/** Tous les fichiers .ts et .cts (hors .d.ts / .d.cts) de `main/`. */
+function collectEntries(dir: string): { esm: string[]; cjs: string[] } {
+  const result = { esm: [] as string[], cjs: [] as string[] };
+
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const entryPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) return collectEntries(entryPath);
-    return isSource(entry.name) ? [entryPath] : [];
-  });
+    if (entry.isDirectory()) {
+      const sub = collectEntries(entryPath);
+      result.esm.push(...sub.esm);
+      result.cjs.push(...sub.cjs);
+    } else if (isEsmSource(entry.name)) {
+      result.esm.push(entryPath);
+    } else if (isCjsSource(entry.name)) {
+      result.cjs.push(entryPath);
+    }
+  }
+
+  return result;
 }
 
-async function createContext(entries: string[]): Promise<BuildContext> {
-  const ctx = await context({
-    entryPoints: entries,
+function sharedOptions(label: string): BuildOptions {
+  return {
     outdir: OUT_DIR,
     outbase: MAIN_DIR,
     platform: "node",
-    format: "cjs",
-    target: "node22",
+    target: "node26",
     bundle: false,
     sourcemap: true,
     tsconfig: path.join(MAIN_DIR, "tsconfig.json"),
     logLevel: "warning",
     plugins: [
       {
-        name: "dev-main-log",
+        name: `dev-main-log-${label}`,
         setup(build) {
-          build.onStart(() => console.log("[dev-main] building..."));
+          build.onStart(() => console.log(`[dev-main:${label}] building...`));
           build.onEnd((result) =>
             console.log(
               result.errors.length
-                ? `[dev-main] ${result.errors.length} erreur(s)`
-                : "[dev-main] ready"
-            )
+                ? `[dev-main:${label}] ${result.errors.length} erreur(s)`
+                : `[dev-main:${label}] ready`,
+            ),
           );
         },
       },
     ],
-  });
-  await ctx.watch();
-  return ctx;
+  };
+}
+
+async function createContexts(entries: {
+  esm: string[];
+  cjs: string[];
+}): Promise<BuildContext[]> {
+  const contexts: BuildContext[] = [];
+
+  if (entries.esm.length > 0) {
+    const esmCtx = await context({
+      ...sharedOptions("esm"),
+      entryPoints: entries.esm,
+      format: "esm",
+    });
+    await esmCtx.watch();
+    contexts.push(esmCtx);
+  }
+
+  if (entries.cjs.length > 0) {
+    const cjsCtx = await context({
+      ...sharedOptions("cjs"),
+      entryPoints: entries.cjs,
+      format: "cjs",
+      outExtension: { ".js": ".cjs" },
+    });
+    await cjsCtx.watch();
+    contexts.push(cjsCtx);
+  }
+
+  return contexts;
 }
 
 async function main(): Promise<void> {
   let entries = collectEntries(MAIN_DIR);
-  let ctx = await createContext(entries);
+  let contexts = await createContexts(entries);
 
-  // Un nouveau fichier n'est pas vu par esbuild : on recrée le contexte si la liste change.
+  // Un nouveau fichier n'est pas vu par esbuild : on recrée les contextes si la liste change.
   let timer: NodeJS.Timeout | undefined;
   fs.watch(MAIN_DIR, { recursive: true }, (_event, filename) => {
     if (!filename || !isSource(filename.toString())) return;
@@ -78,17 +105,20 @@ async function main(): Promise<void> {
     timer = setTimeout(async () => {
       const next = collectEntries(MAIN_DIR);
       const changed =
-        next.length !== entries.length || next.some((f, i) => f !== entries[i]);
+        next.esm.length !== entries.esm.length ||
+        next.cjs.length !== entries.cjs.length ||
+        next.esm.some((f, i) => f !== entries.esm[i]) ||
+        next.cjs.some((f, i) => f !== entries.cjs[i]);
       if (!changed) return;
 
       entries = next;
-      await ctx.dispose();
-      ctx = await createContext(entries);
+      await Promise.all(contexts.map((c) => c.dispose()));
+      contexts = await createContexts(entries);
     }, 200);
   });
 
   const stop = async () => {
-    await ctx.dispose();
+    await Promise.all(contexts.map((c) => c.dispose()));
     process.exit(0);
   };
   process.on("SIGINT", stop);

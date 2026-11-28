@@ -7,13 +7,11 @@ import { useMemo, memo } from "react";
 import { useGames } from "../../../context/games.context";
 
 function ImgBackground() {
-  const { actualGame } = useGames();
+  const { actualInstance } = useGames();
 
-  const backgroundSrc = useMemo(() => {
-    return `./images/${actualGame}-background.png`;
-  }, [actualGame]);
+  const backgroundSrc = actualInstance.background.image;
 
-  const altText = useMemo(() => `${actualGame} background`, [actualGame]);
+  const altText = useMemo(() => `${actualInstance.name} background`, [actualInstance.name]);
 
   return <img src={backgroundSrc} alt={altText} className="background" />;
 }

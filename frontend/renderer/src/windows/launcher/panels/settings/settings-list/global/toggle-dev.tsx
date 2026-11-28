@@ -9,12 +9,14 @@ import { useEffect, useState } from "react";
 
 import { enqueueSnackbar } from "notistack";
 import SettingsBox from "../../component/settings-box/settings-box";
+import { useTranslation } from "react-i18next";
 
 function ToggleDev({
   devActive = false,
   setDevActive = () => {},
   setTab = () => {},
 }: ToggleDevProps) {
+  const { t } = useTranslation();
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -29,8 +31,8 @@ function ToggleDev({
     if (enabled) setTab("dev");
     enqueueSnackbar(
       enabled
-        ? "Outils de développement activés !"
-        : "Outils de développement désactivés !",
+        ? t("settings.dev.on")
+        : t("settings.dev.off"),
       { variant: "success" }
     );
   };
@@ -38,10 +40,10 @@ function ToggleDev({
   return (
     <SettingsBox
       warn={true}
-      text="Besoin d'activer les outils de développement ? Faites-le ici."
+      text={t("settings.dev.text")}
     >
       <Switch onChange={handleChange} checked={checked} />
-      <span>Activer les outils de développement</span>
+      <span>{t("settings.dev.label")}</span>
     </SettingsBox>
   );
 }

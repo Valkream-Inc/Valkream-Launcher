@@ -3,15 +3,16 @@
  * @license MIT-NC
  */
 
-import React from "react";
 import type { MouseEvent } from "react";
+import React from "react";
 import "./css/nav-settings.css";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 
-import { usePanels } from "../../../../context/panels.context";
+import { useTranslation } from "react-i18next";
 import { useGames } from "../../../../context/games.context";
+import { usePanels } from "../../../../context/panels.context";
 import type { NavButtonProps, NavSettingsProps } from "./nav-settings.types";
 
 export const NavButton = ({
@@ -37,15 +38,17 @@ export const NavSettings = ({
   children,
   activeTab,
   setActiveTab,
-  onToogleSpecialOption,
+  ToggleIsConfirmAdminVisible,
+  ToolBar,
 }: NavSettingsProps) => {
+  const { t } = useTranslation();
   const { changePanel } = usePanels();
-  const { actualGame } = useGames();
+  const { actualInstance } = useGames();
 
   const handleToogleSpecialOptionClick = (e: MouseEvent<HTMLImageElement>) => {
     // ctrl + shift click pour rendre les options spéciaux visibles
     if (e.ctrlKey && e.shiftKey) {
-      onToogleSpecialOption();
+      ToggleIsConfirmAdminVisible();
     }
   };
 
@@ -63,11 +66,13 @@ export const NavSettings = ({
       {/* Header */}
       <img
         onClick={handleToogleSpecialOptionClick}
-        src={`./images/${actualGame}-icon-with-name.png`}
+        src={actualInstance.images.iconWithName}
         alt="Logo Valkream"
         className="menu-header"
       />
-      <div className="menu-header">Paramètres</div>
+      <div className="menu-header">
+        {t("nav.title")} {ToolBar}
+      </div>
 
       {/* Boutons */}
       <Box className="nav-box">
@@ -83,7 +88,7 @@ export const NavSettings = ({
       </Box>
       <NavButton
         id="save"
-        label="Sauvegarder"
+        label={t("nav.save")}
         active={false}
         onClick={redirectToSave}
       />

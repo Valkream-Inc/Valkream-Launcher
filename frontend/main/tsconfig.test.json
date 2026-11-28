@@ -1,0 +1,7 @@
+{
+  // Vérifie les types du code ET des tests (sans rien émettre).
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": true },
+  "include": ["app.ts", "src/**/*.ts", "src/**/*.d.ts", "../shared/**/*.d.ts", "../types/**/*.d.ts"],
+  "exclude": []
+}

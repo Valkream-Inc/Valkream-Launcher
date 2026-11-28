@@ -13,8 +13,10 @@ import {
   SelectSettings,
 } from "../../component/select-settings/select-settings";
 import SettingsBox from "../../component/settings-box/settings-box";
+import { useTranslation } from "react-i18next";
 
 function SelectLauncherBackgroundType() {
+  const { t } = useTranslation();
   const { backgroundType, changeBackgroundType } = useBackground();
 
   const handleChange = async (event: BackgroundTypeChangeEvent) => {
@@ -22,7 +24,7 @@ function SelectLauncherBackgroundType() {
     if (value === backgroundType) return;
 
     await changeBackgroundType(value);
-    enqueueSnackbar("Vous avez changé le Fond d'écran du launcher !", {
+    enqueueSnackbar(t("settings.background.changed"), {
       variant: "info",
     });
   };
@@ -30,13 +32,13 @@ function SelectLauncherBackgroundType() {
   return (
     <SettingsBox
       warn={false}
-      text="Vous voulez changer le Fonds d'écran du launcher ? C'est ici !"
+      text={t("settings.background.text")}
     >
       <SelectSettings value={backgroundType} onChange={handleChange}>
-        <SelectItemSettings value="video">Video</SelectItemSettings>
-        <SelectItemSettings value="image">Image</SelectItemSettings>
+        <SelectItemSettings value="video">{t("settings.background.video")}</SelectItemSettings>
+        <SelectItemSettings value="image">{t("settings.background.image")}</SelectItemSettings>
         <SelectItemSettings value="3d">
-          3d (PC performant nécessaire)
+          {t("settings.background.threeD")}
         </SelectItemSettings>
       </SelectSettings>
     </SettingsBox>

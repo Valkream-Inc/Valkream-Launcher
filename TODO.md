@@ -1,18 +1,111 @@
 # TODO
 
-## Packages prioritaire a faire dans l'ordre susivant (4 --> 1 --> 3 --> 2)
+Seules les tâches **ouvertes** sont listées. Légende : (+) petit · (++) moyen · (+++) gros.
 
-- 1 : [ ] (?) transformer les different theme en vraie theme mui valide avec le passage à la derniére version
-- 2 : [ ] (?) migrer l'application vers TAURI
-- 3 : [ ] (?) rajouter un chemin d'installation par défaut/ que l'on demandera de modifier ou non au premier démarrage via un panel "info", et un qelecteur de fichier (l'installeur devra lire un flag avec le chmin pour pouvoir suprimer ce path lors de la déinstallation). Il faudra également gérer le changemment de ROOTPATH via les générals settings.
-- 4 : [ ] (?) il faudra revoir la structure de gestion des jeux cf ce prompt : Salut regarde ma repo ValkreamLauncher dans l'organisations Valkream-Inc et fait moi un plan d'actions détaillé pour avoir un system de gestion des jeux plus propre et adaptable ...
-  je veux pouvoir crée des nouveaux jeux ou d'autres instances du meme jeux sans code redondant il faudrai donc une config dans le main electron pour chaue instance avec toute les infos frontend et un 1 pr le backend avec toute les infos backend ip id nom, et aussi un system de paramétre via le backend ex: on peut définir une liste de mod ou un url ou un chemin relatif ou en core la mettre en dur dans le code du backend ... il faut que les pattern se basse sur une installation de type base (réinstallation) avec des chemin relatif aux root path l'id ? et des liens vers des zip ou vers la config online etc... puis le pattern pour chaque sous lien qui change avec les update definir un ou plusieurs pattern pour des sous path (ils ne doivent pas posser de probléme entre eux) ex dans /mods/ nexus + thunderstore + d'autre patern etc... il faut que le pattern de type base utilise un system de hash enfin il faut une liste de mod et de contributeur via la config backend ? pour chaque instance pour l'affichage dans l'onglet mods et un onglet debug avec les tableaux associés a chaque pattern pour chaque sub path et un tableau recap qui montre si ca fonctionne ou non... il faut également que le system de beta soit pris en compte dans une installation local séparré
+## Avant une beta publique (bloquant)
 
-## Pour plus tard
+- [ ] Lancer le **build à blanc** (Actions → *Launcher Build* → *Run workflow*), télécharger l'artefact `launcher-dry-run` et tester les installeurs sur Windows (la version est désormais `3.0.0-beta.1`, SemVer valide).
+- [ ] Vérifier le workflow *Launcher Build* sur `main` après correction (corepack) : première exécution complète jamais observée (NSIS, `check:build`, `check:runtime`, assets de release).
+- [ ] Faire un parcours complet sur une machine Windows propre : installation du launcher, mise à jour depuis la version précédente, installation d'un jeu, désinstallation.
+- [ ] Rendre le lint bloquant en CI (ou le traiter) et lancer `check:build` / `check:runtime` en CI sur les pull requests.
 
-- [ ] (++) optimize performance in TreeJs (3d ..?), optimize performance in react (useMemo, useCallback, etc.)
-- [ ] (++) optimize base fonction (trottle, etc.)
-- [ ] (++) mettre http2 en place (got plutot que axios)
-- [ ] (++) mettre en place les hash lors de l'installation pour ne recommencer que ce qui a foiré.
-- [ ] (++) mettre en place la verification des plugins et configs via Hash
-- [ ] (+++) mettre a jour la doc
+## À faire avant la prochaine release
+
+- [ ] Migrer vers `steam_library` : Valheim alpha est fait (`hash/alpha-game.json`, `depot` renseigné) ; reste Valheim stable / beta et 7 Days to Die (manifeste depuis une installation Steam propre : `yarn build:manifest … --manifest-only`), puis retirer les zips hébergés.
+- [ ] Valider dans Electron : zoom, barre d'outils, défilement, pastilles de portée, canaux, déplacement du dossier des jeux (dont entre deux disques), pagination, fond 3D chargé à la demande, installeur NSIS (jamais compilé ici).
+- [ ] Lancer `yarn build` complet : `check:build` et `check:runtime` (démarrage Electron) n'ont jamais tourné sur un vrai build.
+
+## Moteur d'installation et publication
+
+- [ ] (+++) Mise à jour différentielle des gros fichiers (bsdiff / zstd).
+- [ ] (++) `build-manifest --zip` / `--tar.gz` : générer aussi l'archive d'une entrée `hash_url`.
+- [ ] (+) Signature des manifestes (ou des `latest.yml`) pour ne pas dépendre uniquement de HTTPS.
+- [ ] (+) Versionner les anciens `latest.yml` (rollback d'une version).
+- [ ] (++) Dockerfile du backend + en-têtes de cache (ETag, `Cache-Control`) pour les gros fichiers.
+
+## Launcher / interface
+
+- [ ] (+) Réglages : aperçu de la ligne de commande effective (admin / Debug).
+- [ ] (+) Onglet Tools : champ « source Thunderstore » (`Auteur/Nom/Version` → dépendances) et écriture du hash dans le `latest.yml`.
+- [ ] (++) Page Mods : recherche, filtres par catégorie, version installée vs disponible --> admin only.
+- [ ] (+) Plusieurs instances du même jeu : choix, duplication, suppression avec taille occupée.
+- [ ] (++) Accessibilité : clavier, contraste des thèmes, `prefers-reduced-motion`.
+- [ ] (++) Mode hors ligne explicite : bandeau « dernière version connue » quand seul le cache répond.
+- [ ] (++) Migrer les CSS des thèmes vers MUI (modern → old → futuristic), avec contrôle visuel (base : `windows/launcher/theme/mui-themes.ts`).
+- [x] Chemin d'installation demandé au premier démarrage : à valider dans Electron (panneau, choix d'un autre disque, rechargement).
+
+## Code, tests, sécurité
+
+- [ ] (++) Tests du renderer (contexts, `InstanceSettings`, `InstanceButton`) avec Testing Library.
+- [ ] (++) Tests de bout en bout (Playwright + Electron) sur le backend de dev : installation, mise à jour, réparation.
+- [ ] (+) Découper `launcher-ipc` / `instance-ipc` par domaine et typer les canaux IPC de bout en bout (`shared/types/ipc.d.ts`).
+- [ ] (+) Fenêtres Electron : activer `sandbox` et une CSP plus stricte.
+- [ ] (+) `yarn audit` / Dependabot.
+- [ ] (+) Nombres et unités (« Mo ») de la progression : localiser le format.
+
+## Propositions (à trier)
+
+### Fiabilité des installations
+
+- [ ] (++) Bouton « Réparer » proposé automatiquement dans l'onglet game quand le rapport détecte un fichier modifié ou manquant (aujourd'hui : onglet Debug seulement).
+- [ ] (+) Vérification d'intégrité en arrière-plan après une mise à jour du jeu (hash des fichiers critiques) avec notification discrète.
+- [ ] (+) Reprise après coupure de la bascule atomique : écrire un petit journal « bascule en cours » pour que « Vérifier » sache quoi terminer.
+- [ ] (++) Test d'installation complète sur un faux serveur local (backend de dev + faux zips) dans la CI : installation, mise à jour, annulation, reprise.
+
+### Performance
+
+- [ ] (++) Fond 3D : réduire la définition et le nombre de particules selon la machine (`navigator.hardwareConcurrency`), pause quand la fenêtre est masquée ou minimisée.
+- [ ] (+) Vidéos des jeux : poster + chargement différé, formats plus légers (WebM/AV1) pour alléger l'installeur (les 3 vidéos et 2 modèles 3D pèsent le plus).
+- [ ] (+) Mesurer le temps de démarrage (fenêtre visible, premier panneau) et le garder sous un budget vérifié dans la CI.
+- [ ] (+) Analyseur de bundle Vite (`rollup-plugin-visualizer`) pour repérer les modules lourds du renderer (MUI icons importés un par un).
+
+### Build et release
+
+- [ ] (+) CI : lancer `yarn check:build` et `yarn check:runtime` sur chaque PR (aujourd'hui seulement dans le workflow de build).
+- [ ] (++) Signature de code Windows de l'installeur (SmartScreen) et publication automatique des notes de version.
+- [ ] (+) Dependabot / Renovate groupé (renderer, outils de build, main) pour garder un `yarn.lock` à jour.
+- [ ] (+) `yarn knip` (ou équivalent) en CI : détecte fichiers, exports et dépendances inutilisés avant qu'ils s'accumulent.
+
+### Documentation
+
+- [ ] (+) Schéma JSON de `index.config.json` et du `latest.yml` (`$schema`) : autocomplétion et validation dans VS Code pour les admins.
+- [ ] (+) Commande `yarn new:game <id>` qui génère les trois fichiers de config d'un jeu à partir des exemples.
+- [ ] (+) Page « Dépannage joueur » (jeu qui ne se lance pas, Steam introuvable, dossier non vide, pare-feu) liée depuis le launcher.
+
+### Interface et accessibilité
+
+- [ ] (+) Export / import des réglages du launcher (support et changement de PC). --> dans dev
+- [ ] (+) Raccourcis clavier (Entrée = Jouer, Échap = retour) et focus visible sur tous les boutons.
+- [ ] (++) Notifications de fin d'installation quand le launcher est en arrière-plan.
+
+## Idées de fonctionnalités
+
+### Pour les joueurs
+
+- [ ] (++) Profils de mods : activer / désactiver des groupes (ex : « boost FPS », « graphismes ») avec aperçu de l'espace et du gain, sans réinstaller (base : entrées `optional`).
+- [ ] (++) Sauvegarde et restauration des mondes / configs avant chaque mise à jour du jeu (zip daté, 3 dernières conservées).
+- [ ] (+) Restauration de la version précédente d'une entrée après une mise à jour qui pose problème (rollback local).
+- [ ] (++) Journal des changements (changelog) affiché avant la mise à jour : généré depuis le `latest.yml` ou un `changelog.json` du remote.
+- [ ] (+) Statut du serveur enrichi : liste des joueurs en ligne dans un popup, historique de disponibilité, bouton « Rejoindre » (`steam://connect/ip:port`) --> que si pas de commande launch.
+- [ ] (+) Prévenir quand le serveur redevient disponible ou quand une maintenance se termine. system de notifications
+- [ ] (++) Limite de bande passante et pause / reprise manuelle des téléchargements.
+- [ ] (+) Lancer le jeu directement connecté au serveur (argument de connexion déclaré dans `launchArgs`).
+- [ ] (?) crée un nouveau type jeu launch only qui ne télécharge rien en local donc pas de param spécifique juste pour faire le lien avec la pallete de jeux Valkream
+
+### Pour les admins
+
+- [ ] (++) Onglet « Publier » : assistant qui calcule le hash, met à jour `latest.beta.yml`, incrémente la version et vérifie les liens avant publication.
+- [ ] (+) Comparaison de deux `latest.yml` (alpha vs beta vs stable) : entrées ajoutées, retirées, versions différentes.
+- [ ] (+) Planification d'une maintenance : message affiché à l'avance et blocage du lancement pendant la fenêtre.
+- [ ] (+) Vérification automatique des liens du `latest.yml` (HTTP 200, taille, hash) en CI, avec alerte si un lien Thunderstore / Nexus disparaît.
+
+### Écosystème
+
+- [ ] (++) Import d'un modpack Thunderstore complet (profil `r2modman`/`gale`) comme entrée du `latest.yml`.
+- [ ] (++) Support de Linux / macOS dans le test de démarrage et les installeurs (AppImage, dmg), avec les chemins par plateforme déjà prévus dans les configs.
+
+### Poids de l'installeur (le plus gros gain restant)
+
+- [ ] (++) Modèle 3D `SevenDtoD-3d.glb` : **97 Mo** (Valheim : 4 Mo). Compresser avec `gltf-transform` (meshopt + textures WebP/KTX2) ; objectif < 10 Mo.
+- [ ] (++) Bandes-annonces `*-trailer.mp4` : **~92 Mo chacune** (1080p, 7,5 Mb/s). Ré-encoder en 720p, CRF 28 (~10-15 Mo) ou héberger sur le serveur et les charger à la demande ; `pre-loading.mp4` (8 Mo) aussi.
+- [ ] (+) Audios `*-song.mp3` (2 Mo et 1,4 Mo) : passer en 96 kbit/s ou hors installeur.

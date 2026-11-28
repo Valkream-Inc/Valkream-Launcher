@@ -4,4 +4,4 @@
  */
 
 /** Identifiants des panneaux du launcher (contexte `panels`). */
-export type PanelId = "info-beta-test" | "choose-games" | "home" | "settings";
+export type PanelId = "choose-games-root" | "info-beta-test" | "choose-games" | "home" | "settings";

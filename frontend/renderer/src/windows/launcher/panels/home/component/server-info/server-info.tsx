@@ -12,14 +12,18 @@ import { useGames } from "../../../../context/games.context";
 import Popup from "../../../../component/popup/popup";
 import { useInfos } from "../../../../context/infos.context";
 import EventCard from "../event-card/event-card";
+import { useTranslation } from "react-i18next";
+import valkreamIcon from "../../../../../../assets/icon/Valkream-icon.png";
+import { localized } from "../../../../../../i18n";
 
 function ServerInfo() {
+  const { t } = useTranslation();
   const { isLoading, serverInfos: rawServerInfos, maintenance: rawMaintenance } =
     useInfos();
   // Le contexte peut renvoyer `false` quand l'info est indisponible
   const serverInfos = rawServerInfos || null;
   const maintenance = rawMaintenance || null;
-  const { actualGame } = useGames();
+  const { actualInstance, actualChannel } = useGames();
   const [isMaintenancePopupOpen, setIsMaintenancePopupOpen] = useState(false);
 
   // Determine the display based on the state
@@ -40,7 +44,7 @@ function ServerInfo() {
     setIsMaintenancePopupOpen(true);
   };
 
-  const maintenance_description = maintenance?.description || "";
+  const maintenance_description = localized(maintenance?.description) || "";
   const maintenance_description_lines = maintenance_description.split("\n");
 
   const maintenance_message = (
@@ -69,30 +73,31 @@ function ServerInfo() {
         open={isMaintenancePopupOpen}
         onClose={() => setIsMaintenancePopupOpen(false)}
         type="info"
-        title="Maintenance"
+        title={t("home.maintenance")}
         message={maintenance_message}
       />
       <div className="server-infos-container" onClick={handleClick}>
         <div className="header-logo">
           <img
-            src={`./images/icon/Valkream-icon.png`}
+            src={valkreamIcon}
             className="logo-image"
             alt="logo"
           />
           <span className="logo-text">
-            {actualGame === "Valheim" ? "Valheim" : "7 Days"}
+            {actualInstance.serverLabel ?? actualInstance.name}
+            {actualChannel !== "stable" && ` (${actualChannel})`}
           </span>
           <span className="server-players">{statusText}</span>
         </div>
         <div>
           <span className="server-infos">
             {isLoading
-              ? "🟠 Chargement ..."
+              ? t("home.loading")
               : maintenance?.enabled
-              ? "🔵 En Maintenance"
+              ? t("home.inMaintenance")
               : serverInfos?.status === "server online"
-              ? "🟢 En ligne"
-              : "🔴 Hors ligne"}
+              ? t("home.online")
+              : t("home.offline")}
           </span>
           <span className="server-ping"> {pingText}</span>
         </div>

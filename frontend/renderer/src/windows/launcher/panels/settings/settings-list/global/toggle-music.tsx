@@ -10,8 +10,10 @@ import { useEffect, useState } from "react";
 import { enqueueSnackbar } from "notistack";
 import { useBackground } from "../../../../context/background.context";
 import SettingsBox from "../../component/settings-box/settings-box";
+import { useTranslation } from "react-i18next";
 
 function ToggleMusic() {
+  const { t } = useTranslation();
   const [checked, setChecked] = useState(false);
   const { mute, unmute } = useBackground();
 
@@ -38,15 +40,15 @@ function ToggleMusic() {
     if (enabled) unmute();
     else mute();
 
-    enqueueSnackbar(enabled ? "Musique activée !" : "Musique désactivée !", {
+    enqueueSnackbar(enabled ? t("settings.music.on") : t("settings.music.off"), {
       variant: "info",
     });
   };
 
   return (
-    <SettingsBox warn={false} text="La musique vous gêne ? Désactivez-la ici.">
+    <SettingsBox warn={false} text={t("settings.music.text")}>
       <Switch onChange={handleChange} checked={checked} />
-      <span>Activer la musique de la vidéo</span>
+      <span>{t("settings.music.label")}</span>
     </SettingsBox>
   );
 }

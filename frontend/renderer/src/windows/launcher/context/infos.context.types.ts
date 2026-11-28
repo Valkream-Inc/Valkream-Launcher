@@ -6,10 +6,9 @@
 import type { ReactNode } from "react";
 import type {
   GameEvent,
+  InstanceStatus,
   Maintenance,
-  SevenDtoDInstallationStatut,
   ServerInfos,
-  ValheimInstallationStatut,
 } from "@shared/types";
 
 export interface InfosProviderProps {
@@ -22,10 +21,8 @@ export interface InfosLoadingState {
   installationStatusLoaded: boolean;
 }
 
-/** Statut d'installation du jeu actif. */
-export type InstallationStatut =
-  | ValheimInstallationStatut
-  | SevenDtoDInstallationStatut;
+/** Statut d'installation de l'instance active. */
+export type InstallationStatut = InstanceStatus;
 
 /**
  * Valeur exposée par `useInfos()`.

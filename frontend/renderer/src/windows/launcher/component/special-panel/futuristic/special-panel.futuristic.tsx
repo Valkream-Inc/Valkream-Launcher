@@ -4,7 +4,6 @@
  */
 
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { memo } from "react";
 import type {
   SpecialPanelThemeProps,
   SpecialPanelType,
@@ -66,7 +65,7 @@ function SpecialPanelFuturistic({
         <Box className="content">
           <Typography className="title">{data.title}</Typography>
           <Typography>{data.paragraph}</Typography>
-          <Stack direction="row" spacing={2} mt={2}>
+          <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
             {buttons.map((btn, idx) => (
               <Button
                 key={idx}
@@ -94,4 +93,4 @@ function SpecialPanelFuturistic({
   );
 }
 
-export default memo(SpecialPanelFuturistic);
+export default SpecialPanelFuturistic;

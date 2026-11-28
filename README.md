@@ -1,156 +1,184 @@
 # Valkream-Launcher
 
-Launcher et système de mise à jour pour le serveur Valheim Valkream.
+Launcher multi-jeux moddé pour les serveurs Valkream (Valheim, 7 Days to Die…) et serveur de fichiers de mise à jour.
 
-<img src="./frontend\renderer\public\images\icon/Valkream-icon-with-name.png">
+<img src="./frontend/renderer/src/assets/icon/Valkream-icon-with-name.png" alt="Valkream" width="320">
 
-## License
-
-This project is under the **MIT Non-Commercial License (MIT-NC)**.
-
-[![License: MIT-NC](https://img.shields.io/badge/License-MIT--NC-blue.svg)](#license)
+[![License: MIT-NC](https://img.shields.io/badge/License-MIT--NC-blue.svg)](#licence)
 
 ## Table des matières
 
 - [Présentation](#présentation)
 - [Fonctionnalités](#fonctionnalités)
+- [Documentation](#documentation)
 - [Structure du projet](#structure-du-projet)
-- [Installation (Développement)](#installation-développement)
-- [Utilisation (Développement)](#utilisation-développement)
-- [Test (Production)](#test-production)
-- [Déploiement (Production)](#déploiement-production)
+- [Démarrer en développement](#démarrer-en-développement)
+- [Commandes](#commandes)
+- [Tests et intégration continue](#tests-et-intégration-continue)
+- [Publier une version du launcher](#publier-une-version-du-launcher)
+- [Déploiement du serveur de fichiers](#déploiement-du-serveur-de-fichiers)
+- [Limites connues](#limites-connues)
+- [Licence](#licence)
 - [Auteurs](#auteurs)
 
 ---
 
 ## Présentation
 
-Ce projet comprend :
+Ce dépôt (monorepo `yarn` + `turbo`) contient :
 
-- Un launcher Electron pour Valheim et 7days moddé
-- Un serveur backend pour servir les fichiers pendant le développement
+- **`frontend/`** : un launcher **Electron** générique (React + MUI, TypeScript). Chaque jeu est une **instance** décrite par une config main, une config render et des fichiers remote ; elle s'installe séparément par canal (`stable`, `beta`, `alpha`).
+- **`backend/`** : un serveur statique Node.js qui sert `backend/public` (configs, `latest.yml`, manifestes de hash) en développement. En production, ce même dossier est copié sur n'importe quel serveur de fichiers.
+
+<img src="./doc/images/home.png" alt="Accueil du launcher" width="560">
 
 ---
 
 ## Fonctionnalités
 
-### Frontend (Electron Launcher)
+### Jeux et mises à jour
 
-- 🚀 **Téléchargement & mise à jour** du jeu (via HTTPS sécurisé)
-- 🆚 **Vérification de la version** locale et en ligne du jeu/modpack
-- 🧩 **Installation/Désinstallation** du jeu, des mods et du modpack via Thunderstore
-- 🎉 **Gestion des événements spéciaux** (affichage dynamique dans l’interface)
-- 🖥️ **Affichage des infos serveur** (joueurs, statut, ping, etc.)
-- 🛡️ **Vérification d’intégrité** des plugins et configs (hash)
-- 🎮 **Détection & gestion de l’installation Steam**
-- 💬 **Notifications modernes** (snackbar, popup)
-- 🖱️ **Interface multi-plateforme** (Windows, Linux, Mac)
-- 🛑 **Mode maintenance** (affichage automatique si serveur en maintenance)
-- 🌐 **Liens directs réseaux sociaux** (Discord, site web, top serveurs)
-- 🔄 **Mise à jour automatique** du launcher via electron-updater
-- 🎮 **Ouverture de steam** quand le jeu est lancé
+- 🧩 **Installation, mise à jour et réparation** d'un jeu, de ses mods et de son modpack (archives zip, manifestes de hash, Thunderstore, Nexus Mods), avec reprise après coupure et cache de hash : seuls les fichiers absents ou modifiés sont retraités.
+- 🗂️ **Canaux isolés** (stable / beta / alpha) : une installation indépendante par canal.
+- 🎮 **Jeux Steam sans héberger les fichiers du jeu** : copie depuis la bibliothèque Steam du joueur (`steam_library`) ou version exacte téléchargée avec DepotDownloader, connexion par **QR code** (`depot_steam`).
+- 🔀 **Config remote déclinable** : toute clé peut varier par canal, plateforme et langue ; fichiers YAML ou JSON ; adresse du serveur de jeu définie dans l'`index.config`.
+- 🗑️ **Installations obsolètes** (jeu retiré, désactivé, canal supprimé) : listées avec un label, lançables, désinstallables.
+- 📦 **Dossier des jeux déplaçable** (même vers un autre disque), progression en octets.
 
-> **⚠️ Attention** : A l'heure actuel l'installation cross-platforme ne fonctionne pas (seul windows fonctionne)
+### Interface
 
-### Images
+- 📊 **Progression détaillée** : pourcentage à la décimale, octets traités / total, vitesse, étapes d'analyse, de copie et de téléchargement.
+- 🔔 **Notifications système** : téléchargement terminé, erreur, action requise (QR code à scanner, popup Steam).
+- 🎨 **Trois thèmes** (moderne, old, futuriste), popups adaptés aux petits écrans, bannière d'événement propre à chaque thème.
+- 🌐 **Français / anglais** (interface, erreurs, étapes) et zoom mémorisé.
+- 🎉 **Événements, mode maintenance, infos serveur** (joueurs, statut, ping), liens vers Discord / site / classement.
 
-<br>
-   <img src="./doc/images/home.png" style="max-width: 20cm">
+### Launcher
+
+- 🔄 **Mise à jour automatique** du launcher (electron-updater, build « update » différentiel).
+- 🛡️ **Intégrité** : manifestes de hash, vérification avant écriture, outils tiers vérifiés par sha256, chemins confinés (le remote ne décide jamais où le launcher écrit).
+- 🛠️ **Outils admin** (onglets Dev, Tools, Debug) pour préparer le remote : hash d'un dossier, liste de mods, diagnostic, réparation.
+
+> **⚠️ Attention** : seul **Windows** est supporté pour l'instant (l'installation multi-plateforme n'est pas finalisée).
+
+---
+
+## Documentation
+
+| Je veux… | Document |
+| --- | --- |
+| comprendre quel fichier modifier pour changer une version, un mod, un événement… | [Guide des configs](doc/instance-system/configs.md) |
+| la référence du système d'instances (providers, Steam, hash, canaux, réglages) | [Système d'instances](doc/instance-system/README.md) |
+| publier une nouvelle version du launcher (CI, build, serveur) | [Publier une version du launcher](doc/new-launcher-version.doc.md) |
+| connaître l'organisation du code Electron | [frontend/README.md](frontend/README.md) |
+| connaître le serveur de dev | [backend/README.md](backend/README.md) |
+| voir ce qui reste à faire | [TODO.md](TODO.md) |
+
+L'index complet est dans [doc/README.md](doc/README.md).
+
 ---
 
 ## Structure du projet
 
-- `frontend/` : Le launcher Electron (interface utilisateur)
-- `backend/` : Serveur Node.js pour servir les fichiers en dev
+```
+frontend/   launcher Electron : main/ (process Node), renderer/ (React + MUI), shared/types/, scripts/
+backend/    serveur statique de dev ; public/ = dossier à déployer (games/<id>/, launcher/)
+doc/        documentation (guides, référence, images)
+.github/    workflows : CI (tests, types, lint) et build / release du launcher
+```
+
+Le projet est entièrement en **TypeScript** (`.ts` / `.tsx`), types séparés du code : `frontend/shared/types/` (contrat main / preload / renderer), `frontend/main/src/types/` (interne au main), `*.types.ts` à côté des composants React.
 
 ---
 
-> **⚠️ Attention** : Certains fichiers et dossier sont masqués sous vscode. (ex: les dossiers `/node_modules`). Ces fichiers sont masqués via le fichier `.vscode/settings.json`
+## Démarrer en développement
 
-## Installation (Développement)
+Prérequis : **Node ≥ 26** (voir `engines` de `package.json`), **Yarn 4** via corepack, et sous Windows les outils de compilation C++ (modules natifs).
 
-### Install Requirement
-
-```bash
+```powershell
 winget install Microsoft.VisualStudio.2022.BuildTools --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
 winget install Python.Python.3.15
 winget install Schniz.fnm
 fnm install 26
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-if (!(Test-Path $PROFILE)) { New-Item -Type File -Path $PROFILE -Force }; Add-Content $PROFILE 'fnm env --use-on-cd | Out-String | Invoke-Expression'
 fnm default 26
 ```
 
-### Installation des dépendances
-
-À la racine du projet :
+Puis, à la racine du dépôt :
 
 ```bash
 npm install -g corepack
-yarn set version stable
+corepack enable
 yarn install
-yarn workspace Valkream-Launcher rebuild
+yarn dev
 ```
 
----
+> Certains dossiers (`node_modules`…) sont masqués dans VS Code via `.vscode/settings.json`. Des tâches équivalentes aux commandes ci-dessous sont dans `Terminal > Exécuter la tâche...`, et un profil de debug Electron est fourni dans `.vscode/launch.json`.
 
-## Utilisation (Développement)
+### Mode développeur dans le launcher
 
-Le projet est entièrement en **TypeScript** (`.ts` / `.tsx`). Les types sont séparés du code :
-
-- `frontend/shared/types/` : types partagés entre le main, le preload et le renderer (contrat IPC, réglages, jeux...)
-- `frontend/main/src/types/` : types internes au process Electron (fichiers `.d.ts`)
-- `frontend/renderer/src/**/*.types.ts` : types des composants et contextes React, à côté du code
-
-```bash
-yarn dev          # backend + launcher : Vite, esbuild (main), Electron, typecheck en watch (turbo)
-yarn dev:fast     # idem sans les typecheck en watch (le plus léger)
-yarn dev:fresh    # electron-rebuild puis yarn dev (après un changement d'Electron / better-sqlite3)
-yarn dev:front    # launcher seul
-yarn dev:back     # serveur de fichiers seul (http://localhost:3000)
-yarn typecheck    # vérification des types (main, renderer, scripts, backend)
-yarn lint         # ESLint
-yarn build        # installeurs du launcher
-yarn rebuild      # recompilation des modules natifs (better-sqlite3) pour Electron
-```
-
-Des tâches équivalentes sont disponibles dans VS Code (`Terminal > Exécuter la tâche...`) et un profil de debug Electron est fourni dans `.vscode/launch.json`.
-
-### Fichiers Zip du jeu
-
-> **⚠️ Attention** : N'oubliez pas d'ajouter les zips `BepInEx` et `Valheim` dans le dossier `/backend/public` et sur votre serveur. Les `.zip` doivent contenir directement les fichiers (pas un dossier parent). `ex: https://play.valkream.com/game/Valheim/latest/`. Le fichier zip BepInEx peut être par exemple `le fichier thunderstore BepInEx` modifié pour que les fichiers soit à la racine. Le fichier zip Valheim peut quand à lui être une `installation neuve zippée` (avec les fichiers a la racine) ou une archive téléchargés depuis `steam`.
-
-## Test (Production)
-
-1. Pusher les modifications sur la main github
-2. Attendre la fin du workflow de build
-3. activer l'option de test beta dans le launcher sur le pc de test (settings -> crtl + maj + click sur l'image -> dev -> beta)
-   <br>
-   <img src="./doc/images/activer les devs.png" style="max-width: 10cm">
-   <br>
-   <img src="./doc/images/activer les devs 2.png" style="max-width: 10cm">
-4. puis télécharger l'installer depuis github
-5. mettre a jour le launcher sur le PC de test (via l'installer)
-6. Lancer le launcher
-7. Vérifier que le launcher fonctionne
-8. Désactiver l'option de test beta dans le launcher (settings -> crtl + maj + click sur l'image -> dev -> beta)
-   <br>
-   <img src="./doc/images/activer les devs.png" style="max-width: 10cm">
-   <br>
-   <img src="./doc/images/activer les devs 2.png" style="max-width: 10cm">
-9. Lancer le launcher (pour verifier que le beta est désactivé et que le launcher se met à jour)
-10. Installer la mise à jour sur le serveur si tout est ok (voire la procédure dans le dossier de doc)
+Les onglets Dev, Tools et Debug des réglages (et la console de DepotDownloader dans le popup Steam) sont réservés aux admins : voir les captures `doc/images/activer les devs*.png`.
 
 ---
 
-## Déploiement (Production)
+## Commandes
 
-Pour un déploiment `simple` en production, il suffit de copier le dossier public du backend sur un serveur de fichiers statique et de configurer le launcher pour utiliser le bonne url.
+Depuis la racine du dépôt :
+
+| Commande | Rôle |
+| --- | --- |
+| `yarn dev` | backend + launcher (Vite, esbuild, Electron, typecheck en watch) |
+| `yarn dev:fast` | idem sans les typecheck en watch (le plus léger) |
+| `yarn dev:front` / `yarn dev:back` | launcher seul / serveur de fichiers seul (http://localhost:3000) |
+| `yarn workspace Valkream-Launcher test` | tests (`node:test` via `tsx`, `*.test.ts` à côté du code) |
+| `yarn typecheck` | types du main, du renderer, des scripts et du backend |
+| `yarn lint` | ESLint |
+| `yarn build` | installeurs du launcher (compilation, build NSIS « install » et « update », vérifications `check:build` et `check:runtime`) |
+| `yarn workspace Valkream-Launcher build:manifest <source> <sortie>` | manifeste de hash d'un dossier (voir le guide des configs) |
+| `yarn workspace Valkream-Launcher hash:file <fichier>` | hash d'un zip (sha256) ou d'un manifeste `.json` (`--latest … --entry …` l'écrit dans le latest.yml) |
+| `yarn workspace Valkream-Launcher depot:pin <tag>` | épingle une version de DepotDownloader (hash sha256) |
 
 ---
+
+## Tests et intégration continue
+
+- **CI** (`.github/workflows/ci.yml`) : à chaque push hors `main` et chaque pull request : installation (`yarn install --immutable`), tests, typecheck, lint (non bloquant pour l'instant). Les runs d'une même branche s'annulent entre eux.
+- **Launcher Build** (`.github/workflows/build.yml`) : à chaque push sur `main` touchant `frontend/` ou les workflows : tests, typecheck, `yarn build`, publication de la release GitHub. Détail et pièges : [Publier une version du launcher](doc/new-launcher-version.doc.md).
+
+Pour tester un build **sans passer par la mise à jour**, faire un **Ctrl + Maj + clic sur la vidéo** de la fenêtre de mise à jour.
+
+---
+
+## Publier une version du launcher
+
+Résumé (procédure complète dans [doc/new-launcher-version.doc.md](doc/new-launcher-version.doc.md)) :
+
+1. **Incrémenter `version`** dans `frontend/package.json` (le tag de la release en est déduit : un tag déjà existant fait échouer la publication).
+2. Fusionner sur `main` : le workflow *Launcher Build* teste, compile et crée la release avec `combined-install-win.zip` et `combined-update-win.zip`.
+3. Récupérer les zips depuis la [page des releases](https://github.com/Valkream-Inc/Valkream-Launcher/releases) et les déployer sur le serveur (`/launcher/latest/`, l'ancienne version archivée dans `/launcher/old/<version>/`).
+
+L'installation d'une mise à jour ne supprime rien (jeux et réglages conservés) ; seule une nouvelle version **majeure** nettoie les installations au premier démarrage. Seule la désinstallation complète supprime les jeux, y compris ceux d'un dossier choisi ailleurs.
+
+---
+
+## Déploiement du serveur de fichiers
+
+Copier `backend/public` sur un serveur de fichiers statique (HTTPS) et faire pointer le launcher vers son URL (`baseUrl` dans `frontend/main/src/core/constants.ts`). Les gros fichiers (zips du jeu, dossiers référencés par un manifeste de hash) ne sont pas dans le dépôt : ils sont hébergés sur le serveur et référencés par les `latest.yml`. Voir [Publier une version d'un jeu](doc/instance-system/README.md#publier-une-version-dun-jeu).
+
+---
+
+## Limites connues
+
+- Windows uniquement (build et installation).
+- Les installeurs NSIS, `check:runtime` et l'interface sous Electron n'ont pas encore été validés de bout en bout sur une machine de test : voir [TODO.md](TODO.md).
+- Les motifs de détection des étapes et erreurs de DepotDownloader reposent sur ses messages usuels ; une cause inconnue retombe sur un message générique avec le détail brut.
+- Pas de signature de code Windows (avertissement SmartScreen possible).
+
+---
+
+## Licence
+
+Ce projet est sous licence **MIT Non-Commercial (MIT-NC)** : voir [LICENSE.md](LICENSE.md).
 
 ## Auteurs
 
 - Jean-Chante (Valkream Team)
-
----

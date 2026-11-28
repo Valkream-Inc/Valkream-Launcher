@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "Minecraft-Example",
+  "requiredSpaceMb": 2000,
+  "enabled": { "win32": true, "linux": true, "darwin": false },
+  "channels": {
+    "stable": "/games/Minecraft-Example/latest.yml"
+  }
+}

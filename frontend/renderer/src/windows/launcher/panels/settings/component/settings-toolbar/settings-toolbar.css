@@ -1,0 +1,16 @@
+/* Barre d'outils des réglages : dans la bande du haut, au-dessus de l'onglet affiché. */
+.settings-toolbar {
+  height: 1cm;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  color: white;
+}
+.settings-toolbar .zoom-value {
+  min-width: 3.2rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "SevenDtoD-Valkream-v2",
+  "requiredSpaceMb": 25000,
+  "enabled": {
+    "win32": true,
+    "linux": true,
+    "darwin": true
+  },
+  "channels": {
+    "stable": "/games/SevenDtoD-Valkream-v2/latest.yml"
+  },
+  "event": "/games/SevenDtoD-Valkream-v2/config/event.json",
+  "maintenance": "/games/SevenDtoD-Valkream-v2/config/maintenance.json",
+  "contributors": "/games/SevenDtoD-Valkream-v2/config/contributors.json",
+  "mods": "/games/SevenDtoD-Valkream-v2/config/mods.json"
+}

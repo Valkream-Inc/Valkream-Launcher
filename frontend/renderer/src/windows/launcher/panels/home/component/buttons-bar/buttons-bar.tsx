@@ -10,10 +10,8 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
 import { Button } from "@mui/material";
 import { useAction } from "../../../../context/action.context";
-import { useGames } from "../../../../context/games.context";
 
-import ValheimButton from "./Valheim-button";
-import SevenDtoDButton from "./SevenDtoD-button";
+import InstanceButton from "./instance-button";
 import type {
   ButtonsBarProps,
   TipsButtonProps,
@@ -36,15 +34,14 @@ function ButtonsBar({
   onTipsClick = () => {},
   onChangeGamesClick = () => {},
 }: ButtonsBarProps) {
-  const { actionLoading } = useAction();
-  const { actualGame } = useGames();
+  const { actionLoading, switchLocked } = useAction();
 
   return (
     <>
       <TipsButton onClick={onTipsClick} />
 
       <div className="bottom-actions">
-        {!actionLoading && (
+        {!actionLoading && !switchLocked && (
           <Button
             variant="contained"
             className="settings-btn"
@@ -54,8 +51,7 @@ function ButtonsBar({
           </Button>
         )}
 
-        {actualGame === "Valheim" && <ValheimButton />}
-        {actualGame === "SevenDtoD" && <SevenDtoDButton />}
+        <InstanceButton />
 
         <Button
           variant="contained"

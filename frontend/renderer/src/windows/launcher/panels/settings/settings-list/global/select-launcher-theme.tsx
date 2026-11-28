@@ -13,8 +13,10 @@ import {
   SelectSettings,
 } from "../../component/select-settings/select-settings";
 import SettingsBox from "../../component/settings-box/settings-box";
+import { useTranslation } from "react-i18next";
 
 function SelectLauncherTheme() {
+  const { t } = useTranslation();
   const { theme, changeTheme } = useTheme();
 
   const handleChange = async (event: LauncherThemeChangeEvent) => {
@@ -22,7 +24,7 @@ function SelectLauncherTheme() {
     if (value === theme) return;
 
     await changeTheme(value);
-    enqueueSnackbar("Vous avez changé le theme du launcher !", {
+    enqueueSnackbar(t("settings.theme.changed"), {
       variant: "info",
     });
   };
@@ -30,7 +32,7 @@ function SelectLauncherTheme() {
   return (
     <SettingsBox
       warn={false}
-      text="Vous voulez changer le theme du launcher ? Faites-le ici."
+      text={t("settings.theme.text")}
     >
       <SelectSettings value={theme} onChange={handleChange}>
         <SelectItemSettings value="old">Old</SelectItemSettings>

@@ -1,0 +1,105 @@
+# ──────────────────────────────────────────────────────────────
+# Exemple de latest.yml du nouveau système d'instances.
+#
+# NORME DE VERSIONNAGE : X0.X1.X2 (affichage seulement)
+#   X0 saison · X1 game-base · X2 game-details
+# Le niveau d'une mise à jour se décide entrée par entrée (version + hash), pas sur cette chaîne.
+#
+# Deux niveaux, tous deux forcés (le jeu n'est jouable en ligne que si tout est à jour) :
+#   game-base      le jeu lui-même : réinstallation complète si en retard
+#   game-details   mods, configuration, détails : mise à jour incrémentale
+#
+# Chaque entrée (le nom de l'entrée est la clé qui relie au dossier d'installation du main).
+# TOUTES les options sauf `version` peuvent :
+#   - être déclinées par plateforme : { win32: …, linux: …, darwin: …, default: … } ;
+#   - prendre une valeur inline, ou un lien (/chemin relatif au serveur de fichiers, ou https://…)
+#     vers un fichier JSON/YAML qui contient la valeur (une chaîne qui commence par « / » est donc
+#     un lien : écrire les chemins sans « / » initial).
+#   Une entrée dont type ou content n'a pas de valeur pour la plateforme n'est pas proposée dessus.
+#   Exceptions : content (zip), hash-folder et api-url sont déjà des liens vers ce que télécharge
+#   le provider ; seule leur plateforme est choisie.
+#
+#   version   indique si elle doit être mise à jour
+#   (pas de `path` : le dossier d'installation de chaque entrée est décidé par le launcher,
+#    dans la config main `entryPaths`, jamais par le remote)
+#   type      zip_url | hash_url | thunderstore_modpack_url | nexus_modpack_url
+#   hash      sha256 du manifeste des fichiers de l'entrée (généré par `yarn build:manifest`)
+#   content   lien, liste, ou manifeste inline
+#   hash-folder / zip / api-url / folder_in_zip   selon le type (voir la doc) ;
+#                                           zip = archive de tous les fichiers d'un hash_url (installation complète)
+#   optional  { setting } : installée seulement si ce réglage d'instance est actif
+#   gameFolderToRemove     relatifs au dossier de l'entrée, supprimés à la mise à jour de l'entrée
+#   gameFolderToPreserve   fichiers/dossiers relatifs au dossier de l'entrée conservés à la mise à jour (config client…).
+#                          "chemin" = toujours ; { path, from } = seulement si la version INSTALLÉE
+#                          satisfait `from` (>=1.2.0, >=1.0.0 <2.0.0, 1.x, *) : la config du joueur
+#                          est encore compatible. Sinon la nouvelle version l'écrase.
+#   to_ignore              motifs relatifs au dossier de l'entrée (*, **, ?) exclus du hash, de la vérification et du
+#                          nettoyage : fichiers locaux que l'entrée ne possède pas (logs, caches…)
+# ──────────────────────────────────────────────────────────────
+
+version: 2.35.38
+buildDate: 2025-09-18T19:00:00.929Z
+
+game-base: # X1 : réinstallation complète si en retard
+  valheim:
+    version: 0.221.12
+    type: zip_url
+    content:
+      win32: https://play.valkream.com/games/Valheim/latest/build-game-win32.zip
+      linux: https://play.valkream.com/games/Valheim/latest/build-game-linux.zip
+      darwin: https://play.valkream.com/games/Valheim/latest/build-game-darwin.zip
+  bepinex:
+    version: 5.4.2333
+    type: zip_url
+    folder_in_zip: BepInExPack_Valheim
+    content: https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2333/
+    gameFolderToRemove:
+      - BepInEx/cache
+
+game-details: # X2 : mods, configuration et détails (mise à jour forcée)
+  configs:
+    version: 2.35.38
+    type: zip_url
+    folder_in_zip: config
+    content: https://thunderstore.io/package/download/ValheimValkream/Valkream/2.35.38/
+    gameFolderToRemove:
+      - wackysDatabase/Cache
+      - Marketplace/SavedData
+    gameFolderToPreserve:
+      - Azumatt.MinimalUI.cfg
+      - WackyMole.EpicMMOSystemUI.cfg
+      - shudnal.ExtraSlots.cfg
+      - org.bepinex.plugins.groups.cfg
+      - randyknapp.mods.minimalstatuseffects.cfg
+  mods-thunderstore:
+    version: 2.35.38
+    type: thunderstore_modpack_url
+    key: dependencies
+    content: https://thunderstore.io/api/experimental/package/ValheimValkream/Valkream/2.35.38/
+  mods-admin:
+    version: 2.35.38
+    optional:
+      setting: modsAdmin
+    type: thunderstore_modpack_url
+    content:
+      - JereKuusela-Infinity_Hammer-1.79.0
+      - JereKuusela-Server_devcommands-1.106.0
+      - JereKuusela-Upgrade_World-1.80.0
+      - JereKuusela-World_Edit_Commands-1.70.0
+      - Astropilot-ValheimTooler-1.11.0
+  mods-boostfps:
+    version: 2.35.38
+    optional:
+      setting: boostFps
+    type: thunderstore_modpack_url
+    content:
+      - castix-ValheimFPSBoost-1.0.0
+      - vaffle1-FPSPlus-1.1.4
+  mods-boostgraphic:
+    version: 2.35.38
+    optional:
+      setting: boostGraphic
+    type: thunderstore_modpack_url
+    content:
+      - Willybach-Willybachs_HD_Seasonality-3.5.6
+      - RustyMods-Seasonality-3.7.4

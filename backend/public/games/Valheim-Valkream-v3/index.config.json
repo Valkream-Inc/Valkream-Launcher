@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "Valheim-Valkream-v3",
+  "requiredSpaceMb": 6000,
+  "enabled": {
+    "win32": true,
+    "linux": false,
+    "darwin": false
+  },
+  "channels": {
+    "beta": "/games/Valheim-Valkream-v3/beta/latest/latest.beta.yml"
+  },
+  "event": {
+    "beta": "/games/Valheim-Valkream-v3/beta/latest/config/event.beta.config.json"
+  },
+  "maintenance": {
+    "beta": "/games/Valheim-Valkream-v3/beta/latest/config/maintenance.beta.config.json"
+  },
+  "contributors": {
+    "beta": "/games/Valheim-Valkream-v3/beta/latest/config/contributors.beta.config.json"
+  },
+  "mods": {
+    "beta": "/games/Valheim-Valkream-v3/beta/latest/config/mods.beta.config.json"
+  }
+}

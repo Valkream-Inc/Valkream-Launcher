@@ -3,13 +3,25 @@
  * @license MIT-NC
  */
 
-import { createContext, useState, useContext } from "react";
-import type { GameName } from "@shared/types";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import type { Channel, GamesRootMove, InstanceId } from "@shared/types";
 
+import instancesRenderConfig from "../../../instances/instances.config";
+import { resolveChannel } from "../../../instances/instances.helpers";
 import type {
   GamesContextValue,
   GamesProviderProps,
 } from "./games.context.types";
+
+/** Relecture de l'index remote (jeux proposés, canaux, maintenance) tant que le launcher est ouvert. */
+const INDEX_REFRESH_MS = 30_000;
 
 const GamesContext = createContext<GamesContextValue | undefined>(undefined);
 export const useGames = (): GamesContextValue => {
@@ -19,18 +31,86 @@ export const useGames = (): GamesContextValue => {
 };
 
 export const GamesProvider = ({ children }: GamesProviderProps) => {
-  const gamesList: GameName[] = ["Valheim", "SevenDtoD"];
-  const [actualGame, setActualGame] = useState<GameName>("Valheim");
+  const [actualInstanceId, setActualInstanceId] = useState<InstanceId>(
+    instancesRenderConfig[0].id
+  );
+  const [actualChannel, setActualChannel] = useState<Channel>("stable");
+  const actualChannelRef = useRef<Channel>("stable");
+  actualChannelRef.current = actualChannel;
+  const [channelLost, setChannelLost] = useState(false);
 
-  const changeActualGame = (newGame: GameName) => {
-    if (!gamesList.includes(newGame)) throw new Error("Game not found");
+  // Déplacement du dossier des jeux (suivi en direct : bouton de jeu et réglage affichent la progression)
+  const [gamesRootMove, setGamesRootMove] = useState<GamesRootMove>({ active: false, done: 0, total: 0 });
+  useEffect(() => {
+    void window.electron_API.getGamesRootMove?.().then(setGamesRootMove).catch(() => undefined);
+    window.electron_API.onGamesRootProgress?.(setGamesRootMove);
+    return () => window.electron_API.removeGamesRootProgressListeners?.();
+  }, []);
 
-    return setActualGame(newGame);
+  // Incrémenté quand les données locales changent sous nos pieds (dossier des jeux déplacé, canaux relus) :
+  // l'accueil relit alors le statut tout de suite au lieu d'attendre le prochain rafraîchissement.
+  const [refreshTick, setRefreshTick] = useState(0);
+  const wasMoving = useRef(false);
+  useEffect(() => {
+    if (wasMoving.current && !gamesRootMove.active) setRefreshTick((tick) => tick + 1);
+    wasMoving.current = gamesRootMove.active;
+  }, [gamesRootMove.active]);
+
+  const actualInstance =
+    instancesRenderConfig.find((item) => item.id === actualInstanceId) ??
+    instancesRenderConfig[0];
+
+  const changeActualInstance = (instanceId: InstanceId, channel: Channel = "stable") => {
+    if (!instancesRenderConfig.some((item) => item.id === instanceId))
+      throw new Error("Game not found");
+
+    setActualChannel(channel);
+    return setActualInstanceId(instanceId);
   };
 
+  const refreshChannel = useCallback(async () => {
+    setRefreshTick((tick) => tick + 1);
+    try {
+      const [betaEnabled, instances] = await Promise.all([
+        window.electron_API.getSettings("betaEnabled"),
+        window.electron_API.getInstances(),
+      ]);
+      const summary = instances.find((item) => item.id === actualInstanceId);
+      // Le canal choisi dans la liste est conservé tant qu'il est proposé (le jeu stable n'est jamais rechargé à tort)
+      // Sans information du remote (hors ligne, pas de cache) : on ne touche à rien
+      if (!summary || summary.channels.length === 0) return;
+      const resolved = resolveChannel(actualChannelRef.current, summary.channels, betaEnabled);
+      if (resolved === null) setChannelLost(true);
+    } catch (error) {
+      console.error("Erreur lors de la récupération du canal :", error);
+    }
+  }, [actualInstanceId]);
+
+  useEffect(() => {
+    refreshChannel();
+  }, [refreshChannel]);
+
+  // L'index est relu régulièrement et au retour sur la fenêtre (le joueur revient souvent après avoir attendu une mise à jour)
+  useEffect(() => {
+    const timer = setInterval(() => void refreshChannel(), INDEX_REFRESH_MS);
+    const onFocus = () => void refreshChannel();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [refreshChannel]);
+
   const contextValue: GamesContextValue = {
-    actualGame,
-    changeActualGame,
+    actualInstanceId,
+    actualInstance,
+    changeActualInstance,
+    actualChannel,
+    refreshChannel,
+    refreshTick,
+    channelLost,
+    clearChannelLost: () => setChannelLost(false),
+    gamesRootMove,
   };
 
   return (

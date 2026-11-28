@@ -3,7 +3,7 @@
  * @license MIT-NC
  */
 
-import React, { memo } from "react";
+import React from "react";
 import {
   Box,
   Button,
@@ -19,6 +19,7 @@ import { keyframes } from "@mui/system";
 
 import { typeConfig } from "./component/popup.config";
 import { createButtons } from "./component/popup.button";
+import { COMPACT, TINY, actionsLayout, buttonText, innerLayout, paperLayout, scrollArea } from "./component/popup.layout";
 import type {
   PopupDecorationProps,
   PopupDecorations,
@@ -334,14 +335,16 @@ function FuturisticPopup({
   title = "Titre du popup",
   message = "Message du popup",
   onConfirm,
+  buttons: customButtons,
+  dismissible = true,
 }: PopupProps) {
   const { color, icon, iconSize, titleSize } = getFuturistTypeConfig(type);
-  const buttons = createButtons(onClose, onConfirm);
+  const buttons = customButtons ?? createButtons(onClose, onConfirm);
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={dismissible ? onClose : undefined}
       slots={{ transition: Transition }}
       keepMounted
       maxWidth="sm"
@@ -349,6 +352,7 @@ function FuturisticPopup({
       slotProps={{
         paper: {
           sx: {
+            ...paperLayout,
             position: "relative",
             background: "#0f0f0f",
             textAlign: "center",
@@ -356,6 +360,7 @@ function FuturisticPopup({
             border: `3px solid ${color}`,
             boxShadow: `0 0 40px ${color}, inset 0 0 20px rgba(255,255,255,0.1)`,
             p: 2,
+            [COMPACT]: { p: 1.2 },
             color: "white",
             overflow: "visible",
             overflowY: "unset !important",
@@ -367,13 +372,16 @@ function FuturisticPopup({
       }}
     >
       {/* Contenu normal du popup */}
-      <Box sx={{ position: "relative", zIndex: 1 }}>
+      <Box sx={innerLayout}>
         <Box
           sx={{
             color,
             textShadow: `0 0 20px ${color}, 0 0 40px ${color}`,
             fontSize: iconSize,
             mb: 2,
+            flexShrink: 0,
+            [COMPACT]: { fontSize: Math.round(iconSize * 0.55), mb: 0.5, lineHeight: 1 },
+            [TINY]: { display: "none" },
           }}
         >
           {icon}
@@ -385,12 +393,13 @@ function FuturisticPopup({
             textShadow: `0 0 15px ${color}`,
             fontWeight: "bold",
             fontSize: titleSize,
-            "&.MuiDialogTitle-root": { p: 0, mb: 2 },
+            flexShrink: 0,
+            "&.MuiDialogTitle-root": { p: 0, mb: 2, [COMPACT]: { mb: 0.5, fontSize: "1.3rem" } },
           }}
         >
           {title}
         </DialogTitle>
-        <DialogContent sx={{ overflow: "visible" }}>
+        <DialogContent sx={{ ...scrollArea, px: 1 }}>
           <Typography
             variant="body1"
             component="div"
@@ -399,8 +408,7 @@ function FuturisticPopup({
               mt: 2,
               mb: 2,
               lineHeight: 1.6,
-              maxHeight: "calc(80vh - 10cm)",
-              overflowY: "auto",
+              [COMPACT]: { mt: 0.5, mb: 0.5, fontSize: "1rem", lineHeight: 1.4 },
               color: "#e0e0e0",
               textAlign: "center",
             }}
@@ -408,21 +416,24 @@ function FuturisticPopup({
             {message}
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: "center", gap: 2, mt: 2 }}>
+        <DialogActions sx={{ justifyContent: "center", ...actionsLayout, gap: 2, mt: 2, [COMPACT]: { mt: 0.5, gap: 1 } }}>
           {buttons.map((btn, i) => (
             <Button
               key={i}
               onClick={btn.action}
+            disabled={btn.disabled}
               sx={{
                 background: "transparent",
                 border: `2px solid ${color}`,
                 color,
                 transition: "0.3s",
                 textShadow: `0 0 10px ${color}`,
+                ...buttonText,
                 px: 3,
                 py: 1,
                 borderRadius: "10px",
                 fontSize: "1.1rem",
+                [COMPACT]: { px: 2, py: 0.4, fontSize: "0.9rem" },
                 "&:hover": {
                   background: color,
                   color: "black",
@@ -451,4 +462,4 @@ function FuturisticPopup({
   );
 }
 
-export default memo(FuturisticPopup);
+export default FuturisticPopup;

@@ -5,9 +5,8 @@
  * Point d'entrée unique : `import type { ... } from "@shared/types"`.
  */
 
-export * from "./common";
-export * from "./settings";
-export * from "./infos";
-export * from "./valheim";
-export * from "./sevendtod";
-export * from "./ipc";
+export * from "./common.js";
+export * from "./settings.js";
+export * from "./infos.js";
+export * from "./instance.js";
+export * from "./ipc.js";

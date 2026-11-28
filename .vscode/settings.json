@@ -29,6 +29,9 @@
   // ESLint 10 n'utilise que la flat config (eslint.config.mjs) : eslint.useFlatConfig est ignoré.
   "eslint.workingDirectories": [{ "mode": "auto" }],
 
+  // json for package
+  "json.schemaDownload.enable": true,
+
   // Aucun artefact Yarn / build dans la recherche ni dans le watcher.
   "search.exclude": {
     "**/node_modules": true,

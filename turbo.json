@@ -11,11 +11,18 @@
     "dev:electron": { "cache": false, "persistent": true },
     "dev:types:main": { "cache": false, "persistent": true },
     "dev:types:renderer": { "cache": false, "persistent": true },
+    "dev:back": { "cache": false, "persistent": true },
 
     // Mis en cache : relancé seulement si les sources ont changé.
     "typecheck": {
       "dependsOn": ["^typecheck"],
-      "inputs": ["$TURBO_DEFAULT$", "!dist/**", "!build/**", "!.tsbuild/**", "!renderer/build/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!dist/**",
+        "!build/**",
+        "!.tsbuild/**",
+        "!renderer/build/**"
+      ],
       "outputs": []
     },
 

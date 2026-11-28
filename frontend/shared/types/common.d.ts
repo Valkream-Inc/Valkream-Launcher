@@ -6,9 +6,6 @@
  * Ce dossier ne contient QUE des types (fichiers .d.ts) : aucun code exécutable.
  */
 
-/** Jeux gérés par le launcher. */
-export type GameName = "Valheim" | "SevenDtoD";
-
 /** Plateformes pour lesquelles un build de jeu peut être téléchargé. */
 export type GamePlatform = "win32" | "linux" | "darwin";
 

@@ -6,30 +6,29 @@
  * Le preload implémente ces interfaces, le renderer les consomme via `window`.
  */
 
-import type { ActionResult, ErrorData, GameName, ProgressData } from "./common";
-import type { CheckInfosResult } from "./infos";
-import type { SettingKey, Settings } from "./settings";
+import type { ActionResult } from "./common.js";
 import type {
-  SevenDtoDInstallationStatut,
-  SevenDtoDModFileDiff,
-} from "./sevendtod";
-import type {
-  ValheimBaseMod,
-  ValheimHashData,
-  ValheimInstallationStatut,
-  ValheimModDetails,
-  ValheimModsData,
-} from "./valheim";
+  Channel,
+  InstanceId,
+  InstanceInfos,
+  InstanceReport,
+  InstanceSettingValue,
+  InstanceStatus,
+  DeprecatedInstall,
+  InstanceSummary,
+  InstanceSyncProgress,
+  UninstallProgress,
+  InstanceSyncResult,
+  DepotOutput,
+  DepotInfo,
+  ModsApi,
+  ModsListResult,
+  ToolsHashSummary,
+  ToolsProgress,
+} from "./instance.js";
+import type { SettingKey, Settings } from "./settings.js";
 
 export type Listener<T> = (data: T) => void;
-
-/** Cycle de vie commun d'une action longue (install, update, play...). */
-export interface ActionEvents {
-  onProgress(callback: Listener<ProgressData>): void;
-  onDone(callback: Listener<unknown>): void;
-  onError(callback: Listener<ErrorData>): void;
-  removeListeners(): void;
-}
 
 /** `window.electron_API` (fenêtre principale). */
 export interface ElectronAPI {
@@ -47,7 +46,73 @@ export interface ElectronAPI {
 
   // infos
   versionLauncher(): Promise<string>;
-  getInfos(game: GameName): Promise<CheckInfosResult>;
+
+  // jeux : une seule API pour toutes les instances (`id` = Valheim-Valkream-v2, SevenDtoD-Valkream-v2…)
+  getInstances(): Promise<InstanceSummary[]>;
+  /** Serveur de jeu, événement et maintenance. */
+  getInstanceInfos(id: InstanceId, channel?: Channel): Promise<InstanceInfos>;
+  /** Statut d'accueil : installé ? à jour ? jouable ? */
+  getInstanceStatus(id: InstanceId, channel: Channel): Promise<InstanceStatus>;
+  /** Rapport détaillé (onglets Mods et Debug). `verify` contrôle aussi les fichiers sur le disque. */
+  getInstanceReport(
+    id: InstanceId,
+    channel: Channel,
+    options?: { verify?: boolean }
+  ): Promise<InstanceReport>;
+  /** Installe / met à jour. `repair` retélécharge aussi les fichiers modifiés ou manquants. */
+  syncInstance(
+    id: InstanceId,
+    channel: Channel,
+    options?: { repair?: boolean }
+  ): Promise<InstanceSyncResult>;
+  /** Solution « localiser l'installation » : choisit le dossier du jeu. Retourne le dossier, `null` si annulé. */
+  pickInstanceSource(id: InstanceId, channel: Channel): Promise<string | null>;
+  /** Oublie le dossier de jeu choisi (retour à la bibliothèque Steam). */
+  clearInstanceSource(id: InstanceId, channel: Channel): Promise<void>;
+  /** Solution « DepotDownloader » : télécharge la version exacte (connexion par QR code). Retourne le dossier. */
+  depotDownloadInstance(id: InstanceId, channel: Channel): Promise<string>;
+  /** Informations de l'écran affiché avant la première utilisation de DepotDownloader. */
+  getDepotInfo(id: InstanceId, channel: Channel): Promise<DepotInfo>;
+  cancelDepotDownload(id: InstanceId, channel: Channel): Promise<void>;
+  /** Sortie de DepotDownloader (lignes, dont le QR code) et progression. */
+  onDepotOutput(callback: (data: DepotOutput) => void): void;
+  removeDepotOutputListeners(): void;
+  // outils admin (onglet Tools) : les dossiers sont choisis par boîte de dialogue côté main
+  /** Choisit un dossier puis le hashe (même algorithme que le launcher). `null` si annulé. */
+  toolsHashFolder(ignore: string[]): Promise<ToolsHashSummary | null>;
+  /** Écrit `hash.json` + `hash/` du dernier dossier hashé dans un dossier choisi. `null` si annulé. */
+  toolsExportHash(ignore: string[]): Promise<{ output: string } | null>;
+  /** Liste `Auteur-Nom-Version` (texte, JSON ou lien) → mods avec image, description et lien. `key` : chemin du tableau dans un JSON (ex : `dependencies`). Un lien de page Thunderstore donne le mod (+ ses dépendances si `withDependencies`, défaut oui). */
+  toolsModsList(source: string, api?: ModsApi, key?: string, withDependencies?: boolean, community?: string): Promise<ModsListResult>;
+  /** Choisit un fichier de liste (txt / json / md, 1 Mo max) et renvoie son texte. `null` si annulé. */
+  toolsOpenTextFile(): Promise<{ name: string; text: string } | null>;
+  /** Progression de l'outil en cours (hash d'un dossier, liste de mods). */
+  onToolsProgress(callback: (data: ToolsProgress) => void): void;
+  removeToolsProgressListeners(): void;
+  /** Enregistre un texte via « Enregistrer sous ». Retourne le chemin, `null` si annulé. */
+  toolsSaveText(defaultName: string, text: string): Promise<string | null>;
+  /** Journal d'installation du canal (texte). */
+  getInstanceLog(id: InstanceId, channel: Channel): Promise<string>;
+  /** Annule la synchronisation en cours de ce canal (sans effet s'il n'y en a pas). */
+  cancelInstanceSync(id: InstanceId, channel: Channel): Promise<void>;
+  launchInstance(id: InstanceId, channel: Channel): Promise<void>;
+  openInstanceFolder(id: InstanceId, channel: Channel): Promise<void>;
+  uninstallInstance(id: InstanceId, channel: Channel): Promise<void>;
+  /** Installations du disque que le launcher ne propose plus (id retiré, désactivé, canal supprimé). */
+  getDeprecatedInstalls(): Promise<DeprecatedInstall[]>;
+  /** Désinstalle une installation même si son id ou son canal n'existe plus. */
+  uninstallDeprecated(id: string, channel: Channel): Promise<void>;
+  /** Progression d'une désinstallation (installation normale ou obsolète). */
+  onUninstallProgress(callback: Listener<UninstallProgress>): void;
+  removeUninstallProgressListeners(): void;
+  onInstanceProgress(callback: Listener<InstanceSyncProgress>): void;
+  removeInstanceProgressListeners(): void;
+  setInstanceSetting(
+    id: InstanceId,
+    channel: Channel,
+    name: string,
+    value: InstanceSettingValue
+  ): Promise<Record<string, InstanceSettingValue>>;
 
   // utils
   openLink(url: string): Promise<void>;
@@ -56,6 +121,18 @@ export interface ElectronAPI {
   openDevTools(): Promise<void>;
   openAppData(): Promise<string>;
   uninstallLauncher(): Promise<ActionResult>;
+  /** Dossier d'installation des jeux (réglage général). */
+  /** Dossier des jeux, espace libre du volume, et `needsChoice` : premier lancement, choix à demander. */
+  getGamesRoot(): Promise<GamesRootInfo>;
+  /** Garde le dossier proposé (le choix n'est plus redemandé). */
+  confirmGamesRoot(): Promise<void>;
+  /** Déplacement du dossier des jeux en cours (fichiers copiés / total). */
+  getGamesRootMove(): Promise<GamesRootMove>;
+  onGamesRootProgress(callback: (progress: GamesRootMove) => void): void;
+  removeGamesRootProgressListeners(): void;
+  /** Choisit un nouveau dossier et y déplace les jeux (atomique). `null` si annulé. */
+  changeGamesRoot(): Promise<string | null>;
+  resetGamesRoot(): Promise<string>;
   chooseFolder(): Promise<string | null>;
 }
 
@@ -69,62 +146,17 @@ export interface ElectronUpdaterAPI {
   openMainWindow(): void;
 }
 
-/** API commune aux jeux (la partie spécifique est ajoutée par jeu). */
-interface BaseGameAPI {
-  getInstallationStatut(): Promise<unknown>;
-  openGameFolder(): Promise<string>;
-  uninstallGame(): Promise<void>;
-
-  install(): Promise<ActionResult>;
-  onInstallProgress(callback: Listener<ProgressData>): void;
-  onInstallDone(callback: Listener<unknown>): void;
-  onInstallError(callback: Listener<ErrorData>): void;
-  removeInstallListeners(): void;
-
-  update(): Promise<ActionResult>;
-  onUpdateProgress(callback: Listener<ProgressData>): void;
-  onUpdateDone(callback: Listener<unknown>): void;
-  onUpdateError(callback: Listener<ErrorData>): void;
-  removeUpdateListeners(): void;
+export interface GamesRootInfo {
+  path: string;
+  isDefault: boolean;
+  freeBytes: number | null;
+  needsChoice: boolean;
 }
 
-/** `window.electron_Valheim_API`. */
-export interface ElectronValheimAPI extends BaseGameAPI {
-  versionGame(): Promise<string>;
-  getInstallationStatut(): Promise<ValheimInstallationStatut>;
-
-  getModsData(signal?: AbortSignal): Promise<ValheimModsData | undefined>;
-  getModDetails(baseMod: ValheimBaseMod): Promise<ValheimModDetails>;
-  getHashData(): Promise<ValheimHashData>;
-
-  start(): Promise<ActionResult>;
-
-  customMods(): Promise<ActionResult>;
-  onCustomModsProgress(callback: Listener<ProgressData>): void;
-  onCustomModsDone(callback: Listener<unknown>): void;
-  onCustomModsError(callback: Listener<ErrorData>): void;
-  removeCustomModsListeners(): void;
-}
-
-/** `window.electron_SevenDtoD_API`. */
-export interface ElectronSevenDtoDAPI extends BaseGameAPI {
-  getInstallationStatut(): Promise<SevenDtoDInstallationStatut>;
-
-  getModsData(): Promise<SevenDtoDModFileDiff[]>;
-  onModsDataProgress(callback: Listener<ProgressData>): void;
-  removeModsDataListeners(): void;
-  /** JSON formaté (`JSON.stringify(hash, null, 2)`). */
-  getLocalHashData(): Promise<string>;
-
-  play(): Promise<ActionResult>;
-  onPlayProgress(callback: Listener<ProgressData>): void;
-  onPlayDone(callback: Listener<unknown>): void;
-  onPlayError(callback: Listener<ErrorData>): void;
-  removePlayListeners(): void;
-
-  fixMods(): Promise<ActionResult>;
-  onFixModsProgress(callback: Listener<ProgressData>): void;
-  onFixModsDone(callback: Listener<unknown>): void;
-  onFixModsError(callback: Listener<ErrorData>): void;
-  removeFixModsListeners(): void;
+export interface GamesRootMove {
+  active: boolean;
+  /** Octets copiés. */
+  done: number;
+  /** Octets à copier. */
+  total: number;
 }

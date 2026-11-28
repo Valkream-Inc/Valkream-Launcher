@@ -1,0 +1,20 @@
+/* Ancien : parchemin encadré, police médiévale (comme les infos serveur et les popups) */
+.old-theme .event-container {
+  background: rgba(240, 230, 200, 0.88) !important;
+  border: 4px double #7b5e57 !important;
+  border-radius: 10px !important;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
+  font-family: "MedievalSharp", "Courier New", monospace;
+}
+.old-theme .event-container:hover {
+  background: rgba(250, 240, 210, 0.95) !important;
+}
+.old-theme .event-title,
+.old-theme .event-date {
+  color: #3b2e2e;
+  font-family: inherit;
+}
+.old-theme .event-image {
+  border-radius: 6px !important;
+  border: 2px solid #a67c52;
+}
