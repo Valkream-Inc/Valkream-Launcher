@@ -29,6 +29,7 @@ import { useEffect, useState } from "react";
 import type {
   ModsApi,
   ModsListResult,
+  ToolsHashFileSummary,
   ToolsHashSummary,
   ToolsProgress,
 } from "@shared/types";
@@ -221,6 +222,68 @@ function HashFolderTool() {
                 >
                   {t("tools.saveManifest")}
                 </Button>
+              </Box>
+            </>
+          )}
+        </Stack>
+      </SettingsBox>
+    </>
+  );
+}
+
+/** Hash d'un seul fichier : manifeste (hash du launcher, indépendant de l'indentation) ou archive (sha256). */
+function HashFileTool() {
+  const { t } = useTranslation();
+  const [ignoreText, setIgnoreText] = useState("");
+  const [result, setResult] = useState<ToolsHashFileSummary | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const pick = async () => {
+    setBusy(true);
+    try {
+      const next = await window.electron_API.toolsHashFile(lines(ignoreText));
+      if (next) setResult(next);
+    } catch (error) {
+      fail(error);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <SettingsTitle warn={false}>{t("tools.hashFileTitle")}</SettingsTitle>
+      <SettingsBox warn={false}>
+        <Stack spacing={1.5} sx={{ width: "100%" }}>
+          <Typography variant="body2">{t("tools.hashFileHelp")}</Typography>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            minRows={2}
+            label={t("tools.ignoreLabel")}
+            value={ignoreText}
+            onChange={(event) => setIgnoreText(event.target.value)}
+          />
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+            <Button variant="contained" disabled={busy} onClick={pick}>
+              {busy ? t("tools.computing") : t("tools.pickFile")}
+            </Button>
+          </Box>
+          {result && (
+            <>
+              <Typography variant="body2" sx={{ wordBreak: "break-all", userSelect: "text" }}>
+                {result.file}
+                <br />
+                {result.kind === "manifest"
+                  ? t("tools.kindManifest", { count: result.fileCount ?? 0 })
+                  : t("tools.kindFile", { size: formatBytes(result.size) })}
+              </Typography>
+              <Typography variant="caption" sx={{ wordBreak: "break-all", userSelect: "text" }}>
+                {t("tools.hashLine", { hash: result.hash })}
+              </Typography>
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                <Button onClick={() => copy(result.hash, t("tools.hashName"))}>{t("tools.copyHash")}</Button>
               </Box>
             </>
           )}
@@ -435,6 +498,7 @@ export default function InstanceToolsTab() {
   return (
     <>
       <HashFolderTool />
+      <HashFileTool />
       <ModsListTool />
     </>
   );

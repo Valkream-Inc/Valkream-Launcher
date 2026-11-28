@@ -113,7 +113,7 @@ Détail et exemples : [Système d'instances](doc/instance-system/README.md) et [
 ### Outils admin (réglages → Dev, Tools, Debug)
 
 - **Hash d'un dossier** : `hash` du `latest.yml` + `hash.json` prêts pour le serveur.
-- **Hash d'un fichier ou d'un manifeste** : `yarn workspace Valkream-Launcher hash:file <fichier>`.
+- **Hash d'un fichier ou d'un manifeste** : bouton dédié (un manifeste `.json` donne le hash du launcher, indépendant de l'indentation ; un zip / tar.gz donne son sha256) ou `yarn workspace Valkream-Launcher hash:file <fichier>`.
 - **Liste de mods** : génère les `ModDisplay` (nom, image, description, lien) triés par ordre alphabétique ; indiquer le **jeu** (ex : `valheim`) pour obtenir des liens de page valides (Thunderstore / Hexium).
 - **Diagnostic et réparation** d'une installation.
 

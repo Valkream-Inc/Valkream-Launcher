@@ -46,6 +46,7 @@ const electronAPI: ElectronAPI = {
     ipcRenderer.invoke("instances:sync", id, channel, options),
   // outils admin
   toolsHashFolder: (ignore) => ipcRenderer.invoke("tools:hash-folder", ignore),
+  toolsHashFile: (ignore) => ipcRenderer.invoke("tools:hash-file", ignore),
   toolsExportHash: (ignore) => ipcRenderer.invoke("tools:export-hash", ignore),
   toolsModsList: (source, apiUrl, key, withDependencies, community) =>
     ipcRenderer.invoke(

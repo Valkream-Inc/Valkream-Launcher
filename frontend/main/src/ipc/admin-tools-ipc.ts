@@ -11,12 +11,13 @@ import { BrowserWindow, dialog, ipcMain, type WebContents } from "electron";
 import fs from "fs";
 import path from "path";
 
-import type { ModsApi, ModsListResult, ToolsHashSummary } from "@shared/types";
+import type { ModsApi, ModsListResult, ToolsHashFileSummary, ToolsHashSummary } from "@shared/types";
 
 import { baseUrl } from "../core/constants.js";
 import SettingsManager from "../core/settings.js";
 import { classifyLink, resolveLinkUrl } from "../instances/remote/link.js";
 import { nexusGetJson } from "../instances/install/providers/nexus.js";
+import { hashAnyFile } from "../instances/tools/hash-file.js";
 import {
   exportHashFolder,
   hashFolder,
@@ -84,6 +85,16 @@ export default function registerAdminToolsIpc(): void {
       };
     },
   );
+
+  // Hash d'un seul fichier : manifeste (hash du launcher) ou fichier quelconque (sha256)
+  ipcMain.handle("tools:hash-file", async (_event, ignore: unknown): Promise<ToolsHashFileSummary | null> => {
+    const picked = await dialog.showOpenDialog(window(), {
+      properties: ["openFile"],
+      title: "Fichier ou manifeste à hasher",
+    });
+    if (picked.canceled || !picked.filePaths[0]) return null;
+    return hashAnyFile(picked.filePaths[0], patterns(ignore));
+  });
 
   // Écrit hash.json + hash/ pour le dossier choisi précédemment
   ipcMain.handle(

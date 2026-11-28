@@ -14,7 +14,7 @@
 import fs from "node:fs";
 
 import { setEntryHash } from "./update-latest";
-import { hashFile, manifestHash, type Manifest } from "../main/src/instances/install/state/manifest";
+import { hashAnyFile } from "../main/src/instances/tools/hash-file";
 
 const main = async (): Promise<void> => {
   const args = process.argv.slice(2);
@@ -39,11 +39,9 @@ const main = async (): Promise<void> => {
     process.exit(1);
   }
 
-  const isManifest = file.toLowerCase().endsWith(".json");
-  const hash = isManifest
-    ? manifestHash(JSON.parse(fs.readFileSync(file, "utf8")) as Manifest, ignore)
-    : await hashFile(file);
-  console.log(`${isManifest ? "manifeste" : "fichier"} : ${file}`);
+  const summary = await hashAnyFile(file, ignore);
+  const hash = summary.hash;
+  console.log(`${summary.kind === "manifest" ? "manifeste" : "fichier"} : ${file}`);
 
   if (latest && entry) {
     fs.writeFileSync(latest, setEntryHash(fs.readFileSync(latest, "utf8"), entry, hash, latest));

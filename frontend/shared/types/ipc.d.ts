@@ -23,6 +23,7 @@ import type {
   DepotInfo,
   ModsApi,
   ModsListResult,
+  ToolsHashFileSummary,
   ToolsHashSummary,
   ToolsProgress,
 } from "./instance.js";
@@ -80,6 +81,7 @@ export interface ElectronAPI {
   // outils admin (onglet Tools) : les dossiers sont choisis par boîte de dialogue côté main
   /** Choisit un dossier puis le hashe (même algorithme que le launcher). `null` si annulé. */
   toolsHashFolder(ignore: string[]): Promise<ToolsHashSummary | null>;
+  toolsHashFile(ignore: string[]): Promise<ToolsHashFileSummary | null>;
   /** Écrit `hash.json` + `hash/` du dernier dossier hashé dans un dossier choisi. `null` si annulé. */
   toolsExportHash(ignore: string[]): Promise<{ output: string } | null>;
   /** Liste `Auteur-Nom-Version` (texte, JSON ou lien) → mods avec image, description et lien. `key` : chemin du tableau dans un JSON (ex : `dependencies`). Un lien de page Thunderstore donne le mod (+ ses dépendances si `withDependencies`, défaut oui). */

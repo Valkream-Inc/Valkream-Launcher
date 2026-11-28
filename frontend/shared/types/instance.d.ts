@@ -490,6 +490,16 @@ export interface InstanceInfos extends CheckInfosResult {}
 /* Outils admin                                                       */
 /* ------------------------------------------------------------------ */
 
+/** Hash d'un fichier isolé : manifeste (`kind: "manifest"`) ou fichier quelconque (sha256 des octets). */
+export interface ToolsHashFileSummary {
+  file: string;
+  kind: "manifest" | "file";
+  hash: string;
+  size: number;
+  /** Nombre de fichiers listés (manifeste uniquement). */
+  fileCount?: number;
+}
+
 export interface ToolsHashSummary {
   folder: string;
   /** Hash d'entrée (`hash` du latest.yml). */
