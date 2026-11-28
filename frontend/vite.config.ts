@@ -32,6 +32,10 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "renderer/build"),
     // Vide le répertoire de sortie avant chaque construction.
     emptyOutDir: true,
+    // Le renderer est chargé depuis le disque (Electron) : un gros chunk (three / MUI) ne coûte aucun
+    // téléchargement. Le 3D et les réglages sont déjà chargés à la demande (`lazy`), donc on relève
+    // le seuil d'alerte plutôt que de découper davantage.
+    chunkSizeWarningLimit: 2000,
     // Configuration de Rollup pour les dépendances externes.
     rollupOptions: {
       external: ["electron"], // Indique à Rollup de ne pas inclure 'electron' dans le bundle
