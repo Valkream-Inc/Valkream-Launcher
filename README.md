@@ -8,18 +8,18 @@ Launcher multi-jeux moddé pour les serveurs Valkream (Valheim, 7 Days to Die…
 
 ## Table des matières
 
-- [Présentation](#présentation)
-- [Fonctionnalités](#fonctionnalités)
-- [Documentation](#documentation)
-- [Structure du projet](#structure-du-projet)
-- [Démarrer en développement](#démarrer-en-développement)
-- [Commandes](#commandes)
-- [Tests et intégration continue](#tests-et-intégration-continue)
-- [Publier une version du launcher](#publier-une-version-du-launcher)
-- [Déploiement du serveur de fichiers](#déploiement-du-serveur-de-fichiers)
-- [Limites connues](#limites-connues)
-- [Licence](#licence)
-- [Auteurs](#auteurs)
+1. [Présentation](#présentation)
+2. [Fonctionnalités](#fonctionnalités)
+3. [Fonctionnement en bref](#fonctionnement-en-bref) : canaux, types d'entrées, options
+4. [Documentation](#documentation)
+5. [Structure du projet](#structure-du-projet)
+6. [Démarrer en développement](#démarrer-en-développement)
+7. [Commandes](#commandes)
+8. [Tests et intégration continue](#tests-et-intégration-continue)
+9. [Publier une version du launcher](#publier-une-version-du-launcher)
+10. [Déploiement du serveur de fichiers](#déploiement-du-serveur-de-fichiers)
+11. [Limites connues](#limites-connues)
+12. [Licence](#licence) · [Auteurs](#auteurs)
 
 ---
 
@@ -60,6 +60,64 @@ Ce dépôt (monorepo `yarn` + `turbo`) contient :
 - 🛠️ **Outils admin** (onglets Dev, Tools, Debug) pour préparer le remote : hash d'un dossier, liste de mods, diagnostic, réparation.
 
 > **⚠️ Attention** : seul **Windows** est supporté pour l'instant (l'installation multi-plateforme n'est pas finalisée).
+
+---
+
+## Fonctionnement en bref
+
+Un jeu = une **instance**, décrite par trois couches : config **main** (chemins, lancement), config **render** (textes, images, mods affichés) et fichiers **remote** (versions, hébergés sur le serveur de fichiers). Voir le [guide des configs](doc/instance-system/configs.md) pour savoir quel fichier modifier.
+
+### Canaux
+
+| Canal | Visible | Usage |
+| --- | --- | --- |
+| `stable` | toujours | version publique |
+| `beta` | si « Afficher les canaux de test » est actif | tests publics |
+| `alpha` | si « Afficher les canaux de test » est actif | tests internes |
+
+Chaque canal est une installation indépendante. **Si aucun jeu du catalogue n'a de `stable`**, les `beta` sont proposées d'office (sinon la première page serait vide).
+
+### Types d'entrées du `latest.yml`
+
+| `type` | Source | Usage typique |
+| --- | --- | --- |
+| `zip_url` | archive `.zip` ou `.tar.gz` | modpack, configs |
+| `hash_url` | manifeste de hash `{ fichier: sha256 }` | gros jeux, mises à jour par différence |
+| `thunderstore_modpack_url` | liste `Auteur-Nom-Version` (Thunderstore ou Hexium via `api-url`) | mods |
+| `nexus_modpack_url` | liste `jeu-idMod-idFichier` (clé API Nexus du joueur) | mods Nexus |
+| `steam_library` | fichiers copiés depuis la bibliothèque Steam du joueur | jeu Steam sans l'héberger |
+| `depot_steam` | DepotDownloader (connexion par QR code) | version exacte d'un jeu Steam |
+| `empty` | aucun contenu | entrée vide volontaire (dossier créé, rien à installer) |
+
+Une entrée sans dossier dans la config main, sans `type` ou sans contenu est ignorée (sauf `empty`).
+
+### Options d'une entrée
+
+Toute option peut être déclinée **par canal, plateforme et langue** (voir le guide des configs).
+
+| Option | Rôle |
+| --- | --- |
+| `path` | dossier d'installation de l'entrée (relatif, sans `/` initial) |
+| `hash` | empreinte attendue : manifeste (`hash_url`), sha256 de l'archive (`zip_url`, `.zip` et `.tar.gz` vérifiés), liste (mods) |
+| `content`, `key` | source des données (inline, lien, `local:<entrée>/<fichier>`) et chemin dans un JSON lié |
+| `zip`, `folder_in_zip` | archive de tous les fichiers d'un manifeste / dossier à extraire d'une archive |
+| `hash-folder` | dossier de fichiers individuels (repli et fichiers hors Steam) |
+| `api-url` | API compatible Thunderstore (ex : `https://hexium.gg`) ou Nexus |
+| `dependencies` | active la résolution des dépendances Thunderstore ; `skip` : dossiers jamais installés. **Sans cette option, seule la liste fournie est installée** |
+| `to_ignore` | motifs exclus du hash, de la vérification et du nettoyage |
+| `gameFolderToRemove`, `gameFolderToPreserve` | dossiers supprimés / conservés lors d'une mise à jour |
+| `optional` | entrée installée seulement si un réglage d'instance est actif |
+
+Détail et exemples : [Système d'instances](doc/instance-system/README.md) et [guide des configs](doc/instance-system/configs.md).
+
+### Outils admin (réglages → Dev, Tools, Debug)
+
+- **Hash d'un dossier** : `hash` du `latest.yml` + `hash.json` prêts pour le serveur.
+- **Hash d'un fichier ou d'un manifeste** : `yarn workspace Valkream-Launcher hash:file <fichier>`.
+- **Liste de mods** : génère les `ModDisplay` (nom, image, description, lien) triés par ordre alphabétique ; indiquer le **jeu** (ex : `valheim`) pour obtenir des liens de page valides (Thunderstore / Hexium).
+- **Diagnostic et réparation** d'une installation.
+
+Ces onglets sont activés par le mode développeur (captures `doc/images/activer les devs*.png`).
 
 ---
 

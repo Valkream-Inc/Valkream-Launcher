@@ -358,7 +358,7 @@ L'`index.config` peut porter une clé `server` (`host`, `port`, `timeout`, tous 
 
 ## Canaux et choix du jeu
 
-Un jeu n'apparaît dans le choix que s'il propose au moins un canal visible : `stable` toujours, `beta` / `alpha` seulement si « Afficher les canaux de test » est actif. Un jeu sans `stable` n'est donc visible qu'avec les tests activés, et uniquement sur ses canaux de test. Désactiver les tests (ou voir un canal retiré du remote) pendant qu'on joue sur ce canal ramène au choix du jeu.
+Un jeu n'apparaît dans le choix que s'il propose au moins un canal visible : `stable` toujours, `beta` / `alpha` seulement si « Afficher les canaux de test » est actif. **Exception** : si aucun jeu du catalogue ne propose de `stable`, les `beta` sont affichées d'office (première page jamais vide). Désactiver les tests (ou voir un canal retiré du remote) pendant qu'on joue sur ce canal ramène au choix du jeu.
 
 ## Choix du dossier au premier lancement
 
