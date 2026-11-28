@@ -47,13 +47,14 @@ const electronAPI: ElectronAPI = {
   // outils admin
   toolsHashFolder: (ignore) => ipcRenderer.invoke("tools:hash-folder", ignore),
   toolsExportHash: (ignore) => ipcRenderer.invoke("tools:export-hash", ignore),
-  toolsModsList: (source, apiUrl, key, withDependencies) =>
+  toolsModsList: (source, apiUrl, key, withDependencies, community) =>
     ipcRenderer.invoke(
       "tools:mods-list",
       source,
       apiUrl,
       key,
       withDependencies,
+      community,
     ),
   toolsOpenTextFile: () => ipcRenderer.invoke("tools:open-text-file"),
   onToolsProgress: (callback) =>

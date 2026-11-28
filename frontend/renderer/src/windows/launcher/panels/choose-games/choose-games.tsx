@@ -240,7 +240,9 @@ export default function ChooseGames() {
 
   // Instances activées par le remote ET décrites côté render : une entrée par canal proposé
   // (stable, puis beta / alpha si le joueur les a activés), pour ne jamais recharger le jeu stable.
+  // Relu toutes les 10 s et au retour sur la fenêtre : hors ligne au démarrage, la liste apparaît dès le retour du réseau
   useEffect(() => {
+    const load = () =>
     Promise.all([
       window.electron_API.getInstances(),
       window.electron_API.getSettings("betaEnabled"),
@@ -267,6 +269,13 @@ export default function ChooseGames() {
         );
       })
       .catch(console.error);
+    load();
+    const timer = setInterval(load, 10_000);
+    window.addEventListener("focus", load);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", load);
+    };
   }, []);
 
   // Installations que le serveur ne propose plus (id retiré, désactivé, canal supprimé) : à désinstaller
