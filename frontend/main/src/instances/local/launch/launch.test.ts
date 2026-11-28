@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import path from "node:path";
 import { describe, it } from "node:test";
 
 import { buildLaunchArgs } from "./launch-args.js";
@@ -55,7 +56,7 @@ describe("planLaunch", () => {
       { platform: "win32" },
     );
     assert.deepEqual(plan, {
-      kind: "executable", path: "java", cwd: "/d/game",
+      kind: "executable", path: "java", cwd: path.resolve("/d", "game"),
       args: ["-Xmx4096M", "--fullscreen", "-jar", "server.jar"], ensureSteam: false,
     });
   });

@@ -69,8 +69,8 @@ export async function load(url, context, next) {
 const REGISTER_SOURCE = (hooksUrl: string) =>
   `import { register } from "node:module"; register(${JSON.stringify(hooksUrl)});`;
 
-/** Modules qui démarrent l'application ou n'existent que dans Electron : vérifiés par la syntaxe (1) et le test Electron (4). */
-const NOT_IMPORTED = [/^app\.js$/, /\.cjs$/];
+/** Modules qui démarrent l'application, n'existent que dans Electron, ou sont le bundle du renderer (`frontend/`, besoin d'un DOM) : vérifiés par la syntaxe (1) et le test Electron (4). */
+const NOT_IMPORTED = [/^app\.js$/, /\.cjs$/, /^frontend\//];
 
 const RUNNER_SOURCE = `
 import path from "node:path";
@@ -90,9 +90,10 @@ const runNodeWithStubs = (buildDir: string, script: string, args: string[]): { s
     fs.writeFileSync(path.join(tmp, "hooks.mjs"), HOOKS_SOURCE);
     fs.writeFileSync(path.join(tmp, "register.mjs"), REGISTER_SOURCE(pathToFileURL(path.join(tmp, "hooks.mjs")).href));
     fs.writeFileSync(path.join(tmp, "run.mjs"), script);
+    // `--import` veut une URL : un chemin « C:\… » est pris pour un protocole sous Windows
     // Le script est dans tmp : les dépendances (yaml…) se résolvent depuis le build, pas depuis tmp → NODE_PATH
     const nodeModules = path.resolve("node_modules");
-    const run = spawnSync(process.execPath, ["--import", path.join(tmp, "register.mjs"), path.join(tmp, "run.mjs"), path.resolve(buildDir), ...args], {
+    const run = spawnSync(process.execPath, ["--import", pathToFileURL(path.join(tmp, "register.mjs")).href, path.join(tmp, "run.mjs"), path.resolve(buildDir), ...args], {
       encoding: "utf8",
       env: { ...process.env, NODE_PATH: nodeModules },
       timeout: 120_000,
