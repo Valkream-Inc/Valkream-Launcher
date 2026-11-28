@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Get version
         id: get_version
@@ -72,12 +72,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "22.17.0"
+          package-manager-cache: false  # v5 : cache auto désactivé (yarn 4 vient de corepack, activé après)
 
       # Yarn 4 (Berry) via corepack, APRÈS setup-node : le shim doit appartenir au Node 22 installé
       # (avec `cache: yarn` dans setup-node, c'est le yarn 1 global qui était résolu → échec packageManager).
@@ -90,7 +91,7 @@ jobs:
         run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Yarn
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.yarn-cache.outputs.dir }}
           key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
@@ -123,12 +124,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "22.17.0"
+          package-manager-cache: false  # v5 : cache auto désactivé (yarn 4 vient de corepack, activé après)
 
       - name: Enable Corepack
         run: corepack enable
@@ -152,7 +154,7 @@ jobs:
           DRY_RUN: "true"
 
       - name: Upload installers
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: launcher-dry-run
           path: |
