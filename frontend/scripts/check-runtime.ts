@@ -90,9 +90,10 @@ const runNodeWithStubs = (buildDir: string, script: string, args: string[]): { s
     fs.writeFileSync(path.join(tmp, "hooks.mjs"), HOOKS_SOURCE);
     fs.writeFileSync(path.join(tmp, "register.mjs"), REGISTER_SOURCE(pathToFileURL(path.join(tmp, "hooks.mjs")).href));
     fs.writeFileSync(path.join(tmp, "run.mjs"), script);
+    // `--import` veut une URL : un chemin « C:\… » est pris pour un protocole sous Windows
     // Le script est dans tmp : les dépendances (yaml…) se résolvent depuis le build, pas depuis tmp → NODE_PATH
     const nodeModules = path.resolve("node_modules");
-    const run = spawnSync(process.execPath, ["--import", path.join(tmp, "register.mjs"), path.join(tmp, "run.mjs"), path.resolve(buildDir), ...args], {
+    const run = spawnSync(process.execPath, ["--import", pathToFileURL(path.join(tmp, "register.mjs")).href, path.join(tmp, "run.mjs"), path.resolve(buildDir), ...args], {
       encoding: "utf8",
       env: { ...process.env, NODE_PATH: nodeModules },
       timeout: 120_000,

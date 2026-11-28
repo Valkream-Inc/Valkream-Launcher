@@ -197,7 +197,7 @@ describe("épinglage d'une release", () => {
 describe("realDepotRunner : décodage", () => {
   it("ne corrompt pas un caractère multi-octets coupé entre deux morceaux", async () => {
     const { realDepotRunner } = await import("./depot-runner.js");
-    const script = `const b=Buffer.from("█▀▄\\n","utf8");process.stdout.write(b.subarray(0,2));setTimeout(()=>process.stdout.write(b.subarray(2)),50)`;
+    const script = `const b=Buffer.from("\\u2588\\u2580\\u2584\\n","utf8");process.stdout.write(b.subarray(0,2));setTimeout(()=>process.stdout.write(b.subarray(2)),50)`;
     const lines: string[] = [];
     const code = await realDepotRunner(process.execPath, ["-e", script], { cwd: process.cwd(), onLine: (l) => lines.push(l) });
     assert.equal(code, 0);

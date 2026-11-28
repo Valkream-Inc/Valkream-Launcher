@@ -29,7 +29,8 @@ describe("parseVdf", () => {
   });
 });
 
-describe("locateSteamGame", () => {
+// Les dossiers du test sont des chemins POSIX simulés : ils n'ont pas de sens sous Windows (lecteur « D: »)
+describe("locateSteamGame", { skip: process.platform === "win32" && "chemins POSIX simulés" }, () => {
   const acf = (installdir: string, buildid: string) => `"AppState"\n{\n "appid" "892970"\n "installdir" "${installdir}"\n "buildid" "${buildid}"\n}`;
   const world = (files: Record<string, string>, platform: SteamLocateDeps["platform"] = "linux"): SteamLocateDeps => {
     const keys = Object.keys(files).map((file) => path.normalize(file));
